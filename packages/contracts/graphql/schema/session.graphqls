@@ -23,6 +23,8 @@ type Session {
 ########## QUERIES ##########
 type query {
   getSession(id: ID!): GetSessionResult!
+  getSessions(accountId: ID!, filter: FilterResult!): [GetSessionResult]!
+  getSessionsByRefreshToken(refreshToken: String!): GetSessionResult!
 }
 
 ########## MUTATIONS ##########

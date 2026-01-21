@@ -97,3 +97,4 @@ type RevokeAllSessionsResultData {
   accountId: ID!
   count: Int!
 }
+
