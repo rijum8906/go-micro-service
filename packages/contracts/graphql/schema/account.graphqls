@@ -4,6 +4,8 @@ type Account {
 
   email: String!
 
+  profiles: [Profile!]!
+
   cretedAt: DateTime!
   updedAt: DateTime!
 }
@@ -30,4 +32,57 @@ type OAuth {
 
   cretedAt: DateTime!
   updedAt: DateTime!
+}
+
+type AccountSecurity {
+  id: ID!
+  accountId: ID!
+
+  isEmailVerified: Boolean!
+  emailVerifiedAt: DateTime
+  twoFactorEnabled: Boolean!
+  twoFactorEnabledAt: DateTime
+
+  cretedAt: DateTime!
+  updedAt: DateTime!
+}
+
+######### INPUTS ##########
+input signinInput {
+  email: String!
+  password: String!
+}
+
+input signupInput {
+  email: String!
+  password: String
+
+  firstName: String!
+  lastName: String!
+}
+
+input changePasswordInput {
+  oldPassword: String!
+  newPassword: String!
+}
+
+########## QUERIES ##########
+type Query {
+  me(): Account!
+  getProfile(id: String!): GetProfileResult!
+}
+
+########## MUTATIONS ##########
+type Mutation {
+  # Auth
+  signin(input: signinInput!): AuthResult!
+  signup(input: signupInput!): AuthResult!
+
+  # Account
+  changePassword(input: changePasswordInput!): BaseResult!
+  resetPassword(email: String!): BaseResult!
+
+  # AccountSecurity
+  verifyEmail(token: String!): BaseResult!
+  resendEmailVerificationLink(): BaseResult!
 }
