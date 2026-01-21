@@ -1,0 +1,57 @@
+######## BASE #########
+type BaseResult {
+  success: Boolean!
+  message: String!
+  data: BaseData
+  errors: [BaseError!]
+}
+
+type BaseResultData {
+  id: ID!
+}
+
+type BaseData {
+  field: String!
+  message: String!
+}
+
+######## ACCOUNTS ###########
+type GetProfileResult {
+  success: Boolean!
+  message: String!
+  data: GetProfileResultData
+  errors: [BaseError!]
+}
+
+type GetProfileResultData {
+  id: ID!
+  diplayName: String!
+}
+
+type GetAccountsResult {
+  success: Boolean!
+  message: String!
+  data: GetAccountsResultData
+  errors: [BaseError!]
+}
+
+type GetAccountsResultData {
+  id: ID!
+  email: String!
+  displayName: String!
+}
+
+type AuthResult {
+  success: Boolean!
+  message: String!
+  data: AuthResultData
+  errors: [BaseError!]
+}
+
+type AuthResultData {
+  account: Account!
+  tokens: {
+    accessToken: String!
+    refreshToken: String!
+  }
+}
