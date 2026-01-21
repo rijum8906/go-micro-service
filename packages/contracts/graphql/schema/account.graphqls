@@ -1,0 +1,33 @@
+######### TYPES #########
+type Account {
+  id: ID!
+
+  email: String!
+
+  cretedAt: DateTime!
+  updedAt: DateTime!
+}
+
+type Profile {
+  id: ID!
+
+  firstName: String!
+  lastName: String!
+  displayName: String!
+
+  cretedAt: DateTime!
+  updedAt: DateTime!
+}
+
+type OAuth {
+  id: ID!
+  accountId: ID!
+
+  provider: String!
+  providerAccountId: String!
+  accessToken: String!
+  accessTokenExpiresAt: DateTime!
+
+  cretedAt: DateTime!
+  updedAt: DateTime!
+}

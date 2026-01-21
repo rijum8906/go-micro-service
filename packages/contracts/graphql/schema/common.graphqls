@@ -1,0 +1,9 @@
+scaler DateTime 
+
+type Query{
+  __empty: String
+}
+
+type Mutation{
+  __empty: String
+}
