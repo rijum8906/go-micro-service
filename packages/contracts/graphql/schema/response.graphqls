@@ -55,3 +55,46 @@ type AuthResultData {
     refreshToken: String!
   }
 }
+
+######## SESSIONS ###########
+type GetSessionResult {
+  success: Boolean!
+  message: String!
+  data: GetSessionResultData
+  errors: [BaseError!]
+}
+
+type GetSessionResultData {
+  id: ID!
+  refreshToken: String!
+  userAgent: String!
+  ipAddress: String!
+  location: String!
+  deviceaId: String!
+  expiresAt: DateTime!
+  isRevoked: Boolean!
+}
+
+type RevokeSessionResult {
+  success: Boolean!
+  message: String!
+  data: RevokeSessionResultData
+  errors: [BaseError!]
+}
+
+type RevokeSessionResultData {
+  id: ID!
+}
+
+type RevokeAllSessionsResult {
+  success: Boolean!
+  message: String!
+  data: RevokeAllSessionsResultData
+  errors: [BaseError!]
+}
+
+type RevokeAllSessionsResultData {
+  accountId: ID!
+  count: Int!
+}
+

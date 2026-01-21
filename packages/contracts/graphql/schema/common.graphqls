@@ -7,3 +7,8 @@ type Query{
 type Mutation{
   __empty: String
 }
+
+type FilterResult {
+  limit: Int!
+  skip: Int
+}
