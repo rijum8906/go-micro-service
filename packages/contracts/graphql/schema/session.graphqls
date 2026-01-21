@@ -1,0 +1,32 @@
+########## TYPES ##########
+type Session {
+  id: ID!
+  accountId: ID!
+
+  refreshToken: String!
+  userAgent: String!
+  ipAddress: String!
+  location: String!
+  deviceaId: String!
+
+  lastActiveAt: DateTime!
+
+  expiresAt: DateTime!
+  isRevoked: Boolean!
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+########## INPUTS ##########
+
+########## QUERIES ##########
+type query {
+  getSession(id: ID!): GetSessionResult!
+}
+
+########## MUTATIONS ##########
+type mutation {
+  revokeSession(id: ID!): RevokeSessionResult!
+  revokeAllSessions(accountId: ID!): RevokeAllSessionsResult!
+}
