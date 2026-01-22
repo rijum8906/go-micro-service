@@ -31,8 +31,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/redis/go-redis/v9 v9.17.2 h1:P2EGsA4qVIM3Pp+aPocCJ7DguDHhqrXNhVcEp4ViluI=
 github.com/redis/go-redis/v9 v9.17.2/go.mod h1:u410H11HMLoB+TP67dz8rL9s6QW2j76l0//kSOd3370=
-github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260121165426-974c93ba3e47 h1:c/8sndFqYrmzoJtDkU7shs+gwe2wQAPbFhwJdZEzOU4=
-github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260121165426-974c93ba3e47/go.mod h1:lNUjShxVvPV3Zkh4A1yH+PWkUYfl2qlrUtU/FLrsYHk=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260122024531-9d9fba09189b h1:VE+b2sxsSb3c4GqQYOwsY69x3N7VfBoZuatMybpcclY=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260122024531-9d9fba09189b/go.mod h1:lNUjShxVvPV3Zkh4A1yH+PWkUYfl2qlrUtU/FLrsYHk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=

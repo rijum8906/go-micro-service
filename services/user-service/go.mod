@@ -4,7 +4,8 @@ go 1.25.6
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260121165426-974c93ba3e47
+	github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260122024531-9d9fba09189b
+	gorm.io/gorm v1.31.1
 )
 
 require (
@@ -23,5 +24,4 @@ require (
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gorm.io/driver/postgres v1.6.0 // indirect
-	gorm.io/gorm v1.31.1 // indirect
 )
