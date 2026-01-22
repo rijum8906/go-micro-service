@@ -7,8 +7,8 @@ import (
 )
 
 type AccountDTO struct {
-	Email        string `json:"email" binding:"required,email"`
-	PasswordHash string `json:"password_hash" binding:"required"`
+	Email         string `json:"email" binding:"required,email"`
+	PlainPassword string `json:"password" binding:"required"`
 }
 
 type ProfileDTO struct {
@@ -31,4 +31,15 @@ type AccountSecurityDTO struct {
 	EmailVerifiedAt    time.Time `json:"email_verified_at"`
 	TwoFactorEnabled   bool      `json:"two_factor_enabled"`
 	TwoFactorEnabledAt time.Time `json:"two_factor_enabled_at"`
+}
+
+type SessionDTO struct {
+	AccountID        uuid.UUID `json:"account_id" binding:"required"`
+	UserAgent        string    `json:"user_agent"`
+	IPAddress        string    `json:"ip_address"`
+	Location         *string   `json:"location"`
+	DeviceID         string    `json:"device_id"`
+	RefreshTokenHash string    `json:"refresh_token_hash"`
+	ExpiresAt        time.Time `json:"expires_at"`
+	LastUsed         time.Time `json:"last_used"`
 }
