@@ -4,11 +4,9 @@ INSERT INTO oauths(
   account_id,
   provider,
   subject,
-  email,
-  token,
-  picture
+  token
 )
-VALUES ($1, $2, $3, $4, $5, $6)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: GetOAuthBySubject :one
