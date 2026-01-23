@@ -17,8 +17,10 @@ CREATE TABLE profiles(
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id UUID NOT NULL REFERENCES accounts(id)
 ON DELETE CASCADE,
-  first_name VARCHAR(255),
-  last_name VARCHAR(255),
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  display_name VARCHAR(255),
+  avatar_url VARCHAR(255),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -48,10 +50,8 @@ ON DELETE CASCADE,
   tokenVARCHAR(255) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(
-    provider,
-    subject
-  )
+  UNIQUE(provider,
+  subject)
 );
 -- ======================
 -- Sessions (many-1 with accounts)
