@@ -2,30 +2,27 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
+	"log"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5"
 )
 
-type Config struct {
-	Host     string
-	Port     int
+type PGXConfig struct {
 	User     string
 	Password string
+	Host     string
+	Port     int
 	Database string
-	SslMode  bool
+	SSLMode  bool
 }
 
-func Connect(cfg Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%t",
-		cfg.Host,
-		cfg.Port,
-		cfg.User,
-		cfg.Password,
-		cfg.Database,
-		cfg.SslMode,
-	)
-	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func ConnectDB(ctx context.Context, cfg PGXConfig) *pgx.Conn {
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%t", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Database, cfg.SSLMode)
+	conn, err := pgx.Connect(ctx, connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return conn
 }
