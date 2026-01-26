@@ -67,13 +67,14 @@ input changePasswordInput {
 }
 
 ########## QUERIES ##########
-type Query {
-  me(): Account!
+extend type Query {
+  me: Account!
   getProfile(id: String!): GetProfileResult!
 }
 
 ########## MUTATIONS ##########
-type Mutation {
+extend type Mutation {
+
   # Auth
   signin(input: signinInput!): AuthResult!
   signup(input: signupInput!): AuthResult!
@@ -84,5 +85,5 @@ type Mutation {
 
   # AccountSecurity
   verifyEmail(token: String!): BaseResult!
-  resendEmailVerificationLink(): BaseResult!
+  resendEmailVerificationLink : BaseResult!
 }

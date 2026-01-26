@@ -50,11 +50,13 @@ type AuthResult {
 
 type AuthResultData {
   account: Account!
-  tokens: {
+  tokens: AuthResultTokenData!
+}
+
+type AuthResultTokenData {
     accessToken: String!
     refreshToken: String!
   }
-}
 
 ######## SESSIONS ###########
 type GetSessionResult {
