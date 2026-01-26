@@ -176,17 +176,6 @@ type ChangePasswordInput struct {
 	NewPassword string `json:"newPassword"`
 }
 
-type Mutation0 struct {
-	RevokeSession     *RevokeSessionResult     `json:"revokeSession"`
-	RevokeAllSessions *RevokeAllSessionsResult `json:"revokeAllSessions"`
-}
-
-type Query0 struct {
-	GetSession                *GetSessionResult   `json:"getSession"`
-	GetSessions               []*GetSessionResult `json:"getSessions"`
-	GetSessionsByRefreshToken *GetSessionResult   `json:"getSessionsByRefreshToken"`
-}
-
 type SigninInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

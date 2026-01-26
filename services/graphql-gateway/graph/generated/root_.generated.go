@@ -146,6 +146,8 @@ type ComplexityRoot struct {
 		Empty                       func(childComplexity int) int
 		ResendEmailVerificationLink func(childComplexity int) int
 		ResetPassword               func(childComplexity int, email string) int
+		RevokeAllSessions           func(childComplexity int, accountID string) int
+		RevokeSession               func(childComplexity int, id string) int
 		Signin                      func(childComplexity int, input model.SigninInput) int
 		Signup                      func(childComplexity int, input model.SignupInput) int
 		VerifyEmail                 func(childComplexity int, token string) int
@@ -172,9 +174,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Empty      func(childComplexity int) int
-		GetProfile func(childComplexity int, id string) int
-		Me         func(childComplexity int) int
+		Empty                     func(childComplexity int) int
+		GetProfile                func(childComplexity int, id string) int
+		GetSession                func(childComplexity int, id string) int
+		GetSessions               func(childComplexity int, accountID string, filter model.FilterResult) int
+		GetSessionsByRefreshToken func(childComplexity int, refreshToken string) int
+		Me                        func(childComplexity int) int
 	}
 
 	RevokeAllSessionsResult struct {
@@ -213,17 +218,6 @@ type ComplexityRoot struct {
 		RefreshToken func(childComplexity int) int
 		UpdatedAt    func(childComplexity int) int
 		UserAgent    func(childComplexity int) int
-	}
-
-	Mutation struct {
-		RevokeAllSessions func(childComplexity int, accountID string) int
-		RevokeSession     func(childComplexity int, id string) int
-	}
-
-	Query struct {
-		GetSession                func(childComplexity int, id string) int
-		GetSessions               func(childComplexity int, accountID string, filter model.FilterResult) int
-		GetSessionsByRefreshToken func(childComplexity int, refreshToken string) int
 	}
 }
 
@@ -669,6 +663,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string)), true
 
+	case "Mutation.revokeAllSessions":
+		if e.complexity.Mutation.RevokeAllSessions == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_revokeAllSessions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RevokeAllSessions(childComplexity, args["accountId"].(string)), true
+
+	case "Mutation.revokeSession":
+		if e.complexity.Mutation.RevokeSession == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_revokeSession_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RevokeSession(childComplexity, args["id"].(string)), true
+
 	case "Mutation.signin":
 		if e.complexity.Mutation.Signin == nil {
 			break
@@ -821,6 +839,42 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.GetProfile(childComplexity, args["id"].(string)), true
+
+	case "Query.getSession":
+		if e.complexity.Query.GetSession == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSession_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSession(childComplexity, args["id"].(string)), true
+
+	case "Query.getSessions":
+		if e.complexity.Query.GetSessions == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSessions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSessions(childComplexity, args["accountId"].(string), args["filter"].(model.FilterResult)), true
+
+	case "Query.getSessionsByRefreshToken":
+		if e.complexity.Query.GetSessionsByRefreshToken == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSessionsByRefreshToken_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSessionsByRefreshToken(childComplexity, args["refreshToken"].(string)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -990,66 +1044,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Session.UserAgent(childComplexity), true
 
-	case "mutation.revokeAllSessions":
-		if e.complexity.Mutation.RevokeAllSessions == nil {
-			break
-		}
-
-		args, err := ec.field_mutation_revokeAllSessions_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RevokeAllSessions(childComplexity, args["accountId"].(string)), true
-
-	case "mutation.revokeSession":
-		if e.complexity.Mutation.RevokeSession == nil {
-			break
-		}
-
-		args, err := ec.field_mutation_revokeSession_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RevokeSession(childComplexity, args["id"].(string)), true
-
-	case "query.getSession":
-		if e.complexity.Query.GetSession == nil {
-			break
-		}
-
-		args, err := ec.field_query_getSession_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSession(childComplexity, args["id"].(string)), true
-
-	case "query.getSessions":
-		if e.complexity.Query.GetSessions == nil {
-			break
-		}
-
-		args, err := ec.field_query_getSessions_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSessions(childComplexity, args["accountId"].(string), args["filter"].(model.FilterResult)), true
-
-	case "query.getSessionsByRefreshToken":
-		if e.complexity.Query.GetSessionsByRefreshToken == nil {
-			break
-		}
-
-		args, err := ec.field_query_getSessionsByRefreshToken_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSessionsByRefreshToken(childComplexity, args["refreshToken"].(string)), true
-
 	}
 	return 0, false
 }
@@ -1073,7 +1067,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = ec._query(ctx, opCtx.Operation.SelectionSet)
+				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
 					result := <-ec.deferredResults
@@ -1376,33 +1370,27 @@ type RevokeAllSessionsResultData {
 type Session {
   id: ID!
   accountId: ID!
-
   refreshToken: String!
   userAgent: String!
   ipAddress: String!
   location: String!
   deviceaId: String!
-
   lastActiveAt: DateTime!
-
   expiresAt: DateTime!
   isRevoked: Boolean!
-
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-########## INPUTS ##########
-
 ########## QUERIES ##########
-extend type query {
+extend type Query {
   getSession(id: ID!): GetSessionResult!
-  getSessions(accountId: ID!, filter: FilterResult!): [GetSessionResult]!
+  getSessions(accountId: ID!, filter: FilterResult!): [GetSessionResult!]!
   getSessionsByRefreshToken(refreshToken: String!): GetSessionResult!
 }
 
 ########## MUTATIONS ##########
-extend type mutation {
+extend type Mutation {
   revokeSession(id: ID!): RevokeSessionResult!
   revokeAllSessions(accountId: ID!): RevokeAllSessionsResult!
 }

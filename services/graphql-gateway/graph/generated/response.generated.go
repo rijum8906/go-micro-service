@@ -2447,7 +2447,11 @@ func (ec *executionContext) marshalNGetProfileResult2ᚖgithubᚗcomᚋrijum8906
 	return ec._GetProfileResult(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGetSessionResult2ᚕᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionResult(ctx context.Context, sel ast.SelectionSet, v []*model.GetSessionResult) graphql.Marshaler {
+func (ec *executionContext) marshalNGetSessionResult2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionResult(ctx context.Context, sel ast.SelectionSet, v model.GetSessionResult) graphql.Marshaler {
+	return ec._GetSessionResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGetSessionResult2ᚕᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionResultᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.GetSessionResult) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2471,7 +2475,7 @@ func (ec *executionContext) marshalNGetSessionResult2ᚕᚖgithubᚗcomᚋrijum8
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOGetSessionResult2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionResult(ctx, sel, v[i])
+			ret[i] = ec.marshalNGetSessionResult2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionResult(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2481,6 +2485,12 @@ func (ec *executionContext) marshalNGetSessionResult2ᚕᚖgithubᚗcomᚋrijum8
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
 
 	return ret
 }
@@ -2495,6 +2505,10 @@ func (ec *executionContext) marshalNGetSessionResult2ᚖgithubᚗcomᚋrijum8906
 	return ec._GetSessionResult(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNRevokeAllSessionsResult2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeAllSessionsResult(ctx context.Context, sel ast.SelectionSet, v model.RevokeAllSessionsResult) graphql.Marshaler {
+	return ec._RevokeAllSessionsResult(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNRevokeAllSessionsResult2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeAllSessionsResult(ctx context.Context, sel ast.SelectionSet, v *model.RevokeAllSessionsResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -2503,6 +2517,10 @@ func (ec *executionContext) marshalNRevokeAllSessionsResult2ᚖgithubᚗcomᚋri
 		return graphql.Null
 	}
 	return ec._RevokeAllSessionsResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRevokeSessionResult2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeSessionResult(ctx context.Context, sel ast.SelectionSet, v model.RevokeSessionResult) graphql.Marshaler {
+	return ec._RevokeSessionResult(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNRevokeSessionResult2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeSessionResult(ctx context.Context, sel ast.SelectionSet, v *model.RevokeSessionResult) graphql.Marshaler {
@@ -2541,13 +2559,6 @@ func (ec *executionContext) marshalOGetProfileResultData2ᚖgithubᚗcomᚋrijum
 		return graphql.Null
 	}
 	return ec._GetProfileResultData(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOGetSessionResult2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionResult(ctx context.Context, sel ast.SelectionSet, v *model.GetSessionResult) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GetSessionResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOGetSessionResultData2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionResultData(ctx context.Context, sel ast.SelectionSet, v *model.GetSessionResultData) graphql.Marshaler {
