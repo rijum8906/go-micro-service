@@ -12,14 +12,14 @@ import (
 	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/generated"
 )
 
-// Empty is the resolver for the empty field.
+// Empty is the resolver for the _empty field.
 func (r *mutationResolver) Empty(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented: Empty - empty"))
+	panic(fmt.Errorf("not implemented: Empty - _empty"))
 }
 
-// Empty is the resolver for the empty field.
+// Empty is the resolver for the _empty field.
 func (r *queryResolver) Empty(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented: Empty - empty"))
+	panic(fmt.Errorf("not implemented: Empty - _empty"))
 }
 
 // Mutation returns generated.MutationResolver implementation.
