@@ -2,33 +2,27 @@
 type Session {
   id: ID!
   accountId: ID!
-
   refreshToken: String!
   userAgent: String!
   ipAddress: String!
   location: String!
   deviceaId: String!
-
   lastActiveAt: DateTime!
-
   expiresAt: DateTime!
   isRevoked: Boolean!
-
   createdAt: DateTime!
   updatedAt: DateTime!
 }
 
-########## INPUTS ##########
-
 ########## QUERIES ##########
-type query {
+extend type Query {
   getSession(id: ID!): GetSessionResult!
-  getSessions(accountId: ID!, filter: FilterResult!): [GetSessionResult]!
+  getSessions(accountId: ID!, filter: FilterResult!): [GetSessionResult!]!
   getSessionsByRefreshToken(refreshToken: String!): GetSessionResult!
 }
 
 ########## MUTATIONS ##########
-type mutation {
+extend type Mutation {
   revokeSession(id: ID!): RevokeSessionResult!
   revokeAllSessions(accountId: ID!): RevokeAllSessionsResult!
 }

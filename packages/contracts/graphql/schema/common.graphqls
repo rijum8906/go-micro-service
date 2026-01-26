@@ -1,14 +1,19 @@
-scaler DateTime 
+scalar DateTime 
 
 type Query{
-  __empty: String
+  _empty: String
 }
 
 type Mutation{
-  __empty: String
+  _empty: String
 }
 
-type FilterResult {
+input FilterResult {
   limit: Int!
   skip: Int
+}
+
+type BaseError {
+  field: String!
+  message: String!
 }
