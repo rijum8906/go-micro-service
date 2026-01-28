@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 		Port:     cfg.DBPort,
 		User:     cfg.DBUser,
 		Password: cfg.DBPassword,
-		Database: "test", // Hardcode or env-gate the test database name!
+		Database: "postgres", // Hardcode or env-gate the test database name!
 	})
 
 	// Assign to global variable
