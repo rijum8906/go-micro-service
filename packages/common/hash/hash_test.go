@@ -21,4 +21,17 @@ func TestHashPassword(t *testing.T) {
 	if isValid != nil {
 		t.Errorf("password must be valid")
 	}
+
+	isInvalid := hashS.VerifyPassword(hashedPassword, "invalid")
+	if isInvalid == nil {
+		t.Errorf("password must be invalid")
+	}
+
+	isRefreshToken, err := hashS.GenerateRefreshToken()
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if isRefreshToken == "" {
+		t.Errorf("refresh token must be generated")
+	}
 }
