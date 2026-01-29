@@ -12,7 +12,7 @@ SELECT * FROM sessions WHERE refresh_token = $1;
 SELECT * FROM sessions WHERE account_id = $1 ORDER BY last_login_at DESC LIMIT 1;
 
 -- name: GetSessionsByAccountID :many
-SELECT * FROM sessions WHERE account_id = $1 ORDER BY last_login_at DESC LIMIT $2;
+SELECT * FROM sessions WHERE account_id = $1 ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
 
 -- name: RevokeSession :exec
 UPDATE sessions SET is_revoked = TRUE WHERE id = $1;

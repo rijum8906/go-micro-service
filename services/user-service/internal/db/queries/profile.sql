@@ -17,7 +17,7 @@ SELECT * FROM profiles WHERE account_id = $1;
 -- name: UpdateProfile :one
 UPDATE profiles
 SET first_name = $2, last_name = $3, display_name = $4, avatar_url = $5
-WHERE account_id = $1
+WHERE id = $1
 RETURNING *;
 
 -- name: DeleteProfile :exec

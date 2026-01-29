@@ -17,5 +17,11 @@ SET email = $2, password_hash = $3
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdateAccountByEmail :one
+UPDATE accounts
+SET email = $2, password_hash = $3
+WHERE email = $1
+RETURNING *;
+
 -- name: DeleteAccount :exec
 DELETE FROM accounts WHERE id = $1;

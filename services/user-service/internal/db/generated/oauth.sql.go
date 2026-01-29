@@ -199,3 +199,39 @@ func (q *Queries) UpdateOAuth(ctx context.Context, arg UpdateOAuthParams) (Oauth
 	)
 	return i, err
 }
+
+const updateOAuthBySubject = `-- name: UpdateOAuthBySubject :one
+UPDATE oauths
+SET account_id = $2, provider = $3, subject = $4, token = $5 
+WHERE subject = $1
+RETURNING id, account_id, provider, subject, token, created_at, updated_at
+`
+
+type UpdateOAuthBySubjectParams struct {
+	Subject   string
+	AccountID pgtype.UUID
+	Provider  string
+	Subject_2 string
+	Token     string
+}
+
+func (q *Queries) UpdateOAuthBySubject(ctx context.Context, arg UpdateOAuthBySubjectParams) (Oauth, error) {
+	row := q.db.QueryRow(ctx, updateOAuthBySubject,
+		arg.Subject,
+		arg.AccountID,
+		arg.Provider,
+		arg.Subject_2,
+		arg.Token,
+	)
+	var i Oauth
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.Provider,
+		&i.Subject,
+		&i.Token,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
