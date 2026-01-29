@@ -18,3 +18,6 @@ test-all:
 clean-all:
 	rm -rf bin/
 	@echo "Cleanup complete."
+
+stat-user-service:
+	$(MAKE) -C services/user-service run
