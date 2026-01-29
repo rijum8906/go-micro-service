@@ -135,7 +135,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data dto.Request
 	return nil
 }
 
-func (s *authService) ResetPassword(ctx context.Context, data dto.ResetpasswordDTO) error {
+func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordDTO) error {
 	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
 	if err != nil {
 		return appError.ErrInvalidToken
