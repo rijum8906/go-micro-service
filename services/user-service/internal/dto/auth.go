@@ -23,3 +23,23 @@ type SignUpDTO struct {
 
 	Metadata UserMetadata
 }
+type RequestPasswordResetDTO struct {
+	Email    string
+	Metadata UserMetadata
+}
+
+type ResetpasswordDTO struct {
+	Token       string
+	NewPassword string
+	Metadata    UserMetadata
+}
+
+type RequestEmailVerificationDTO struct {
+	Email    string
+	Metadata UserMetadata
+}
+
+type VerifyEmailDTO struct {
+	Token    string
+	Metadata UserMetadata
+}

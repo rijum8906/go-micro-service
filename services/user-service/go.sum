@@ -11,6 +11,8 @@ github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/r
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
 github.com/golang-jwt/jwt/v5 v5.3.0 h1:pv4AsKCKKZuqlgs5sUmn4x8UlGa0kEVt/puTpKx9vvo=
 github.com/golang-jwt/jwt/v5 v5.3.0/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
+github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
+github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
@@ -35,10 +37,14 @@ github.com/redis/go-redis/v9 v9.17.2 h1:P2EGsA4qVIM3Pp+aPocCJ7DguDHhqrXNhVcEp4Vi
 github.com/redis/go-redis/v9 v9.17.2/go.mod h1:u410H11HMLoB+TP67dz8rL9s6QW2j76l0//kSOd3370=
 github.com/redis/go-redis/v9 v9.17.3 h1:fN29NdNrE17KttK5Ndf20buqfDZwGNgoUr9qjl1DQx4=
 github.com/redis/go-redis/v9 v9.17.3/go.mod h1:u410H11HMLoB+TP67dz8rL9s6QW2j76l0//kSOd3370=
+github.com/rijum8906/go-micro-service v0.0.0-20260129012256-e3baef971588 h1:aVoIMlJdm6GRRgxlrytyml8SA7Xn8RDN8xl/X+GrD6Q=
+github.com/rijum8906/go-micro-service v0.0.0-20260129012256-e3baef971588/go.mod h1:ZNuIMFLzyOuDWayxAArj2vNB2f62voWIUfsmpW8hPlA=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260122024531-9d9fba09189b h1:VE+b2sxsSb3c4GqQYOwsY69x3N7VfBoZuatMybpcclY=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260122024531-9d9fba09189b/go.mod h1:lNUjShxVvPV3Zkh4A1yH+PWkUYfl2qlrUtU/FLrsYHk=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260128094028-410a3e4b9952 h1:wapyQE73jM4jvpDzAJBNXUNpK+54JP6Dfhj0sYhz8us=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260128094028-410a3e4b9952/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129012256-e3baef971588 h1:LjxkeTWqP+UoyADZNwaNzKOX29/7FmO5C/BSI83pl9Y=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129012256-e3baef971588/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
