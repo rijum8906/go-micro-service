@@ -30,5 +30,11 @@ SET account_id = $2, provider = $3, subject = $4, token = $5
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdateOAuthBySubject :one
+UPDATE oauths
+SET account_id = $2, provider = $3, subject = $4, token = $5 
+WHERE subject = $1
+RETURNING *;
+
 -- name: DeleteOAuth :exec
 DELETE FROM oauths WHERE id = $1;

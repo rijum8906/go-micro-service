@@ -17,5 +17,11 @@ SET account_id = $2, is_email_verified = $3, email_verified_at = $4, two_factor_
 WHERE id = $1
 RETURNING *;
 
+-- name: UpdateAccountSecurityByAccountID :one
+UPDATE account_securities
+SET account_id = $2, is_email_verified = $3, email_verified_at = $4, two_factor_enabled = $5, two_factor_enabled_at = $6
+WHERE account_id = $1
+RETURNING *;
+
 -- name: DeleteAccountSecurity :exec
 DELETE FROM account_securities WHERE id = $1;

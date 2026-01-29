@@ -134,12 +134,12 @@ func (q *Queries) GetProfilesByAccountID(ctx context.Context, accountID pgtype.U
 const updateProfile = `-- name: UpdateProfile :one
 UPDATE profiles
 SET first_name = $2, last_name = $3, display_name = $4, avatar_url = $5
-WHERE account_id = $1
+WHERE id = $1
 RETURNING id, account_id, first_name, last_name, display_name, avatar_url, created_at, updated_at
 `
 
 type UpdateProfileParams struct {
-	AccountID   pgtype.UUID
+	ID          pgtype.UUID
 	FirstName   string
 	LastName    string
 	DisplayName pgtype.Text
@@ -148,7 +148,7 @@ type UpdateProfileParams struct {
 
 func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error) {
 	row := q.db.QueryRow(ctx, updateProfile,
-		arg.AccountID,
+		arg.ID,
 		arg.FirstName,
 		arg.LastName,
 		arg.DisplayName,

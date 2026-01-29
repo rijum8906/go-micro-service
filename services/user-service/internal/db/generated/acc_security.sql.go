@@ -122,3 +122,42 @@ func (q *Queries) UpdateAccountSecurity(ctx context.Context, arg UpdateAccountSe
 	)
 	return i, err
 }
+
+const updateAccountSecurityByAccountID = `-- name: UpdateAccountSecurityByAccountID :one
+UPDATE account_securities
+SET account_id = $2, is_email_verified = $3, email_verified_at = $4, two_factor_enabled = $5, two_factor_enabled_at = $6
+WHERE account_id = $1
+RETURNING id, account_id, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, created_at, updated_at
+`
+
+type UpdateAccountSecurityByAccountIDParams struct {
+	AccountID          pgtype.UUID
+	AccountID_2        pgtype.UUID
+	IsEmailVerified    bool
+	EmailVerifiedAt    pgtype.Timestamptz
+	TwoFactorEnabled   bool
+	TwoFactorEnabledAt pgtype.Timestamptz
+}
+
+func (q *Queries) UpdateAccountSecurityByAccountID(ctx context.Context, arg UpdateAccountSecurityByAccountIDParams) (AccountSecurity, error) {
+	row := q.db.QueryRow(ctx, updateAccountSecurityByAccountID,
+		arg.AccountID,
+		arg.AccountID_2,
+		arg.IsEmailVerified,
+		arg.EmailVerifiedAt,
+		arg.TwoFactorEnabled,
+		arg.TwoFactorEnabledAt,
+	)
+	var i AccountSecurity
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.IsEmailVerified,
+		&i.EmailVerifiedAt,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

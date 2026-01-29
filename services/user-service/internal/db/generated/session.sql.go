@@ -110,16 +110,17 @@ func (q *Queries) GetSessionByRefreshToken(ctx context.Context, refreshToken str
 }
 
 const getSessionsByAccountID = `-- name: GetSessionsByAccountID :many
-SELECT id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login_at, is_revoked, expires_at, created_at, updated_at FROM sessions WHERE account_id = $1 ORDER BY last_login_at DESC LIMIT $2
+SELECT id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login_at, is_revoked, expires_at, created_at, updated_at FROM sessions WHERE account_id = $1 ORDER BY last_login_at DESC LIMIT $2 OFFSET $3
 `
 
 type GetSessionsByAccountIDParams struct {
 	AccountID pgtype.UUID
 	Limit     int32
+	Offset    int32
 }
 
 func (q *Queries) GetSessionsByAccountID(ctx context.Context, arg GetSessionsByAccountIDParams) ([]Session, error) {
-	rows, err := q.db.Query(ctx, getSessionsByAccountID, arg.AccountID, arg.Limit)
+	rows, err := q.db.Query(ctx, getSessionsByAccountID, arg.AccountID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
