@@ -5,9 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 )
@@ -40,7 +38,7 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 		// TODO: Handle the error
 		return nil, err
 	}
-	accessToken, err := s.utilsConfig.JwtService.IssueToken(ctx, formatUUID(account.ID))
+	accessToken, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err != nil {
 		// TODO: Handle the error
 		return nil, err
@@ -56,14 +54,58 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 	}, nil
 }
 
-func (s *authService) SignUp(ctx context.Context, dto dto.SignUpDTO) (*dto.AuthenticationResult, error) {
-	return nil, nil
-}
-
-func formatUUID(u pgtype.UUID) string {
-	if !u.Valid {
-		return ""
+func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.AuthenticationResult, error) {
+	_, err := s.q.GetAccountByEmail(ctx, data.Email)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			// TODO: Handle the error
+			return nil, err
+		}
 	}
-	// Formats the 16-byte array into the standard UUID string format
-	return fmt.Sprintf("%x-%x-%x-%x-%x", u.Bytes[0:4], u.Bytes[4:6], u.Bytes[6:8], u.Bytes[8:10], u.Bytes[10:16])
+
+	passHash, err := s.utilsConfig.HashService.HashPassword(data.Password)
+	if err != nil {
+		// TODO: Handle the error
+		return nil, err
+	}
+	createAccountParams := db.CreateAccountParams{
+		Email:        data.Email,
+		PasswordHash: passHash,
+	}
+	creeateProfileParams := db.CreateProfileParams{
+		FirstName: data.FirstName,
+		LastName:  data.LastName,
+	}
+
+	account, err := s.q.CreateAccount(ctx, createAccountParams)
+	if err != nil {
+		// TODO: Handle the error
+		return nil, err
+	}
+
+	profile, err := s.q.CreateProfile(ctx, creeateProfileParams)
+	if err != nil {
+		// TODO: Handle the error
+		return nil, err
+	}
+
+	refreshToken, err := s.utilsConfig.HashService.GenerateRefreshToken()
+	if err != nil {
+		// TODO: Handle the error
+		return nil, err
+	}
+	accessToken, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
+	if err != nil {
+		// TODO: Handle the error
+		return nil, err
+	}
+
+	return &dto.AuthenticationResult{
+		Account:  &account,
+		Profiles: []*db.Profile{&profile},
+		Tokens: &dto.Tokens{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+	}, nil
 }
