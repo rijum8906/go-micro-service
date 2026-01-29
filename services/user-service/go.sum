@@ -45,6 +45,8 @@ github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260128094028-410a
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260128094028-410a3e4b9952/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129012256-e3baef971588 h1:LjxkeTWqP+UoyADZNwaNzKOX29/7FmO5C/BSI83pl9Y=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129012256-e3baef971588/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129033856-930044d4a498 h1:q6XoYsDzYYiGwJyrkq1acbSCzyXErUZv88+EEpHImC4=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129033856-930044d4a498/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
