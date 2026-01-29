@@ -1,0 +1,19 @@
+version: "2"
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+issues:
+  # This is the modern way to handle default exclusions
+  # If you want to see everything, set this to 0
+  max-issues-per-linter: 0
+  max-same-issues: 0
