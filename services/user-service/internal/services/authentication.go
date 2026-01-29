@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 )
@@ -31,34 +32,28 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			// TODO: Handle the error
-			return nil, err
+			return nil, appError.ErrAccountNotFound
 		}
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 
 	err = s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, data.Password)
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInvalidCredentials
 	}
 
 	profiles, err := s.q.GetProfilesByAccountID(ctx, account.ID)
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 
 	refreshToken, err := s.utilsConfig.HashService.GenerateRefreshToken()
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 	accessToken, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 
 	return &dto.AuthenticationResult{
@@ -75,15 +70,13 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.Auth
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
-			// TODO: Handle the error
-			return nil, err
+			return nil, appError.ErrInternal
 		}
 	}
 
 	passHash, err := s.utilsConfig.HashService.HashPassword(data.Password)
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 	createAccountParams := db.CreateAccountParams{
 		Email:        data.Email,
@@ -96,25 +89,21 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.Auth
 
 	account, err := s.q.CreateAccount(ctx, createAccountParams)
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 
 	profile, err := s.q.CreateProfile(ctx, creeateProfileParams)
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 
 	refreshToken, err := s.utilsConfig.HashService.GenerateRefreshToken()
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 	accessToken, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err != nil {
-		// TODO: Handle the error
-		return nil, err
+		return nil, appError.ErrInternal
 	}
 
 	return &dto.AuthenticationResult{
@@ -131,17 +120,14 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data dto.Request
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			// TODO: Handle the error
-			return err
+			return appError.ErrAccountNotFound
 		}
-		// TODO: Handle the error
-		return err
+		return appError.ErrInternal
 	}
 
 	_, err = s.utilsConfig.JwtService.IssueToken(ctx, account.ID.String())
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInternal
 	}
 
 	// TODO: Send reset password email
@@ -152,32 +138,27 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data dto.Request
 func (s *authService) ResetPassword(ctx context.Context, data dto.ResetpasswordDTO) error {
 	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInvalidToken
 	}
 
 	accID := claims.UserID
 	if accID == "" {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInvalidTokenClaims
 	}
 	hashPass, err := s.utilsConfig.HashService.HashPassword(data.NewPassword)
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInternal
 	}
 	pgUUID, err := ToPgUUID(accID)
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInvalidTokenClaims
 	}
 	_, err = s.q.UpdateAccount(ctx, db.UpdateAccountParams{
 		ID:           pgUUID,
 		PasswordHash: hashPass,
 	})
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInternal
 	}
 	return nil
 }
@@ -185,24 +166,20 @@ func (s *authService) ResetPassword(ctx context.Context, data dto.ResetpasswordD
 func (s *authService) RequestEmailVerification(ctx context.Context, data dto.RequestEmailVerificationDTO) error {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrAccountNotFound
 	}
 
 	accountSecurity, err := s.q.GetAccountSecurityByAccountID(ctx, account.ID)
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInternal
 	}
 	if accountSecurity.IsEmailVerified {
-		// TODO: Handle the error
-		return err
+		return errors.New("email already verified")
 	}
 
 	_, err = s.utilsConfig.JwtService.IssueToken(ctx, account.ID.String())
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInternal
 	}
 
 	// TODO: Send verification email
@@ -212,18 +189,15 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data dto.Req
 func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailDTO) error {
 	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInvalidToken
 	}
 	accID := claims.UserID
 	if accID == "" {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInvalidTokenClaims
 	}
 	pgUUID, err := ToPgUUID(accID)
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInvalidTokenClaims
 	}
 
 	_, err = s.q.UpdateAccountSecurityByAccountID(ctx, db.UpdateAccountSecurityByAccountIDParams{
@@ -235,8 +209,7 @@ func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailDTO) 
 		},
 	})
 	if err != nil {
-		// TODO: Handle the error
-		return err
+		return appError.ErrInternal
 	}
 
 	return nil
