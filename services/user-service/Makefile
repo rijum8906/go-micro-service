@@ -22,3 +22,6 @@ build:
 # Runs only user-service tests
 test:
 	go test -v ./...
+
+run:
+	 go run ./cmd/main.go

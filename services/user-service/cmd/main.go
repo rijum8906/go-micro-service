@@ -1,40 +1,66 @@
 package main
 
 import (
+	"context"
+
+	"github.com/gin-gonic/gin"
 	"github.com/rijum8906/go-micro-service/packages/common/database/postgres"
 	"github.com/rijum8906/go-micro-service/packages/common/database/redis"
 	"github.com/rijum8906/go-micro-service/packages/common/env"
+	"github.com/rijum8906/go-micro-service/packages/common/hash"
 	"github.com/rijum8906/go-micro-service/packages/common/jwt"
+	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/handler"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
 )
 
 func main() {
+	// Initialize a global background context
+	ctx := context.Background()
+
 	env, err := env.Load()
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = postgres.Connect(postgres.Config{
+	// Pass context to Postgres connection
+	pgPool := postgres.Connect(ctx, postgres.Config{
 		Host:     env.DBHost,
 		Port:     env.DBPort,
 		User:     env.DBUser,
 		Password: env.DBPassword,
 		Database: env.DBName,
-		SslMode:  false,
 	})
-	if err != nil {
-		panic(err)
-	}
 
-	redis := redis.Connect(redis.Config{
+	// Pass context to Redis connection
+	redisClient := redis.Connect(redis.Config{
 		Database: env.RedisDatabase,
 		Host:     env.RedisHost,
 		Port:     env.RedisPort,
 		User:     env.RedisUser,
 		Password: env.RedisPassword,
 	})
-	_ = jwt.NewService(redis, jwt.Config{
+
+	jwtService := jwt.NewService(redisClient, jwt.Config{
 		Secret:     env.JwtSecret,
 		Issuer:     env.JwtIssuer,
 		Expiration: env.JwtExpiration,
 	})
+
+	hashService := hash.NewService(10)
+
+	authService := services.NewAuth(db.New(pgPool), &services.UtilsConfig{
+		HashService: hashService,
+		JwtService:  jwtService,
+	})
+	// server logic starts here...
+
+	router := gin.Default()
+	apiRouterV1 := router.Group("/api/v1")
+	authRouter := apiRouterV1.Group("/auth")
+	handler.RegisterHandlers(authRouter, authService)
+	err = router.Run(":8906")
+	if err != nil {
+		panic(err)
+	}
 }
