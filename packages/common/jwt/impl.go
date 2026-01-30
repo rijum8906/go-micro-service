@@ -10,12 +10,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Config struct {
-	Issuer     string
-	Secret     string
-	Expiration time.Duration
-}
-
 type service struct {
 	redis *redis.Client
 	cfg   Config
@@ -28,7 +22,14 @@ func NewService(r *redis.Client, cfg Config) Service {
 	}
 }
 
-func (s *service) IssueToken(ctx context.Context, subject string) (string, error) {
+func sessionKey(sessionID string) string {
+	return "auth:session:" + sessionID
+}
+
+func (s *service) IssueToken(
+	ctx context.Context,
+	subject string,
+) (string, error) {
 	sessionID := uuid.NewString()
 	now := time.Now()
 	exp := now.Add(s.cfg.Expiration)
@@ -50,7 +51,7 @@ func (s *service) IssueToken(ctx context.Context, subject string) (string, error
 
 	if err := s.redis.Set(
 		ctx,
-		"auth:session:"+sessionID,
+		sessionKey(sessionID),
 		subject,
 		time.Until(exp),
 	).Err(); err != nil {
@@ -60,7 +61,10 @@ func (s *service) IssueToken(ctx context.Context, subject string) (string, error
 	return tokenStr, nil
 }
 
-func (s *service) ValidateToken(ctx context.Context, tokenStr string) (*Claims, error) {
+func (s *service) ValidateToken(
+	ctx context.Context,
+	tokenStr string,
+) (*Claims, error) {
 	token, err := jwtlib.ParseWithClaims(
 		tokenStr,
 		&jwtlib.RegisteredClaims{},
@@ -68,15 +72,21 @@ func (s *service) ValidateToken(ctx context.Context, tokenStr string) (*Claims, 
 			return []byte(s.cfg.Secret), nil
 		},
 	)
+	if err != nil || !token.Valid {
+		return nil, ErrInvalidToken
+	}
+
+	rc, ok := token.Claims.(*jwtlib.RegisteredClaims)
+	if !ok {
+		return nil, ErrInvalidToken
+	}
+
+	exists, err := s.redis.Exists(ctx, sessionKey(rc.ID)).Result()
 	if err != nil {
 		return nil, err
 	}
-
-	rc := token.Claims.(*jwtlib.RegisteredClaims)
-
-	exists, err := s.redis.Exists(ctx, "auth:session:"+rc.ID).Result()
-	if err != nil || exists == 0 {
-		return nil, err
+	if exists == 0 {
+		return nil, ErrInvalidToken
 	}
 
 	return &Claims{
@@ -86,6 +96,9 @@ func (s *service) ValidateToken(ctx context.Context, tokenStr string) (*Claims, 
 	}, nil
 }
 
-func (s *service) RevokeSession(ctx context.Context, sessionID string) error {
-	return s.redis.Del(ctx, "auth:session:"+sessionID).Err()
+func (s *service) RevokeSession(
+	ctx context.Context,
+	sessionID string,
+) error {
+	return s.redis.Del(ctx, sessionKey(sessionID)).Err()
 }
