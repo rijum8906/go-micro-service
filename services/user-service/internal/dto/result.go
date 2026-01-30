@@ -9,6 +9,6 @@ type Tokens struct {
 
 type AuthenticationResult struct {
 	Account  *db.Account
-	Profiles []*db.Profile
+	Profiles *[]db.Profile
 	Tokens   *Tokens
 }

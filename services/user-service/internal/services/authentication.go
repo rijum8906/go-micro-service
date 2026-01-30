@@ -37,8 +37,7 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 		return nil, appError.ErrInternal
 	}
 
-	err = s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, data.Password)
-	if err != nil {
+	if err := s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, data.Password); err != nil {
 		return nil, appError.ErrInvalidCredentials
 	}
 
@@ -51,6 +50,7 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 	if err != nil {
 		return nil, appError.ErrInternal
 	}
+
 	accessToken, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err != nil {
 		return nil, appError.ErrInternal
@@ -58,7 +58,7 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 
 	return &dto.AuthenticationResult{
 		Account:  &account,
-		Profiles: make([]*db.Profile, len(profiles)),
+		Profiles: &profiles,
 		Tokens: &dto.Tokens{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
@@ -68,31 +68,30 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 
 func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.AuthenticationResult, error) {
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
-	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			return nil, appError.ErrInternal
-		}
+	if err == nil {
+		return nil, errors.New("account already exists")
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return nil, appError.ErrInternal
 	}
 
 	passHash, err := s.utilsConfig.HashService.HashPassword(data.Password)
 	if err != nil {
 		return nil, appError.ErrInternal
 	}
-	createAccountParams := db.CreateAccountParams{
+
+	account, err := s.q.CreateAccount(ctx, db.CreateAccountParams{
 		Email:        data.Email,
 		PasswordHash: passHash,
-	}
-	creeateProfileParams := db.CreateProfileParams{
-		FirstName: data.FirstName,
-		LastName:  data.LastName,
-	}
-
-	account, err := s.q.CreateAccount(ctx, createAccountParams)
+	})
 	if err != nil {
 		return nil, appError.ErrInternal
 	}
 
-	profile, err := s.q.CreateProfile(ctx, creeateProfileParams)
+	profile, err := s.q.CreateProfile(ctx, db.CreateProfileParams{
+		FirstName: data.FirstName,
+		LastName:  data.LastName,
+	})
 	if err != nil {
 		return nil, appError.ErrInternal
 	}
@@ -101,6 +100,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.Auth
 	if err != nil {
 		return nil, appError.ErrInternal
 	}
+
 	accessToken, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err != nil {
 		return nil, appError.ErrInternal
@@ -108,7 +108,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.Auth
 
 	return &dto.AuthenticationResult{
 		Account:  &account,
-		Profiles: []*db.Profile{&profile},
+		Profiles: &[]db.Profile{profile},
 		Tokens: &dto.Tokens{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
@@ -166,23 +166,25 @@ func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordD
 func (s *authService) RequestEmailVerification(ctx context.Context, data dto.RequestEmailVerificationDTO) error {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
-		return appError.ErrAccountNotFound
-	}
-
-	accountSecurity, err := s.q.GetAccountSecurityByAccountID(ctx, account.ID)
-	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return appError.ErrAccountNotFound
+		}
 		return appError.ErrInternal
 	}
-	if accountSecurity.IsEmailVerified {
-		return errors.New("email already verified")
-	}
 
-	_, err = s.utilsConfig.JwtService.IssueToken(ctx, account.ID.String())
+	sec, err := s.q.GetAccountSecurityByAccountID(ctx, account.ID)
 	if err != nil {
 		return appError.ErrInternal
 	}
 
-	// TODO: Send verification email
+	if sec.IsEmailVerified {
+		return errors.New("email is already verified")
+	}
+
+	if _, err := s.utilsConfig.JwtService.IssueToken(ctx, account.ID.String()); err != nil {
+		return appError.ErrInternal
+	}
+
 	return nil
 }
 
