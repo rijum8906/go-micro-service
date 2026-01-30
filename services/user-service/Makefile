@@ -4,9 +4,6 @@ MIGRATION_DIR=internal/db/migrations
 
 .PHONY: setup migrate sqlc build test
 
-# Runs migrations and generates sqlc code
-setup: migrate sqlc
-
 # Pushes your auth schema to local Postgres
 migrate:
 	goose -dir $(MIGRATION_DIR) postgres "$(DB_URL)" up
