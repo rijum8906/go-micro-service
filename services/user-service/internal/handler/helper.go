@@ -1,14 +1,19 @@
 package handler
 
 import (
+	"errors"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 )
 
-func formatValidationErrors(ve validator.ValidationErrors) []BaseResponseError {
-	errors := make([]BaseResponseError, 0, len(ve))
+func formatValidationErrors(ve validator.ValidationErrors) []dto.BaseResponseError {
+	errors := make([]dto.BaseResponseError, 0, len(ve))
 
 	for _, fe := range ve {
-		errors = append(errors, BaseResponseError{
+		errors = append(errors, dto.BaseResponseError{
 			Field:   fe.Field(),
 			Message: validationErrorMessage(fe),
 		})
@@ -37,4 +42,23 @@ func validationErrorMessage(fe validator.FieldError) string {
 	default:
 		return "Invalid value"
 	}
+}
+
+// handleBindError differentiates between validation errors and malformed JSON.
+func handleBindError(ctx *gin.Context, err error) {
+	var ve validator.ValidationErrors
+	if errors.As(err, &ve) {
+		ctx.JSON(http.StatusBadRequest, dto.BaseErrorResponse{
+			Success: false,
+			Errors:  formatValidationErrors(ve),
+			Message: "Invalid request body",
+		})
+		return
+	}
+
+	// Covers invalid JSON, wrong types, etc.
+	ctx.JSON(http.StatusBadRequest, dto.BaseErrorResponse{
+		Success: false,
+		Message: err.Error(),
+	})
 }

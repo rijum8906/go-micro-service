@@ -2,11 +2,9 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
@@ -24,63 +22,73 @@ func RegisterHandlers(router *gin.RouterGroup, service services.AuthService) {
 
 func signUpHandler(service services.AuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.SignUpDTO
+		var input dto.SignupRequest
 
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			handleBindError(ctx, err)
 			return
 		}
+		data := dto.SignUpDTO{
+			FirstName: input.FirstName,
+			LastName:  input.LastName,
+			Email:     input.Email,
+			Password:  input.Password,
+			Metadata: dto.MetadataDTO{
+				UserAgent: ctx.Request.UserAgent(),
+				IPAddr:    ctx.ClientIP(),
+				DeviceID:  input.Metadata.DeviceID,
+			},
+		}
 
-		result, err := service.SignUp(ctx.Request.Context(), input)
+		result, err := service.SignUp(ctx.Request.Context(), data)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to create account",
+			ctx.JSON(http.StatusInternalServerError, &dto.BaseErrorResponse{
+				Success: false,
+				Message: err.Error(),
 			})
 			return
 		}
 
-		ctx.JSON(http.StatusCreated, result)
+		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthenticationResult]{
+			Success: true,
+			Message: "account created successfully",
+			Data:    result,
+		})
 	}
 }
 
 func signInHandler(service services.AuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.SignInDTO
+		var input dto.SigninRequest
 
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			handleBindError(ctx, err)
 			return
 		}
+		data := dto.SignInDTO{
+			Email:    input.Email,
+			Password: input.Password,
+			Metadata: dto.MetadataDTO{
+				UserAgent: ctx.Request.UserAgent(),
+				IPAddr:    ctx.ClientIP(),
+				DeviceID:  input.Metadata.DeviceID,
+			},
+		}
 
-		result, err := service.Signin(ctx.Request.Context(), input)
+		result, err := service.Signin(ctx.Request.Context(), data)
 		if err != nil {
 			// Auth failure should be explicit and boring
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "invalid credentials",
+			ctx.JSON(http.StatusUnauthorized, &dto.BaseErrorResponse{
+				Success: false,
+				Message: err.Error(),
 			})
 			return
 		}
 
-		ctx.JSON(http.StatusOK, result)
-	}
-}
-
-// --------------------
-// Error Handling
-// --------------------
-
-// handleBindError differentiates between validation errors and malformed JSON.
-func handleBindError(ctx *gin.Context, err error) {
-	var ve validator.ValidationErrors
-	if errors.As(err, &ve) {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"validation_errors": formatValidationErrors(ve),
+		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthenticationResult]{
+			Success: true,
+			Message: "account signed in successfully",
+			Data:    result,
 		})
-		return
 	}
-
-	// Covers invalid JSON, wrong types, etc.
-	ctx.JSON(http.StatusBadRequest, gin.H{
-		"error": "malformed request body",
-	})
 }

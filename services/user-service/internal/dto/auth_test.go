@@ -17,7 +17,7 @@ func TestSignUpDTO(t *testing.T) {
 			Password:  "password",
 			FirstName: "John",
 			LastName:  "Doe",
-			Metadata: dto.UserMetadata{
+			Metadata: dto.MetadataDTO{
 				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 				IPAddr:    "127.0.0.1",
 				DeviceID:  "1234567890",
@@ -34,7 +34,7 @@ func TestSignUpDTO(t *testing.T) {
 			Password: "passdskhfkhfkhahs",
 			// FirstName: "John",
 			LastName: "Doe",
-			Metadata: dto.UserMetadata{
+			Metadata: dto.MetadataDTO{
 				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 				IPAddr:    "127.0.0.1",
 				DeviceID:  "1234567890",
@@ -51,7 +51,7 @@ func TestSignUpDTO(t *testing.T) {
 			Password:  "pass",
 			FirstName: "John",
 			LastName:  "Doe",
-			Metadata: dto.UserMetadata{
+			Metadata: dto.MetadataDTO{
 				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 				IPAddr:    "127.0.0.1",
 				DeviceID:  "1234567890",
@@ -68,7 +68,7 @@ func TestSignInDTO(t *testing.T) {
 		input := dto.SignInDTO{
 			Email:    "zPjgP@example.com",
 			Password: "password",
-			Metadata: dto.UserMetadata{
+			Metadata: dto.MetadataDTO{
 				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 				IPAddr:    "127.0.0.1",
 				DeviceID:  "1234567890",

@@ -1,5 +1,4 @@
-// Package handler contains standard API response structures.
-package handler
+package dto
 
 // BaseSuccessResponse represents a consistent API response envelope.
 type BaseSuccessResponse[T any] struct {
