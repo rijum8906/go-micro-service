@@ -103,6 +103,8 @@ github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129152422-2e0d
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260129152422-2e0d723abdde/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260130053257-6895356045ee h1:k7TVMiKAlK4g0fETDz3gV05AfZW87gLQyXNKwPyW4OU=
 github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260130053257-6895356045ee/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260130123155-171fe661ff55 h1:zNjeHUtwwm5v9S+24e/7S9JiHbjlvIm6vs5l2kG+aB4=
+github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260130123155-171fe661ff55/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

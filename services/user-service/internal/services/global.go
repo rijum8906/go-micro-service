@@ -9,8 +9,9 @@ import (
 )
 
 type UtilsConfig struct {
-	HashService hash.Service
-	JwtService  jwt.Service
+	HashService      hash.Service
+	JwtService       jwt.Service
+	SecureJWTService jwt.ScopedActionJWT
 }
 
 func FormatUUID(u pgtype.UUID) string {

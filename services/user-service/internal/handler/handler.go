@@ -28,19 +28,23 @@ func signUpHandler(service services.AuthService) gin.HandlerFunc {
 			handleBindError(ctx, err)
 			return
 		}
-		data := dto.SignUpDTO{
+		data := dto.SignupRequest{
 			FirstName: input.FirstName,
 			LastName:  input.LastName,
 			Email:     input.Email,
 			Password:  input.Password,
-			Metadata: dto.MetadataDTO{
-				UserAgent: ctx.Request.UserAgent(),
-				IPAddr:    ctx.ClientIP(),
-				DeviceID:  input.Metadata.DeviceID,
+			Metadata: dto.Metadata{
+				DeviceID: input.Metadata.DeviceID,
 			},
 		}
 
-		result, err := service.SignUp(ctx.Request.Context(), data)
+		requestMetadata := dto.RequestMetadata{
+			UserAgent: ctx.Request.UserAgent(),
+			IPAddr:    ctx.ClientIP(),
+			DeviceID:  input.Metadata.DeviceID,
+		}
+
+		result, err := service.SignUp(ctx.Request.Context(), data, requestMetadata)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, &dto.BaseErrorResponse{
 				Success: false,
@@ -65,17 +69,21 @@ func signInHandler(service services.AuthService) gin.HandlerFunc {
 			handleBindError(ctx, err)
 			return
 		}
-		data := dto.SignInDTO{
+		data := dto.SigninRequest{
 			Email:    input.Email,
 			Password: input.Password,
-			Metadata: dto.MetadataDTO{
-				UserAgent: ctx.Request.UserAgent(),
-				IPAddr:    ctx.ClientIP(),
-				DeviceID:  input.Metadata.DeviceID,
+			Metadata: dto.Metadata{
+				DeviceID: input.Metadata.DeviceID,
 			},
 		}
 
-		result, err := service.Signin(ctx.Request.Context(), data)
+		requestMetadata := dto.RequestMetadata{
+			UserAgent: ctx.Request.UserAgent(),
+			IPAddr:    ctx.ClientIP(),
+			DeviceID:  input.Metadata.DeviceID,
+		}
+
+		result, err := service.Signin(ctx.Request.Context(), data, requestMetadata)
 		if err != nil {
 			// Auth failure should be explicit and boring
 			ctx.JSON(http.StatusUnauthorized, &dto.BaseErrorResponse{

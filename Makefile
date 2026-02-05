@@ -2,8 +2,9 @@
 
 .PHONY: infra user-setup user-test clean-all
 
-# 1. Start Postgres and Redis on your Arch laptop
 infra:
+	sudo systemctl start postgresql redis
+infra-stop:
 	sudo systemctl start postgresql redis
 
 # 2. Fully prepare the User Service (Migrations + SQLC)

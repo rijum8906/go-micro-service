@@ -28,7 +28,7 @@ func ToPgUUID(idStr string) (pgtype.UUID, error) {
 	}, nil
 }
 
-func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.AuthenticationResult, error) {
+func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMetadata dto.RequestMetadata) (*dto.AuthenticationResult, error) {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -66,7 +66,7 @@ func (s *authService) Signin(ctx context.Context, data dto.SignInDTO) (*dto.Auth
 	}, nil
 }
 
-func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.AuthenticationResult, error) {
+func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMetadata dto.RequestMetadata) (*dto.AuthenticationResult, error) {
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err == nil {
 		return nil, errors.New("account already exists")
@@ -116,7 +116,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignUpDTO) (*dto.Auth
 	}, nil
 }
 
-func (s *authService) RequestPasswordReset(ctx context.Context, data dto.RequestPasswordResetDTO) error {
+func (s *authService) RequestPasswordReset(ctx context.Context, data dto.RequestPasswordResetRequest, reqMetadata dto.RequestMetadata) error {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -135,7 +135,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data dto.Request
 	return nil
 }
 
-func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordDTO) error {
+func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordRequest, reqMetadata dto.RequestMetadata) error {
 	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
 	if err != nil {
 		return appError.ErrInvalidToken
@@ -163,7 +163,7 @@ func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordD
 	return nil
 }
 
-func (s *authService) RequestEmailVerification(ctx context.Context, data dto.RequestEmailVerificationDTO) error {
+func (s *authService) RequestEmailVerification(ctx context.Context, data dto.RequestEmailVerificationRequest, reqMetadata dto.RequestMetadata) error {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -188,7 +188,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data dto.Req
 	return nil
 }
 
-func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailDTO) error {
+func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailRequest, reqMetadata dto.RequestMetadata) error {
 	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
 	if err != nil {
 		return appError.ErrInvalidToken
