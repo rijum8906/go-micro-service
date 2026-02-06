@@ -27,9 +27,6 @@ function SignInComponent() {
           metadata: { deviceId: generateDeviceId() }
         }
 
-        // const response = await axios.post('http://localhost:8906/api/v1/auth/signin', payload, {
-        //   timeout: 5000,
-        // })
         const response = await api.post('/auth/signin', payload, {
           timeout: 5000,
         })
@@ -37,7 +34,6 @@ function SignInComponent() {
         toast.success(response.data.message || 'Logged in successfully')
 
         if (response.data.token) {
-          localStorage.setItem('token', response.data.token)
         }
 
         router.navigate({ to: '/' })
