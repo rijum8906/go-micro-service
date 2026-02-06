@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 )
 
@@ -61,4 +62,12 @@ func handleBindError(ctx *gin.Context, err error) {
 		Success: false,
 		Message: err.Error(),
 	})
+}
+
+func parseAppError(err *appError.AppError) gin.H {
+	return gin.H{
+		"success": false,
+		"message": err.Message,
+		"errors":  err.Errors,
+	}
 }

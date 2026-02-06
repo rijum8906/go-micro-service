@@ -46,10 +46,7 @@ func signUpHandler(service services.AuthService) gin.HandlerFunc {
 
 		result, err := service.SignUp(ctx.Request.Context(), data, requestMetadata)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, &dto.BaseErrorResponse{
-				Success: false,
-				Message: err.Error(),
-			})
+			ctx.JSON(err.StatusCode, parseAppError(err))
 			return
 		}
 
@@ -86,10 +83,7 @@ func signInHandler(service services.AuthService) gin.HandlerFunc {
 		result, err := service.Signin(ctx.Request.Context(), data, requestMetadata)
 		if err != nil {
 			// Auth failure should be explicit and boring
-			ctx.JSON(http.StatusUnauthorized, &dto.BaseErrorResponse{
-				Success: false,
-				Message: err.Error(),
-			})
+			ctx.JSON(err.StatusCode, parseAppError(err))
 			return
 		}
 
