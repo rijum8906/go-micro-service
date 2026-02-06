@@ -28,7 +28,7 @@ func ToPgUUID(idStr string) (pgtype.UUID, error) {
 	}, nil
 }
 
-func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMetadata dto.RequestMetadata) (*dto.AuthenticationResult, error) {
+func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, error) {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -56,20 +56,20 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 		return nil, appError.ErrInternal
 	}
 
-	return &dto.AuthenticationResult{
+	return &dto.AuthResponse{
 		Account:  &account,
 		Profiles: &profiles,
-		Tokens: &dto.Tokens{
+		Token: &dto.Token{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
 	}, nil
 }
 
-func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMetadata dto.RequestMetadata) (*dto.AuthenticationResult, error) {
+func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, error) {
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err == nil {
-		return nil, errors.New("account already exists")
+		return nil, appError.ErrAccountExists
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return nil, appError.ErrInternal
@@ -106,10 +106,10 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		return nil, appError.ErrInternal
 	}
 
-	return &dto.AuthenticationResult{
+	return &dto.AuthResponse{
 		Account:  &account,
 		Profiles: &[]db.Profile{profile},
-		Tokens: &dto.Tokens{
+		Token: &dto.Token{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},

@@ -53,7 +53,7 @@ func signUpHandler(service services.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthenticationResult]{
+		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthResponse]{
 			Success: true,
 			Message: "account created successfully",
 			Data:    result,
@@ -93,7 +93,7 @@ func signInHandler(service services.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthenticationResult]{
+		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthResponse]{
 			Success: true,
 			Message: "account signed in successfully",
 			Data:    result,
