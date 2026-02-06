@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { signupSchema } from '@/schemas/auth'
+import { SignupRequest, signupSchema } from '@/schemas/auth'
 import { SocialAuth } from '@/components/auth/social-auth'
 import { toast } from 'sonner'
-import axios, { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
+import { generateDeviceId } from '@/lib/device'
+import { api } from '@/api/axios'
 
 export const Route = createFileRoute('/auth/signup')({
   component: SignUpComponent,
@@ -27,7 +29,11 @@ function SignUpComponent() {
     validators: { onChange: signupSchema },
     onSubmit: async ({ value }) => {
       try {
-        const response = await axios.post('http://localhost:8906/api/v1/auth/signup', value, {
+        const payload: SignupRequest = {
+          ...value,
+          metadata: { deviceId: generateDeviceId() }
+        }
+        const response = await api.post('/auth/signup', payload, {
           timeout: 5000,
         })
 
