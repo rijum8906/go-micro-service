@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/rijum8906/go-micro-service/packages/common/database/postgres"
 	"github.com/rijum8906/go-micro-service/packages/common/database/redis"
@@ -56,6 +57,15 @@ func main() {
 	// server logic starts here...
 
 	router := gin.Default()
+	// Configure CORS
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"}, // Your React port
+		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+
 	apiRouterV1 := router.Group("/api/v1")
 	authRouter := apiRouterV1.Group("/auth")
 	handler.RegisterHandlers(authRouter, authService)
