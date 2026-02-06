@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -6,12 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Label } from '@/components/ui/label'
 import { signupSchema } from '@/schemas/auth'
 import { SocialAuth } from '@/components/auth/social-auth'
+import { toast } from 'sonner'
+import axios, { AxiosError } from 'axios'
 
 export const Route = createFileRoute('/auth/signup')({
   component: SignUpComponent,
 })
 
 function SignUpComponent() {
+  const router = useRouter()
+
   const form = useForm({
     defaultValues: {
       firstName: '',
@@ -20,15 +24,29 @@ function SignUpComponent() {
       password: '',
       confirmPassword: '',
     },
-    validators: {
-      onChange: signupSchema,
-    },
+    validators: { onChange: signupSchema },
     onSubmit: async ({ value }) => {
-      console.log('Registering user:', value)
+      try {
+        const response = await axios.post('http://localhost:8906/api/v1/auth/signup', value, {
+          timeout: 5000,
+        })
+
+        toast.success(response.data.message || 'Account created successfully')
+        router.navigate({ to: '/auth/signin' })
+      } catch (err) {
+        const error = err as AxiosError<{ message?: string }>
+
+        if (!error.response) {
+          toast.error('Network error: Registration service is unreachable')
+          return
+        }
+
+        const serverMessage = error.response.data?.message
+        toast.error(serverMessage || 'Registration failed. Please try again.')
+      }
     },
   })
 
-  // Helper to render error messages correctly
   const ErrorDisplay = ({ errors }: { errors: any[] }) => {
     if (!errors.length) return null
     return (
@@ -40,10 +58,10 @@ function SignUpComponent() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-lg shadow-xl border-muted">
+      <Card className="w-full max-w-lg shadow-xl border-muted/50">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-bold tracking-tight">Create an account</CardTitle>
-          <CardDescription>Enter your details to get started with our platform</CardDescription>
+          <CardDescription>Enter your details to join our platform</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -54,7 +72,6 @@ function SignUpComponent() {
             }}
             className="space-y-4"
           >
-            {/* First and Last Name Grid */}
             <div className="grid grid-cols-2 gap-4">
               <form.Field name="firstName">
                 {(field) => (
@@ -66,7 +83,7 @@ function SignUpComponent() {
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="John"
-                      autoComplete='given-name'
+                      autoComplete="given-name"
                     />
                     <ErrorDisplay errors={field.state.meta.errors} />
                   </div>
@@ -82,7 +99,7 @@ function SignUpComponent() {
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="Doe"
-                      autoComplete='family-name'
+                      autoComplete="family-name"
                     />
                     <ErrorDisplay errors={field.state.meta.errors} />
                   </div>
@@ -101,6 +118,7 @@ function SignUpComponent() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="john@example.com"
+                    autoComplete="email"
                   />
                   <ErrorDisplay errors={field.state.meta.errors} />
                 </div>
@@ -117,6 +135,7 @@ function SignUpComponent() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    autoComplete="new-password"
                   />
                   <ErrorDisplay errors={field.state.meta.errors} />
                 </div>
@@ -133,6 +152,7 @@ function SignUpComponent() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    autoComplete="new-password"
                   />
                   <ErrorDisplay errors={field.state.meta.errors} />
                 </div>
@@ -141,15 +161,13 @@ function SignUpComponent() {
 
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
-                <Button className="w-full h-11 text-base font-semibold" type="submit" disabled={!canSubmit}>
-                  {isSubmitting ? 'Creating account...' : 'Create Account'}
+                <Button className="w-full h-11 text-base font-semibold" type="submit" disabled={!canSubmit || isSubmitting}>
+                  {isSubmitting ? 'Registering...' : 'Create Account'}
                 </Button>
               )}
             </form.Subscribe>
           </form>
 
-
-          {/* Social Auth */}
           <div className="mt-6">
             <SocialAuth />
           </div>
@@ -157,7 +175,7 @@ function SignUpComponent() {
         <CardFooter className="flex justify-center border-t p-6">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link to="/auth/signin" className="text-primary hover:underline font-semibold">
+            <Link to="/auth/signin" className="text-primary font-semibold hover:underline">
               Sign in
             </Link>
           </p>
