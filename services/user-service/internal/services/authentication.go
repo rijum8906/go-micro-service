@@ -110,6 +110,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 	}
 
 	profile, err := s.q.CreateProfile(ctx, db.CreateProfileParams{
+		AccountID: account.ID,
 		FirstName: data.FirstName,
 		LastName:  data.LastName,
 	})
