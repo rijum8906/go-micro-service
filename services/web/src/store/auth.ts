@@ -1,24 +1,8 @@
+import { Account, Profile, Token } from '@/types/auth';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 // 1. Types & Interfaces
-export interface Token {
-  accessToken: string;
-  refreshToken: string;
-}
-export interface Profile {
-  firstName: string;
-  lastName: string;
-  age: number;
-  avatarUrl?: string; // Optional for new accounts
-}
-
-export interface Account {
-  email: string;
-  profiles: Profile[];
-  currentProfileIndex: number; // For switching between sub-profiles
-}
-
 interface AuthState {
   account: Account | null;
   isSignedIn: boolean;
