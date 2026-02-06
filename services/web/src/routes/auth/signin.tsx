@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { loginSchema, LoginSchemaType } from '@/schemas/auth'
+import { SigninRequest, signinSchema, LoginSchemaType } from '@/schemas/auth'
 import { SocialAuth } from '@/components/auth/social-auth'
 import { toast } from 'sonner'
-import axios, { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
 import { generateDeviceId } from '@/lib/device'
+import { api } from '@/api/axios'
 
 export const Route = createFileRoute('/auth/signin')({
   component: SignInComponent,
@@ -21,12 +22,15 @@ function SignInComponent() {
     defaultValues: { email: '', password: '' } as LoginSchemaType,
     onSubmit: async ({ value }) => {
       try {
-        const payload = {
+        const payload: SigninRequest = {
           ...value,
           metadata: { deviceId: generateDeviceId() }
         }
 
-        const response = await axios.post('http://localhost:8906/api/v1/auth/signin', payload, {
+        // const response = await axios.post('http://localhost:8906/api/v1/auth/signin', payload, {
+        //   timeout: 5000,
+        // })
+        const response = await api.post('/auth/signin', payload, {
           timeout: 5000,
         })
 
@@ -80,7 +84,7 @@ function SignInComponent() {
             }}
             className="space-y-4"
           >
-            <form.Field name="email" validators={{ onChange: loginSchema.shape.email }}>
+            <form.Field name="email" validators={{ onChange: signinSchema.shape.email }}>
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Email</Label>
@@ -97,7 +101,7 @@ function SignInComponent() {
               )}
             </form.Field>
 
-            <form.Field name="password" validators={{ onChange: loginSchema.shape.password }}>
+            <form.Field name="password" validators={{ onChange: signinSchema.shape.password }}>
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Password</Label>
