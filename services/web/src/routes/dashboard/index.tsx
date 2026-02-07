@@ -12,9 +12,9 @@ import { Button } from '@/components/ui/button';
 export const Route = createFileRoute('/dashboard/')({
   component: RouteComponent,
   beforeLoad(ctx) {
-    const { isSignedIn, _hasHydrated } = useAuthStore.getState();
+    const { isSignedIn } = useAuthStore.getState();
 
-    if (_hasHydrated && !isSignedIn) {
+    if (!isSignedIn) {
       throw redirect({
         to: '/auth/signin',
         search: { redirect: ctx.location.href },
