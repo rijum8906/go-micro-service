@@ -1,44 +1,57 @@
-# Go Microservices Justfile
 set shell := ["zsh", "-c"]
+# --- Help ---
 
-# Default: list all commands
+# Default: list all available commands [cite: 1]
 default:
     @just --list
 
-# --- Infrastructure ---
+# --- Service Delegation (The "Router") ---
 
-# Start core services (Postgres, Redis)
-infra:
-    sudo systemctl start postgresql redis
+# Initialize a service (e.g., just setup user-service) [cite: 1]
+setup service:
+    @just --justfile services/{{service}}/justfile setup
 
-# Stop core services
-infra-stop:
-    sudo systemctl stop postgresql redis
+# Run a service in production mode [cite: 1]
+run service:
+    @just --justfile services/{{service}}/justfile run
 
-# --- User Service ---
+# Run a service with hot-reload (Air) [cite: 2]
+dev service:
+    @just --justfile services/{{service}}/justfile dev
 
-# Full setup for the user service
-user-setup:
-    cd services/user-service && go mod download && swag init
-    # Running migrations if you have them
-    # migrate -path services/user-service/migrations -database ${DB_URL} up
+# Apply database migrations for a specific service [cite: 1]
+migrate service:
+    @just --justfile services/{{service}}/justfile migrate-up
 
-# Run the user service with hot reload (requires 'air')
-user-dev:
-    cd services/user-service && air
+# Create a new migration file (usage: just create-migration user-service add_bio) [cite: 1]
+create-migration service name:
+    @just --justfile services/{{service}}/justfile create-migration {{name}}
 
-# --- Global Commands ---
+# --- Infrastructure Management ---
 
-# Run all tests in the monorepo
+# Start local infra for a service (Postgres/Redis via systemd or docker) [cite: 1]
+infra-start service:
+    @just --justfile services/{{service}}/justfile infra
+
+# Stop local infra for a service [cite: 1]
+infra-stop service:
+    @just --justfile services/{{service}}/justfile infra-stop
+
+# --- Global Monorepo Maintenance ---
+
+# Run all tests across the entire monorepo [cite: 2]
 test-all:
+    @echo "Running all tests..."
     go test -v ./...
 
-# Tidy all go modules
+# Synchronize go.work and tidy all go.mod files [cite: 3]
 tidy:
+    @echo "Tidying workspace..."
     go work sync || true
     find . -name "go.mod" -execdir go mod tidy \;
 
-# Cleanup binaries
+# Clean all build artifacts and binaries 
 clean:
+    @echo "Cleaning binaries..."
     rm -rf bin/
-    find . -type f -name "user-service" -delete
+    find . -type f -executable -name "*-service" -delete
