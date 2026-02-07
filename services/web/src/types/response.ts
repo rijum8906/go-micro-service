@@ -1,5 +1,5 @@
 // @/types/response.ts
-import { Account, Profile, Token } from "./auth";
+import type { Account, Profile, Token } from './auth';
 
 export interface ErrorDetail {
   field: string;
