@@ -1,19 +1,26 @@
-import { Account, Token } from "./auth";
+// @/types/response.ts
+import { Account, Profile, Token } from "./auth";
 
-export interface Response {
-  success: boolean;
-  message: string;
-  errors?: ErrorResponse[];
-}
-
-export interface ErrorResponse {
+export interface ErrorDetail {
   field: string;
   message: string;
 }
 
-export interface AuthResponse extends Response {
+export interface BaseResponse {
+  success: boolean;
+  message: string;
+}
+
+// Matches your Go BaseErrorResponse
+export interface ErrorResponse extends BaseResponse {
+  errors?: ErrorDetail[];
+}
+
+// Matches your Go BaseSuccessResponse[*dto.AuthResponse]
+export interface AuthResponse extends BaseResponse {
   data: {
-    account: Account
+    account: Account;
+    profiles: Profile[];
     token: Token;
-  }
+  };
 }
