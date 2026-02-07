@@ -31,6 +31,7 @@ import { api } from '@/api/axios';
 import type { AuthResponse } from '@/types/response';
 import { useAuthStore } from '@/store/auth';
 import z from 'zod';
+import { useEffect } from 'react';
 
 const signinSearchSchema = z.object({
   redirect: z.string().optional().catch(''),
@@ -43,7 +44,13 @@ export const Route = createFileRoute('/auth/signin')({
 function SignInComponent() {
   const router = useRouter();
   const { redirect } = Route.useSearch();
-  const { setAuth } = useAuthStore();
+  const { setAuth, isSignedIn } = useAuthStore();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.navigate({ to: redirect || '/' });
+    }
+  }, [isSignedIn, router.navigate, redirect]);
 
   const form = useForm({
     defaultValues: { email: '', password: '' } as LoginSchemaType,

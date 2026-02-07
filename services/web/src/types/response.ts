@@ -24,3 +24,7 @@ export interface AuthResponse extends BaseResponse {
     token: Token;
   };
 }
+
+export interface UpdateProfileResponse extends BaseResponse {
+  data: Profile;
+}
