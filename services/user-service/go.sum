@@ -77,8 +77,8 @@ github.com/quic-go/quic-go v0.59.0 h1:OLJkp1Mlm/aS7dpKgTc6cnpynnD2Xg7C1pwL6vy/SA
 github.com/quic-go/quic-go v0.59.0/go.mod h1:upnsH4Ju1YkqpLXC305eW3yDZ4NfnNbmQRCMWS58IKU=
 github.com/redis/go-redis/v9 v9.17.3 h1:fN29NdNrE17KttK5Ndf20buqfDZwGNgoUr9qjl1DQx4=
 github.com/redis/go-redis/v9 v9.17.3/go.mod h1:u410H11HMLoB+TP67dz8rL9s6QW2j76l0//kSOd3370=
-github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260206070517-561d38eed486 h1:UszjtcxkBFAR0C0Gv1u54K6M4r2ATi/0/ZPxvORo52E=
-github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260206070517-561d38eed486/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
+github.com/rijum8906/go-micro-service/packages/common v0.0.3 h1:mbf1P9rcigrc+TFmrdyVb3frMM3F98mDZquYHjFOKjw=
+github.com/rijum8906/go-micro-service/packages/common v0.0.3/go.mod h1:Dub7CEjIRMwx+Tx/5ESQY9rMwC7805WPlaBf+SoC+4E=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=

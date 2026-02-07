@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -59,7 +60,7 @@ func main() {
 	router := gin.Default()
 	// Configure CORS
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Your React port
+		AllowOrigins:     env.CorsAllowedOrigins,
 		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -69,7 +70,7 @@ func main() {
 	apiRouterV1 := router.Group("/api/v1")
 	authRouter := apiRouterV1.Group("/auth")
 	handler.RegisterHandlers(authRouter, authService)
-	err = router.Run(":8906")
+	err = router.Run(fmt.Sprintf(":%s", env.AppPort))
 	if err != nil {
 		panic(err)
 	}

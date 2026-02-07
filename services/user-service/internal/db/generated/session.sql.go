@@ -19,12 +19,12 @@ RETURNING id, account_id, refresh_token, user_agent, ip_addr, device_id, last_lo
 `
 
 type CreateSessionParams struct {
-	AccountID    pgtype.UUID
-	RefreshToken string
-	UserAgent    string
-	IpAddr       string
-	DeviceID     string
-	ExpiresAt    pgtype.Timestamptz
+	AccountID    pgtype.UUID        `json:"account_id"`
+	RefreshToken string             `json:"refresh_token"`
+	UserAgent    string             `json:"user_agent"`
+	IpAddr       string             `json:"ip_addr"`
+	DeviceID     string             `json:"device_id"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
 }
 
 // session.sql
@@ -114,9 +114,9 @@ SELECT id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login
 `
 
 type GetSessionsByAccountIDParams struct {
-	AccountID pgtype.UUID
-	Limit     int32
-	Offset    int32
+	AccountID pgtype.UUID `json:"account_id"`
+	Limit     int32       `json:"limit"`
+	Offset    int32       `json:"offset"`
 }
 
 func (q *Queries) GetSessionsByAccountID(ctx context.Context, arg GetSessionsByAccountIDParams) ([]Session, error) {
@@ -168,13 +168,13 @@ RETURNING id, account_id, refresh_token, user_agent, ip_addr, device_id, last_lo
 `
 
 type UpdateSessionParams struct {
-	ID           pgtype.UUID
-	AccountID    pgtype.UUID
-	RefreshToken string
-	UserAgent    string
-	IpAddr       string
-	DeviceID     string
-	LastLoginAt  pgtype.Timestamptz
+	ID           pgtype.UUID        `json:"id"`
+	AccountID    pgtype.UUID        `json:"account_id"`
+	RefreshToken string             `json:"refresh_token"`
+	UserAgent    string             `json:"user_agent"`
+	IpAddr       string             `json:"ip_addr"`
+	DeviceID     string             `json:"device_id"`
+	LastLoginAt  pgtype.Timestamptz `json:"last_login_at"`
 }
 
 func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) (Session, error) {

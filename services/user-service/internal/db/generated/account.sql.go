@@ -19,8 +19,8 @@ RETURNING id, email, password_hash, created_at, updated_at
 `
 
 type CreateAccountParams struct {
-	Email        string
-	PasswordHash string
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
 }
 
 // account.sql
@@ -88,9 +88,9 @@ RETURNING id, email, password_hash, created_at, updated_at
 `
 
 type UpdateAccountParams struct {
-	ID           pgtype.UUID
-	Email        string
-	PasswordHash string
+	ID           pgtype.UUID `json:"id"`
+	Email        string      `json:"email"`
+	PasswordHash string      `json:"password_hash"`
 }
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
@@ -114,9 +114,9 @@ RETURNING id, email, password_hash, created_at, updated_at
 `
 
 type UpdateAccountByEmailParams struct {
-	Email        string
-	Email_2      string
-	PasswordHash string
+	Email        string `json:"email"`
+	Email_2      string `json:"email_2"`
+	PasswordHash string `json:"password_hash"`
 }
 
 func (q *Queries) UpdateAccountByEmail(ctx context.Context, arg UpdateAccountByEmailParams) (Account, error) {

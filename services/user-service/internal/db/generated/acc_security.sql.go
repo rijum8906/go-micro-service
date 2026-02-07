@@ -92,12 +92,12 @@ RETURNING id, account_id, is_email_verified, email_verified_at, two_factor_enabl
 `
 
 type UpdateAccountSecurityParams struct {
-	ID                 pgtype.UUID
-	AccountID          pgtype.UUID
-	IsEmailVerified    bool
-	EmailVerifiedAt    pgtype.Timestamptz
-	TwoFactorEnabled   bool
-	TwoFactorEnabledAt pgtype.Timestamptz
+	ID                 pgtype.UUID        `json:"id"`
+	AccountID          pgtype.UUID        `json:"account_id"`
+	IsEmailVerified    bool               `json:"is_email_verified"`
+	EmailVerifiedAt    pgtype.Timestamptz `json:"email_verified_at"`
+	TwoFactorEnabled   bool               `json:"two_factor_enabled"`
+	TwoFactorEnabledAt pgtype.Timestamptz `json:"two_factor_enabled_at"`
 }
 
 func (q *Queries) UpdateAccountSecurity(ctx context.Context, arg UpdateAccountSecurityParams) (AccountSecurity, error) {
@@ -131,12 +131,12 @@ RETURNING id, account_id, is_email_verified, email_verified_at, two_factor_enabl
 `
 
 type UpdateAccountSecurityByAccountIDParams struct {
-	AccountID          pgtype.UUID
-	AccountID_2        pgtype.UUID
-	IsEmailVerified    bool
-	EmailVerifiedAt    pgtype.Timestamptz
-	TwoFactorEnabled   bool
-	TwoFactorEnabledAt pgtype.Timestamptz
+	AccountID          pgtype.UUID        `json:"account_id"`
+	AccountID_2        pgtype.UUID        `json:"account_id_2"`
+	IsEmailVerified    bool               `json:"is_email_verified"`
+	EmailVerifiedAt    pgtype.Timestamptz `json:"email_verified_at"`
+	TwoFactorEnabled   bool               `json:"two_factor_enabled"`
+	TwoFactorEnabledAt pgtype.Timestamptz `json:"two_factor_enabled_at"`
 }
 
 func (q *Queries) UpdateAccountSecurityByAccountID(ctx context.Context, arg UpdateAccountSecurityByAccountIDParams) (AccountSecurity, error) {

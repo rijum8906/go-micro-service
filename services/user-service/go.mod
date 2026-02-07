@@ -8,6 +8,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
+	github.com/rijum8906/go-micro-service/packages/common v0.0.3
 )
 
 require (
@@ -38,7 +39,6 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.0 // indirect
 	github.com/redis/go-redis/v9 v9.17.3 // indirect
-	github.com/rijum8906/go-micro-service/packages/common v0.0.0-20260206070517-561d38eed486 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	go.uber.org/mock v0.6.0 // indirect

@@ -23,8 +23,8 @@ type BaseResponseError struct {
 }
 
 type Token struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type AuthResponse struct {

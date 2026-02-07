@@ -23,10 +23,10 @@ RETURNING id, account_id, provider, subject, token, created_at, updated_at
 `
 
 type CreateOAuthParams struct {
-	AccountID pgtype.UUID
-	Provider  string
-	Subject   string
-	Token     string
+	AccountID pgtype.UUID `json:"account_id"`
+	Provider  string      `json:"provider"`
+	Subject   string      `json:"subject"`
+	Token     string      `json:"token"`
 }
 
 // oauth.sql
@@ -121,8 +121,8 @@ SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oau
 `
 
 type GetOAuthBySubjectAndProviderParams struct {
-	Subject  string
-	Provider string
+	Subject  string `json:"subject"`
+	Provider string `json:"provider"`
 }
 
 func (q *Queries) GetOAuthBySubjectAndProvider(ctx context.Context, arg GetOAuthBySubjectAndProviderParams) (Oauth, error) {
@@ -145,8 +145,8 @@ SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oau
 `
 
 type GetOAuthsByAccountIDParams struct {
-	AccountID pgtype.UUID
-	Limit     int32
+	AccountID pgtype.UUID `json:"account_id"`
+	Limit     int32       `json:"limit"`
 }
 
 func (q *Queries) GetOAuthsByAccountID(ctx context.Context, arg GetOAuthsByAccountIDParams) (Oauth, error) {
@@ -172,11 +172,11 @@ RETURNING id, account_id, provider, subject, token, created_at, updated_at
 `
 
 type UpdateOAuthParams struct {
-	ID        pgtype.UUID
-	AccountID pgtype.UUID
-	Provider  string
-	Subject   string
-	Token     string
+	ID        pgtype.UUID `json:"id"`
+	AccountID pgtype.UUID `json:"account_id"`
+	Provider  string      `json:"provider"`
+	Subject   string      `json:"subject"`
+	Token     string      `json:"token"`
 }
 
 func (q *Queries) UpdateOAuth(ctx context.Context, arg UpdateOAuthParams) (Oauth, error) {
@@ -208,11 +208,11 @@ RETURNING id, account_id, provider, subject, token, created_at, updated_at
 `
 
 type UpdateOAuthBySubjectParams struct {
-	Subject   string
-	AccountID pgtype.UUID
-	Provider  string
-	Subject_2 string
-	Token     string
+	Subject   string      `json:"subject"`
+	AccountID pgtype.UUID `json:"account_id"`
+	Provider  string      `json:"provider"`
+	Subject_2 string      `json:"subject_2"`
+	Token     string      `json:"token"`
 }
 
 func (q *Queries) UpdateOAuthBySubject(ctx context.Context, arg UpdateOAuthBySubjectParams) (Oauth, error) {

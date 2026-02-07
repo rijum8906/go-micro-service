@@ -19,11 +19,11 @@ RETURNING id, account_id, first_name, last_name, display_name, avatar_url, creat
 `
 
 type CreateProfileParams struct {
-	AccountID   pgtype.UUID
-	FirstName   string
-	LastName    string
-	DisplayName pgtype.Text
-	AvatarUrl   pgtype.Text
+	AccountID   pgtype.UUID `json:"account_id"`
+	FirstName   string      `json:"first_name"`
+	LastName    string      `json:"last_name"`
+	DisplayName pgtype.Text `json:"display_name"`
+	AvatarUrl   pgtype.Text `json:"avatar_url"`
 }
 
 // profile.sql
@@ -139,11 +139,11 @@ RETURNING id, account_id, first_name, last_name, display_name, avatar_url, creat
 `
 
 type UpdateProfileParams struct {
-	ID          pgtype.UUID
-	FirstName   string
-	LastName    string
-	DisplayName pgtype.Text
-	AvatarUrl   pgtype.Text
+	ID          pgtype.UUID `json:"id"`
+	FirstName   string      `json:"first_name"`
+	LastName    string      `json:"last_name"`
+	DisplayName pgtype.Text `json:"display_name"`
+	AvatarUrl   pgtype.Text `json:"avatar_url"`
 }
 
 func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error) {

@@ -9,55 +9,55 @@ import (
 )
 
 type Account struct {
-	ID           pgtype.UUID
-	Email        string
-	PasswordHash string
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
+	ID           pgtype.UUID        `json:"id"`
+	Email        string             `json:"email"`
+	PasswordHash string             `json:"password_hash"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
 type AccountSecurity struct {
-	ID                 pgtype.UUID
-	AccountID          pgtype.UUID
-	IsEmailVerified    bool
-	EmailVerifiedAt    pgtype.Timestamptz
-	TwoFactorEnabled   bool
-	TwoFactorEnabledAt pgtype.Timestamptz
-	CreatedAt          pgtype.Timestamptz
-	UpdatedAt          pgtype.Timestamptz
+	ID                 pgtype.UUID        `json:"id"`
+	AccountID          pgtype.UUID        `json:"account_id"`
+	IsEmailVerified    bool               `json:"is_email_verified"`
+	EmailVerifiedAt    pgtype.Timestamptz `json:"email_verified_at"`
+	TwoFactorEnabled   bool               `json:"two_factor_enabled"`
+	TwoFactorEnabledAt pgtype.Timestamptz `json:"two_factor_enabled_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Oauth struct {
-	ID        pgtype.UUID
-	AccountID pgtype.UUID
-	Provider  string
-	Subject   string
-	Token     string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	ID        pgtype.UUID        `json:"id"`
+	AccountID pgtype.UUID        `json:"account_id"`
+	Provider  string             `json:"provider"`
+	Subject   string             `json:"subject"`
+	Token     string             `json:"token"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Profile struct {
-	ID          pgtype.UUID
-	AccountID   pgtype.UUID
-	FirstName   string
-	LastName    string
-	DisplayName pgtype.Text
-	AvatarUrl   pgtype.Text
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
+	ID          pgtype.UUID        `json:"id"`
+	AccountID   pgtype.UUID        `json:"account_id"`
+	FirstName   string             `json:"first_name"`
+	LastName    string             `json:"last_name"`
+	DisplayName pgtype.Text        `json:"display_name"`
+	AvatarUrl   pgtype.Text        `json:"avatar_url"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Session struct {
-	ID           pgtype.UUID
-	AccountID    pgtype.UUID
-	RefreshToken string
-	UserAgent    string
-	IpAddr       string
-	DeviceID     string
-	LastLoginAt  pgtype.Timestamptz
-	IsRevoked    bool
-	ExpiresAt    pgtype.Timestamptz
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
+	ID           pgtype.UUID        `json:"id"`
+	AccountID    pgtype.UUID        `json:"account_id"`
+	RefreshToken string             `json:"refresh_token"`
+	UserAgent    string             `json:"user_agent"`
+	IpAddr       string             `json:"ip_addr"`
+	DeviceID     string             `json:"device_id"`
+	LastLoginAt  pgtype.Timestamptz `json:"last_login_at"`
+	IsRevoked    bool               `json:"is_revoked"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
