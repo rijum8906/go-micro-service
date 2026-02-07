@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/rijum8906/go-micro-service/packages/common/env"
 	"github.com/rijum8906/go-micro-service/packages/common/errors"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
@@ -20,15 +21,41 @@ type AuthService interface {
 type authService struct {
 	q           *db.Queries
 	utilsConfig *UtilsConfig
+	env         *env.Env
 }
 
-func NewAuth(queries *db.Queries, cfg *UtilsConfig) AuthService {
+func NewAuth(queries *db.Queries, cfg *UtilsConfig, env *env.Env) AuthService {
 	return &authService{
 		q: queries,
 		utilsConfig: &UtilsConfig{
 			HashService:      cfg.HashService,
 			JwtService:       cfg.JwtService,
 			SecureJWTService: cfg.SecureJWTService,
+			Storage:          cfg.Storage,
 		},
+		env: env,
+	}
+}
+
+type UserService interface {
+	UpdateProfile(ctx context.Context, dto dto.UpdateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
+}
+
+type userService struct {
+	q           *db.Queries
+	utilsConfig *UtilsConfig
+	env         *env.Env
+}
+
+func NewUserService(queries *db.Queries, cfg *UtilsConfig, env *env.Env) UserService {
+	return &userService{
+		q: queries,
+		utilsConfig: &UtilsConfig{
+			HashService:      cfg.HashService,
+			JwtService:       cfg.JwtService,
+			SecureJWTService: cfg.SecureJWTService,
+			Storage:          cfg.Storage,
+		},
+		env: env,
 	}
 }

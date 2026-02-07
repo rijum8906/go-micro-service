@@ -20,61 +20,48 @@ func updateProfile(service services.UserService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input dto.UpdateProfileRequest
 
-		if err := ctx.ShouldBindJSON(&input); err != nil {
+		// 1. Use ShouldBind instead of ShouldBindJSON for multipart/form-data
+		if err := ctx.ShouldBind(&input); err != nil {
 			handleBindError(ctx, err)
 			return
 		}
-		data := dto.UpdateProfileRequest{
-			ProfileID: input.ProfileID,
-			FirstName: input.FirstName,
-			LastName:  input.LastName,
-			Metadata: dto.Metadata{
-				DeviceID: input.Metadata.DeviceID,
-			},
+
+		// 2. Validate user_id from middleware
+		userID, ok := ctx.Get("user_id")
+		if !ok {
+			ctx.JSON(http.StatusUnauthorized, &dto.BaseErrorResponse{
+				Success: false,
+				Message: "user id not found",
+			})
+			return
 		}
 
+		uidStr, _ := userID.(string)
+		pgUUID, appErr := services.ToPgUUID(uidStr)
+		if appErr != nil {
+			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			return
+		}
+
+		// 3. Prepare Metadata
 		reqMetadata := dto.RequestMetadata{
 			UserAgent: ctx.Request.UserAgent(),
 			IPAddr:    ctx.ClientIP(),
 			DeviceID:  input.Metadata.DeviceID,
 		}
 
-		userID, ok := ctx.Get("user_id")
-		if !ok {
-			ctx.JSON(http.StatusInternalServerError, &dto.BaseErrorResponse{
-				Success: false,
-				Message: "user id not found",
-			})
-			return
-		}
-		uidStr, ok := userID.(string)
-		if !ok {
-			ctx.JSON(http.StatusInternalServerError, &dto.BaseErrorResponse{
-				Success: false,
-				Message: "user id not found",
-			})
-			return
-		}
-		pgUUID, err := services.ToPgUUID(uidStr)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, &dto.BaseErrorResponse{
-				Success: false,
-				Message: err.Error(),
-			})
-			return
-		}
-
 		authzMetadata := dto.AuthzMetadata{
 			UserID: pgUUID,
 		}
 
-		err = service.UpdateProfile(ctx.Request.Context(), data, reqMetadata, authzMetadata)
-		if err != nil {
-			ctx.JSON(err.StatusCode, parseAppError(err))
+		// 4. Pass the entire 'input' struct (which now contains input.Avatar)
+		appErr = service.UpdateProfile(ctx.Request.Context(), input, reqMetadata, authzMetadata)
+		if appErr != nil {
+			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
 			return
 		}
 
-		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthResponse]{
+		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[any]{
 			Success: true,
 			Message: "profile updated successfully",
 		})

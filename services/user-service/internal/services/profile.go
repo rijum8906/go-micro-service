@@ -24,20 +24,36 @@ func (s *userService) UpdateProfile(ctx context.Context, data dto.UpdateProfileR
 		return appErr
 	}
 
+	if data.Avatar != nil {
+		file, err := data.Avatar.Open()
+		if err != nil {
+			return appError.NewAppError(http.StatusInternalServerError, "failed to upload avatar", &[]appError.Error{
+				{Field: "avatar", Message: err.Error()},
+			})
+		}
+		defer file.Close()
+		url, err := s.utilsConfig.Storage.UploadFile(ctx, data.Avatar.Filename, file, data.Avatar.Header.Get("Content-Type"))
+		if err != nil {
+			return appError.NewAppError(http.StatusInternalServerError, "failed to upload avatar", &[]appError.Error{
+				{Field: "avatar", Message: err.Error()},
+			})
+		}
+		data.AvatarURL = &url
+	}
 	// 2. Execute the update with nullable parameters
 	_, err := s.q.UpdateProfile(ctx, db.UpdateProfileParams{
 		ID: pgtypeProfileID,
 		FirstName: pgtype.Text{
 			String: getStringValue(data.FirstName),
-			Valid:  data.FirstName != nil,
+			Valid:  data.FirstName != nil && *data.FirstName != "",
 		}.String,
 		LastName: pgtype.Text{
 			String: getStringValue(data.LastName),
-			Valid:  data.LastName != nil,
+			Valid:  data.LastName != nil && *data.LastName != "",
 		}.String,
 		AvatarUrl: pgtype.Text{
 			String: getStringValue(data.AvatarURL),
-			Valid:  data.AvatarURL != nil,
+			Valid:  data.AvatarURL != nil && *data.AvatarURL != "",
 		},
 	})
 	if err != nil {

@@ -71,8 +71,26 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 	}
 
 	refreshToken, err := s.utilsConfig.HashService.GenerateRefreshToken()
+	if err != nil {
+		return nil, ErrInternal
+	}
+	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
+		AccountID:    account.ID,
+		RefreshToken: refreshToken,
+		UserAgent:    reqMetadata.UserAgent,
+		IpAddr:       reqMetadata.IPAddr,
+		DeviceID:     reqMetadata.DeviceID,
+		ExpiresAt: pgtype.Timestamptz{
+			Time:  time.Now().Add(s.env.JwtExpiration),
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return nil, ErrInternal
+	}
+
 	accessToken, err2 := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
-	if err != nil || err2 != nil {
+	if err2 != nil {
 		return nil, ErrInternal
 	}
 
@@ -86,7 +104,6 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 	}, nil
 }
 
-// SignUp handles user registration with 409 Conflict check
 func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, *appError.AppError) {
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err == nil {
@@ -119,6 +136,20 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 	}
 
 	refreshToken, _ := s.utilsConfig.HashService.GenerateRefreshToken()
+	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
+		AccountID:    account.ID,
+		RefreshToken: refreshToken,
+		UserAgent:    reqMetadata.UserAgent,
+		IpAddr:       reqMetadata.IPAddr,
+		DeviceID:     reqMetadata.DeviceID,
+		ExpiresAt: pgtype.Timestamptz{
+			Time:  time.Now().Add(s.env.JwtExpiration),
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return nil, ErrInternal
+	}
 	accessToken, _ := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 
 	return &dto.AuthResponse{

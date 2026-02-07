@@ -13,7 +13,9 @@ import (
 	"github.com/rijum8906/go-micro-service/packages/common/jwt"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/handler"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/storage"
 )
 
 func main() {
@@ -49,12 +51,36 @@ func main() {
 		Expiration: env.JwtExpiration,
 	})
 
+	secureJWTService := jwt.NewScopedActionJWT(redisClient, jwt.Config{
+		Secret:     env.JwtSecret,
+		Issuer:     env.JwtIssuer,
+		Expiration: env.JwtExpiration,
+	})
+
 	hashService := hash.NewService(10)
 
-	authService := services.NewAuth(db.New(pgPool), &services.UtilsConfig{
+	middlewareService := middleware.NewMiddleware(middleware.Services{
 		HashService: hashService,
 		JwtService:  jwtService,
 	})
+
+	s3Storage, err := storage.NewS3Storage(ctx, env.StorageEndpoint, env.StorageAccessKey, env.StorageSecretKey, env.StorageBucket, env.StorageEndpoint)
+	if err != nil {
+		panic(err)
+	}
+
+	authService := services.NewAuth(db.New(pgPool), &services.UtilsConfig{
+		HashService:      hashService,
+		JwtService:       jwtService,
+		SecureJWTService: secureJWTService,
+		Storage:          s3Storage,
+	}, env)
+	userService := services.NewUserService(db.New(pgPool), &services.UtilsConfig{
+		HashService:      hashService,
+		JwtService:       jwtService,
+		SecureJWTService: secureJWTService,
+		Storage:          s3Storage,
+	}, env)
 	// server logic starts here...
 
 	router := gin.Default()
@@ -68,8 +94,13 @@ func main() {
 	}))
 
 	apiRouterV1 := router.Group("/api/v1")
+
 	authRouter := apiRouterV1.Group("/auth")
+	userRouter := apiRouterV1.Group("/users")
+
 	handler.RegisterHandlers(authRouter, authService)
+	handler.RegisterUserHandlers(userRouter, userService, middlewareService)
+
 	err = router.Run(fmt.Sprintf(":%s", env.AppPort))
 	if err != nil {
 		panic(err)

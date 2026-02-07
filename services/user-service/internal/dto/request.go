@@ -1,7 +1,11 @@
 // Package dto contains data transfer objects for the auth service.
 package dto
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"mime/multipart"
+
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 const (
 	PassAuthzType = "password_authorization"
@@ -76,4 +80,14 @@ type GenerateScopedTokenRequest struct {
 	Scope         string        `json:"scope"    binding:"required"`
 	Authorization Authorization `json:"authorization" binding:"required"`
 	Metadata      Metadata      `json:"metadata" binding:"required"`
+}
+
+type UpdateProfileRequest struct {
+	ProfileID string   `form:"profileId" binding:"required,uuid4"`
+	FirstName *string  `form:"firstName" binding:"omitempty,min=1,max=20"`
+	LastName  *string  `form:"lastName"  binding:"omitempty,min=1,max=20"`
+	AvatarURL *string  `form:"avatarUrl" binding:"omitempty,max=255"`
+	Metadata  Metadata `form:"metadata"  binding:"required"`
+
+	Avatar *multipart.FileHeader `form:"avatar"`
 }
