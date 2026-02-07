@@ -13,12 +13,12 @@ api.interceptors.request.use(
     const token = useAuthStore.getState().token;
 
     if (token) {
-      config.headers.Authorization = `Bearer ${token.accessToken}`;
+      config.headers.Authorization = `Bearer ${token.access_token}`;
     }
 
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );

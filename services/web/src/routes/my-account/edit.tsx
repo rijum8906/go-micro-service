@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router';
+import { createFileRoute, redirect, useRouter } from '@tanstack/react-router';
 import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,9 +7,23 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth';
 import { useId, useState } from 'react';
+import { api } from '@/api/axios';
+import { generateDeviceId } from '@/lib/device';
+import { ErrorResponse } from '@/types/response';
+import { AxiosError } from 'axios';
 
 export const Route = createFileRoute('/my-account/edit')({
   component: EditAccountComponent,
+  beforeLoad(ctx) {
+    const { isSignedIn } = useAuthStore.getState();
+
+    if (!isSignedIn) {
+      throw redirect({
+        to: '/auth/signin',
+        search: { redirect: ctx.location.href },
+      });
+    }
+  },
 });
 
 function EditAccountComponent() {
@@ -31,21 +45,46 @@ function EditAccountComponent() {
     },
     onSubmit: async ({ value }) => {
       try {
-        // Since we have an image, we use FormData instead of a standard JSON payload
         const formData = new FormData();
-        formData.append('first_name', value.firstName);
-        formData.append('last_name', value.lastName);
+
+        // 1. Append simple fields
+        formData.append('profileId', profile?.id || '');
+        if (profile?.first_name !== value.firstName) {
+          formData.append('firstName', value.firstName);
+        }
+        if (profile?.last_name !== value.lastName) {
+          formData.append('lastName', value.lastName);
+        }
+
+        // 2. Append the File (Avatar)
         if (value.avatar) {
+          // value.avatar should be the File object from your <input type="file" />
           formData.append('avatar', value.avatar);
         }
 
-        console.log('Sending update...', value);
-        // await api.put('/auth/profile', formData);
+        formData.append(
+          'metadata',
+          JSON.stringify({
+            deviceId: generateDeviceId(),
+          }),
+        );
+
+        // 4. Send the request
+        const res = await api.put<ErrorResponse>(
+          '/users/update-profile',
+          formData,
+        );
+        if (res.data.errors) {
+          toast.error(res.data.errors[0].message);
+        }
 
         toast.success('Profile updated successfully');
         router.navigate({ to: '/my-account' });
-      } catch (err) {
-        toast.error('Failed to update profile');
+      } catch (err: any) {
+        const error = err as AxiosError<{ message?: string }>;
+        toast.error(
+          error.response?.data?.message || 'Failed to update profile',
+        );
       }
     },
   });

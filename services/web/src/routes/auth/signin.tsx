@@ -1,4 +1,11 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
+import {
+  createFileRoute,
+  Link,
+  useLocation,
+  useParams,
+  useRouter,
+  useSearch,
+} from '@tanstack/react-router';
 import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,13 +30,19 @@ import { generateDeviceId } from '@/lib/device';
 import { api } from '@/api/axios';
 import type { AuthResponse } from '@/types/response';
 import { useAuthStore } from '@/store/auth';
+import z from 'zod';
 
+const signinSearchSchema = z.object({
+  redirect: z.string().optional().catch(''),
+});
 export const Route = createFileRoute('/auth/signin')({
   component: SignInComponent,
+  validateSearch: signinSearchSchema,
 });
 
 function SignInComponent() {
   const router = useRouter();
+  const { redirect } = Route.useSearch();
   const { setAuth } = useAuthStore();
 
   const form = useForm({
@@ -51,7 +64,7 @@ function SignInComponent() {
 
           setAuth(authData.account, authData.profiles, authData.token);
 
-          router.navigate({ to: '/' });
+          router.navigate({ to: redirect || '/' });
         }
       } catch (err) {
         const error = err as AxiosError<{ message?: string }>;
