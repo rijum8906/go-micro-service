@@ -1,13 +1,23 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/auth';
 
 export const Route = createFileRoute('/my-account/')({
   component: MyAccountComponent,
+  beforeLoad(ctx) {
+    const { isSignedIn } = useAuthStore.getState();
+
+    if (!isSignedIn) {
+      throw redirect({
+        to: '/auth/signin',
+        search: { redirect: ctx.location.href },
+      });
+    }
+  },
 });
 
 function MyAccountComponent() {
-  const { account, profiles } = useAuthStore();
+  const { account, profiles, logout } = useAuthStore();
 
   return (
     <div className="container mx-auto py-10 px-4">
@@ -28,6 +38,7 @@ function MyAccountComponent() {
             <Button asChild>
               <Link to="/my-account/edit">Edit Profile</Link>
             </Button>
+            <Button onClick={() => logout()}>Log out</Button>
           </div>
         </div>
       </div>
