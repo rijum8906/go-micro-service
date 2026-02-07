@@ -14,10 +14,10 @@ export MINIO_ROOT_PASSWORD := env_var_or_default("MINIO_ROOT_PASSWORD", "passwor
 # --- Build & Execution ---
 # Start MinIO server locally
 minio-up:
-    @mkdir -p "${MINIO_DATA}"
+    @mkdir -p "$HOME/minio_data"
     @echo "Starting MinIO server..."
     @echo "Console available at http://localhost:${MINIO_CONSOLE_PORT}"
-    MINIO_ROOT_USER="${MINIO_ROOT_USER}" MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD}" minio server "$HOME/minio_data" --console-address ":${MINIO_CONSOLE_PORT}"
+    MINIO_ROOT_USER="${MINIO_ROOT_USER}" MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD}" minio server "$HOME/minio_data" --console-address ":${MINIO_CONSOLE_PORT}" &
 
 # Setup the MinIO client (mcli) and create initial bucket
 minio-setup:
@@ -60,9 +60,9 @@ sqlc:
 # --- Infrastructure ---
 
 # Start local infrastructure (systemd)
-infra:
-    sudo systemclitl start postgresql redis
+infra-start: minio-up
+    sudo systemctl start postgresql redis
 
 # Stop core services [cite: 1]
 infra-stop:
-    sudo systemclitl stop postgresql redis
+    sudo systemctl stop postgresql redis
