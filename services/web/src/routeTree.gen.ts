@@ -9,17 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MyAccountIndexRouteImport } from './routes/my-account/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as MyAccountEditRouteImport } from './routes/my-account/edit'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
 
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -28,6 +24,16 @@ const IndexRoute = IndexRouteImport.update({
 const MyAccountIndexRoute = MyAccountIndexRouteImport.update({
   id: '/my-account/',
   path: '/my-account/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyAccountEditRoute = MyAccountEditRouteImport.update({
+  id: '/my-account/edit',
+  path: '/my-account/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -43,62 +49,67 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/my-account/edit': typeof MyAccountEditRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/my-account/': typeof MyAccountIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/my-account/edit': typeof MyAccountEditRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/my-account': typeof MyAccountIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/my-account/edit': typeof MyAccountEditRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/my-account/': typeof MyAccountIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/auth/signin'
     | '/auth/signup'
+    | '/my-account/edit'
+    | '/dashboard/'
     | '/my-account/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/auth/signin' | '/auth/signup' | '/my-account'
+  to:
+    | '/'
+    | '/auth/signin'
+    | '/auth/signup'
+    | '/my-account/edit'
+    | '/dashboard'
+    | '/my-account'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
     | '/auth/signin'
     | '/auth/signup'
+    | '/my-account/edit'
+    | '/dashboard/'
     | '/my-account/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  MyAccountEditRoute: typeof MyAccountEditRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
   MyAccountIndexRoute: typeof MyAccountIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -111,6 +122,20 @@ declare module '@tanstack/react-router' {
       path: '/my-account'
       fullPath: '/my-account/'
       preLoaderRoute: typeof MyAccountIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-account/edit': {
+      id: '/my-account/edit'
+      path: '/my-account/edit'
+      fullPath: '/my-account/edit'
+      preLoaderRoute: typeof MyAccountEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -132,9 +157,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthSignupRoute: AuthSignupRoute,
+  MyAccountEditRoute: MyAccountEditRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
   MyAccountIndexRoute: MyAccountIndexRoute,
 }
 export const routeTree = rootRouteImport
