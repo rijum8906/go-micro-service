@@ -1,17 +1,23 @@
+// @/types/auth.ts
 
 export interface Token {
-  accessToken: string;
-  refreshToken: string;
+    access_token: string;
+    refresh_token: string;
 }
+
 export interface Profile {
-  firstName: string;
-  lastName: string;
-  age: number;
-  avatarUrl?: string; // Optional for new accounts
+    id: string; // UUID from Go
+    account_id: string; // UUID from Go
+    first_name: string;
+    last_name: string;
+    display_name: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Account {
-  email: string;
-  profiles: Profile[];
-  currentProfileIndex: number; // For switching between sub-profiles
+    id: string;
+    email: string;
+    created_at: string;
+    updated_at: string;
 }
