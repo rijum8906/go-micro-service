@@ -34,13 +34,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       // Actions
       setHasHydrated: (state) => set({ _hasHydrated: state }),
-      setAuth: (account, profiles, token) => set({
-        account,
-        profiles,
-        token,
-        isSignedIn: true,
-        currentProfileIdx: profiles.length > 0 ? 0 : null,
-      }),
+      setAuth: (account, profiles, token) =>
+        set({
+          account,
+          profiles,
+          token,
+          isSignedIn: true,
+          currentProfileIdx: profiles.length > 0 ? 0 : null,
+        }),
 
       logout: () => {
         set({
@@ -48,32 +49,40 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           profiles: null,
           token: null,
           isSignedIn: false,
-          currentProfileIdx: null
+          currentProfileIdx: null,
         });
         // Explicitly clear storage for security
         localStorage.removeItem('auth-storage');
       },
 
-      addProfile: (profile) => set((state) => {
-        const newProfiles = state.profiles ? [...state.profiles, profile] : [profile];
-        return {
-          profiles: newProfiles,
-          // If this is the first profile added, set it as current
-          currentProfileIdx: state.currentProfileIdx === null ? 0 : state.currentProfileIdx
-        };
-      }),
+      addProfile: (profile) =>
+        set((state) => {
+          const newProfiles = state.profiles
+            ? [...state.profiles, profile]
+            : [profile];
+          return {
+            profiles: newProfiles,
+            // If this is the first profile added, set it as current
+            currentProfileIdx:
+              state.currentProfileIdx === null ? 0 : state.currentProfileIdx,
+          };
+        }),
 
-      updateProfile: (profileId, updates) => set((state) => ({
-        // Map through profiles to find matching ID from Go backend
-        profiles: state.profiles
-          ? state.profiles.map((p) => p.id === profileId ? { ...p, ...updates } : p)
-          : null
-      })),
+      updateProfile: (profileId, updates) =>
+        set((state) => ({
+          // Map through profiles to find matching ID from Go backend
+          profiles: state.profiles
+            ? state.profiles.map((p) =>
+                p.id === profileId ? { ...p, ...updates } : p,
+              )
+            : null,
+        })),
 
-      updateAccount: (updates) => set((state) => ({
-        // Update account fields like email or metadata
-        account: state.account ? { ...state.account, ...updates } : null
-      })),
+      updateAccount: (updates) =>
+        set((state) => ({
+          // Update account fields like email or metadata
+          account: state.account ? { ...state.account, ...updates } : null,
+        })),
 
       setCurrentProfile: (idx) => set({ currentProfileIdx: idx }),
     }),
@@ -86,12 +95,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         profiles: state.profiles,
         token: state.token,
         isSignedIn: state.isSignedIn,
-        currentProfileIdx: state.currentProfileIdx
+        currentProfileIdx: state.currentProfileIdx,
       }),
       onRehydrateStorage: () => (state) => {
         // This runs automatically when the page loads
         state?.setHasHydrated(true);
       },
-    }
-  )
+    },
+  ),
 );
