@@ -12,12 +12,12 @@ export MIGRATION_DIR := "internal/db/migrations"
 # Build the service binary
 build:
     @echo "Building user-service..."
-    go build -o ../../bin/user-service ./cmd/main.go
+    go build -o ./bin/user-service ./cmd/main.go
 
 # Build and then run the binary
 run: build
     @echo "Starting user-service..."
-    ../../bin/user-service
+    ./bin/user-service
 
 # Development run with hot reload 
 dev:
