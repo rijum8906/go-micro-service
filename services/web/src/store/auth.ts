@@ -2,69 +2,96 @@ import { Account, Profile, Token } from '@/types/auth';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-// 1. Types & Interfaces
 interface AuthState {
+  _hasHydrated: boolean;
   account: Account | null;
+  profiles: Profile[] | null;
+  currentProfileIdx: number | null;
   isSignedIn: boolean;
-  token: Token | null; // Essential for Axios/Go API requests
+  token: Token | null;
 }
 
 interface AuthActions {
-  // Authentication
-  setAuth: (account: Account, token: Token) => void;
+  setHasHydrated: (state: boolean) => void;
+  setAuth: (account: Account, profiles: Profile[], token: Token) => void;
   logout: () => void;
-
-  // Profile Management
   addProfile: (profile: Profile) => void;
-  switchProfile: (index: number) => void;
+  updateProfile: (profileId: string, updates: Partial<Profile>) => void;
   updateAccount: (updates: Partial<Account>) => void;
+  setCurrentProfile: (idx: number) => void;
 }
 
-// 2. The Store with Persistence
 export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
     (set) => ({
       // Initial State
+      _hasHydrated: false,
       account: null,
+      profiles: null,
+      currentProfileIdx: null,
       isSignedIn: false,
       token: null,
 
-      // Set auth data after successful sign-in from Go backend
-      setAuth: (account, token) => set({
+      // Actions
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
+      setAuth: (account, profiles, token) => set({
         account,
+        profiles,
         token,
-        isSignedIn: true
+        isSignedIn: true,
+        currentProfileIdx: profiles.length > 0 ? 0 : null,
       }),
 
-      // Clear everything on logout
-      logout: () => set({
-        account: null,
-        token: null,
-        isSignedIn: false
+      logout: () => {
+        set({
+          account: null,
+          profiles: null,
+          token: null,
+          isSignedIn: false,
+          currentProfileIdx: null
+        });
+        // Explicitly clear storage for security
+        localStorage.removeItem('auth-storage');
+      },
+
+      addProfile: (profile) => set((state) => {
+        const newProfiles = state.profiles ? [...state.profiles, profile] : [profile];
+        return {
+          profiles: newProfiles,
+          // If this is the first profile added, set it as current
+          currentProfileIdx: state.currentProfileIdx === null ? 0 : state.currentProfileIdx
+        };
       }),
 
-      // Add a sub-profile to the existing account
-      addProfile: (profile) => set((state) => ({
-        account: state.account
-          ? { ...state.account, profiles: [...state.account.profiles, profile] }
+      updateProfile: (profileId, updates) => set((state) => ({
+        // Map through profiles to find matching ID from Go backend
+        profiles: state.profiles
+          ? state.profiles.map((p) => p.id === profileId ? { ...p, ...updates } : p)
           : null
       })),
 
-      // Change which profile is currently active
-      switchProfile: (index) => set((state) => ({
-        account: state.account
-          ? { ...state.account, currentProfileIndex: index }
-          : null
-      })),
-
-      // General update for email or other settings
       updateAccount: (updates) => set((state) => ({
+        // Update account fields like email or metadata
         account: state.account ? { ...state.account, ...updates } : null
       })),
+
+      setCurrentProfile: (idx) => set({ currentProfileIdx: idx }),
     }),
     {
-      name: 'auth-storage', // Key in localStorage
+      name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
+      // Persist essential auth data
+      partialize: (state) => ({
+        account: state.account,
+        profiles: state.profiles,
+        token: state.token,
+        isSignedIn: state.isSignedIn,
+        currentProfileIdx: state.currentProfileIdx
+      }),
+      onRehydrateStorage: () => (state) => {
+        // This runs automatically when the page loads
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import { AxiosError } from 'axios'
 import { generateDeviceId } from '@/lib/device'
 import { api } from '@/api/axios'
+import { AuthResponse } from '@/types/response'
+import { useAuthStore } from '@/store/auth'
 
 export const Route = createFileRoute('/auth/signup')({
   component: SignUpComponent,
@@ -17,6 +19,7 @@ export const Route = createFileRoute('/auth/signup')({
 
 function SignUpComponent() {
   const router = useRouter()
+  const { setAuth } = useAuthStore()
 
   const form = useForm({
     defaultValues: {
@@ -33,12 +36,19 @@ function SignUpComponent() {
           ...value,
           metadata: { deviceId: generateDeviceId() }
         }
-        const response = await api.post('/auth/signup', payload, {
+        const response = await api.post<AuthResponse>('/auth/signup', payload, {
           timeout: 5000,
         })
+        if (!response.data.data.account || !response.data.data.token) {
+          toast.error(response.data.message || 'Registration failed. Please try again.')
+          router.navigate({ to: '/auth/signin' })
+          setAuth(response.data.data.account, response.data.data.profiles, response.data.data.token)
+          return
+        } else {
+          toast.success(response.data.message || 'Registration successful')
+          router.navigate({ to: '/auth/signin' })
+        }
 
-        toast.success(response.data.message || 'Account created successfully')
-        router.navigate({ to: '/auth/signin' })
       } catch (err) {
         const error = err as AxiosError<{ message?: string }>
 
