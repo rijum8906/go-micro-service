@@ -1,25 +1,36 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { SigninRequest, signinSchema, LoginSchemaType } from '@/schemas/auth'
-import { SocialAuth } from '@/components/auth/social-auth'
-import { toast } from 'sonner'
-import { AxiosError } from 'axios'
-import { generateDeviceId } from '@/lib/device'
-import { api } from '@/api/axios'
-import { AuthResponse } from '@/types/response'
-import { useAuthStore } from '@/store/auth'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
+import { useForm } from '@tanstack/react-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import {
+  type SigninRequest,
+  signinSchema,
+  type LoginSchemaType,
+} from '@/schemas/auth';
+import { SocialAuth } from '@/components/auth/social-auth';
+import { toast } from 'sonner';
+import type { AxiosError } from 'axios';
+import { generateDeviceId } from '@/lib/device';
+import { api } from '@/api/axios';
+import type { AuthResponse } from '@/types/response';
+import { useAuthStore } from '@/store/auth';
 
 export const Route = createFileRoute('/auth/signin')({
   component: SignInComponent,
-})
+});
 
 function SignInComponent() {
-  const router = useRouter()
-  const { setAuth } = useAuthStore()
+  const router = useRouter();
+  const { setAuth } = useAuthStore();
 
   const form = useForm({
     defaultValues: { email: '', password: '' } as LoginSchemaType,
@@ -27,63 +38,55 @@ function SignInComponent() {
       try {
         const payload: SigninRequest = {
           ...value,
-          metadata: { deviceId: generateDeviceId() }
-        }
+          metadata: { deviceId: generateDeviceId() },
+        };
 
-        const response = await api.post<AuthResponse>('/auth/signin', payload, {
-          timeout: 5000,
-        })
+        const response = await api.post<AuthResponse>('/auth/signin', payload);
 
-        if (response.data.data.account && response.data.data.token) {
-          toast.success(response.data.message || 'Logged in successfully')
-          router.navigate({ to: '/' })
-          setAuth(response.data.data.account, response.data.data.profiles, response.data.data.token)
-        } else {
-          toast.error(response.data.message || 'An unexpected error occurred during sign in')
+        // Accessing response.data.data because of your BaseSuccessResponse wrapper in Go
+        const authData = response.data.data;
+
+        if (authData) {
+          toast.success(response.data.message || 'Logged in successfully');
+
+          setAuth(authData.account, authData.profiles, authData.token);
+
+          router.navigate({ to: '/' });
         }
       } catch (err) {
-        const error = err as AxiosError<{ message?: string }>
-
-        if (!error.response) {
-          toast.error('Unable to connect to the authentication service')
-          return
-        }
-
-        // Professional error prioritization using the 'message' field
-        const serverMessage = error.response.data?.message
-        toast.error(serverMessage || 'An unexpected error occurred during sign in')
+        const error = err as AxiosError<{ message?: string }>;
+        const serverMessage =
+          error.response?.data?.message || 'Authentication failed';
+        toast.error(serverMessage);
       }
-    }
-  })
-
-  const renderErrors = (field: any) => {
-    if (!field.state.meta.errors.length) return null
-    return (
-      <p className="text-xs text-destructive mt-1">
-        {field.state.meta.errors.map((err: any) =>
-          typeof err === 'object' ? err.message : err
-        ).join(', ')}
-      </p>
-    )
-  }
+    },
+  });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md shadow-xl border-muted/50">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold tracking-tight">Sign in</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            Sign in
+          </CardTitle>
+          <CardDescription>
+            Enter your credentials to access your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit();
             }}
             className="space-y-4"
           >
-            <form.Field name="email" validators={{ onChange: signinSchema.shape.email }}>
+            {/* Email Field */}
+            <form.Field
+              name="email"
+              validators={{ onChange: signinSchema.shape.email }}
+            >
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Email</Label>
@@ -93,14 +96,21 @@ function SignInComponent() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="name@example.com"
-                    autoComplete="email"
                   />
-                  {renderErrors(field)}
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-xs font-medium text-destructive">
+                      {field.state.meta.errors.join(', ')}
+                    </p>
+                  )}
                 </div>
               )}
             </form.Field>
 
-            <form.Field name="password" validators={{ onChange: signinSchema.shape.password }}>
+            {/* Password Field */}
+            <form.Field
+              name="password"
+              validators={{ onChange: signinSchema.shape.password }}
+            >
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Password</Label>
@@ -110,16 +120,25 @@ function SignInComponent() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    autoComplete="current-password"
                   />
-                  {renderErrors(field)}
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-xs font-medium text-destructive">
+                      {field.state.meta.errors.join(', ')}
+                    </p>
+                  )}
                 </div>
               )}
             </form.Field>
 
-            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
               {([canSubmit, isSubmitting]) => (
-                <Button className="w-full h-10" type="submit" disabled={!canSubmit || isSubmitting}>
+                <Button
+                  className="w-full h-10"
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting}
+                >
                   {isSubmitting ? 'Authenticating...' : 'Sign In'}
                 </Button>
               )}
@@ -132,10 +151,16 @@ function SignInComponent() {
         </CardContent>
         <CardFooter className="flex justify-center border-t py-4">
           <p className="text-sm text-muted-foreground">
-            Don't have an account? <Link to="/auth/signup" className="text-primary font-medium hover:underline">Sign up</Link>
+            Don't have an account?{' '}
+            <Link
+              to="/auth/signup"
+              className="text-primary font-medium hover:underline"
+            >
+              Sign up
+            </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
