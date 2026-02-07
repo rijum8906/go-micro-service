@@ -1,6 +1,7 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const Route = createFileRoute('/my-account/')({
   component: MyAccountComponent,
@@ -26,6 +27,10 @@ function MyAccountComponent() {
         <div className="p-6 border rounded-lg bg-card shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
           <div className="space-y-2">
+            <Avatar size="lg">
+              <AvatarImage src={profiles?.[0]?.avatar_url} />
+              <AvatarFallback>{profiles?.[0]?.first_name}</AvatarFallback>
+            </Avatar>
             <p>
               <strong>Email:</strong> {account?.email}
             </p>
