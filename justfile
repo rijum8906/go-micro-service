@@ -31,7 +31,7 @@ create-migration service name:
 
 # Start local infra for a service (Postgres/Redis via systemd or docker) [cite: 1]
 infra-start service:
-    @just --justfile services/{{service}}/justfile infra
+    @just --justfile services/{{service}}/justfile infra-start
 
 # Stop local infra for a service [cite: 1]
 infra-stop service:
