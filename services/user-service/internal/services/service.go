@@ -38,7 +38,7 @@ func NewAuth(queries *db.Queries, cfg *UtilsConfig, env *env.Env) AuthService {
 }
 
 type UserService interface {
-	UpdateProfile(ctx context.Context, dto dto.UpdateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
+	UpdateProfile(ctx context.Context, dto dto.UpdateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
 }
 
 type userService struct {

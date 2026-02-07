@@ -133,17 +133,20 @@ func (q *Queries) GetProfilesByAccountID(ctx context.Context, accountID pgtype.U
 
 const updateProfile = `-- name: UpdateProfile :one
 UPDATE profiles
-SET first_name = $2, last_name = $3, display_name = $4, avatar_url = $5
+SET 
+    first_name = COALESCE($2, first_name),
+    last_name = COALESCE($3, last_name),
+    avatar_url = COALESCE($4, avatar_url),
+    updated_at = NOW()
 WHERE id = $1
 RETURNING id, account_id, first_name, last_name, display_name, avatar_url, created_at, updated_at
 `
 
 type UpdateProfileParams struct {
-	ID          pgtype.UUID `json:"id"`
-	FirstName   string      `json:"first_name"`
-	LastName    string      `json:"last_name"`
-	DisplayName pgtype.Text `json:"display_name"`
-	AvatarUrl   pgtype.Text `json:"avatar_url"`
+	ID        pgtype.UUID `json:"id"`
+	FirstName pgtype.Text `json:"first_name"`
+	LastName  pgtype.Text `json:"last_name"`
+	AvatarUrl pgtype.Text `json:"avatar_url"`
 }
 
 func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error) {
@@ -151,7 +154,6 @@ func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (P
 		arg.ID,
 		arg.FirstName,
 		arg.LastName,
-		arg.DisplayName,
 		arg.AvatarUrl,
 	)
 	var i Profile

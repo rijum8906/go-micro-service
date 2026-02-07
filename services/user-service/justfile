@@ -6,7 +6,6 @@ set dotenv-load := true
 # Database connection string inherited from environment or defaulted
 export DB_URL := env_var_or_default("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable")
 export MIGRATION_DIR := "internal/db/migrations"
-export MINIO_DATA := env_var_or_default("MINIO_DATA", "$HOME/minio_data")
 export MINIO_PORT := env_var_or_default("MINIO_PORT", "9000")
 export MINIO_CONSOLE_PORT := env_var_or_default("MINIO_CONSOLE_PORT", "9001")
 export MINIO_ROOT_USER := env_var_or_default("MINIO_ROOT_USER", "admin")
@@ -18,7 +17,7 @@ minio-up:
     @mkdir -p "${MINIO_DATA}"
     @echo "Starting MinIO server..."
     @echo "Console available at http://localhost:${MINIO_CONSOLE_PORT}"
-    MINIO_ROOT_USER="${MINIO_ROOT_USER}" MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD}" minio server "${MINIO_DATA}" --console-address ":${MINIO_CONSOLE_PORT}"
+    MINIO_ROOT_USER="${MINIO_ROOT_USER}" MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD}" minio server "$HOME/minio_data" --console-address ":${MINIO_CONSOLE_PORT}"
 
 # Setup the MinIO client (mcli) and create initial bucket
 minio-setup:

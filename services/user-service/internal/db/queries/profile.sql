@@ -16,7 +16,11 @@ SELECT * FROM profiles WHERE account_id = $1;
 
 -- name: UpdateProfile :one
 UPDATE profiles
-SET first_name = $2, last_name = $3, display_name = $4, avatar_url = $5
+SET 
+    first_name = COALESCE(sqlc.narg('first_name'), first_name),
+    last_name = COALESCE(sqlc.narg('last_name'), last_name),
+    avatar_url = COALESCE(sqlc.narg('avatar_url'), avatar_url),
+    updated_at = NOW()
 WHERE id = $1
 RETURNING *;
 

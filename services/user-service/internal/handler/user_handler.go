@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
@@ -55,15 +56,16 @@ func updateProfile(service services.UserService) gin.HandlerFunc {
 		}
 
 		// 4. Pass the entire 'input' struct (which now contains input.Avatar)
-		appErr = service.UpdateProfile(ctx.Request.Context(), input, reqMetadata, authzMetadata)
+		profile, appErr := service.UpdateProfile(ctx.Request.Context(), input, reqMetadata, authzMetadata)
 		if appErr != nil {
 			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
 			return
 		}
 
-		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[any]{
+		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*db.Profile]{
 			Success: true,
 			Message: "profile updated successfully",
+			Data:    profile,
 		})
 	}
 }
