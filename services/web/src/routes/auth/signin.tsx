@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import { AxiosError } from 'axios'
 import { generateDeviceId } from '@/lib/device'
 import { api } from '@/api/axios'
+import { AuthResponse } from '@/types/response'
+import { useAuthStore } from '@/store/auth'
 
 export const Route = createFileRoute('/auth/signin')({
   component: SignInComponent,
@@ -17,6 +19,7 @@ export const Route = createFileRoute('/auth/signin')({
 
 function SignInComponent() {
   const router = useRouter()
+  const { setAuth } = useAuthStore()
 
   const form = useForm({
     defaultValues: { email: '', password: '' } as LoginSchemaType,
@@ -27,20 +30,20 @@ function SignInComponent() {
           metadata: { deviceId: generateDeviceId() }
         }
 
-        const response = await api.post('/auth/signin', payload, {
+        const response = await api.post<AuthResponse>('/auth/signin', payload, {
           timeout: 5000,
         })
 
-        toast.success(response.data.message || 'Logged in successfully')
-
-        if (response.data.token) {
+        if (response.data.data.account && response.data.data.token) {
+          toast.success(response.data.message || 'Logged in successfully')
+          router.navigate({ to: '/' })
+          setAuth(response.data.data.account, response.data.data.profiles, response.data.data.token)
+        } else {
+          toast.error(response.data.message || 'An unexpected error occurred during sign in')
         }
-
-        router.navigate({ to: '/' })
       } catch (err) {
         const error = err as AxiosError<{ message?: string }>
 
-        // Handle network/server-down errors
         if (!error.response) {
           toast.error('Unable to connect to the authentication service')
           return
