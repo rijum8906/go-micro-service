@@ -9,8 +9,8 @@ import { useAuthStore } from '@/store/auth';
 import { useId, useState } from 'react';
 import { api } from '@/api/axios';
 import { generateDeviceId } from '@/lib/device';
-import { ErrorResponse } from '@/types/response';
-import { AxiosError } from 'axios';
+import type { ErrorResponse, UpdateProfileResponse } from '@/types/response';
+import type { AxiosError } from 'axios';
 
 export const Route = createFileRoute('/my-account/edit')({
   component: EditAccountComponent,
@@ -29,7 +29,7 @@ export const Route = createFileRoute('/my-account/edit')({
 function EditAccountComponent() {
   const id = useId();
   const router = useRouter();
-  const { profiles, currentProfileIdx } = useAuthStore();
+  const { profiles, currentProfileIdx, updateProfile } = useAuthStore();
   const profile = profiles?.[currentProfileIdx ?? 0];
 
   // Local state for image preview
@@ -70,14 +70,21 @@ function EditAccountComponent() {
         );
 
         // 4. Send the request
-        const res = await api.put<ErrorResponse>(
+        const res = await api.put<UpdateProfileResponse>(
           '/users/update-profile',
           formData,
         );
-        if (res.data.errors) {
-          toast.error(res.data.errors[0].message);
+        if (!res.data.data) {
+          toast.error(res.data.message);
+          return;
         }
 
+        if (profile?.id)
+          updateProfile(profile.id, {
+            first_name: value.firstName,
+            last_name: value.lastName,
+            avatar_url: res.data.data.avatar_url,
+          });
         toast.success('Profile updated successfully');
         router.navigate({ to: '/my-account' });
       } catch (err: any) {
