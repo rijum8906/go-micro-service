@@ -1,0 +1,52 @@
+set shell := ["zsh", "-c"]
+set dotenv-load := true
+
+# --- Variables ---
+
+# Database connection string inherited from environment or defaulted
+export DB_URL := env_var_or_default("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable")
+export MIGRATION_DIR := "internal/db/migrations"
+
+# --- Build & Execution ---
+
+# Build the service binary
+build:
+    @echo "Building user-service..."
+    go build -o ../../bin/user-service ./cmd/main.go
+
+# Build and then run the binary
+run: build
+    @echo "Starting user-service..."
+    ../../bin/user-service
+
+# Development run with hot reload 
+dev:
+    air
+
+# Setup
+setup:
+    go mod tidy
+
+# --- Database & Tools ---
+
+# Apply database migrations
+migrate-up:
+    goose -dir {{MIGRATION_DIR}} postgres "${DB_URL}" up
+
+# Create a new migration file (usage: just create-migration name)
+create-migration name:
+    goose -dir {{MIGRATION_DIR}} create {{name}} sql
+
+# Generate Go code using sqlc
+sqlc:
+    sqlc generate
+
+# --- Infrastructure ---
+
+# Start local infrastructure (systemd)
+infra:
+    sudo systemctl start postgresql redis
+
+# Stop core services [cite: 1]
+infra-stop:
+    sudo systemctl stop postgresql redis
