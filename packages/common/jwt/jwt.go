@@ -7,29 +7,13 @@ import (
 
 	jwtlib "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	"github.com/rijum8906/go-micro-service/packages/common/errors"
 )
-
-type service struct {
-	redis *redis.Client
-	cfg   Config
-}
-
-func NewService(r *redis.Client, cfg Config) Service {
-	return &service{
-		redis: r,
-		cfg:   cfg,
-	}
-}
-
-func sessionKey(sessionID string) string {
-	return "auth:session:" + sessionID
-}
 
 func (s *service) IssueToken(
 	ctx context.Context,
 	subject string,
-) (string, error) {
+) (string, *errors.AppError) {
 	sessionID := uuid.NewString()
 	now := time.Now()
 	exp := now.Add(s.cfg.Expiration)
@@ -46,7 +30,7 @@ func (s *service) IssueToken(
 
 	tokenStr, err := token.SignedString([]byte(s.cfg.Secret))
 	if err != nil {
-		return "", err
+		return "", errors.ErrInternal.WithInternal(err)
 	}
 
 	if err := s.redis.Set(
@@ -55,7 +39,7 @@ func (s *service) IssueToken(
 		subject,
 		time.Until(exp),
 	).Err(); err != nil {
-		return "", err
+		return "", errors.ErrDBError.WithInternal(err)
 	}
 
 	return tokenStr, nil
@@ -64,7 +48,7 @@ func (s *service) IssueToken(
 func (s *service) ValidateToken(
 	ctx context.Context,
 	tokenStr string,
-) (*Claims, error) {
+) (*Claims, *errors.AppError) {
 	token, err := jwtlib.ParseWithClaims(
 		tokenStr,
 		&jwtlib.RegisteredClaims{},
@@ -73,20 +57,20 @@ func (s *service) ValidateToken(
 		},
 	)
 	if err != nil || !token.Valid {
-		return nil, ErrInvalidToken
+		return nil, errors.ErrInvalidToken
 	}
 
 	rc, ok := token.Claims.(*jwtlib.RegisteredClaims)
 	if !ok {
-		return nil, ErrInvalidToken
+		return nil, errors.ErrInvalidTokenClaims
 	}
 
 	exists, err := s.redis.Exists(ctx, sessionKey(rc.ID)).Result()
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrDBError.WithInternal(err)
 	}
 	if exists == 0 {
-		return nil, ErrInvalidToken
+		return nil, errors.NewAppError(400, "session not found", []errors.Error{})
 	}
 
 	return &Claims{
@@ -99,6 +83,10 @@ func (s *service) ValidateToken(
 func (s *service) RevokeSession(
 	ctx context.Context,
 	sessionID string,
-) error {
-	return s.redis.Del(ctx, sessionKey(sessionID)).Err()
+) *errors.AppError {
+	err := s.redis.Del(ctx, sessionKey(sessionID)).Err()
+	if err != nil {
+		return errors.ErrDBError.WithInternal(err)
+	}
+	return nil
 }
