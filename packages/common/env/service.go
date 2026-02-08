@@ -9,6 +9,20 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/rijum8906/go-micro-service/packages/common/errors"
+)
+
+const (
+	// Log Level
+	LogLevelDevelopment = "development"
+	LogLevelDebug       = "debug"
+	LogLevelProduction  = "production"
+	LogLevelTest        = "test"
+
+	// App Environment
+	AppEnvDevelopment = "development"
+	AppEnvTest        = "test"
+	AppEnvProduction  = "production"
 )
 
 type Env struct {
@@ -36,8 +50,8 @@ type Env struct {
 	JwtIssuer           string
 	JwtSecret           string
 	JwtExpiration       time.Duration
-	JwtSecureSecret     string
-	JwtSecureExpiration time.Duration
+	ScopedJwtSecret     string
+	ScopedJwtExpiration time.Duration
 
 	// Email (SMTP) - Needed for Password Resets/Verification
 	SMTPHost     string
@@ -55,14 +69,26 @@ type Env struct {
 	StorageBucket    string
 	StorageAccessKey string
 	StorageSecretKey string
+	StoragePublicKey string
 
 	// CORS
 	CorsAllowedOrigins []string
+	CorsAllowedMethods []string
+	CorsAllowedHeaders []string
+
+	// Debug
+	Debug bool
+
+	// Logger
+	LogLevel string
 }
 
-func Load() (*Env, error) {
+func Load() (*Env, *errors.AppError) {
 	// Load .env file if it exists (useful for your Linux dev environment)
-	_ = godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
 
 	env := &Env{
 		// App
@@ -89,8 +115,8 @@ func Load() (*Env, error) {
 		JwtIssuer:           getString("JWT_ISSUER", "user-service"),
 		JwtSecret:           getRequiredString("JWT_SECRET"), // Crashes if missing
 		JwtExpiration:       getDuration("JWT_EXPIRATION", 15*time.Minute),
-		JwtSecureSecret:     getString("JWT_SECURE_SECRET", "dev-secure-secret"),
-		JwtSecureExpiration: getDuration("JWT_SECURE_EXPIRATION", 5*time.Minute),
+		ScopedJwtSecret:     getRequiredString("SCOPED_JWT_SECRET"), // Crashes if missing
+		ScopedJwtExpiration: getDuration("SCOPED_JWT_EXPIRATION", 15*time.Minute),
 
 		// SMTP
 		SMTPHost:     getString("SMTP_HOST", "smtp.gmail.com"),
@@ -104,13 +130,22 @@ func Load() (*Env, error) {
 		BcryptCost:    getInt("BCRYPT_COST", 12),
 
 		// Storage
-		StorageEndpoint:  getString("STORAGE_ENDPOINT", ""),
+		StorageEndpoint:  getString("STORAGE_ENDPOINT", "http://localhost:9000"),
 		StorageBucket:    getString("STORAGE_BUCKET", "avatars"),
-		StorageAccessKey: getString("STORAGE_ACCESS_KEY", ""),
-		StorageSecretKey: getString("STORAGE_SECRET_KEY", ""),
+		StorageAccessKey: getString("STORAGE_ACCESS_KEY", "admin"),
+		StorageSecretKey: getString("STORAGE_SECRET_KEY", "password123"),
+		StoragePublicKey: getString("STORAGE_PUBLIC_KEY", "http://localhost:9000"),
 
 		// CORS
 		CorsAllowedOrigins: strings.Split(getString("CORS_ALLOWED_ORIGINS", "http://localhost:3000"), ","),
+		CorsAllowedMethods: strings.Split(getString("CORS_ALLOWED_METHODS", "GET,POST,PUT,PATCH,DELETE"), ","),
+		CorsAllowedHeaders: strings.Split(getString("CORS_ALLOWED_HEADERS", "Content-Type,Authorization,Content-Length"), ","),
+
+		// Debug
+		Debug: getBool("DEBUG", true),
+
+		// Logger
+		LogLevel: getString("LOG_LEVEL", "debug"),
 	}
 
 	return env, nil
