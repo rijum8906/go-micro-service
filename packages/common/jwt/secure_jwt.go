@@ -2,65 +2,32 @@ package jwt
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	"github.com/rijum8906/go-micro-service/packages/common/errors"
 )
 
 const (
 	ActionChangePassword = "change_password"
 	ActionChangeEmail    = "change_email"
 	ActionChangeName     = "change_name"
+	ActionChangePhone    = "change_phone"
+	ActionChangeRole     = "change_role"
+	ActionChangeStatus   = "change_status"
 )
-
-var ErrInvalidToken = errors.New("invalid or expired action token")
-
-type ScopedActionClaims struct {
-	UserID string
-	Scope  string
-	JTI    string
-}
-
-type ScopedJWTClaims struct {
-	jwt.RegisteredClaims
-	Scope string `json:"scope"`
-}
-
-type ScopedActionJWT interface {
-	IssueToken(ctx context.Context, claims ScopedActionClaims) (string, error)
-	ValidateToken(ctx context.Context, token string) (*ScopedActionClaims, error)
-	RevokeActionToken(ctx context.Context, jti string) error
-}
-
-type scopedActionJWT struct {
-	redis *redis.Client
-	cfg   Config
-}
-
-func NewScopedActionJWT(r *redis.Client, cfg Config) ScopedActionJWT {
-	return &scopedActionJWT{
-		redis: r,
-		cfg:   cfg,
-	}
-}
-
-func redisKey(jti string) string {
-	return "scoped_action:" + jti
-}
 
 func (s *scopedActionJWT) IssueToken(
 	ctx context.Context,
 	claims ScopedActionClaims,
-) (string, error) {
+) (string, *errors.AppError) {
 	jti := uuid.NewString()
 
 	jwtClaims := ScopedJWTClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        jti,
-			Subject:   claims.UserID,
+			Subject:   claims.Subject,
 			Issuer:    s.cfg.Issuer,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.cfg.Expiration)),
@@ -71,7 +38,7 @@ func (s *scopedActionJWT) IssueToken(
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims)
 	tokenStr, err := token.SignedString([]byte(s.cfg.Secret))
 	if err != nil {
-		return "", err
+		return "", errors.ErrInternal.WithInternal(err)
 	}
 
 	if err := s.redis.Set(
@@ -80,7 +47,7 @@ func (s *scopedActionJWT) IssueToken(
 		claims.Scope,
 		time.Until(jwtClaims.ExpiresAt.Time),
 	).Err(); err != nil {
-		return "", err
+		return "", errors.ErrDBError.WithInternal(err)
 	}
 
 	return tokenStr, nil
@@ -89,7 +56,7 @@ func (s *scopedActionJWT) IssueToken(
 func (s *scopedActionJWT) ValidateToken(
 	ctx context.Context,
 	tokenStr string,
-) (*ScopedActionClaims, error) {
+) (*ScopedActionClaims, *errors.AppError) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&ScopedJWTClaims{},
@@ -98,34 +65,40 @@ func (s *scopedActionJWT) ValidateToken(
 		},
 	)
 	if err != nil || !token.Valid {
-		return nil, ErrInvalidToken
+		return nil, errors.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(*ScopedJWTClaims)
 	if !ok {
-		return nil, ErrInvalidToken
+		return nil, errors.ErrInvalidTokenClaims
 	}
 
 	key := redisKey(claims.ID)
 
 	exists, err := s.redis.Exists(ctx, key).Result()
 	if err != nil || exists == 0 {
-		return nil, ErrInvalidToken
+		return nil, errors.ErrInvalidToken
 	}
 
 	// single-use: burn after validation
-	_ = s.redis.Del(ctx, key)
+	err = s.redis.Del(ctx, key).Err()
+	if err != nil {
+		return nil, errors.ErrDBError.WithInternal(err)
+	}
 
 	return &ScopedActionClaims{
-		UserID: claims.Subject,
-		Scope:  claims.Scope,
-		JTI:    claims.ID,
+		Subject: claims.Subject,
+		Scope:   claims.Scope,
 	}, nil
 }
 
 func (s *scopedActionJWT) RevokeActionToken(
 	ctx context.Context,
 	jti string,
-) error {
-	return s.redis.Del(ctx, redisKey(jti)).Err()
+) *errors.AppError {
+	err := s.redis.Del(ctx, redisKey(jti)).Err()
+	if err != nil {
+		return errors.ErrDBError.WithInternal(err)
+	}
+	return nil
 }

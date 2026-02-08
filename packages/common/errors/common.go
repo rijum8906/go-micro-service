@@ -13,6 +13,7 @@ var (
 	ErrDBConnection = NewAppError(500, "database connection error", []Error{})
 	ErrDBNotFound   = NewAppError(404, "database not found", []Error{})
 	ErrDBConflict   = NewAppError(409, "database conflict", []Error{})
+	ErrDBError      = NewAppError(500, "database error", []Error{})
 
 	// Validation errors
 	ErrValidation         = NewAppError(400, "validation error", []Error{})
