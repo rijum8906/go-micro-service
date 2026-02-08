@@ -17,22 +17,16 @@ import (
 
 // Professional Global Error Definitions
 var (
-	ErrInternal = appError.NewAppError(http.StatusInternalServerError, "internal server error", &[]appError.Error{
-		{Field: "server", Message: "An unexpected error occurred. Please try again later."},
-	})
-	ErrInvalidToken = appError.NewAppError(http.StatusUnauthorized, "unauthorized", &[]appError.Error{
+	ErrInvalidToken = appError.NewAppError(http.StatusUnauthorized, "unauthorized", []appError.Error{
 		{Field: "token", Message: "Your session has expired or the token is invalid."},
 	})
-	ErrInvalidCredentials = appError.NewAppError(http.StatusUnauthorized, "invalid credentials", &[]appError.Error{
-		{Field: "auth", Message: "The email or password provided is incorrect."},
-	})
-	ErrEmailAlreadyExists = appError.NewAppError(http.StatusConflict, "conflict", &[]appError.Error{
+	ErrEmailAlreadyExists = appError.NewAppError(http.StatusConflict, "conflict", []appError.Error{
 		{Field: "email", Message: "An account with this email already exists."},
 	})
-	ErrAccountNotFound = appError.NewAppError(http.StatusNotFound, "not found", &[]appError.Error{
+	ErrAccountNotFound = appError.NewAppError(http.StatusNotFound, "not found", []appError.Error{
 		{Field: "email", Message: "No account found with this email address."},
 	})
-	ErrEmailAlreadyVerified = appError.NewAppError(http.StatusBadRequest, "bad request", &[]appError.Error{
+	ErrEmailAlreadyVerified = appError.NewAppError(http.StatusBadRequest, "bad request", []appError.Error{
 		{Field: "email", Message: "This email is already verified."},
 	})
 )
@@ -41,7 +35,7 @@ var (
 func ToPgUUID(idStr string) (pgtype.UUID, *appError.AppError) {
 	parsed, err := uuid.Parse(idStr)
 	if err != nil {
-		return pgtype.UUID{}, appError.NewAppError(http.StatusBadRequest, "bad request", &[]appError.Error{
+		return pgtype.UUID{}, appError.NewAppError(http.StatusBadRequest, "bad request", []appError.Error{
 			{Field: "id", Message: "The provided ID is not a valid UUID format."},
 		})
 	}
@@ -56,23 +50,23 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrInvalidCredentials // Secure: Don't leak user existence
+			return nil, appError.ErrInvalidCredentials
 		}
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	if err := s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, data.Password); err != nil {
-		return nil, ErrInvalidCredentials
+		return nil, appError.ErrInvalidCredentials
 	}
 
 	profiles, err := s.q.GetProfilesByAccountID(ctx, account.ID)
 	if err != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	refreshToken, err := s.utilsConfig.HashService.GenerateRefreshToken()
 	if err != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
@@ -86,12 +80,12 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 		},
 	})
 	if err != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	accessToken, err2 := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err2 != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err2)
 	}
 
 	return &dto.AuthResponse{
@@ -107,15 +101,15 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, *appError.AppError) {
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err == nil {
-		return nil, ErrEmailAlreadyExists // Professional 409
+		return nil, appError.ErrUserExists.WithField("email", "an user already exists with this email")
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	passHash, err := s.utilsConfig.HashService.HashPassword(data.Password)
 	if err != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	account, err := s.q.CreateAccount(ctx, db.CreateAccountParams{
@@ -123,7 +117,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		PasswordHash: passHash,
 	})
 	if err != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	profile, err := s.q.CreateProfile(ctx, db.CreateProfileParams{
@@ -132,7 +126,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		LastName:  data.LastName,
 	})
 	if err != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	refreshToken, _ := s.utilsConfig.HashService.GenerateRefreshToken()
@@ -148,7 +142,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		},
 	})
 	if err != nil {
-		return nil, ErrInternal
+		return nil, appError.ErrInternal.WithInternal(err)
 	}
 	accessToken, _ := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 
@@ -168,12 +162,12 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data dto.Request
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrAccountNotFound
 		}
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	_, err = s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	// TODO: Trigger Email Service logic here
@@ -183,12 +177,12 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data dto.Request
 func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordRequest, reqMetadata dto.RequestMetadata) *appError.AppError {
 	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
 	if err != nil {
-		return ErrInvalidToken
+		return appError.ErrInvalidToken
 	}
 
 	hashPass, err := s.utilsConfig.HashService.HashPassword(data.NewPassword)
 	if err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	pgUUID, appErr := ToPgUUID(claims.UserID)
@@ -201,7 +195,7 @@ func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordR
 		PasswordHash: hashPass,
 	})
 	if err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 	return nil
 }
@@ -212,12 +206,12 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data dto.Req
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrAccountNotFound
 		}
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	sec, err := s.q.GetAccountSecurityByAccountID(ctx, account.ID)
 	if err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	if sec.IsEmailVerified {
@@ -225,7 +219,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data dto.Req
 	}
 
 	if _, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID)); err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	return nil
@@ -251,7 +245,7 @@ func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailReque
 		},
 	})
 	if err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	return nil

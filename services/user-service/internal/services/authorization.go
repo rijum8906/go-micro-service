@@ -18,7 +18,7 @@ func (s *authService) GenerateScopedActionToken(ctx context.Context, data dto.Ge
 		JTI:    uuid.New().String(),
 	})
 	if err != nil {
-		return "", ErrInternal
+		return "", appError.ErrInternal.WithInternal(err)
 	}
 	return token, nil
 }
@@ -26,19 +26,19 @@ func (s *authService) GenerateScopedActionToken(ctx context.Context, data dto.Ge
 func (s *authService) ChangePassword(ctx context.Context, data dto.ChangePasswordRequest, authzMetadata dto.AuthzMetadata) *appError.AppError {
 	claims, err := s.utilsConfig.SecureJWTService.ValidateToken(ctx, data.Token)
 	if err != nil {
-		return ErrInvalidToken // 401 Unauthorized
+		return appError.ErrInvalidToken
 	}
 
 	// Professional Check: Ensure the token belongs to the acting user
 	if claims.UserID != authzMetadata.UserID.String() {
-		return appError.NewAppError(http.StatusForbidden, "forbidden", &[]appError.Error{
+		return appError.NewAppError(http.StatusForbidden, "forbidden", []appError.Error{
 			{Field: "auth", Message: "You do not have permission to perform this action."},
 		})
 	}
 
 	newPassHash, err := s.utilsConfig.HashService.HashPassword(data.NewPassword)
 	if err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	_, err = s.q.UpdateAccount(ctx, db.UpdateAccountParams{
@@ -46,7 +46,7 @@ func (s *authService) ChangePassword(ctx context.Context, data dto.ChangePasswor
 		PasswordHash: newPassHash,
 	})
 	if err != nil {
-		return ErrInternal
+		return appError.ErrInternal.WithInternal(err)
 	}
 
 	return nil

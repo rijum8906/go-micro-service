@@ -28,14 +28,14 @@ func (s *userService) UpdateProfile(ctx context.Context, data dto.UpdateProfileR
 	if data.Avatar != nil {
 		file, err := data.Avatar.Open()
 		if err != nil {
-			return nil, appError.NewAppError(http.StatusInternalServerError, "failed to upload avatar", &[]appError.Error{
+			return nil, appError.NewAppError(http.StatusInternalServerError, "failed to upload avatar", []appError.Error{
 				{Field: "avatar", Message: err.Error()},
 			})
 		}
 		defer file.Close()
 		url, err := s.utilsConfig.Storage.UploadFile(ctx, fmt.Sprintf("%s/avatar_url", authzMetadata.UserID), file, data.Avatar.Header.Get("Content-Type"))
 		if err != nil {
-			return nil, appError.NewAppError(http.StatusInternalServerError, "failed to upload avatar", &[]appError.Error{
+			return nil, appError.NewAppError(http.StatusInternalServerError, "failed to upload avatar", []appError.Error{
 				{Field: "avatar", Message: err.Error()},
 			})
 		}
