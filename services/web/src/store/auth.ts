@@ -1,106 +1,133 @@
-import { Account, Profile, Token } from '@/types/auth';
+import { Token } from '@/types/auth';
+import type { Account, Profile } from '@/types/models';
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface AuthState {
-  _hasHydrated: boolean;
   account: Account | null;
   profiles: Profile[] | null;
-  currentProfileIdx: number | null;
-  isSignedIn: boolean;
   token: Token | null;
+  activeProfileId: string | null;
+  isSignedIn: boolean;
 }
 
 interface AuthActions {
-  setHasHydrated: (state: boolean) => void;
-  setAuth: (account: Account, profiles: Profile[], token: Token) => void;
-  logout: () => void;
-  addProfile: (profile: Profile) => void;
-  updateProfile: (profileId: string, updates: Partial<Profile>) => void;
-  updateAccount: (updates: Partial<Account>) => void;
-  setCurrentProfile: (idx: number) => void;
+  // Account
+  createAccount(data: Account): void;
+  updateAccount(data: Partial<Account>): void;
+  deleteAccount(): void;
+
+  // Profile
+  createProfile(data: Profile): void;
+  updateProfile(id: string, data: Partial<Profile>): void;
+  deleteProfile(id: string): void;
+
+  // Active profile
+  activeProfile(): Profile | null;
+  changeActiveProfile(id: string): void;
+  switchActiveProfile(): void;
+
+  // Token
+  createToken(data: Token): void;
+  updateToken(data: Partial<Token>): void;
+  deleteToken(): void;
+
+  // Auth
+  logout(): void;
 }
 
-export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set) => ({
-      // Initial State
-      _hasHydrated: false,
+export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
+  account: null,
+  profiles: null,
+  activeProfileId: null,
+  isSignedIn: false,
+  token: null,
+
+  /* ---------- Account ---------- */
+
+  createAccount: (data) => set(() => ({ account: data, isSignedIn: true })),
+
+  updateAccount: (data) =>
+    set((state) => ({
+      account: state.account ? { ...state.account, ...data } : null,
+    })),
+
+  deleteAccount: () =>
+    set(() => ({
+      account: null,
+      isSignedIn: false,
+      profiles: null,
+      activeProfileId: null,
+    })),
+
+  /* ---------- Profiles ---------- */
+
+  createProfile: (data) =>
+    set((state) => ({
+      profiles: state.profiles ? [data, ...state.profiles] : [data],
+      activeProfileId: state.activeProfileId ?? data.id,
+    })),
+
+  updateProfile: (id, data) =>
+    set((state) => ({
+      profiles:
+        state.profiles?.map((p) => (p.id === id ? { ...p, ...data } : p)) ??
+        null,
+    })),
+
+  deleteProfile: (id) =>
+    set((state) => {
+      const profiles = state.profiles?.filter((p) => p.id !== id) ?? null;
+      const activeProfileId =
+        state.activeProfileId === id
+          ? (profiles?.[0]?.id ?? null)
+          : state.activeProfileId;
+
+      return { profiles, activeProfileId };
+    }),
+
+  /* ---------- Active profile ---------- */
+
+  activeProfile: () => {
+    const { profiles, activeProfileId } = get();
+    if (!profiles || !activeProfileId) return null;
+    return profiles.find((p) => p.id === activeProfileId) ?? null;
+  },
+
+  changeActiveProfile: (id) =>
+    set((state) => {
+      if (!state.profiles?.some((p) => p.id === id)) return state;
+      return { activeProfileId: id };
+    }),
+
+  switchActiveProfile: () => {
+    const { profiles, activeProfileId } = get();
+    if (!profiles || profiles.length < 2) return;
+
+    const currentIndex = profiles.findIndex((p) => p.id === activeProfileId);
+
+    const nextIndex =
+      currentIndex === -1 || currentIndex === profiles.length - 1
+        ? 0
+        : currentIndex + 1;
+
+    set({ activeProfileId: profiles[nextIndex].id });
+  },
+
+  /* ---------- Token ---------- */
+  createToken: (data) => set(() => ({ token: data })),
+  updateToken: (data) =>
+    set((state) => ({
+      token: state.token ? { ...state.token, ...data } : null,
+    })),
+  deleteToken: () => set(() => ({ token: null })),
+
+  /* ---------- Auth ---------- */
+
+  logout: () =>
+    set(() => ({
       account: null,
       profiles: null,
-      currentProfileIdx: null,
+      activeProfileId: null,
       isSignedIn: false,
-      token: null,
-
-      // Actions
-      setHasHydrated: (state) => set({ _hasHydrated: state }),
-      setAuth: (account, profiles, token) =>
-        set({
-          account,
-          profiles,
-          token,
-          isSignedIn: true,
-          currentProfileIdx: profiles.length > 0 ? 0 : null,
-        }),
-
-      logout: () => {
-        set({
-          account: null,
-          profiles: null,
-          token: null,
-          isSignedIn: false,
-          currentProfileIdx: null,
-        });
-        // Explicitly clear storage for security
-        localStorage.removeItem('auth-storage');
-      },
-
-      addProfile: (profile) =>
-        set((state) => {
-          const newProfiles = state.profiles
-            ? [...state.profiles, profile]
-            : [profile];
-          return {
-            profiles: newProfiles,
-            // If this is the first profile added, set it as current
-            currentProfileIdx:
-              state.currentProfileIdx === null ? 0 : state.currentProfileIdx,
-          };
-        }),
-
-      updateProfile: (profileId, updates) =>
-        set((state) => ({
-          // Map through profiles to find matching ID from Go backend
-          profiles: state.profiles
-            ? state.profiles.map((p) =>
-                p.id === profileId ? { ...p, ...updates } : p,
-              )
-            : null,
-        })),
-
-      updateAccount: (updates) =>
-        set((state) => ({
-          // Update account fields like email or metadata
-          account: state.account ? { ...state.account, ...updates } : null,
-        })),
-
-      setCurrentProfile: (idx) => set({ currentProfileIdx: idx }),
-    }),
-    {
-      name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
-      // Persist essential auth data
-      partialize: (state) => ({
-        account: state.account,
-        profiles: state.profiles,
-        token: state.token,
-        isSignedIn: state.isSignedIn,
-        currentProfileIdx: state.currentProfileIdx,
-      }),
-      onRehydrateStorage: () => (state) => {
-        // This runs automatically when the page loads
-        state?.setHasHydrated(true);
-      },
-    },
-  ),
-);
+    })),
+}));

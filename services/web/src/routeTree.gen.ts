@@ -10,15 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MyProfileIndexRouteImport } from './routes/my-profile/index'
 import { Route as MyAccountIndexRouteImport } from './routes/my-account/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as MyAccountEditRouteImport } from './routes/my-account/edit'
+import { Route as MyProfileEditRouteImport } from './routes/my-profile/edit'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
+import { Route as MyAccountEditIndexRouteImport } from './routes/my-account/edit/index'
+import { Route as MyAccountEditLayoutRouteImport } from './routes/my-account/edit/_layout'
+import { Route as MyAccountEditLayoutSecurityRouteImport } from './routes/my-account/edit/_layout/security'
+import { Route as MyAccountEditLayoutProfileRouteImport } from './routes/my-account/edit/_layout/profile'
+import { Route as MyAccountEditLayoutPrivacyRouteImport } from './routes/my-account/edit/_layout/privacy'
+import { Route as MyAccountEditLayoutNotificationsRouteImport } from './routes/my-account/edit/_layout/notifications'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyProfileIndexRoute = MyProfileIndexRouteImport.update({
+  id: '/my-profile/',
+  path: '/my-profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyAccountIndexRoute = MyAccountIndexRouteImport.update({
@@ -31,9 +43,9 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MyAccountEditRoute = MyAccountEditRouteImport.update({
-  id: '/my-account/edit',
-  path: '/my-account/edit',
+const MyProfileEditRoute = MyProfileEditRouteImport.update({
+  id: '/my-profile/edit',
+  path: '/my-profile/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -46,31 +58,85 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyAccountEditIndexRoute = MyAccountEditIndexRouteImport.update({
+  id: '/my-account/edit/',
+  path: '/my-account/edit/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyAccountEditLayoutRoute = MyAccountEditLayoutRouteImport.update({
+  id: '/my-account/edit/_layout',
+  path: '/my-account/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyAccountEditLayoutSecurityRoute =
+  MyAccountEditLayoutSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => MyAccountEditLayoutRoute,
+  } as any)
+const MyAccountEditLayoutProfileRoute =
+  MyAccountEditLayoutProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => MyAccountEditLayoutRoute,
+  } as any)
+const MyAccountEditLayoutPrivacyRoute =
+  MyAccountEditLayoutPrivacyRouteImport.update({
+    id: '/privacy',
+    path: '/privacy',
+    getParentRoute: () => MyAccountEditLayoutRoute,
+  } as any)
+const MyAccountEditLayoutNotificationsRoute =
+  MyAccountEditLayoutNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => MyAccountEditLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/my-account/edit': typeof MyAccountEditRoute
+  '/my-profile/edit': typeof MyProfileEditRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/my-account/': typeof MyAccountIndexRoute
+  '/my-profile/': typeof MyProfileIndexRoute
+  '/my-account/edit': typeof MyAccountEditLayoutRouteWithChildren
+  '/my-account/edit/': typeof MyAccountEditIndexRoute
+  '/my-account/edit/notifications': typeof MyAccountEditLayoutNotificationsRoute
+  '/my-account/edit/privacy': typeof MyAccountEditLayoutPrivacyRoute
+  '/my-account/edit/profile': typeof MyAccountEditLayoutProfileRoute
+  '/my-account/edit/security': typeof MyAccountEditLayoutSecurityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/my-account/edit': typeof MyAccountEditRoute
+  '/my-profile/edit': typeof MyProfileEditRoute
   '/dashboard': typeof DashboardIndexRoute
   '/my-account': typeof MyAccountIndexRoute
+  '/my-profile': typeof MyProfileIndexRoute
+  '/my-account/edit': typeof MyAccountEditIndexRoute
+  '/my-account/edit/notifications': typeof MyAccountEditLayoutNotificationsRoute
+  '/my-account/edit/privacy': typeof MyAccountEditLayoutPrivacyRoute
+  '/my-account/edit/profile': typeof MyAccountEditLayoutProfileRoute
+  '/my-account/edit/security': typeof MyAccountEditLayoutSecurityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
-  '/my-account/edit': typeof MyAccountEditRoute
+  '/my-profile/edit': typeof MyProfileEditRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/my-account/': typeof MyAccountIndexRoute
+  '/my-profile/': typeof MyProfileIndexRoute
+  '/my-account/edit/_layout': typeof MyAccountEditLayoutRouteWithChildren
+  '/my-account/edit/': typeof MyAccountEditIndexRoute
+  '/my-account/edit/_layout/notifications': typeof MyAccountEditLayoutNotificationsRoute
+  '/my-account/edit/_layout/privacy': typeof MyAccountEditLayoutPrivacyRoute
+  '/my-account/edit/_layout/profile': typeof MyAccountEditLayoutProfileRoute
+  '/my-account/edit/_layout/security': typeof MyAccountEditLayoutSecurityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -78,34 +144,57 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/signin'
     | '/auth/signup'
-    | '/my-account/edit'
+    | '/my-profile/edit'
     | '/dashboard/'
     | '/my-account/'
+    | '/my-profile/'
+    | '/my-account/edit'
+    | '/my-account/edit/'
+    | '/my-account/edit/notifications'
+    | '/my-account/edit/privacy'
+    | '/my-account/edit/profile'
+    | '/my-account/edit/security'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth/signin'
     | '/auth/signup'
-    | '/my-account/edit'
+    | '/my-profile/edit'
     | '/dashboard'
     | '/my-account'
+    | '/my-profile'
+    | '/my-account/edit'
+    | '/my-account/edit/notifications'
+    | '/my-account/edit/privacy'
+    | '/my-account/edit/profile'
+    | '/my-account/edit/security'
   id:
     | '__root__'
     | '/'
     | '/auth/signin'
     | '/auth/signup'
-    | '/my-account/edit'
+    | '/my-profile/edit'
     | '/dashboard/'
     | '/my-account/'
+    | '/my-profile/'
+    | '/my-account/edit/_layout'
+    | '/my-account/edit/'
+    | '/my-account/edit/_layout/notifications'
+    | '/my-account/edit/_layout/privacy'
+    | '/my-account/edit/_layout/profile'
+    | '/my-account/edit/_layout/security'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthSignupRoute: typeof AuthSignupRoute
-  MyAccountEditRoute: typeof MyAccountEditRoute
+  MyProfileEditRoute: typeof MyProfileEditRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   MyAccountIndexRoute: typeof MyAccountIndexRoute
+  MyProfileIndexRoute: typeof MyProfileIndexRoute
+  MyAccountEditLayoutRoute: typeof MyAccountEditLayoutRouteWithChildren
+  MyAccountEditIndexRoute: typeof MyAccountEditIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -115,6 +204,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-profile/': {
+      id: '/my-profile/'
+      path: '/my-profile'
+      fullPath: '/my-profile/'
+      preLoaderRoute: typeof MyProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/my-account/': {
@@ -131,11 +227,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/my-account/edit': {
-      id: '/my-account/edit'
-      path: '/my-account/edit'
-      fullPath: '/my-account/edit'
-      preLoaderRoute: typeof MyAccountEditRouteImport
+    '/my-profile/edit': {
+      id: '/my-profile/edit'
+      path: '/my-profile/edit'
+      fullPath: '/my-profile/edit'
+      preLoaderRoute: typeof MyProfileEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -152,16 +248,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-account/edit/': {
+      id: '/my-account/edit/'
+      path: '/my-account/edit'
+      fullPath: '/my-account/edit/'
+      preLoaderRoute: typeof MyAccountEditIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-account/edit/_layout': {
+      id: '/my-account/edit/_layout'
+      path: '/my-account/edit'
+      fullPath: '/my-account/edit'
+      preLoaderRoute: typeof MyAccountEditLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-account/edit/_layout/security': {
+      id: '/my-account/edit/_layout/security'
+      path: '/security'
+      fullPath: '/my-account/edit/security'
+      preLoaderRoute: typeof MyAccountEditLayoutSecurityRouteImport
+      parentRoute: typeof MyAccountEditLayoutRoute
+    }
+    '/my-account/edit/_layout/profile': {
+      id: '/my-account/edit/_layout/profile'
+      path: '/profile'
+      fullPath: '/my-account/edit/profile'
+      preLoaderRoute: typeof MyAccountEditLayoutProfileRouteImport
+      parentRoute: typeof MyAccountEditLayoutRoute
+    }
+    '/my-account/edit/_layout/privacy': {
+      id: '/my-account/edit/_layout/privacy'
+      path: '/privacy'
+      fullPath: '/my-account/edit/privacy'
+      preLoaderRoute: typeof MyAccountEditLayoutPrivacyRouteImport
+      parentRoute: typeof MyAccountEditLayoutRoute
+    }
+    '/my-account/edit/_layout/notifications': {
+      id: '/my-account/edit/_layout/notifications'
+      path: '/notifications'
+      fullPath: '/my-account/edit/notifications'
+      preLoaderRoute: typeof MyAccountEditLayoutNotificationsRouteImport
+      parentRoute: typeof MyAccountEditLayoutRoute
+    }
   }
 }
+
+interface MyAccountEditLayoutRouteChildren {
+  MyAccountEditLayoutNotificationsRoute: typeof MyAccountEditLayoutNotificationsRoute
+  MyAccountEditLayoutPrivacyRoute: typeof MyAccountEditLayoutPrivacyRoute
+  MyAccountEditLayoutProfileRoute: typeof MyAccountEditLayoutProfileRoute
+  MyAccountEditLayoutSecurityRoute: typeof MyAccountEditLayoutSecurityRoute
+}
+
+const MyAccountEditLayoutRouteChildren: MyAccountEditLayoutRouteChildren = {
+  MyAccountEditLayoutNotificationsRoute: MyAccountEditLayoutNotificationsRoute,
+  MyAccountEditLayoutPrivacyRoute: MyAccountEditLayoutPrivacyRoute,
+  MyAccountEditLayoutProfileRoute: MyAccountEditLayoutProfileRoute,
+  MyAccountEditLayoutSecurityRoute: MyAccountEditLayoutSecurityRoute,
+}
+
+const MyAccountEditLayoutRouteWithChildren =
+  MyAccountEditLayoutRoute._addFileChildren(MyAccountEditLayoutRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthSignupRoute: AuthSignupRoute,
-  MyAccountEditRoute: MyAccountEditRoute,
+  MyProfileEditRoute: MyProfileEditRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   MyAccountIndexRoute: MyAccountIndexRoute,
+  MyProfileIndexRoute: MyProfileIndexRoute,
+  MyAccountEditLayoutRoute: MyAccountEditLayoutRouteWithChildren,
+  MyAccountEditIndexRoute: MyAccountEditIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
