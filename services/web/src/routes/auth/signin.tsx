@@ -1,11 +1,4 @@
-import {
-  createFileRoute,
-  Link,
-  useLocation,
-  useParams,
-  useRouter,
-  useSearch,
-} from '@tanstack/react-router';
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
 import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,20 +11,13 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import {
-  type SigninRequest,
-  signinSchema,
-  type LoginSchemaType,
-} from '@/schemas/auth';
+import { signinSchema, type SigninSchemaType } from '@/schemas/auth';
 import { SocialAuth } from '@/components/auth/social-auth';
 import { toast } from 'sonner';
-import type { AxiosError } from 'axios';
-import { generateDeviceId } from '@/lib/device';
-import { api } from '@/api/axios';
-import type { AuthResponse } from '@/types/response';
-import { useAuthStore } from '@/store/auth';
 import z from 'zod';
 import { useEffect } from 'react';
+import { useAuthStore } from '@/store/auth';
+import { signin } from '@/api/auth';
 
 const signinSearchSchema = z.object({
   redirect: z.string().optional().catch(''),
@@ -44,7 +30,8 @@ export const Route = createFileRoute('/auth/signin')({
 function SignInComponent() {
   const router = useRouter();
   const { redirect } = Route.useSearch();
-  const { setAuth, isSignedIn } = useAuthStore();
+  const { createToken, createAccount, createProfile, isSignedIn } =
+    useAuthStore();
 
   useEffect(() => {
     if (isSignedIn) {
@@ -53,31 +40,17 @@ function SignInComponent() {
   }, [isSignedIn, router.navigate, redirect]);
 
   const form = useForm({
-    defaultValues: { email: '', password: '' } as LoginSchemaType,
+    defaultValues: { email: '', password: '' } as SigninSchemaType,
     onSubmit: async ({ value }) => {
-      try {
-        const payload: SigninRequest = {
-          ...value,
-          metadata: { deviceId: generateDeviceId() },
-        };
-
-        const response = await api.post<AuthResponse>('/auth/signin', payload);
-
-        // Accessing response.data.data because of your BaseSuccessResponse wrapper in Go
-        const authData = response.data.data;
-
-        if (authData) {
-          toast.success(response.data.message || 'Logged in successfully');
-
-          setAuth(authData.account, authData.profiles, authData.token);
-
-          router.navigate({ to: redirect || '/' });
-        }
-      } catch (err) {
-        const error = err as AxiosError<{ message?: string }>;
-        const serverMessage =
-          error.response?.data?.message || 'Authentication failed';
-        toast.error(serverMessage);
+      const response = await signin(value);
+      if (response.success) {
+        createAccount(response.data.account);
+        response.data.profiles.forEach(createProfile);
+        createToken(response.data.token);
+        toast.success(response.message || 'Logged in successfully');
+        router.navigate({ to: redirect || '/' });
+      } else {
+        toast.error(response.message || 'Authentication failed');
       }
     },
   });

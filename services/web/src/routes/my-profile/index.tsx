@@ -1,0 +1,54 @@
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuthStore } from '@/store/auth';
+
+export const Route = createFileRoute('/my-profile/')({
+  component: MyAccountComponent,
+  beforeLoad(ctx) {
+    const { isSignedIn } = useAuthStore.getState();
+
+    if (!isSignedIn) {
+      throw redirect({
+        to: '/auth/signin',
+        search: { redirect: ctx.location.href },
+      });
+    }
+  },
+});
+
+function MyAccountComponent() {
+  const { account, activeProfile, logout } = useAuthStore();
+  const profile = activeProfile();
+
+  if (!profile) return null;
+
+  return (
+    <div className="container mx-auto py-10 px-4">
+      <h1 className="text-3xl font-bold mb-6">My Account</h1>
+      <div className="grid gap-6">
+        <div className="p-6 border rounded-lg bg-card shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
+          <div className="space-y-2">
+            <Avatar size="lg">
+              <AvatarImage src={profile.avatarUrl || ''} />
+              <AvatarFallback>{profile.firstName[0]}</AvatarFallback>
+            </Avatar>
+            <p>
+              <strong>Email:</strong> {account?.email}
+            </p>
+            <p>
+              <strong>Name:</strong> {profile.firstName} {profile.lastName}
+            </p>
+          </div>
+          <div className="mt-6">
+            <Button asChild>
+              <Link to="/my-profile/edit">Edit Profile</Link>
+            </Button>
+            <Button onClick={() => logout()}>Log out</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
