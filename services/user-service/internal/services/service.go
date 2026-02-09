@@ -37,18 +37,46 @@ func NewAuth(queries *db.Queries, cfg *UtilsConfig, env *env.Env) AuthService {
 	}
 }
 
-type UserService interface {
-	UpdateProfile(ctx context.Context, dto dto.UpdateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
+type AccountService interface {
+	DeleteAccount(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
+	MyAccount(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*dto.MyAccountResult, *errors.AppError)
 }
 
-type userService struct {
+type accountService struct {
 	q           *db.Queries
 	utilsConfig *UtilsConfig
 	env         *env.Env
 }
 
-func NewUserService(queries *db.Queries, cfg *UtilsConfig, env *env.Env) UserService {
-	return &userService{
+func NewAccountService(queries *db.Queries, cfg *UtilsConfig, env *env.Env) AccountService {
+	return &accountService{
+		q: queries,
+		utilsConfig: &UtilsConfig{
+			HashService:      cfg.HashService,
+			JwtService:       cfg.JwtService,
+			SecureJWTService: cfg.SecureJWTService,
+			Storage:          cfg.Storage,
+		},
+		env: env,
+	}
+}
+
+type ProfileService interface {
+	GetProfile(ctx context.Context, id string) (*dto.GetProfileResult, *errors.AppError)
+	UpdateProfile(ctx context.Context, data dto.UpdateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
+	CreateProfile(ctx context.Context, data dto.CreateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
+	DeleteProfile(ctx context.Context, data dto.DeleteProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
+	MyProfile(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
+}
+
+type profileService struct {
+	q           *db.Queries
+	utilsConfig *UtilsConfig
+	env         *env.Env
+}
+
+func NewProfileService(queries *db.Queries, cfg *UtilsConfig, env *env.Env) ProfileService {
+	return &profileService{
 		q: queries,
 		utilsConfig: &UtilsConfig{
 			HashService:      cfg.HashService,

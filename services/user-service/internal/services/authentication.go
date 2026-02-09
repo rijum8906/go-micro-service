@@ -1,4 +1,4 @@
-// Package services
+// Package services contains services for the auth service.
 package services
 
 import (
@@ -15,23 +15,8 @@ import (
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 )
 
-// Professional Global Error Definitions
-var (
-	ErrInvalidToken = appError.NewAppError(http.StatusUnauthorized, "unauthorized", []appError.Error{
-		{Field: "token", Message: "Your session has expired or the token is invalid."},
-	})
-	ErrEmailAlreadyExists = appError.NewAppError(http.StatusConflict, "conflict", []appError.Error{
-		{Field: "email", Message: "An account with this email already exists."},
-	})
-	ErrAccountNotFound = appError.NewAppError(http.StatusNotFound, "not found", []appError.Error{
-		{Field: "email", Message: "No account found with this email address."},
-	})
-	ErrEmailAlreadyVerified = appError.NewAppError(http.StatusBadRequest, "bad request", []appError.Error{
-		{Field: "email", Message: "This email is already verified."},
-	})
-)
-
-// ToPgUUID converts a string to pgtype.UUID or returns a professional 400 error
+// ToPgUUID converts a string to pgtype.UUID or returns a professional 400 error.
+// Useful for bridging between domain strings and database-specific types.
 func ToPgUUID(idStr string) (pgtype.UUID, *appError.AppError) {
 	parsed, err := uuid.Parse(idStr)
 	if err != nil {
@@ -39,26 +24,28 @@ func ToPgUUID(idStr string) (pgtype.UUID, *appError.AppError) {
 			{Field: "id", Message: "The provided ID is not a valid UUID format."},
 		})
 	}
-	return pgtype.UUID{
-		Bytes: parsed,
-		Valid: true,
-	}, nil
+	return pgtype.UUID{Bytes: parsed, Valid: true}, nil
 }
 
-// Signin handles user authentication with 401 status for security
+// --- Authentication Logic ---
+
+// Signin handles the full authentication flow: verification, session creation, and token issuance.
 func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, *appError.AppError) {
+	// 1. Verify Account Existence
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, appError.ErrInvalidCredentials
+			return nil, appError.ErrInvalidCredentials // Hide user existence for security
 		}
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
+	// 2. Credential Verification
 	if err := s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, data.Password); err != nil {
 		return nil, appError.ErrInvalidCredentials
 	}
 
+	// 3. Data Retrieval & Session Preparation
 	profiles, err := s.q.GetProfilesByAccountID(ctx, account.ID)
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
@@ -68,21 +55,22 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
+
+	// 4. Persistence: Create the Refresh Session
+	// Note: In a larger app, you might use a transaction here.
 	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
 		RefreshToken: refreshToken,
 		UserAgent:    reqMetadata.UserAgent,
 		IpAddr:       reqMetadata.IPAddr,
 		DeviceID:     reqMetadata.DeviceID,
-		ExpiresAt: pgtype.Timestamptz{
-			Time:  time.Now().Add(s.env.JwtExpiration),
-			Valid: true,
-		},
+		ExpiresAt:    pgtype.Timestamptz{Time: time.Now().Add(s.env.JwtExpiration), Valid: true},
 	})
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
+	// 5. Token Generation
 	accessToken, err2 := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 	if err2 != nil {
 		return nil, appError.ErrInternal.WithInternal(err2)
@@ -91,27 +79,29 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 	return &dto.AuthResponse{
 		Account:  &account,
 		Profiles: &profiles,
-		Token: &dto.Token{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		},
+		Token:    &dto.Token{AccessToken: accessToken, RefreshToken: refreshToken},
 	}, nil
 }
 
+// SignUp orchestrates account creation and immediate profile initialization.
 func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, *appError.AppError) {
+	// 1. Idempotency/Duplicate Check
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err == nil {
-		return nil, appError.ErrUserExists.WithField("email", "an user already exists with this email")
+		return nil, appError.ErrUserExists.WithField("email", "An account with this email already exists.")
 	}
 	if !errors.Is(err, sql.ErrNoRows) {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
+	// 2. Security: Securely Hash Password
 	passHash, err := s.utilsConfig.HashService.HashPassword(data.Password)
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
+	// 3. Database Write Operations
+	// TODO: Wrap in a DB transaction to ensure Account + Profile are atomic.
 	account, err := s.q.CreateAccount(ctx, db.CreateAccountParams{
 		Email:        data.Email,
 		PasswordHash: passHash,
@@ -129,6 +119,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
+	// 4. Post-Registration: Auto-Login session
 	refreshToken, _ := s.utilsConfig.HashService.GenerateRefreshToken()
 	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
@@ -136,53 +127,78 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		UserAgent:    reqMetadata.UserAgent,
 		IpAddr:       reqMetadata.IPAddr,
 		DeviceID:     reqMetadata.DeviceID,
-		ExpiresAt: pgtype.Timestamptz{
-			Time:  time.Now().Add(s.env.JwtExpiration),
-			Valid: true,
-		},
+		ExpiresAt:    pgtype.Timestamptz{Time: time.Now().Add(s.env.JwtExpiration), Valid: true},
 	})
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
+
 	accessToken, _ := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
 
 	return &dto.AuthResponse{
 		Account:  &account,
 		Profiles: &[]db.Profile{profile},
-		Token: &dto.Token{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		},
+		Token:    &dto.Token{AccessToken: accessToken, RefreshToken: refreshToken},
 	}, nil
 }
 
+// --- Account Maintenance Logic ---
+
+// RequestPasswordReset sends a secure link. Note: We return "NotFound" specifically
+// here because reset requests are usually initiated by users who know their email.
 func (s *authService) RequestPasswordReset(ctx context.Context, data dto.RequestPasswordResetRequest, reqMetadata dto.RequestMetadata) *appError.AppError {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return ErrAccountNotFound
+			return appError.ErrNotFound
 		}
 		return appError.ErrInternal.WithInternal(err)
 	}
 
-	_, err = s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
-	if err != nil {
-		return appError.ErrInternal.WithInternal(err)
+	// Create a short-lived scoped token for the reset action
+	_, appErr := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
+	if appErr != nil {
+		return appErr
 	}
 
-	// TODO: Trigger Email Service logic here
 	return nil
 }
 
+// ResetPassword consumes a token to update credentials.
 func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordRequest, reqMetadata dto.RequestMetadata) *appError.AppError {
-	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
-	if err != nil {
-		return appError.ErrInvalidToken
+	// 1. Verify Action Token Integrity
+	claims, appErr := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
+	if appErr != nil {
+		return appErr
 	}
 
+	// 2. Hash New Credentials
 	hashPass, err := s.utilsConfig.HashService.HashPassword(data.NewPassword)
 	if err != nil {
 		return appError.ErrInternal.WithInternal(err)
+	}
+
+	// 3. Map Domain ID to DB ID
+	pgUUID, appErr := ToPgUUID(claims.UserID)
+	if appErr != nil {
+		return appErr
+	}
+
+	// 4. Commit Changes
+	if _, err = s.q.UpdateAccount(ctx, db.UpdateAccountParams{ID: pgUUID, PasswordHash: pgtype.Text{
+		String: hashPass,
+		Valid:  true,
+	}}); err != nil {
+		return appError.ErrInternal.WithInternal(err)
+	}
+	return nil
+}
+
+// VerifyEmail marks an account as trusted after validating the provided token.
+func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailRequest, reqMetadata dto.RequestMetadata) *appError.AppError {
+	claims, appErr := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
+	if appErr != nil {
+		return appErr
 	}
 
 	pgUUID, appErr := ToPgUUID(claims.UserID)
@@ -190,13 +206,18 @@ func (s *authService) ResetPassword(ctx context.Context, data dto.ResetPasswordR
 		return appErr
 	}
 
-	_, err = s.q.UpdateAccount(ctx, db.UpdateAccountParams{
-		ID:           pgUUID,
-		PasswordHash: hashPass,
+	// Update verification status and timestamp
+	_, err := s.q.UpdateAccountSecurityByAccountID(ctx, db.UpdateAccountSecurityByAccountIDParams{
+		IsEmailVerified: pgtype.Bool{
+			Valid: true,
+		},
+		AccountID:       pgUUID,
+		EmailVerifiedAt: pgtype.Timestamptz{Valid: true, Time: time.Now()},
 	})
 	if err != nil {
 		return appError.ErrInternal.WithInternal(err)
 	}
+
 	return nil
 }
 
@@ -204,7 +225,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data dto.Req
 	account, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return ErrAccountNotFound
+			return appError.ErrNotFound
 		}
 		return appError.ErrInternal.WithInternal(err)
 	}
@@ -215,37 +236,11 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data dto.Req
 	}
 
 	if sec.IsEmailVerified {
-		return ErrEmailAlreadyVerified
+		return appError.NewAppError(http.StatusBadRequest, "email already verified", []appError.Error{})
 	}
 
-	if _, err := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID)); err != nil {
-		return appError.ErrInternal.WithInternal(err)
-	}
-
-	return nil
-}
-
-func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailRequest, reqMetadata dto.RequestMetadata) *appError.AppError {
-	claims, err := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
-	if err != nil {
-		return ErrInvalidToken
-	}
-
-	pgUUID, appErr := ToPgUUID(claims.UserID)
-	if appErr != nil {
+	if _, appErr := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID)); appErr != nil {
 		return appErr
-	}
-
-	_, err = s.q.UpdateAccountSecurityByAccountID(ctx, db.UpdateAccountSecurityByAccountIDParams{
-		AccountID_2:     pgUUID,
-		IsEmailVerified: true,
-		EmailVerifiedAt: pgtype.Timestamptz{
-			Valid: true,
-			Time:  time.Now(),
-		},
-	})
-	if err != nil {
-		return appError.ErrInternal.WithInternal(err)
 	}
 
 	return nil

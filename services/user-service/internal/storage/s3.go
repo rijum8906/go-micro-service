@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/rijum8906/go-micro-service/packages/common/errors"
 )
 
 type S3Storage struct {
@@ -18,13 +19,13 @@ type S3Storage struct {
 	publicURL  string
 }
 
-func NewS3Storage(ctx context.Context, endpoint, accessKey, secretKey, bucket, publicURL string) (*S3Storage, error) {
+func NewS3Storage(ctx context.Context, endpoint, accessKey, secretKey, bucket, publicURL string) (*S3Storage, *errors.AppError) {
 	cfg, err := config.LoadDefaultConfig(ctx,
 		config.WithRegion("us-east-1"), // MinIO requires a region string, even if ignored
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewAppError(500, "error loading AWS config", []errors.Error{}).WithInternal(err)
 	}
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {

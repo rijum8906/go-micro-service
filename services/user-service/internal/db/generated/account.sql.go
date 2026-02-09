@@ -20,7 +20,7 @@ RETURNING id, email, password_hash, created_at, updated_at
 
 type CreateAccountParams struct {
 	Email        string `json:"email"`
-	PasswordHash string `json:"password_hash"`
+	PasswordHash string `json:"passwordHash"`
 }
 
 // account.sql
@@ -82,15 +82,18 @@ func (q *Queries) GetAccountByEmail(ctx context.Context, email string) (Account,
 
 const updateAccount = `-- name: UpdateAccount :one
 UPDATE accounts
-SET email = $2, password_hash = $3
+SET 
+  email = COALESCE($2, email),
+  password_hash = COALESCE($3, password_hash),
+  updated_at = NOW()
 WHERE id = $1
 RETURNING id, email, password_hash, created_at, updated_at
 `
 
 type UpdateAccountParams struct {
 	ID           pgtype.UUID `json:"id"`
-	Email        string      `json:"email"`
-	PasswordHash string      `json:"password_hash"`
+	Email        pgtype.Text `json:"email"`
+	PasswordHash pgtype.Text `json:"passwordHash"`
 }
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
@@ -108,19 +111,22 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (A
 
 const updateAccountByEmail = `-- name: UpdateAccountByEmail :one
 UPDATE accounts
-SET email = $2, password_hash = $3
+SET 
+  email = COALESCE($2, email),
+  password_hash = COALESCE($3, password_hash),
+  updated_at = NOW()
 WHERE email = $1
 RETURNING id, email, password_hash, created_at, updated_at
 `
 
 type UpdateAccountByEmailParams struct {
-	Email        string `json:"email"`
-	Email_2      string `json:"email_2"`
-	PasswordHash string `json:"password_hash"`
+	Email        string      `json:"email"`
+	NewEmail     pgtype.Text `json:"newEmail"`
+	PasswordHash pgtype.Text `json:"passwordHash"`
 }
 
 func (q *Queries) UpdateAccountByEmail(ctx context.Context, arg UpdateAccountByEmailParams) (Account, error) {
-	row := q.db.QueryRow(ctx, updateAccountByEmail, arg.Email, arg.Email_2, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, updateAccountByEmail, arg.Email, arg.NewEmail, arg.PasswordHash)
 	var i Account
 	err := row.Scan(
 		&i.ID,

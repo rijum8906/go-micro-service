@@ -19,12 +19,12 @@ RETURNING id, account_id, refresh_token, user_agent, ip_addr, device_id, last_lo
 `
 
 type CreateSessionParams struct {
-	AccountID    pgtype.UUID        `json:"account_id"`
-	RefreshToken string             `json:"refresh_token"`
-	UserAgent    string             `json:"user_agent"`
-	IpAddr       string             `json:"ip_addr"`
-	DeviceID     string             `json:"device_id"`
-	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	AccountID    pgtype.UUID        `json:"accountId"`
+	RefreshToken string             `json:"refreshToken"`
+	UserAgent    string             `json:"userAgent"`
+	IpAddr       string             `json:"ipAddr"`
+	DeviceID     string             `json:"deviceId"`
+	ExpiresAt    pgtype.Timestamptz `json:"expiresAt"`
 }
 
 // session.sql
@@ -87,7 +87,7 @@ func (q *Queries) GetSessionByAccountID(ctx context.Context, accountID pgtype.UU
 }
 
 const getSessionByRefreshToken = `-- name: GetSessionByRefreshToken :one
-SELECT id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login_at, is_revoked, expires_at, created_at, updated_at FROM sessions WHERE refresh_token = $1
+SELECT id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login_at, is_revoked, expires_at, created_at, updated_at FROM sessions WHERE refresh_token = $1 AND is_revoked = FALSE
 `
 
 func (q *Queries) GetSessionByRefreshToken(ctx context.Context, refreshToken string) (Session, error) {
@@ -114,7 +114,7 @@ SELECT id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login
 `
 
 type GetSessionsByAccountIDParams struct {
-	AccountID pgtype.UUID `json:"account_id"`
+	AccountID pgtype.UUID `json:"accountId"`
 	Limit     int32       `json:"limit"`
 	Offset    int32       `json:"offset"`
 }
@@ -151,8 +151,21 @@ func (q *Queries) GetSessionsByAccountID(ctx context.Context, arg GetSessionsByA
 	return items, nil
 }
 
+const revokeAllAccountSessions = `-- name: RevokeAllAccountSessions :exec
+UPDATE sessions 
+SET is_revoked = TRUE, updated_at = NOW() 
+WHERE account_id = $1 AND is_revoked = FALSE
+`
+
+func (q *Queries) RevokeAllAccountSessions(ctx context.Context, accountID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, revokeAllAccountSessions, accountID)
+	return err
+}
+
 const revokeSession = `-- name: RevokeSession :exec
-UPDATE sessions SET is_revoked = TRUE WHERE id = $1
+UPDATE sessions 
+SET is_revoked = TRUE, updated_at = NOW() 
+WHERE id = $1
 `
 
 func (q *Queries) RevokeSession(ctx context.Context, id pgtype.UUID) error {
@@ -162,30 +175,37 @@ func (q *Queries) RevokeSession(ctx context.Context, id pgtype.UUID) error {
 
 const updateSession = `-- name: UpdateSession :one
 UPDATE sessions
-SET account_id = $2, refresh_token = $3, user_agent = $4, ip_addr = $5, device_id = $6, last_login_at = $7
+SET 
+    refresh_token = COALESCE($2, refresh_token),
+    user_agent = COALESCE($3, user_agent),
+    ip_addr = COALESCE($4, ip_addr),
+    device_id = COALESCE($5, device_id),
+    last_login_at = COALESCE($6, last_login_at),
+    is_revoked = COALESCE($7, is_revoked),
+    updated_at = NOW()
 WHERE id = $1
 RETURNING id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login_at, is_revoked, expires_at, created_at, updated_at
 `
 
 type UpdateSessionParams struct {
 	ID           pgtype.UUID        `json:"id"`
-	AccountID    pgtype.UUID        `json:"account_id"`
-	RefreshToken string             `json:"refresh_token"`
-	UserAgent    string             `json:"user_agent"`
-	IpAddr       string             `json:"ip_addr"`
-	DeviceID     string             `json:"device_id"`
-	LastLoginAt  pgtype.Timestamptz `json:"last_login_at"`
+	RefreshToken pgtype.Text        `json:"refreshToken"`
+	UserAgent    pgtype.Text        `json:"userAgent"`
+	IpAddr       pgtype.Text        `json:"ipAddr"`
+	DeviceID     pgtype.Text        `json:"deviceId"`
+	LastLoginAt  pgtype.Timestamptz `json:"lastLoginAt"`
+	IsRevoked    pgtype.Bool        `json:"isRevoked"`
 }
 
 func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) (Session, error) {
 	row := q.db.QueryRow(ctx, updateSession,
 		arg.ID,
-		arg.AccountID,
 		arg.RefreshToken,
 		arg.UserAgent,
 		arg.IpAddr,
 		arg.DeviceID,
 		arg.LastLoginAt,
+		arg.IsRevoked,
 	)
 	var i Session
 	err := row.Scan(

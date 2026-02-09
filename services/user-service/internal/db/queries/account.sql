@@ -13,13 +13,19 @@ SELECT * FROM accounts WHERE id = $1;
 
 -- name: UpdateAccount :one
 UPDATE accounts
-SET email = $2, password_hash = $3
+SET 
+  email = COALESCE(sqlc.narg('email'), email),
+  password_hash = COALESCE(sqlc.narg('passwordHash'), password_hash),
+  updated_at = NOW()
 WHERE id = $1
 RETURNING *;
 
 -- name: UpdateAccountByEmail :one
 UPDATE accounts
-SET email = $2, password_hash = $3
+SET 
+  email = COALESCE(sqlc.narg('new_email'), email),
+  password_hash = COALESCE(sqlc.narg('passwordHash'), password_hash),
+  updated_at = NOW()
 WHERE email = $1
 RETURNING *;
 

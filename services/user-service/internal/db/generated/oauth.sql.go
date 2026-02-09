@@ -12,6 +12,7 @@ import (
 )
 
 const createOAuth = `-- name: CreateOAuth :one
+
 INSERT INTO oauths(
   account_id,
   provider,
@@ -23,7 +24,7 @@ RETURNING id, account_id, provider, subject, token, created_at, updated_at
 `
 
 type CreateOAuthParams struct {
-	AccountID pgtype.UUID `json:"account_id"`
+	AccountID pgtype.UUID `json:"accountId"`
 	Provider  string      `json:"provider"`
 	Subject   string      `json:"subject"`
 	Token     string      `json:"token"`
@@ -140,49 +141,59 @@ func (q *Queries) GetOAuthBySubjectAndProvider(ctx context.Context, arg GetOAuth
 	return i, err
 }
 
-const getOAuthsByAccountID = `-- name: GetOAuthsByAccountID :one
-SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oauths WHERE account_id = $1 ORDER BY created_at DESC LIMIT $2
+const getOAuthsByAccountID = `-- name: GetOAuthsByAccountID :many
+SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oauths WHERE account_id = $1
 `
 
-type GetOAuthsByAccountIDParams struct {
-	AccountID pgtype.UUID `json:"account_id"`
-	Limit     int32       `json:"limit"`
-}
-
-func (q *Queries) GetOAuthsByAccountID(ctx context.Context, arg GetOAuthsByAccountIDParams) (Oauth, error) {
-	row := q.db.QueryRow(ctx, getOAuthsByAccountID, arg.AccountID, arg.Limit)
-	var i Oauth
-	err := row.Scan(
-		&i.ID,
-		&i.AccountID,
-		&i.Provider,
-		&i.Subject,
-		&i.Token,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) GetOAuthsByAccountID(ctx context.Context, accountID pgtype.UUID) ([]Oauth, error) {
+	rows, err := q.db.Query(ctx, getOAuthsByAccountID, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Oauth
+	for rows.Next() {
+		var i Oauth
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.Provider,
+			&i.Subject,
+			&i.Token,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateOAuth = `-- name: UpdateOAuth :one
 UPDATE oauths
-SET account_id = $2, provider = $3, subject = $4, token = $5 
+SET 
+  provider = COALESCE($2, provider),
+  subject = COALESCE($3, subject),
+  token = COALESCE($4, token),
+  updated_at = NOW()
 WHERE id = $1
 RETURNING id, account_id, provider, subject, token, created_at, updated_at
 `
 
 type UpdateOAuthParams struct {
-	ID        pgtype.UUID `json:"id"`
-	AccountID pgtype.UUID `json:"account_id"`
-	Provider  string      `json:"provider"`
-	Subject   string      `json:"subject"`
-	Token     string      `json:"token"`
+	ID       pgtype.UUID `json:"id"`
+	Provider pgtype.Text `json:"provider"`
+	Subject  pgtype.Text `json:"subject"`
+	Token    pgtype.Text `json:"token"`
 }
 
 func (q *Queries) UpdateOAuth(ctx context.Context, arg UpdateOAuthParams) (Oauth, error) {
 	row := q.db.QueryRow(ctx, updateOAuth,
 		arg.ID,
-		arg.AccountID,
 		arg.Provider,
 		arg.Subject,
 		arg.Token,
@@ -202,27 +213,20 @@ func (q *Queries) UpdateOAuth(ctx context.Context, arg UpdateOAuthParams) (Oauth
 
 const updateOAuthBySubject = `-- name: UpdateOAuthBySubject :one
 UPDATE oauths
-SET account_id = $2, provider = $3, subject = $4, token = $5 
+SET 
+  token = COALESCE($2, token),
+  updated_at = NOW()
 WHERE subject = $1
 RETURNING id, account_id, provider, subject, token, created_at, updated_at
 `
 
 type UpdateOAuthBySubjectParams struct {
-	Subject   string      `json:"subject"`
-	AccountID pgtype.UUID `json:"account_id"`
-	Provider  string      `json:"provider"`
-	Subject_2 string      `json:"subject_2"`
-	Token     string      `json:"token"`
+	Subject string      `json:"subject"`
+	Token   pgtype.Text `json:"token"`
 }
 
 func (q *Queries) UpdateOAuthBySubject(ctx context.Context, arg UpdateOAuthBySubjectParams) (Oauth, error) {
-	row := q.db.QueryRow(ctx, updateOAuthBySubject,
-		arg.Subject,
-		arg.AccountID,
-		arg.Provider,
-		arg.Subject_2,
-		arg.Token,
-	)
+	row := q.db.QueryRow(ctx, updateOAuthBySubject, arg.Subject, arg.Token)
 	var i Oauth
 	err := row.Scan(
 		&i.ID,

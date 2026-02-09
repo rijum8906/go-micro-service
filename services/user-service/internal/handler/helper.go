@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
 )
 
 func formatValidationErrors(ve validator.ValidationErrors) []dto.BaseResponseError {
@@ -70,4 +71,29 @@ func parseAppError(err *appError.AppError) gin.H {
 		"message": err.Message,
 		"errors":  err.Errors,
 	}
+}
+
+func extractReqMetadata(deviceID string, ctx *gin.Context) dto.RequestMetadata {
+	return dto.RequestMetadata{
+		DeviceID:  deviceID,
+		UserAgent: ctx.Request.UserAgent(),
+		IPAddr:    ctx.ClientIP(),
+	}
+}
+
+func extractAuthzMeatadata(ctx *gin.Context) (dto.AuthzMetadata, *appError.AppError) {
+	userID, ok := ctx.Get("user_id")
+	if !ok {
+		return dto.AuthzMetadata{}, appError.NewAppError(http.StatusForbidden, "forbidden", []appError.Error{
+			{Field: "auth", Message: "You do not have permission to perform this action."},
+		})
+	}
+
+	pgID, err := services.ToPgUUID(userID.(string))
+	if err != nil {
+		return dto.AuthzMetadata{}, err
+	}
+	return dto.AuthzMetadata{
+		UserID: pgID,
+	}, nil
 }

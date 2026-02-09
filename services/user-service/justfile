@@ -60,9 +60,11 @@ sqlc:
 # --- Infrastructure ---
 
 # Start local infrastructure (systemd)
-infra-start: minio-up
+infra-start:
     sudo systemctl start postgresql redis
+    just minio-up &
 
 # Stop core services [cite: 1]
 infra-stop:
+    pkill minio
     sudo systemctl stop postgresql redis

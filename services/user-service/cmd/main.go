@@ -27,23 +27,33 @@ func main() {
 		panic(err)
 	}
 
-	// Pass context to Postgres connection
-	pgPool := postgres.Connect(ctx, postgres.Config{
+	router := gin.Default()
+
+	postgresCfg := postgres.Config{
 		Host:     env.DBHost,
 		Port:     env.DBPort,
 		User:     env.DBUser,
 		Password: env.DBPassword,
 		Database: env.DBName,
-	})
+	}
+	// Pass context to Postgres connection
+	pgPool, err := postgres.Connect(ctx, postgresCfg)
+	if err != nil {
+		panic(err.Message)
+	}
 
-	// Pass context to Redis connection
-	redisClient := redis.Connect(redis.Config{
+	redisCfg := redis.Config{
 		Database: env.RedisDatabase,
 		Host:     env.RedisHost,
 		Port:     env.RedisPort,
 		User:     env.RedisUser,
 		Password: env.RedisPassword,
-	})
+	}
+	// Pass context to Redis connection
+	redisClient, err := redis.Connect(ctx, redisCfg)
+	if err != nil {
+		panic(err.Message)
+	}
 
 	jwtService := jwt.NewService(redisClient, jwt.Config{
 		Secret:     env.JwtSecret,
@@ -51,44 +61,47 @@ func main() {
 		Expiration: env.JwtExpiration,
 	})
 
-	secureJWTService := jwt.NewScopedActionJWT(redisClient, jwt.Config{
-		Secret:     env.JwtSecret,
+	scopedJWTService := jwt.NewScopedActionJWT(redisClient, jwt.Config{
+		Secret:     env.ScopedJwtSecret,
 		Issuer:     env.JwtIssuer,
-		Expiration: env.JwtExpiration,
+		Expiration: env.ScopedJwtExpiration,
 	})
 
-	hashService := hash.NewService(10)
+	hashService := hash.NewService(env.BcryptCost)
 
 	middlewareService := middleware.NewMiddleware(middleware.Services{
 		HashService: hashService,
 		JwtService:  jwtService,
 	})
 
-	s3Storage, err := storage.NewS3Storage(ctx, env.StorageEndpoint, env.StorageAccessKey, env.StorageSecretKey, env.StorageBucket, env.StorageEndpoint)
+	s3Storage, err := storage.NewS3Storage(
+		ctx,
+		env.StorageEndpoint,
+		env.StorageAccessKey,
+		env.StorageSecretKey,
+		env.StorageBucket,
+		env.StoragePublicKey,
+	)
 	if err != nil {
 		panic(err)
 	}
 
-	authService := services.NewAuth(db.New(pgPool), &services.UtilsConfig{
+	utilsCfg := &services.UtilsConfig{
 		HashService:      hashService,
 		JwtService:       jwtService,
-		SecureJWTService: secureJWTService,
+		SecureJWTService: scopedJWTService,
 		Storage:          s3Storage,
-	}, env)
-	userService := services.NewUserService(db.New(pgPool), &services.UtilsConfig{
-		HashService:      hashService,
-		JwtService:       jwtService,
-		SecureJWTService: secureJWTService,
-		Storage:          s3Storage,
-	}, env)
+	}
+
+	authService := services.NewAuth(db.New(pgPool), utilsCfg, env)
+	profileService := services.NewProfileService(db.New(pgPool), utilsCfg, env)
 	// server logic starts here...
 
-	router := gin.Default()
 	// Configure CORS
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     env.CorsAllowedOrigins,
-		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowMethods:     env.CorsAllowedMethods,
+		AllowHeaders:     env.CorsAllowedHeaders,
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
@@ -96,13 +109,13 @@ func main() {
 	apiRouterV1 := router.Group("/api/v1")
 
 	authRouter := apiRouterV1.Group("/auth")
-	userRouter := apiRouterV1.Group("/users")
+	profilesRouter := apiRouterV1.Group("/profiles")
 
 	handler.RegisterHandlers(authRouter, authService)
-	handler.RegisterUserHandlers(userRouter, userService, middlewareService)
+	handler.SetupProfilesHandlers(profilesRouter, profileService, middlewareService)
 
-	err = router.Run(fmt.Sprintf(":%s", env.AppPort))
-	if err != nil {
-		panic(err)
+	error := router.Run(fmt.Sprintf(":%s", env.AppPort))
+	if error != nil {
+		panic(error)
 	}
 }

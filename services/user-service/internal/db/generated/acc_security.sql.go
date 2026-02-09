@@ -86,24 +86,27 @@ func (q *Queries) GetAccountSecurityByAccountID(ctx context.Context, accountID p
 
 const updateAccountSecurity = `-- name: UpdateAccountSecurity :one
 UPDATE account_securities
-SET account_id = $2, is_email_verified = $3, email_verified_at = $4, two_factor_enabled = $5, two_factor_enabled_at = $6
+SET 
+  is_email_verified = COALESCE($2, is_email_verified),
+  email_verified_at = COALESCE($3, email_verified_at),
+  two_factor_enabled = COALESCE($4, two_factor_enabled),
+  two_factor_enabled_at = COALESCE($5, two_factor_enabled_at),
+  updated_at = NOW()
 WHERE id = $1
 RETURNING id, account_id, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, created_at, updated_at
 `
 
 type UpdateAccountSecurityParams struct {
 	ID                 pgtype.UUID        `json:"id"`
-	AccountID          pgtype.UUID        `json:"account_id"`
-	IsEmailVerified    bool               `json:"is_email_verified"`
-	EmailVerifiedAt    pgtype.Timestamptz `json:"email_verified_at"`
-	TwoFactorEnabled   bool               `json:"two_factor_enabled"`
-	TwoFactorEnabledAt pgtype.Timestamptz `json:"two_factor_enabled_at"`
+	IsEmailVerified    pgtype.Bool        `json:"isEmailVerified"`
+	EmailVerifiedAt    pgtype.Timestamptz `json:"emailVerifiedAt"`
+	TwoFactorEnabled   pgtype.Bool        `json:"twoFactorEnabled"`
+	TwoFactorEnabledAt pgtype.Timestamptz `json:"twoFactorEnabledAt"`
 }
 
 func (q *Queries) UpdateAccountSecurity(ctx context.Context, arg UpdateAccountSecurityParams) (AccountSecurity, error) {
 	row := q.db.QueryRow(ctx, updateAccountSecurity,
 		arg.ID,
-		arg.AccountID,
 		arg.IsEmailVerified,
 		arg.EmailVerifiedAt,
 		arg.TwoFactorEnabled,
@@ -125,24 +128,27 @@ func (q *Queries) UpdateAccountSecurity(ctx context.Context, arg UpdateAccountSe
 
 const updateAccountSecurityByAccountID = `-- name: UpdateAccountSecurityByAccountID :one
 UPDATE account_securities
-SET account_id = $2, is_email_verified = $3, email_verified_at = $4, two_factor_enabled = $5, two_factor_enabled_at = $6
+SET 
+  is_email_verified = COALESCE($2, is_email_verified),
+  email_verified_at = COALESCE($3, email_verified_at),
+  two_factor_enabled = COALESCE($4, two_factor_enabled),
+  two_factor_enabled_at = COALESCE($5, two_factor_enabled_at),
+  updated_at = NOW()
 WHERE account_id = $1
 RETURNING id, account_id, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, created_at, updated_at
 `
 
 type UpdateAccountSecurityByAccountIDParams struct {
-	AccountID          pgtype.UUID        `json:"account_id"`
-	AccountID_2        pgtype.UUID        `json:"account_id_2"`
-	IsEmailVerified    bool               `json:"is_email_verified"`
-	EmailVerifiedAt    pgtype.Timestamptz `json:"email_verified_at"`
-	TwoFactorEnabled   bool               `json:"two_factor_enabled"`
-	TwoFactorEnabledAt pgtype.Timestamptz `json:"two_factor_enabled_at"`
+	AccountID          pgtype.UUID        `json:"accountId"`
+	IsEmailVerified    pgtype.Bool        `json:"isEmailVerified"`
+	EmailVerifiedAt    pgtype.Timestamptz `json:"emailVerifiedAt"`
+	TwoFactorEnabled   pgtype.Bool        `json:"twoFactorEnabled"`
+	TwoFactorEnabledAt pgtype.Timestamptz `json:"twoFactorEnabledAt"`
 }
 
 func (q *Queries) UpdateAccountSecurityByAccountID(ctx context.Context, arg UpdateAccountSecurityByAccountIDParams) (AccountSecurity, error) {
 	row := q.db.QueryRow(ctx, updateAccountSecurityByAccountID,
 		arg.AccountID,
-		arg.AccountID_2,
 		arg.IsEmailVerified,
 		arg.EmailVerifiedAt,
 		arg.TwoFactorEnabled,

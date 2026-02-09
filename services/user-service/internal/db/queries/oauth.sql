@@ -1,4 +1,5 @@
 -- oauth.sql
+
 -- name: CreateOAuth :one
 INSERT INTO oauths(
   account_id,
@@ -12,8 +13,8 @@ RETURNING *;
 -- name: GetOAuthBySubject :one
 SELECT * FROM oauths WHERE subject = $1;
 
--- name: GetOAuthsByAccountID :one
-SELECT * FROM oauths WHERE account_id = $1 ORDER BY created_at DESC LIMIT $2;
+-- name: GetOAuthsByAccountID :many
+SELECT * FROM oauths WHERE account_id = $1;
 
 -- name: GetOAuthBySubjectAndProvider :one
 SELECT * FROM oauths WHERE subject = $1 AND provider = $2;
@@ -26,13 +27,19 @@ SELECT * FROM oauths WHERE account_id = $1;
 
 -- name: UpdateOAuth :one
 UPDATE oauths
-SET account_id = $2, provider = $3, subject = $4, token = $5 
+SET 
+  provider = COALESCE(sqlc.narg('provider'), provider),
+  subject = COALESCE(sqlc.narg('subject'), subject),
+  token = COALESCE(sqlc.narg('token'), token),
+  updated_at = NOW()
 WHERE id = $1
 RETURNING *;
 
 -- name: UpdateOAuthBySubject :one
 UPDATE oauths
-SET account_id = $2, provider = $3, subject = $4, token = $5 
+SET 
+  token = COALESCE(sqlc.narg('token'), token),
+  updated_at = NOW()
 WHERE subject = $1
 RETURNING *;
 

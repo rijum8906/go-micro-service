@@ -19,11 +19,11 @@ RETURNING id, account_id, first_name, last_name, display_name, avatar_url, creat
 `
 
 type CreateProfileParams struct {
-	AccountID   pgtype.UUID `json:"account_id"`
-	FirstName   string      `json:"first_name"`
-	LastName    string      `json:"last_name"`
-	DisplayName pgtype.Text `json:"display_name"`
-	AvatarUrl   pgtype.Text `json:"avatar_url"`
+	AccountID   pgtype.UUID `json:"accountId"`
+	FirstName   string      `json:"firstName"`
+	LastName    string      `json:"lastName"`
+	DisplayName pgtype.Text `json:"displayName"`
+	AvatarUrl   pgtype.Text `json:"avatarUrl"`
 }
 
 // profile.sql
@@ -59,11 +59,11 @@ func (q *Queries) DeleteProfile(ctx context.Context, accountID pgtype.UUID) erro
 }
 
 const getProfile = `-- name: GetProfile :one
-SELECT id, account_id, first_name, last_name, display_name, avatar_url, created_at, updated_at FROM profiles WHERE account_id = $1
+SELECT id, account_id, first_name, last_name, display_name, avatar_url, created_at, updated_at FROM profiles WHERE id = $1
 `
 
-func (q *Queries) GetProfile(ctx context.Context, accountID pgtype.UUID) (Profile, error) {
-	row := q.db.QueryRow(ctx, getProfile, accountID)
+func (q *Queries) GetProfile(ctx context.Context, id pgtype.UUID) (Profile, error) {
+	row := q.db.QueryRow(ctx, getProfile, id)
 	var i Profile
 	err := row.Scan(
 		&i.ID,
@@ -136,17 +136,19 @@ UPDATE profiles
 SET 
     first_name = COALESCE($2, first_name),
     last_name = COALESCE($3, last_name),
-    avatar_url = COALESCE($4, avatar_url),
+    display_name = COALESCE($4, display_name),
+    avatar_url = COALESCE($5, avatar_url),
     updated_at = NOW()
 WHERE id = $1
 RETURNING id, account_id, first_name, last_name, display_name, avatar_url, created_at, updated_at
 `
 
 type UpdateProfileParams struct {
-	ID        pgtype.UUID `json:"id"`
-	FirstName pgtype.Text `json:"first_name"`
-	LastName  pgtype.Text `json:"last_name"`
-	AvatarUrl pgtype.Text `json:"avatar_url"`
+	ID          pgtype.UUID `json:"id"`
+	FirstName   pgtype.Text `json:"firstName"`
+	LastName    pgtype.Text `json:"lastName"`
+	DisplayName pgtype.Text `json:"displayName"`
+	AvatarUrl   pgtype.Text `json:"avatarUrl"`
 }
 
 func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error) {
@@ -154,6 +156,7 @@ func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (P
 		arg.ID,
 		arg.FirstName,
 		arg.LastName,
+		arg.DisplayName,
 		arg.AvatarUrl,
 	)
 	var i Profile
