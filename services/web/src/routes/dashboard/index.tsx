@@ -4,10 +4,10 @@ import {
   Link,
   redirect,
 } from '@tanstack/react-router';
-import { useAuthStore } from '@/store/auth';
 import { Card, CardHeader } from '@/components/ui/card';
 import { LoadingScreen } from '@/components/layout/loader';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/auth';
 
 export const Route = createFileRoute('/dashboard/')({
   component: RouteComponent,
@@ -24,11 +24,9 @@ export const Route = createFileRoute('/dashboard/')({
 });
 
 function RouteComponent() {
-  const { account, profiles, currentProfileIdx: currentIdx } = useAuthStore();
-
-  const activeProfile =
-    profiles && currentIdx !== null ? profiles[currentIdx] : null;
-  console.log(activeProfile);
+  const { account, activeProfile } = useAuthStore();
+  const profile = activeProfile();
+  if (!profile) return null;
 
   return (
     <ClientOnly fallback={<LoadingScreen />}>
@@ -43,14 +41,14 @@ function RouteComponent() {
           </CardHeader>
 
           <div className="p-6 pt-0">
-            {activeProfile ? (
+            {profile ? (
               <div className="flex items-center gap-4">
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-                  {activeProfile.first_name}
+                  {profile.firstName}
                 </div>
                 <div>
                   <p className="text-sm font-medium leading-none">
-                    {activeProfile.first_name} {activeProfile.last_name}
+                    {profile.firstName} {profile.lastName}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Active Profile
