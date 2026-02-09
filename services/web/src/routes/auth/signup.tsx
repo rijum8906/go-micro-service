@@ -1,25 +1,41 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { SignupRequest, signupSchema } from '@/schemas/auth'
-import { SocialAuth } from '@/components/auth/social-auth'
-import { toast } from 'sonner'
-import { AxiosError } from 'axios'
-import { generateDeviceId } from '@/lib/device'
-import { api } from '@/api/axios'
-import { AuthResponse } from '@/types/response'
-import { useAuthStore } from '@/store/auth'
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router';
+import { useForm } from '@tanstack/react-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { signupSchema } from '@/schemas/auth';
+import { SocialAuth } from '@/components/auth/social-auth';
+import { toast } from 'sonner';
+import { signup } from '@/api/auth';
+import { useAuthStore } from '@/store/auth';
+import z from 'zod';
+
+const signinSearchSchema = z.object({
+  redirect: z.string().optional().catch(''),
+});
 
 export const Route = createFileRoute('/auth/signup')({
   component: SignUpComponent,
-})
+  validateSearch: signinSearchSchema,
+});
 
 function SignUpComponent() {
-  const router = useRouter()
-  const { setAuth } = useAuthStore()
+  const router = useRouter();
+  const { redirect } = Route.useSearch();
+  const { createToken, createAccount, createProfile } = useAuthStore();
 
   const form = useForm({
     defaultValues: {
@@ -31,60 +47,36 @@ function SignUpComponent() {
     },
     validators: { onChange: signupSchema },
     onSubmit: async ({ value }) => {
-      try {
-        const payload: SignupRequest = {
-          ...value,
-          metadata: { deviceId: generateDeviceId() }
-        }
-        const response = await api.post<AuthResponse>('/auth/signup', payload, {
-          timeout: 5000,
-        })
-        if (!response.data.data.account || !response.data.data.token) {
-          toast.error(response.data.message || 'Registration failed. Please try again.')
-          router.navigate({ to: '/auth/signin' })
-          setAuth(response.data.data.account, response.data.data.profiles, response.data.data.token)
-          return
-        } else {
-          toast.success(response.data.message || 'Registration successful')
-          router.navigate({ to: '/auth/signin' })
-        }
-
-      } catch (err) {
-        const error = err as AxiosError<{ message?: string }>
-
-        if (!error.response) {
-          toast.error('Network error: Registration service is unreachable')
-          return
-        }
-
-        const serverMessage = error.response.data?.message
-        toast.error(serverMessage || 'Registration failed. Please try again.')
+      const response = await signup(value);
+      if (response.success) {
+        createAccount(response.data.account);
+        response.data.profiles.forEach(createProfile);
+        createToken(response.data.token);
+        toast.success(response.message || 'Logged in successfully');
+        router.navigate({ to: redirect || '/' });
+      } else {
+        toast.error(response.message || 'Authentication failed');
       }
     },
-  })
-
-  const ErrorDisplay = ({ errors }: { errors: any[] }) => {
-    if (!errors.length) return null
-    return (
-      <p className="text-xs text-destructive mt-1">
-        {errors.map((err) => (typeof err === 'object' ? err.message : err)).join(', ')}
-      </p>
-    )
-  }
+  });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-lg shadow-xl border-muted/50">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold tracking-tight">Create an account</CardTitle>
-          <CardDescription>Enter your details to join our platform</CardDescription>
+          <CardTitle className="text-3xl font-bold tracking-tight">
+            Create an account
+          </CardTitle>
+          <CardDescription>
+            Enter your details to join our platform
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit();
             }}
             className="space-y-4"
           >
@@ -175,9 +167,15 @@ function SignUpComponent() {
               )}
             </form.Field>
 
-            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
               {([canSubmit, isSubmitting]) => (
-                <Button className="w-full h-11 text-base font-semibold" type="submit" disabled={!canSubmit || isSubmitting}>
+                <Button
+                  className="w-full h-11 text-base font-semibold"
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting}
+                >
                   {isSubmitting ? 'Registering...' : 'Create Account'}
                 </Button>
               )}
@@ -191,12 +189,25 @@ function SignUpComponent() {
         <CardFooter className="flex justify-center border-t p-6">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link to="/auth/signin" className="text-primary font-semibold hover:underline">
+            <Link
+              to="/auth/signin"
+              className="text-primary font-semibold hover:underline"
+            >
               Sign in
             </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
+const ErrorDisplay = ({ errors }: { errors: any[] }) => {
+  if (!errors.length) return null;
+  return (
+    <p className="text-xs text-destructive mt-1">
+      {errors
+        .map((err) => (typeof err === 'object' ? err.message : err))
+        .join(', ')}
+    </p>
+  );
+};

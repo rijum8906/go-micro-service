@@ -1,5 +1,8 @@
 // @/types/response.ts
-import type { Account, Profile, Token } from './auth';
+
+import type { Token } from './auth';
+import type { Account, Profile } from './models';
+import type { GetProfileResult } from './result';
 
 export interface ErrorDetail {
   field: string;
@@ -9,6 +12,18 @@ export interface ErrorDetail {
 export interface BaseResponse {
   success: boolean;
   message: string;
+}
+
+export interface BaseSuccessResponse<T = unknown> {
+  success: true;
+  message: string;
+  data?: T;
+}
+
+export interface BaseErrorResponse {
+  success: false;
+  message: string;
+  errors?: ErrorDetail[];
 }
 
 // Matches your Go BaseErrorResponse
@@ -27,4 +42,8 @@ export interface AuthResponse extends BaseResponse {
 
 export interface UpdateProfileResponse extends BaseResponse {
   data: Profile;
+}
+
+export interface GetProfileResponse extends BaseResponse {
+  data: GetProfileResult;
 }
