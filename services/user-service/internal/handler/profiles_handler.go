@@ -106,24 +106,15 @@ func updateProfile(service services.ProfileService) gin.HandlerFunc {
 
 func deleteProfile(service services.ProfileService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.DeleteProfileRequest
 		profileID := ctx.Param("profile_id")
-		input.ProfileID = profileID
 
-		// 1. Use ShouldBind instead of ShouldBindJSON for multipart/form-data
-		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
-			return
-		}
-
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
 		authMetadata, appErr := extractAuthzMeatadata(ctx)
 		if appErr != nil {
 			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
 			return
 		}
 
-		appErr = service.DeleteProfile(ctx, input, reqMetadata, authMetadata)
+		appErr = service.DeleteProfile(ctx, profileID, authMetadata)
 		if appErr != nil {
 			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
 			return

@@ -94,6 +94,7 @@ func main() {
 	}
 
 	authService := services.NewAuth(db.New(pgPool), utilsCfg, env)
+	accountService := services.NewAccountService(db.New(pgPool), utilsCfg, env)
 	profileService := services.NewProfileService(db.New(pgPool), utilsCfg, env)
 	// server logic starts here...
 
@@ -110,9 +111,11 @@ func main() {
 
 	authRouter := apiRouterV1.Group("/auth")
 	profilesRouter := apiRouterV1.Group("/profiles")
+	accountRouter := apiRouterV1.Group("/accounts")
 
 	handler.RegisterHandlers(authRouter, authService)
 	handler.SetupProfilesHandlers(profilesRouter, profileService, middlewareService)
+	handler.SetupAccountsHandlers(accountRouter, accountService, middlewareService)
 
 	error := router.Run(fmt.Sprintf(":%s", env.AppPort))
 	if error != nil {

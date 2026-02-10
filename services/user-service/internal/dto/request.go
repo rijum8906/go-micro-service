@@ -12,6 +12,8 @@ const (
 	MFAAuthzType  = "mfa_authorization"
 )
 
+//--------- BASE ---------
+
 type Metadata struct {
 	DeviceID string `json:"deviceId"  binding:"required"`
 }
@@ -31,6 +33,12 @@ type Authorization struct {
 	Value string `json:"value" binding:"required"`
 }
 
+type Request struct {
+	Metadata Metadata `json:"metadata" binding:"required"`
+}
+
+// --------- AUTH ----------
+
 type SigninRequest struct {
 	Email    string `json:"email"    binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8"`
@@ -48,23 +56,26 @@ type SignupRequest struct {
 	Metadata Metadata `json:"metadata" binding:"required"`
 }
 
+// --------- PASSWORDS ----------
+
 type RequestPasswordResetRequest struct {
 	Email    string   `json:"email"    binding:"required,email"`
 	Metadata Metadata `json:"metadata" binding:"required"`
 }
 
 type ChangePasswordRequest struct {
-	Token       string   `json:"token"         binding:"required,uuid4"`
-	OldPassword string   `json:"oldPasswprd"   binding:"required,min=8,max=64"`
-	NewPassword string   `json:"newPasswprd"   binding:"required,min=8,max=64"`
+	Token       string   `json:"token"         binding:"required"`
+	NewPassword string   `json:"newPassword"   binding:"required,min=8,max=64"`
 	Metadata    Metadata `json:"metadata"      binding:"required"`
 }
 
 type ResetPasswordRequest struct {
-	Token       string   `json:"token"       binding:"required,uuid4"`
+	Token       string   `json:"token"       binding:"required"`
 	NewPassword string   `json:"newPassword" binding:"required,min=8,max=64"`
 	Metadata    Metadata `json:"metadata"    binding:"required"`
 }
+
+// --------- EMAILS ----------
 
 type RequestEmailVerificationRequest struct {
 	Email    string   `json:"email"    binding:"required,email"`
@@ -76,18 +87,29 @@ type VerifyEmailRequest struct {
 	Metadata Metadata `json:"metadata" binding:"required"`
 }
 
+type ChangeEmailRequest struct {
+	Token    string   `json:"token"         binding:"required"`
+	NewEmail string   `json:"newEmail"      binding:"required,email"`
+	Metadata Metadata `json:"metadata"      binding:"required"`
+}
+
+// -------- TOKENS --------
+
 type GenerateScopedTokenRequest struct {
 	Scope         string        `json:"scope"    binding:"required"`
 	Authorization Authorization `json:"authorization" binding:"required"`
 	Metadata      Metadata      `json:"metadata" binding:"required"`
 }
 
+// --------- PROFILES ----------
+
 type UpdateProfileRequest struct {
-	ProfileID string   `form:"profileId" binding:"required,uuid4"`
-	FirstName *string  `form:"firstName" binding:"omitempty,min=1,max=20"`
-	LastName  *string  `form:"lastName"  binding:"omitempty,min=1,max=20"`
-	AvatarURL *string  `binding:"omitempty,max=255"`
-	Metadata  Metadata `form:"metadata"  binding:"required"`
+	ProfileID   string   `form:"profileId" binding:"required,uuid4"`
+	FirstName   *string  `form:"firstName" binding:"omitempty,min=1,max=20"`
+	LastName    *string  `form:"lastName"  binding:"omitempty,min=1,max=20"`
+	DisplayName *string  `form:"displayName"  binding:"omitempty,min=1,max=20"`
+	AvatarURL   *string  `binding:"omitempty,max=255"`
+	Metadata    Metadata `form:"metadata"  binding:"required"`
 
 	Avatar *multipart.FileHeader `form:"avatar"`
 }
@@ -98,8 +120,7 @@ type GetProfileRequest struct {
 }
 
 type DeleteProfileRequest struct {
-	ProfileID string   `form:"profileId" binding:"required,uuid4"`
-	Metadata  Metadata `form:"metadata"  binding:"required"`
+	Metadata Metadata `form:"metadata"  binding:"required"`
 }
 
 type CreateProfileRequest struct {
@@ -111,3 +132,5 @@ type CreateProfileRequest struct {
 
 	Avatar *multipart.FileHeader `form:"avatar"`
 }
+
+// --------- ACCOUNTS SECURITIES ----------

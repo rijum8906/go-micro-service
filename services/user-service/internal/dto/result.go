@@ -15,3 +15,15 @@ type GetProfileResult struct {
 	DisplayName *string `json:"displayName"`
 	AvatarURL   *string `json:"avatarUrl"`
 }
+
+type CheckAccountExistResult struct {
+	Exist bool `json:"exist"`
+}
+
+type ChangeEmailResult struct {
+	Email string `json:"email"`
+}
+
+type GenerateScopedTokenResult struct {
+	Token string `json:"token"`
+}

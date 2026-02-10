@@ -71,6 +71,10 @@ func (s *profileService) UpdateProfile(
 			String: assertString(data.LastName),
 			Valid:  data.LastName != nil,
 		},
+		DisplayName: pgtype.Text{
+			String: assertString(data.DisplayName),
+			Valid:  data.DisplayName != nil,
+		},
 		AvatarUrl: pgtype.Text{
 			String: assertString(data.AvatarURL),
 			Valid:  data.AvatarURL != nil,
@@ -125,11 +129,14 @@ func (s *profileService) CreateProfile(
 
 func (s *profileService) DeleteProfile(
 	ctx context.Context,
-	data dto.DeleteProfileRequest,
-	reqMetadata dto.RequestMetadata,
+	id string,
 	authzMetadata dto.AuthzMetadata,
 ) *errors.AppError {
-	err := s.q.DeleteProfile(ctx, authzMetadata.UserID)
+	pgID, appErr := ToPgUUID(id)
+	if appErr != nil {
+		return appErr
+	}
+	err := s.q.DeleteProfile(ctx, pgID)
 	if err != nil {
 		return errors.ErrInternal.WithInternal(err)
 	}

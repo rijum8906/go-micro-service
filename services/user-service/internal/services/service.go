@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/go-micro-service/packages/common/env"
 	"github.com/rijum8906/go-micro-service/packages/common/errors"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
@@ -38,8 +39,12 @@ func NewAuth(queries *db.Queries, cfg *UtilsConfig, env *env.Env) AuthService {
 }
 
 type AccountService interface {
+	CheckAccountExist(ctx context.Context, id pgtype.UUID) (*dto.CheckAccountExistResult, *errors.AppError)
 	DeleteAccount(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
 	MyAccount(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*dto.MyAccountResult, *errors.AppError)
+	ChangeEmail(ctx context.Context, data dto.ChangeEmailRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*dto.ChangeEmailResult, *errors.AppError)
+	ChangePassword(ctx context.Context, data dto.ChangePasswordRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
+	GenerateScopedToken(ctx context.Context, data dto.GenerateScopedTokenRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*dto.GenerateScopedTokenResult, *errors.AppError)
 }
 
 type accountService struct {
@@ -65,7 +70,7 @@ type ProfileService interface {
 	GetProfile(ctx context.Context, id string) (*dto.GetProfileResult, *errors.AppError)
 	UpdateProfile(ctx context.Context, data dto.UpdateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
 	CreateProfile(ctx context.Context, data dto.CreateProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
-	DeleteProfile(ctx context.Context, data dto.DeleteProfileRequest, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
+	DeleteProfile(ctx context.Context, id string, authzMetadata dto.AuthzMetadata) *errors.AppError
 	MyProfile(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError)
 }
 
