@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	stdErrors "errors"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,7 +29,15 @@ func (s *accountService) CheckAccountExist(
 	ctx context.Context,
 	id pgtype.UUID,
 ) (*dto.CheckAccountExistResult, *errors.AppError) {
-	return nil, nil
+	_, err := s.q.GetAccount(ctx, id)
+	if err != nil {
+		if stdErrors.Is(err, sql.ErrNoRows) {
+			return &dto.CheckAccountExistResult{Exist: false}, nil
+		}
+		return nil, errors.ErrDBError.WithInternal(err)
+	}
+
+	return &dto.CheckAccountExistResult{Exist: true}, nil
 }
 
 func (s *accountService) ChangePassword(
