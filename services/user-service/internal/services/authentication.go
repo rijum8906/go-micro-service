@@ -120,7 +120,10 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 	}
 
 	// 4. Post-Registration: Auto-Login session
-	refreshToken, _ := s.utilsConfig.HashService.GenerateRefreshToken()
+	refreshToken, err := s.utilsConfig.HashService.GenerateRefreshToken()
+	if err != nil {
+		return nil, appError.ErrInternal.WithInternal(err)
+	}
 	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
 		RefreshToken: refreshToken,
@@ -133,7 +136,10 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
-	accessToken, _ := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
+	accessToken, appErr := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
+	if appErr != nil {
+		return nil, appError.ErrInternal.WithInternal(appErr)
+	}
 
 	return &dto.AuthResponse{
 		Account:  &account,
@@ -209,6 +215,7 @@ func (s *authService) VerifyEmail(ctx context.Context, data dto.VerifyEmailReque
 	// Update verification status and timestamp
 	_, err := s.q.UpdateAccountSecurityByAccountID(ctx, db.UpdateAccountSecurityByAccountIDParams{
 		IsEmailVerified: pgtype.Bool{
+			Bool:  true,
 			Valid: true,
 		},
 		AccountID:       pgUUID,

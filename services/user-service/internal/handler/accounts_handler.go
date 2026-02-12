@@ -99,11 +99,17 @@ func checkAccountExist(service services.AccountService) gin.HandlerFunc {
 			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
 			return
 		}
-		_, appErr = service.CheckAccountExist(ctx, pgID)
+		result, appErr := service.CheckAccountExist(ctx, pgID)
 		if appErr != nil {
 			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
 			return
 		}
+
+		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*dto.CheckAccountExistResult]{
+			Success: true,
+			Message: "Account existence checked successfully",
+			Data:    result,
+		})
 	}
 }
 
