@@ -26,6 +26,8 @@ type Options struct {
 	MaxConnIdleTime  time.Duration
 	MaxConnLifetime  time.Duration
 	HealthCheckQuery string
+	RetryAttempts    int
+	RetryDelay       time.Duration
 }
 
 // DSN builds a postgres connection string
@@ -55,6 +57,12 @@ func (c *Config) applyDefaults() {
 	if c.Options.MaxConnIdleTime == 0 {
 		c.Options.MaxConnIdleTime = 5 * time.Minute
 	}
+	if c.Options.RetryAttempts == 0 {
+		c.Options.RetryAttempts = 5
+	}
+	if c.Options.RetryDelay == 0 {
+		c.Options.RetryDelay = 2 * time.Second
+	}
 }
 
 func Connect(ctx context.Context, cfg Config) (*pgxpool.Pool, *errors.AppError) {
@@ -65,24 +73,35 @@ func Connect(ctx context.Context, cfg Config) (*pgxpool.Pool, *errors.AppError) 
 		return nil, errors.ErrInternal.WithInternal(err)
 	}
 
+	// Apply pool settings
 	poolConfig.MaxConns = int32(cfg.Options.MaxConns)
 	poolConfig.MinConns = int32(cfg.Options.MinConns)
 	poolConfig.MaxConnIdleTime = cfg.Options.MaxConnIdleTime
 
-	if cfg.Options.MaxConnLifetime > 0 {
-		poolConfig.MaxConnLifetime = cfg.Options.MaxConnLifetime
+	var pool *pgxpool.Pool
+	var lastErr error
+
+	// Retry Loop
+	for i := 1; i <= cfg.Options.RetryAttempts; i++ {
+		pool, err = pgxpool.NewWithConfig(ctx, poolConfig)
+		if err == nil {
+			// Even if the pool is created, we must Ping to ensure Postgres is READY
+			if err = pool.Ping(ctx); err == nil {
+				return pool, nil // Success!
+			}
+		}
+
+		lastErr = err
+		fmt.Printf("⚠️ Database connection attempt %d/%d failed: %v. Retrying in %v...\n",
+			i, cfg.Options.RetryAttempts, lastErr, cfg.Options.RetryDelay)
+
+		// Wait before next attempt, but respect context cancellation
+		select {
+		case <-ctx.Done():
+			return nil, errors.ErrDBConnection.WithInternal(ctx.Err())
+		case <-time.After(cfg.Options.RetryDelay):
+		}
 	}
 
-	// Create the pool
-	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
-	if err != nil {
-		return nil, errors.ErrDBConnection.WithInternal(err)
-	}
-
-	// Verification
-	if err := pool.Ping(ctx); err != nil {
-		return nil, errors.ErrDBConnection.WithInternal(err)
-	}
-
-	return pool, nil
+	return nil, errors.ErrDBConnection.WithInternal(fmt.Errorf("after %d attempts, last error: %w", cfg.Options.RetryAttempts, lastErr))
 }
