@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,7 @@ import (
 	"github.com/rijum8906/go-micro-service/packages/common/env"
 	"github.com/rijum8906/go-micro-service/packages/common/hash"
 	"github.com/rijum8906/go-micro-service/packages/common/jwt"
+	dbRoot "github.com/rijum8906/go-micro-service/services/user-service/internal/db"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/handler"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
@@ -35,11 +37,21 @@ func main() {
 		User:     env.DBUser,
 		Password: env.DBPassword,
 		Database: env.DBName,
+		SSLMode:  "disable",
+		Options: &postgres.Options{
+			RetryAttempts: 5,
+			RetryDelay:    time.Second * 2,
+		},
 	}
 	// Pass context to Postgres connection
 	pgPool, err := postgres.Connect(ctx, postgresCfg)
 	if err != nil {
 		panic(err.Message)
+	}
+
+	errr := dbRoot.RunMigrations(ctx, pgPool)
+	if errr != nil {
+		panic(errr)
 	}
 
 	redisCfg := redis.Config{
