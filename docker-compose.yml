@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:14.22-bookworm
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:8.4.2-trixie
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/var/lib/redis/data
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  user-service:
+    build:
+      context: ./services/user-service # Path to your user-service folder
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+    ports:
+      - "8906:8906"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+
+volumes:
+  pg_data:
+  redis:
+  minio_data:
