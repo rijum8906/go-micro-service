@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: go-micro-service
+spec:
+  type: LoadBalancer # Access enabled via Minikube tunnel
+  selector:
+    app: user-service
+  ports:
+    - name: http
+      port: 8906
+      targetPort: 8906
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: go-micro-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: fistrax/user-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8906
+              name: http
+          envFrom:
+            - configMapRef:
+                name: app-config
+            - secretRef:
+                name: app-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8906
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8906
+            initialDelaySeconds: 5
+            periodSeconds: 5
