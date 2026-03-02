@@ -124,8 +124,7 @@ function RouteComponent() {
                 </div>
                 {field.state.meta.errors.length > 0 && (
                   <p className="text-xs font-medium text-destructive">
-                    {field.state.meta.errors[0].message}
-                    {console.log(field.state.meta.errors)}
+                    {field.state.meta.errors[0]?.message}
                   </p>
                 )}
               </div>

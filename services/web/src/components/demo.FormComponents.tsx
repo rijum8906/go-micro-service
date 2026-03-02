@@ -13,8 +13,8 @@ import { Label } from '@/components/ui/label'
 export function SubscribeButton({ label }: { label: string }) {
   const form = useFormContext()
   return (
-    <form.Subscribe selector={(state) => state.isSubmitting}>
-      {(isSubmitting) => (
+    <form.Subscribe selector={(state: any) => state.isSubmitting}>
+      {(isSubmitting: boolean) => (
         <Button type="submit" disabled={isSubmitting}>
           {label}
         </Button>
@@ -49,8 +49,8 @@ export function TextField({
   label: string
   placeholder?: string
 }) {
-  const field = useFieldContext<string>()
-  const errors = useStore(field.store, (state) => state.meta.errors)
+  const field = useFieldContext<any>()
+  const errors = useStore(field.store, (state: any) => state.meta.errors)
 
   return (
     <div>
@@ -75,8 +75,8 @@ export function TextArea({
   label: string
   rows?: number
 }) {
-  const field = useFieldContext<string>()
-  const errors = useStore(field.store, (state) => state.meta.errors)
+  const field = useFieldContext<any>()
+  const errors = useStore(field.store, (state: any) => state.meta.errors)
 
   return (
     <div>
@@ -104,8 +104,8 @@ export function Select({
   values: Array<{ label: string; value: string }>
   placeholder?: string
 }) {
-  const field = useFieldContext<string>()
-  const errors = useStore(field.store, (state) => state.meta.errors)
+  const field = useFieldContext<any>()
+  const errors = useStore(field.store, (state: any) => state.meta.errors)
 
   return (
     <div>
@@ -134,8 +134,8 @@ export function Select({
 }
 
 export function Slider({ label }: { label: string }) {
-  const field = useFieldContext<number>()
-  const errors = useStore(field.store, (state) => state.meta.errors)
+  const field = useFieldContext<any>()
+  const errors = useStore(field.store, (state: any) => state.meta.errors)
 
   return (
     <div>
@@ -154,8 +154,8 @@ export function Slider({ label }: { label: string }) {
 }
 
 export function Switch({ label }: { label: string }) {
-  const field = useFieldContext<boolean>()
-  const errors = useStore(field.store, (state) => state.meta.errors)
+  const field = useFieldContext<any>()
+  const errors = useStore(field.store, (state: any) => state.meta.errors)
 
   return (
     <div>

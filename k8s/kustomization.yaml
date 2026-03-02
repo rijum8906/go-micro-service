@@ -9,3 +9,4 @@ resources:
   - redis.yaml
   - minio.yaml
   - user-service.yaml
+  - web-service.yaml
