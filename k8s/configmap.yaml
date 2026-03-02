@@ -27,9 +27,18 @@ data:
   BCRYPT_COST: "12"
   STORAGE_ENDPOINT: "http://minio:9000"
   STORAGE_BUCKET: "avatars"
-  STORAGE_PUBLIC_KEY: "http://localhost:9000"
-  CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+  STORAGE_PUBLIC_KEY: "http://minio:9000"
+  CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://user-service"
   CORS_ALLOWED_METHODS: "GET,POST,PUT,PATCH,DELETE"
   CORS_ALLOWED_HEADERS: "Content-Type,Authorization,Content-Length"
   DEBUG: "false"
   LOG_LEVEL: "production"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: go-micro-service
+data:
+  API_BASE_URL: http://user-service:8906/api/v1
+  INTERNAL_API_BASE_URL: http://user-service:8906/api/v1

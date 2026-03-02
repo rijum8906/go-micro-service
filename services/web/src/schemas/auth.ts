@@ -35,3 +35,16 @@ export const createProfileSchema = z.object({
   avatar: z.file().optional(),
 });
 export type CreateProfileSchemaType = z.infer<typeof createProfileSchema>;
+
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+export type ChangePasswordSchemaType = z.infer<typeof changePasswordSchema>;

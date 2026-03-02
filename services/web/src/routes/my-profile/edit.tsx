@@ -13,7 +13,6 @@ import {
   deleteProfile as deleteProfileApi,
 } from '@/api/auth';
 import { useAuthStore } from '@/store/auth';
-import type { UpdateProfileSchemaType } from '@/schemas/auth';
 import { generateDeviceId } from '@/lib/device';
 
 export const Route = createFileRoute('/my-profile/edit')({

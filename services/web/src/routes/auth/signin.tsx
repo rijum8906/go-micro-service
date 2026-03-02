@@ -18,6 +18,7 @@ import z from 'zod';
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { signin } from '@/api/auth';
+import { getBaseApiUrlFn } from '@/lib/server-api';
 
 const signinSearchSchema = z.object({
   redirect: z.string().optional().catch(''),
@@ -25,6 +26,10 @@ const signinSearchSchema = z.object({
 export const Route = createFileRoute('/auth/signin')({
   component: SignInComponent,
   validateSearch: signinSearchSchema,
+  loader: async () => {
+    const apiUrl = await getBaseApiUrlFn();
+    return { apiUrl };
+  },
 });
 
 function SignInComponent() {
@@ -32,6 +37,7 @@ function SignInComponent() {
   const { redirect } = Route.useSearch();
   const { createToken, createAccount, createProfile, isSignedIn } =
     useAuthStore();
+  const { apiUrl } = Route.useLoaderData();
 
   useEffect(() => {
     if (isSignedIn) {
