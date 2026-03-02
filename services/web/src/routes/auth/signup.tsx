@@ -1,7 +1,6 @@
 import {
   createFileRoute,
   Link,
-  redirect,
   useRouter,
 } from '@tanstack/react-router';
 import { useForm } from '@tanstack/react-form';
