@@ -1,4 +1,5 @@
 services:
+  # postgres
   postgres:
     image: postgres:14.22-bookworm
     environment:
@@ -10,6 +11,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
+    # redis
   redis:
     image: redis:8.4.2-trixie
     ports:
@@ -17,6 +19,7 @@ services:
     volumes:
       - redis:/var/lib/redis/data
 
+  # minio
   minio:
     image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
     ports:
@@ -29,6 +32,7 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
+  # user-service
   user-service:
     build:
       context: ./services/user-service # Path to your user-service folder
@@ -40,6 +44,17 @@ services:
       - postgres
       - redis
       - minio
+
+  # web-service
+  web-service:
+    build:
+      context: ./services/web # Path to your web-service folder
+    environment:
+      API_BASE_URL: "http://user-service:8906/api/v1"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-service
 
 volumes:
   pg_data:
