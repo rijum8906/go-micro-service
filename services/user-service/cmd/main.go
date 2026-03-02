@@ -97,6 +97,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	s3Storage.CreateBucket(ctx, env.StorageBucket)
 
 	utilsCfg := &services.UtilsConfig{
 		HashService:      hashService,

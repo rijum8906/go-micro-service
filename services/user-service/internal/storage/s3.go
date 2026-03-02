@@ -54,3 +54,14 @@ func (s *S3Storage) UploadFile(ctx context.Context, fileName string, file io.Rea
 	// Returns the link for your database
 	return fmt.Sprintf("%s/%s/%s", s.publicURL, s.bucketName, fileName), nil
 }
+
+func (s *S3Storage) CreateBucket(ctx context.Context, bucketName string) error {
+	_, err := s.client.CreateBucket(ctx, &s3.CreateBucketInput{
+		Bucket: aws.String(bucketName),
+	},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}

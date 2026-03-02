@@ -34,6 +34,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className='dark'>
       <head>
+        <script src="/config.js"></script>
         <HeadContent />
       </head>
       <body>

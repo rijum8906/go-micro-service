@@ -9,6 +9,10 @@ export interface ErrorDetail {
   message: string;
 }
 
+export interface Metadata {
+  deviceId: string;
+}
+
 export interface BaseResponse {
   success: boolean;
   message: string;

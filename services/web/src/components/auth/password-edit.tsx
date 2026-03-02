@@ -1,8 +1,8 @@
 import { useForm } from '@tanstack/react-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
+import { changePassword } from '@/api/auth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Card,
   CardContent,
@@ -10,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { api } from '@/api/axios';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const passwordSchema = z
   .object({
@@ -40,13 +40,16 @@ export function PasswordEdit() {
     },
     onSubmit: async ({ value }) => {
       try {
-        // Replace with your actual api.put('/auth/password', value)
-        console.log('Updating password...', value);
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API
-        api.put('/auth/password', value);
+        const response = await changePassword(value);
+
+        if (!response.success) {
+          toast.error(response.message || 'Failed to update password');
+          return;
+        }
+
         toast.success('Password updated successfully');
         form.reset();
-      } catch (err) {
+      } catch (_err) {
         toast.error('Failed to update password');
       }
     },
