@@ -1,4 +1,4 @@
-// Package dto contains data transfer objects for the auth service.
+// Package dto contains data transfer objects for the user service.
 package dto
 
 import (

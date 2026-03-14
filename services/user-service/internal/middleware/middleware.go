@@ -1,4 +1,4 @@
-// Package middleware contains middleware for the auth service.
+// Package middleware contains middleware for the user service.
 package middleware
 
 import (
