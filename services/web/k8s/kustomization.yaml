@@ -3,10 +3,4 @@ kind: Kustomization
 namespace: go-micro-service
 resources:
   - namespace.yaml
-  - configmap.yaml
-  - secret.yaml
-  - postgres.yaml
-  - redis.yaml
-  - minio.yaml
-  - user-service.yaml
   - web-service.yaml
