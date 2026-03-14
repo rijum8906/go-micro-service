@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: go-micro-service
+spec:
+  selector:
+    app: minio
+  type: ClusterIP
+  ports:
+    - name: minio
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+    - name: minio-console
+      protocol: TCP
+      port: 9001
+      targetPort: 9001
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: minio
+  namespace: go-micro-service
+spec:
+  selector:
+    matchLabels:
+      app: minio
+  serviceName: "minio"
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: minio
+      labels:
+        app: minio
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: minio
+          image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
+          args:
+            - server
+            - /data
+            - --console-address
+            - ":9001"
+          ports:
+            - containerPort: 9000
+              name: minio
+            - containerPort: 9001
+              name: minio-console
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              subPath: minio
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Kolkata
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+---

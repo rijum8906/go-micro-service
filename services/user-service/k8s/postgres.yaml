@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: go-micro-service
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  # FIXED: StatefulSet needs headless service
+  clusterIP: None
+  type: ClusterIP
+  ports:
+    - name: postgres
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: go-micro-service
+  labels:
+    app: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  serviceName: "postgres" # Must match service name
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: postgres
+      labels:
+        app: postgres
+    spec:
+      terminationGracePeriodSeconds: 60 # PostgreSQL needs time to shut down
+
+      containers:
+        - name: postgres
+          image: postgres:15.17-trixie
+          imagePullPolicy: IfNotPresent
+
+          # FIXED: envFrom was reversed (configMapRef vs secretRef)
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+            - secretRef:
+                name: postgres-secrets
+
+          # FIXED: Add explicit env for better control
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_USER
+                  optional: true
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_DB
+                  optional: true
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: TZ
+              value: Asia/Kolkata
+
+          ports:
+            # FIXED: Wrong port (80 -> 5432)
+            - containerPort: 5432
+              name: postgres
+
+          # FIXED: Probes use correct variable syntax
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-${POSTGRES_USER:-postgres}}"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  psql -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-${POSTGRES_USER:-postgres}} -t -c "SELECT 1" | grep -q 1
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # FIXED: Correct mount path for PostgreSQL
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data # Changed from /data
+              subPath: postgres
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+
+      # FIXED: Pod-level volumes
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Kolkata
+            type: File
+
+  # volumeClaimTemplates is correct for StatefulSet
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        storageClassName: standard
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi # Increased from 1Gi for production
+        volumeMode: Filesystem
+
+  # Keep PVCs on deletion
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain

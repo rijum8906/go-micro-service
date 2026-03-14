@@ -5,11 +5,11 @@ metadata:
   namespace: go-micro-service
 spec:
   ports:
-    - name: user-service
-      port: 8906
+    - port: 8906
       targetPort: 8906
   selector:
     app: user-service
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -18,6 +18,11 @@ metadata:
   namespace: go-micro-service
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   selector:
     matchLabels:
       app: user-service
@@ -29,29 +34,23 @@ spec:
       containers:
         - name: user-service
           image: fistrax/user-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8906
-              name: http
           envFrom:
             - configMapRef:
-                name: app-config
+                name: user-service-config
             - secretRef:
-                name: app-secrets
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
-          livenessProbe:
-            tcpSocket:
-              port: 8906
-            initialDelaySeconds: 30
-            periodSeconds: 10
+                name: user-service-secrets
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /health
               port: 8906
             initialDelaySeconds: 5
             periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8906
+            initialDelaySeconds: 30
+            periodSeconds: 10

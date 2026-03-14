@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -125,6 +126,12 @@ func main() {
 	authRouter := apiRouterV1.Group("/auth")
 	profilesRouter := apiRouterV1.Group("/profiles")
 	accountRouter := apiRouterV1.Group("/accounts")
+
+	router.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+		})
+	})
 
 	handler.RegisterHandlers(authRouter, authService)
 	handler.SetupProfilesHandlers(profilesRouter, profileService, middlewareService)
