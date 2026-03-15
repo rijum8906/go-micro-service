@@ -4,28 +4,29 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/profile"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
-func SetupProfilesHandlers(router *gin.RouterGroup, service services.ProfileService, middlewareService middleware.Middleware) {
-	router.Use(func(ctx *gin.Context) {
-		if ctx.Request.Method != "GET" {
-			middlewareService.AuthMiddleware()(ctx)
-			return
-		}
-		ctx.Next()
-	})
+func SetupProfilesHandlers(router *gin.RouterGroup, service profile.ProfileService, middlewareService middleware.Middleware) {
+	// Public routes
 	router.GET("/:profile_id", getProfile(service))
-	router.PUT("/:profile_id", updateProfile(service))
-	router.DELETE("/:profile_id", deleteProfile(service))
-	router.POST("/", createProfile(service))
+
+	// Private routes
+	authorized := router.Group("/")
+	authorized.Use(middlewareService.AuthMiddleware())
+	{
+		authorized.PUT("/:profile_id", updateProfile(service))
+		authorized.DELETE("/:profile_id", deleteProfile(service))
+		authorized.POST("/", createProfile(service))
+	}
 }
 
-func getProfile(service services.ProfileService) gin.HandlerFunc {
+func getProfile(service profile.ProfileService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		profileID := ctx.Param("profile_id")
 		result, err := service.GetProfile(ctx, profileID)
@@ -37,9 +38,9 @@ func getProfile(service services.ProfileService) gin.HandlerFunc {
 	}
 }
 
-func createProfile(service services.ProfileService) gin.HandlerFunc {
+func createProfile(service profile.ProfileService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.CreateProfileRequest
+		var input request.CreateProfileRequest
 		if err := ctx.ShouldBind(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
@@ -57,7 +58,7 @@ func createProfile(service services.ProfileService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*db.Profile]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*db.Profile]{
 			Success: true,
 			Message: "Profile created successfully",
 			Data:    result,
@@ -65,9 +66,9 @@ func createProfile(service services.ProfileService) gin.HandlerFunc {
 	}
 }
 
-func updateProfile(service services.ProfileService) gin.HandlerFunc {
+func updateProfile(service profile.ProfileService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.UpdateProfileRequest
+		var input request.UpdateProfileRequest
 		profileID := ctx.Param("profile_id")
 		input.ProfileID = profileID
 
@@ -96,7 +97,7 @@ func updateProfile(service services.ProfileService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*db.Profile]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*db.Profile]{
 			Success: true,
 			Message: "Profile updated successfully",
 			Data:    result,
@@ -104,7 +105,7 @@ func updateProfile(service services.ProfileService) gin.HandlerFunc {
 	}
 }
 
-func deleteProfile(service services.ProfileService) gin.HandlerFunc {
+func deleteProfile(service profile.ProfileService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		profileID := ctx.Param("profile_id")
 
@@ -119,7 +120,7 @@ func deleteProfile(service services.ProfileService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*db.Profile]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*db.Profile]{
 			Success: true,
 			Message: "Profile deleted successfully",
 		})

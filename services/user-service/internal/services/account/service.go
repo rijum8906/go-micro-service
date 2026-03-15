@@ -1,4 +1,5 @@
-package services
+// Package account contains services for the account service.
+package account
 
 import (
 	"context"
@@ -9,15 +10,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/go-micro-service/packages/common/errors"
 	"github.com/rijum8906/go-micro-service/packages/common/jwt"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 func (s *accountService) DeleteAccount(
 	ctx context.Context,
-	reqMetadata dto.RequestMetadata,
-	authzMetadata dto.AuthzMetadata,
+	reqMetadata request.RequestMetadata,
+	authzMetadata request.AuthzMetadata,
 ) *errors.AppError {
 	err := s.q.DeleteAccount(ctx, authzMetadata.UserID)
 	if err != nil {
@@ -29,23 +31,23 @@ func (s *accountService) DeleteAccount(
 func (s *accountService) CheckAccountExist(
 	ctx context.Context,
 	id pgtype.UUID,
-) (*dto.CheckAccountExistResult, *errors.AppError) {
+) (*response.CheckAccountExistResult, *errors.AppError) {
 	_, err := s.q.GetAccount(ctx, id)
 	if err != nil {
 		if stdErrors.Is(err, sql.ErrNoRows) {
-			return &dto.CheckAccountExistResult{Exist: false}, nil
+			return &response.CheckAccountExistResult{Exist: false}, nil
 		}
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
 
-	return &dto.CheckAccountExistResult{Exist: true}, nil
+	return &response.CheckAccountExistResult{Exist: true}, nil
 }
 
 func (s *accountService) ChangePassword(
 	ctx context.Context,
-	data dto.ChangePasswordRequest,
-	reqMetadata dto.RequestMetadata,
-	authzMetadata dto.AuthzMetadata,
+	data request.ChangePasswordRequest,
+	reqMetadata request.RequestMetadata,
+	authzMetadata request.AuthzMetadata,
 ) *errors.AppError {
 	claims, appErr := s.utilsConfig.SecureJWTService.ValidateToken(ctx, data.Token)
 	if appErr != nil {
@@ -85,10 +87,10 @@ func (s *accountService) ChangePassword(
 
 func (s *accountService) ChangeEmail(
 	ctx context.Context,
-	data dto.ChangeEmailRequest,
-	reqMetadata dto.RequestMetadata,
-	authzMetadata dto.AuthzMetadata,
-) (*dto.ChangeEmailResult, *errors.AppError) {
+	data request.ChangeEmailRequest,
+	reqMetadata request.RequestMetadata,
+	authzMetadata request.AuthzMetadata,
+) (*response.ChangeEmailResult, *errors.AppError) {
 	claims, appErr := s.utilsConfig.SecureJWTService.ValidateToken(ctx, data.Token)
 	if appErr != nil {
 		return nil, appErr
@@ -117,16 +119,16 @@ func (s *accountService) ChangeEmail(
 		return nil, errors.ErrInternal.WithInternal(err)
 	}
 
-	return &dto.ChangeEmailResult{
+	return &response.ChangeEmailResult{
 		Email: data.NewEmail,
 	}, nil
 }
 
 func (s *accountService) MyAccount(
 	ctx context.Context,
-	reqMetadata dto.RequestMetadata,
-	authzMetadata dto.AuthzMetadata,
-) (*dto.MyAccountResult, *errors.AppError) {
+	reqMetadata request.RequestMetadata,
+	authzMetadata request.AuthzMetadata,
+) (*response.MyAccountResult, *errors.AppError) {
 	account, err := s.q.GetAccount(ctx, authzMetadata.UserID)
 	if err != nil {
 		return nil, errors.ErrDBError.WithInternal(err)
@@ -147,7 +149,7 @@ func (s *accountService) MyAccount(
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
 
-	return &dto.MyAccountResult{
+	return &response.MyAccountResult{
 		Account:         &account,
 		Profiles:        &profiles,
 		AccountSecurity: &accountSecuriry,
@@ -162,10 +164,10 @@ var ActionTokens = []string{
 
 func (s *accountService) GenerateScopedToken(
 	ctx context.Context,
-	data dto.GenerateScopedTokenRequest,
-	reqMetadata dto.RequestMetadata,
-	authzMetadata dto.AuthzMetadata,
-) (*dto.GenerateScopedTokenResult, *errors.AppError) {
+	data request.GenerateScopedTokenRequest,
+	reqMetadata request.RequestMetadata,
+	authzMetadata request.AuthzMetadata,
+) (*response.GenerateScopedTokenResult, *errors.AppError) {
 	isAvailable := false
 	for _, action := range ActionTokens {
 		if action == data.Scope {
@@ -178,7 +180,7 @@ func (s *accountService) GenerateScopedToken(
 		})
 	}
 
-	if data.Authorization.Type != dto.PassAuthzType {
+	if data.Authorization.Type != request.PassAuthzType {
 		return nil, errors.NewAppError(http.StatusForbidden, "forbidden", []errors.Error{
 			{Field: "auth", Message: "Other authorization types are not supported yet."},
 		})
@@ -201,12 +203,12 @@ func (s *accountService) GenerateScopedToken(
 	if appErr != nil {
 		return nil, appErr
 	}
-	return &dto.GenerateScopedTokenResult{
+	return &response.GenerateScopedTokenResult{
 		Token: token,
 	}, nil
 }
 
-func (s *accountService) Signout(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError {
+func (s *accountService) Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError {
 	redisKey := utils.GenerateRedisLoginKey(authzMetadata.UserID.String(), reqMetadata.DeviceID)
 	err := s.utilsConfig.JwtService.RevokeSession(ctx, redisKey)
 	if err != nil {

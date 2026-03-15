@@ -6,13 +6,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/auth"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 // RegisterHandlers sets up routes for the auth service.
-func RegisterHandlers(router *gin.RouterGroup, service services.AuthService) {
+func RegisterHandlers(router *gin.RouterGroup, service auth.AuthService) {
 	router.POST("/signup", signUpHandler(service))
 	router.POST("/signin", signInHandler(service))
 }
@@ -21,16 +22,16 @@ func RegisterHandlers(router *gin.RouterGroup, service services.AuthService) {
 // Handlers
 // --------------------
 
-func signUpHandler(service services.AuthService) gin.HandlerFunc {
+func signUpHandler(service auth.AuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.SignupRequest
+		var input request.SignupRequest
 
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		requestMetadata := dto.RequestMetadata{
+		requestMetadata := request.RequestMetadata{
 			UserAgent: ctx.Request.UserAgent(),
 			IPAddr:    ctx.ClientIP(),
 			DeviceID:  input.Metadata.DeviceID,
@@ -42,7 +43,7 @@ func signUpHandler(service services.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthResponse]{
+		ctx.JSON(http.StatusOK, &response.BaseSuccessResponse[*response.AuthResponse]{
 			Success: true,
 			Message: "account created successfully",
 			Data:    result,
@@ -50,16 +51,16 @@ func signUpHandler(service services.AuthService) gin.HandlerFunc {
 	}
 }
 
-func signInHandler(service services.AuthService) gin.HandlerFunc {
+func signInHandler(service auth.AuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.SigninRequest
+		var input request.SigninRequest
 
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		requestMetadata := dto.RequestMetadata{
+		requestMetadata := request.RequestMetadata{
 			UserAgent: ctx.Request.UserAgent(),
 			IPAddr:    ctx.ClientIP(),
 			DeviceID:  input.Metadata.DeviceID,
@@ -71,7 +72,7 @@ func signInHandler(service services.AuthService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, &dto.BaseSuccessResponse[*dto.AuthResponse]{
+		ctx.JSON(http.StatusOK, &response.BaseSuccessResponse[*response.AuthResponse]{
 			Success: true,
 			Message: "account signed in successfully",
 			Data:    result,

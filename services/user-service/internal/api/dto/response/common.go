@@ -1,4 +1,5 @@
-package dto
+// Package response contains response data transfer objects for the auth service.
+package response
 
 import db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 

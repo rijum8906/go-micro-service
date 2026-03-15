@@ -12,16 +12,20 @@ func (m *middleware) AuthMiddleware() gin.HandlerFunc {
 		// 1. Get the Authorization header
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Authorization header is required"})
-			c.Abort() // Stop the request here
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "Authorization header is required",
+			})
 			return
 		}
 
 		// 2. Check for "Bearer <token>" format
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Invalid authorization format"})
-			c.Abort()
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "Invalid authorization format",
+			})
 			return
 		}
 
@@ -30,13 +34,15 @@ func (m *middleware) AuthMiddleware() gin.HandlerFunc {
 		// 3. Verify the token
 		claims, err := m.services.JwtService.ValidateToken(c.Request.Context(), tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Invalid or expired token"})
-			c.Abort()
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "Invalid or expired token",
+			})
 			return
 		}
 
-		// 4. Inject UserID into context for downstream handlers
-		c.Set("user_id", claims.UserID)
-		c.Next() // Continue to the next handler
+		// 4. Inject UserID into context using the typed key for safety
+		c.Set(string(UserIDKey), claims.UserID)
+		c.Next()
 	}
 }

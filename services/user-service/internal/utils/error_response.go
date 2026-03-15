@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
 )
 
 // ValidationErrorHandler handles validation and binding errors consistently
@@ -34,7 +34,7 @@ func (h *ValidationErrorHandler) HandleBindingError(ctx *gin.Context, err error)
 
 // sendValidationError formats and sends validation errors
 func (h *ValidationErrorHandler) sendValidationError(ctx *gin.Context, validationErrors validator.ValidationErrors) {
-	response := dto.BaseErrorResponse{
+	response := response.BaseErrorResponse{
 		Success: false,
 		Message: "Validation failed",
 		Errors:  h.formatValidationErrors(validationErrors),
@@ -45,21 +45,21 @@ func (h *ValidationErrorHandler) sendValidationError(ctx *gin.Context, validatio
 
 // sendBadRequestError sends a generic bad request error
 func (h *ValidationErrorHandler) sendBadRequestError(ctx *gin.Context, message string) {
-	response := dto.BaseErrorResponse{
+	response := response.BaseErrorResponse{
 		Success: false,
 		Message: message,
-		Errors:  []dto.BaseResponseError{},
+		Errors:  []response.BaseResponseError{},
 	}
 
 	ctx.JSON(http.StatusBadRequest, response)
 }
 
 // formatValidationErrors converts validator errors to a structured format
-func (h *ValidationErrorHandler) formatValidationErrors(ve validator.ValidationErrors) []dto.BaseResponseError {
-	errors := make([]dto.BaseResponseError, 0, len(ve))
+func (h *ValidationErrorHandler) formatValidationErrors(ve validator.ValidationErrors) []response.BaseResponseError {
+	errors := make([]response.BaseResponseError, 0, len(ve))
 
 	for _, fieldError := range ve {
-		errors = append(errors, dto.BaseResponseError{
+		errors = append(errors, response.BaseResponseError{
 			Field:   fieldError.Field(),
 			Message: h.getValidationErrorMessage(fieldError),
 		})

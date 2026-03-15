@@ -9,6 +9,9 @@ import (
 
 type Middleware interface {
 	AuthMiddleware() gin.HandlerFunc
+	RequestID() gin.HandlerFunc
+	Logger() gin.HandlerFunc
+	Recovery() gin.HandlerFunc
 }
 
 type middleware struct {
@@ -24,4 +27,16 @@ func NewMiddleware(utils Services) Middleware {
 	return &middleware{
 		services: utils,
 	}
+}
+
+func (m *middleware) RequestID() gin.HandlerFunc {
+	return RequestIDMiddleware()
+}
+
+func (m *middleware) Logger() gin.HandlerFunc {
+	return LoggerMiddleware()
+}
+
+func (m *middleware) Recovery() gin.HandlerFunc {
+	return RecoveryMiddleware()
 }

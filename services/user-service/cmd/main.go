@@ -13,12 +13,15 @@ import (
 	"github.com/rijum8906/go-micro-service/packages/common/env"
 	"github.com/rijum8906/go-micro-service/packages/common/hash"
 	"github.com/rijum8906/go-micro-service/packages/common/jwt"
+	handler "github.com/rijum8906/go-micro-service/services/user-service/internal/api/handlers/rest"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
 	dbRoot "github.com/rijum8906/go-micro-service/services/user-service/internal/db"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/handler"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/storage"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/account"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/auth"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/profile"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/storage"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 func main() {
@@ -30,7 +33,12 @@ func main() {
 		panic(err)
 	}
 
-	router := gin.Default()
+	router := gin.New()
+
+	// Global middlewares
+	router.Use(middleware.RecoveryMiddleware())
+	router.Use(middleware.RequestIDMiddleware())
+	router.Use(middleware.LoggerMiddleware())
 
 	postgresCfg := postgres.Config{
 		Host:     env.DBHost,
@@ -97,16 +105,16 @@ func main() {
 	)
 	s3Storage.CreateBucket(ctx, env.StorageBucket)
 
-	utilsCfg := &services.UtilsConfig{
+	utilsCfg := &utils.UtilsConfig{
 		HashService:      hashService,
 		JwtService:       jwtService,
 		SecureJWTService: scopedJWTService,
 		Storage:          s3Storage,
 	}
 
-	authService := services.NewAuth(db.New(pgPool), utilsCfg, env)
-	accountService := services.NewAccountService(db.New(pgPool), utilsCfg, env)
-	profileService := services.NewProfileService(db.New(pgPool), utilsCfg, env)
+	authService := auth.NewAuth(db.New(pgPool), utilsCfg, env)
+	accountService := account.NewAccountService(db.New(pgPool), utilsCfg, env)
+	profileService := profile.NewProfileService(db.New(pgPool), utilsCfg, env)
 	// server logic starts here...
 
 	// Configure CORS
@@ -114,7 +122,7 @@ func main() {
 		AllowOrigins:     env.CorsAllowedOrigins,
 		AllowMethods:     env.CorsAllowedMethods,
 		AllowHeaders:     env.CorsAllowedHeaders,
-		ExposeHeaders:    []string{"Content-Length"},
+		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
 		AllowCredentials: true,
 	}))
 

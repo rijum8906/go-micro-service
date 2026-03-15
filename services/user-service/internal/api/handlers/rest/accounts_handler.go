@@ -4,33 +4,33 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/account"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
-func SetupAccountsHandlers(router *gin.RouterGroup, service services.AccountService, middlewareService middleware.Middleware) {
-	router.Use(func(ctx *gin.Context) {
-		if ctx.Request.Method != "GET" {
-			middlewareService.AuthMiddleware()(ctx)
-			return
-		}
-		ctx.Next()
-	})
-
-	router.POST("/signout", signOutHandler(service))
-	router.PUT("/change-email", changeEmail(service))
-	router.PUT("/change-password", changePassword(service))
-	router.DELETE("/:id", deleteAccount(service))
+func SetupAccountsHandlers(router *gin.RouterGroup, service account.AccountService, middlewareService middleware.Middleware) {
+	// Public routes
 	router.GET("/:id/exists", checkAccountExist(service))
-	router.GET("/my-account", myAccount(service))
-	router.POST("/generate-scoped-token", generateScopedToken(service))
+
+	// Private routes
+	authorized := router.Group("/")
+	authorized.Use(middlewareService.AuthMiddleware())
+	{
+		authorized.POST("/signout", signOutHandler(service))
+		authorized.PUT("/change-email", changeEmail(service))
+		authorized.PUT("/change-password", changePassword(service))
+		authorized.DELETE("/:id", deleteAccount(service))
+		authorized.GET("/my-account", myAccount(service))
+		authorized.POST("/generate-scoped-token", generateScopedToken(service))
+	}
 }
 
-func myAccount(service services.AccountService) gin.HandlerFunc {
+func myAccount(service account.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.Request
+		var input request.Request
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
@@ -53,17 +53,17 @@ func myAccount(service services.AccountService) gin.HandlerFunc {
 	}
 }
 
-func deleteAccount(service services.AccountService) gin.HandlerFunc {
+func deleteAccount(service account.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 
-		pgID, appErr := services.ToPgUUID(id)
+		pgID, appErr := utils.StrIDToPgUUID(id)
 		if appErr != nil {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
-		var input dto.Request
+		var input request.Request
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, appErr)
 			return
@@ -76,7 +76,7 @@ func deleteAccount(service services.AccountService) gin.HandlerFunc {
 			return
 		}
 		if authMetadata.UserID != pgID {
-			ctx.JSON(http.StatusForbidden, dto.BaseErrorResponse{
+			ctx.JSON(http.StatusForbidden, response.BaseErrorResponse{
 				Success: false,
 				Message: "You do not have permission to perform this action.",
 			})
@@ -88,18 +88,18 @@ func deleteAccount(service services.AccountService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[bool]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[bool]{
 			Success: true,
 			Message: "Account deleted successfully",
 		})
 	}
 }
 
-func checkAccountExist(service services.AccountService) gin.HandlerFunc {
+func checkAccountExist(service account.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 
-		pgID, appErr := services.ToPgUUID(id)
+		pgID, appErr := utils.StrIDToPgUUID(id)
 		if appErr != nil {
 			utils.HandleServiceError(ctx, appErr)
 			return
@@ -110,7 +110,7 @@ func checkAccountExist(service services.AccountService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*dto.CheckAccountExistResult]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*response.CheckAccountExistResult]{
 			Success: true,
 			Message: "Account existence checked successfully",
 			Data:    result,
@@ -118,9 +118,9 @@ func checkAccountExist(service services.AccountService) gin.HandlerFunc {
 	}
 }
 
-func changeEmail(service services.AccountService) gin.HandlerFunc {
+func changeEmail(service account.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.ChangeEmailRequest
+		var input request.ChangeEmailRequest
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
@@ -139,7 +139,7 @@ func changeEmail(service services.AccountService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*dto.ChangeEmailResult]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*response.ChangeEmailResult]{
 			Success: true,
 			Message: "Email changed successfully",
 			Data:    result,
@@ -147,9 +147,9 @@ func changeEmail(service services.AccountService) gin.HandlerFunc {
 	}
 }
 
-func changePassword(service services.AccountService) gin.HandlerFunc {
+func changePassword(service account.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.ChangePasswordRequest
+		var input request.ChangePasswordRequest
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
@@ -167,16 +167,16 @@ func changePassword(service services.AccountService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[bool]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[bool]{
 			Success: true,
 			Message: "Password changed successfully",
 		})
 	}
 }
 
-func generateScopedToken(service services.AccountService) gin.HandlerFunc {
+func generateScopedToken(service account.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.GenerateScopedTokenRequest
+		var input request.GenerateScopedTokenRequest
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
@@ -194,7 +194,7 @@ func generateScopedToken(service services.AccountService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*dto.GenerateScopedTokenResult]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*response.GenerateScopedTokenResult]{
 			Success: true,
 			Message: "Scoped token generated successfully",
 			Data:    result,
@@ -202,9 +202,9 @@ func generateScopedToken(service services.AccountService) gin.HandlerFunc {
 	}
 }
 
-func signOutHandler(service services.AccountService) gin.HandlerFunc {
+func signOutHandler(service account.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var input dto.SignoutRequest
+		var input request.SignoutRequest
 		if err := ctx.ShouldBindJSON(&input); err != nil {
 			utils.HandleBindError(ctx, err)
 			return
@@ -222,7 +222,7 @@ func signOutHandler(service services.AccountService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*dto.GenerateScopedTokenResult]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*response.GenerateScopedTokenResult]{
 			Success: true,
 			Message: "Signed out successfully",
 		})

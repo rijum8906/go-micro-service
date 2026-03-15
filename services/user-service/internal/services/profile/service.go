@@ -1,4 +1,4 @@
-package services
+package profile
 
 import (
 	"context"
@@ -6,8 +6,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/go-micro-service/packages/common/errors"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 func assertString(str *string) string {
@@ -17,8 +19,8 @@ func assertString(str *string) string {
 	return *str
 }
 
-func (s *profileService) GetProfile(ctx context.Context, id string) (*dto.GetProfileResult, *errors.AppError) {
-	pgID, appErr := ToPgUUID(id)
+func (s *profileService) GetProfile(ctx context.Context, id string) (*response.GetProfileResult, *errors.AppError) {
+	pgID, appErr := utils.StrIDToPgUUID(id)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -28,7 +30,7 @@ func (s *profileService) GetProfile(ctx context.Context, id string) (*dto.GetPro
 		return nil, errors.ErrInternal.WithInternal(err)
 	}
 
-	return &dto.GetProfileResult{
+	return &response.GetProfileResult{
 		FirstName:   profile.FirstName,
 		LastName:    profile.LastName,
 		DisplayName: &profile.DisplayName.String,
@@ -38,9 +40,9 @@ func (s *profileService) GetProfile(ctx context.Context, id string) (*dto.GetPro
 
 func (s *profileService) UpdateProfile(
 	ctx context.Context,
-	data dto.UpdateProfileRequest,
-	reqMetadata dto.RequestMetadata,
-	authzMetadata dto.AuthzMetadata,
+	data request.UpdateProfileRequest,
+	reqMetadata request.RequestMetadata,
+	authzMetadata request.AuthzMetadata,
 ) (*db.Profile, *errors.AppError) {
 	// Check if the user uploaded avatar
 	if data.Avatar != nil {
@@ -56,7 +58,7 @@ func (s *profileService) UpdateProfile(
 		}
 		data.AvatarURL = &publicURL
 	}
-	pgID, appErr := ToPgUUID(data.ProfileID)
+	pgID, appErr := utils.StrIDToPgUUID(data.ProfileID)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -91,9 +93,9 @@ func (s *profileService) UpdateProfile(
 
 func (s *profileService) CreateProfile(
 	ctx context.Context,
-	data dto.CreateProfileRequest,
-	reqMetadata dto.RequestMetadata,
-	authzMetadata dto.AuthzMetadata,
+	data request.CreateProfileRequest,
+	reqMetadata request.RequestMetadata,
+	authzMetadata request.AuthzMetadata,
 ) (*db.Profile, *errors.AppError) {
 	if data.Avatar != nil {
 		file, err := data.Avatar.Open()
@@ -130,9 +132,9 @@ func (s *profileService) CreateProfile(
 func (s *profileService) DeleteProfile(
 	ctx context.Context,
 	id string,
-	authzMetadata dto.AuthzMetadata,
+	authzMetadata request.AuthzMetadata,
 ) *errors.AppError {
-	pgID, appErr := ToPgUUID(id)
+	pgID, appErr := utils.StrIDToPgUUID(id)
 	if appErr != nil {
 		return appErr
 	}
@@ -143,7 +145,7 @@ func (s *profileService) DeleteProfile(
 	return nil
 }
 
-func (s *profileService) MyProfile(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*db.Profile, *errors.AppError) {
+func (s *profileService) MyProfile(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*db.Profile, *errors.AppError) {
 	profile, err := s.q.GetProfile(ctx, authzMetadata.UserID)
 	if err != nil {
 		return nil, errors.ErrDBError.WithInternal(err)
