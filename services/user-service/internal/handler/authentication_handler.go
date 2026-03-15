@@ -8,6 +8,7 @@ import (
 
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 // RegisterHandlers sets up routes for the auth service.
@@ -25,17 +26,8 @@ func signUpHandler(service services.AuthService) gin.HandlerFunc {
 		var input dto.SignupRequest
 
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
-		}
-		data := dto.SignupRequest{
-			FirstName: input.FirstName,
-			LastName:  input.LastName,
-			Email:     input.Email,
-			Password:  input.Password,
-			Metadata: dto.Metadata{
-				DeviceID: input.Metadata.DeviceID,
-			},
 		}
 
 		requestMetadata := dto.RequestMetadata{
@@ -44,9 +36,9 @@ func signUpHandler(service services.AuthService) gin.HandlerFunc {
 			DeviceID:  input.Metadata.DeviceID,
 		}
 
-		result, err := service.SignUp(ctx.Request.Context(), data, requestMetadata)
+		result, err := service.SignUp(ctx.Request.Context(), input, requestMetadata)
 		if err != nil {
-			ctx.JSON(err.StatusCode, parseAppError(err))
+			utils.HandleServiceError(ctx, err)
 			return
 		}
 
@@ -63,15 +55,8 @@ func signInHandler(service services.AuthService) gin.HandlerFunc {
 		var input dto.SigninRequest
 
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
-		}
-		data := dto.SigninRequest{
-			Email:    input.Email,
-			Password: input.Password,
-			Metadata: dto.Metadata{
-				DeviceID: input.Metadata.DeviceID,
-			},
 		}
 
 		requestMetadata := dto.RequestMetadata{
@@ -80,10 +65,9 @@ func signInHandler(service services.AuthService) gin.HandlerFunc {
 			DeviceID:  input.Metadata.DeviceID,
 		}
 
-		result, err := service.Signin(ctx.Request.Context(), data, requestMetadata)
+		result, err := service.Signin(ctx.Request.Context(), input, requestMetadata)
 		if err != nil {
-			// Auth failure should be explicit and boring
-			ctx.JSON(err.StatusCode, parseAppError(err))
+			utils.HandleServiceError(ctx, err)
 			return
 		}
 

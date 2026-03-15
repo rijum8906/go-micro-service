@@ -3,7 +3,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -13,19 +12,29 @@ import (
 	"github.com/rijum8906/go-micro-service/packages/common/errors"
 )
 
+type S3StorageService interface {
+	// Bucket operations
+	CreateBucket(ctx context.Context, bucketName string) *errors.AppError
+	IsBucketExists(ctx context.Context, bucketName string) (bool, *errors.AppError)
+
+	// file operations
+	UploadFile(ctx context.Context, fileName string, file io.Reader, contentType string) (string, *errors.AppError)
+}
+
 type S3Storage struct {
 	client     *s3.Client
 	bucketName string
 	publicURL  string
 }
 
-func NewS3Storage(ctx context.Context, endpoint, accessKey, secretKey, bucket, publicURL string) (*S3Storage, *errors.AppError) {
+func NewS3StorageService(ctx context.Context, endpoint, accessKey, secretKey, bucket, publicURL string) S3StorageService {
 	cfg, err := config.LoadDefaultConfig(ctx,
+
 		config.WithRegion("us-east-1"), // MinIO requires a region string, even if ignored
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
 	)
 	if err != nil {
-		return nil, errors.NewAppError(500, "error loading AWS config", []errors.Error{}).WithInternal(err)
+		panic(err)
 	}
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
@@ -37,10 +46,34 @@ func NewS3Storage(ctx context.Context, endpoint, accessKey, secretKey, bucket, p
 		client:     client,
 		bucketName: bucket,
 		publicURL:  publicURL,
-	}, nil
+	}
 }
 
-func (s *S3Storage) UploadFile(ctx context.Context, fileName string, file io.Reader, contentType string) (string, error) {
+// Bucket operations
+
+func (s *S3Storage) CreateBucket(ctx context.Context, bucketName string) *errors.AppError {
+	_, err := s.client.CreateBucket(ctx, &s3.CreateBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		return errors.NewAppError(500, "error creating bucket", []errors.Error{}).WithInternal(err)
+	}
+	return nil
+}
+
+func (s *S3Storage) IsBucketExists(ctx context.Context, bucketName string) (bool, *errors.AppError) {
+	_, err := s.client.HeadBucket(ctx, &s3.HeadBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+// File operations
+
+func (s *S3Storage) UploadFile(ctx context.Context, fileName string, file io.Reader, contentType string) (string, *errors.AppError) {
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucketName),
 		Key:         aws.String(fileName),
@@ -48,20 +81,7 @@ func (s *S3Storage) UploadFile(ctx context.Context, fileName string, file io.Rea
 		ContentType: aws.String(contentType),
 	})
 	if err != nil {
-		return "", err
+		return "", errors.NewAppError(500, "error uploading file", []errors.Error{}).WithInternal(err)
 	}
-
-	// Returns the link for your database
-	return fmt.Sprintf("%s/%s/%s", s.publicURL, s.bucketName, fileName), nil
-}
-
-func (s *S3Storage) CreateBucket(ctx context.Context, bucketName string) error {
-	_, err := s.client.CreateBucket(ctx, &s3.CreateBucketInput{
-		Bucket: aws.String(bucketName),
-	},
-	)
-	if err != nil {
-		return err
-	}
-	return nil
+	return s.publicURL + fileName, nil
 }

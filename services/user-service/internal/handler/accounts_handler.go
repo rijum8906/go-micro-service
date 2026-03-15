@@ -7,6 +7,7 @@ import (
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 func SetupAccountsHandlers(router *gin.RouterGroup, service services.AccountService, middlewareService middleware.Middleware) {
@@ -18,6 +19,7 @@ func SetupAccountsHandlers(router *gin.RouterGroup, service services.AccountServ
 		ctx.Next()
 	})
 
+	router.POST("/signout", signOutHandler(service))
 	router.PUT("/change-email", changeEmail(service))
 	router.PUT("/change-password", changePassword(service))
 	router.DELETE("/:id", deleteAccount(service))
@@ -30,22 +32,23 @@ func myAccount(service services.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input dto.Request
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		account, appErr := service.MyAccount(ctx, reqMetadata, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
+
 		ctx.JSON(http.StatusOK, account)
 	}
 }
@@ -53,22 +56,23 @@ func myAccount(service services.AccountService) gin.HandlerFunc {
 func deleteAccount(service services.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
+
 		pgID, appErr := services.ToPgUUID(id)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		var input dto.Request
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, appErr)
 			return
 		}
 
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		if authMetadata.UserID != pgID {
@@ -81,7 +85,7 @@ func deleteAccount(service services.AccountService) gin.HandlerFunc {
 
 		appErr = service.DeleteAccount(ctx, reqMetadata, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[bool]{
@@ -94,14 +98,15 @@ func deleteAccount(service services.AccountService) gin.HandlerFunc {
 func checkAccountExist(service services.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
+
 		pgID, appErr := services.ToPgUUID(id)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		result, appErr := service.CheckAccountExist(ctx, pgID)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
@@ -117,20 +122,20 @@ func changeEmail(service services.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input dto.ChangeEmailRequest
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		result, appErr := service.ChangeEmail(ctx, input, reqMetadata, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
@@ -146,20 +151,20 @@ func changePassword(service services.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input dto.ChangePasswordRequest
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		appErr = service.ChangePassword(ctx, input, reqMetadata, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[bool]{
@@ -173,26 +178,53 @@ func generateScopedToken(service services.AccountService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input dto.GenerateScopedTokenRequest
 		if err := ctx.ShouldBindJSON(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		result, appErr := service.GenerateScopedToken(ctx, input, reqMetadata, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*dto.GenerateScopedTokenResult]{
 			Success: true,
 			Message: "Scoped token generated successfully",
 			Data:    result,
+		})
+	}
+}
+
+func signOutHandler(service services.AccountService) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var input dto.SignoutRequest
+		if err := ctx.ShouldBindJSON(&input); err != nil {
+			utils.HandleBindError(ctx, err)
+			return
+		}
+
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
+		if appErr != nil {
+			utils.HandleServiceError(ctx, appErr)
+			return
+		}
+
+		appErr = service.Signout(ctx, reqMetadata, authMetadata)
+		if appErr != nil {
+			utils.HandleServiceError(ctx, appErr)
+			return
+		}
+		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*dto.GenerateScopedTokenResult]{
+			Success: true,
+			Message: "Signed out successfully",
 		})
 	}
 }

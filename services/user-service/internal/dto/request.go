@@ -56,6 +56,10 @@ type SignupRequest struct {
 	Metadata Metadata `json:"metadata" binding:"required"`
 }
 
+type SignoutRequest struct {
+	Metadata Metadata `json:"metadata" binding:"required"`
+}
+
 // --------- PASSWORDS ----------
 
 type RequestPasswordResetRequest struct {

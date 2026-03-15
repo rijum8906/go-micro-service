@@ -1,8 +1,9 @@
 # Stage 1: Build
 FROM golang:1.25-bookworm AS builder
 WORKDIR /app
-COPY . .
+COPY ./go.mod /app/go.mod
 RUN go mod download
+COPY . .
 RUN go build -o user-service ./cmd/main.go
 
 # Stage 2: Final Image

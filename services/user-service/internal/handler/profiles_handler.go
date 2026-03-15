@@ -8,6 +8,7 @@ import (
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/middleware"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/services"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 func SetupProfilesHandlers(router *gin.RouterGroup, service services.ProfileService, middlewareService middleware.Middleware) {
@@ -29,7 +30,7 @@ func getProfile(service services.ProfileService) gin.HandlerFunc {
 		profileID := ctx.Param("profile_id")
 		result, err := service.GetProfile(ctx, profileID)
 		if err != nil {
-			ctx.JSON(err.StatusCode, parseAppError(err))
+			utils.HandleServiceError(ctx, err)
 			return
 		}
 		ctx.JSON(http.StatusOK, result)
@@ -39,22 +40,21 @@ func getProfile(service services.ProfileService) gin.HandlerFunc {
 func createProfile(service services.ProfileService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var input dto.CreateProfileRequest
-		// 1. Use ShouldBind instead of ShouldBindJSON for multipart/form-data
 		if err := ctx.ShouldBind(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		result, appErr := service.CreateProfile(ctx, input, reqMetadata, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*db.Profile]{
@@ -80,20 +80,20 @@ func updateProfile(service services.ProfileService) gin.HandlerFunc {
 
 		// 1. Use ShouldBind instead of ShouldBindJSON for multipart/form-data
 		if err := ctx.ShouldBind(&input); err != nil {
-			handleBindError(ctx, err)
+			utils.HandleBindError(ctx, err)
 			return
 		}
 
-		reqMetadata := extractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		result, appErr := service.UpdateProfile(ctx, input, reqMetadata, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*db.Profile]{
@@ -108,15 +108,15 @@ func deleteProfile(service services.ProfileService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		profileID := ctx.Param("profile_id")
 
-		authMetadata, appErr := extractAuthzMeatadata(ctx)
+		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
 		appErr = service.DeleteProfile(ctx, profileID, authMetadata)
 		if appErr != nil {
-			ctx.JSON(appErr.StatusCode, parseAppError(appErr))
+			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 		ctx.JSON(http.StatusOK, dto.BaseSuccessResponse[*db.Profile]{

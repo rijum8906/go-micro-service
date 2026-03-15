@@ -13,6 +13,7 @@ import (
 	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 // ToPgUUID converts a string to pgtype.UUID or returns a professional 400 error.
@@ -58,7 +59,7 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 
 	// 4. Persistence: Create the Refresh Session
 	// Note: In a larger app, you might use a transaction here.
-	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
+	createdSession, err := s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
 		RefreshToken: refreshToken,
 		UserAgent:    reqMetadata.UserAgent,
@@ -71,7 +72,7 @@ func (s *authService) Signin(ctx context.Context, data dto.SigninRequest, reqMet
 	}
 
 	// 5. Token Generation
-	accessToken, err2 := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
+	accessToken, err2 := s.utilsConfig.JwtService.IssueToken(ctx, utils.GenerateRedisLoginKey(account.ID.String(), createdSession.DeviceID))
 	if err2 != nil {
 		return nil, appError.ErrInternal.WithInternal(err2)
 	}
@@ -124,7 +125,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
-	_, err = s.q.CreateSession(ctx, db.CreateSessionParams{
+	createdSession, err := s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
 		RefreshToken: refreshToken,
 		UserAgent:    reqMetadata.UserAgent,
@@ -136,7 +137,7 @@ func (s *authService) SignUp(ctx context.Context, data dto.SignupRequest, reqMet
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
-	accessToken, appErr := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
+	accessToken, appErr := s.utilsConfig.JwtService.IssueToken(ctx, utils.GenerateRedisLoginKey(account.ID.String(), createdSession.DeviceID))
 	if appErr != nil {
 		return nil, appError.ErrInternal.WithInternal(appErr)
 	}
@@ -162,7 +163,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data dto.Request
 	}
 
 	// Create a short-lived scoped token for the reset action
-	_, appErr := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID))
+	_, appErr := s.utilsConfig.JwtService.IssueToken(ctx, utils.FormatUUID(account.ID))
 	if appErr != nil {
 		return appErr
 	}
@@ -246,7 +247,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data dto.Req
 		return appError.NewAppError(http.StatusBadRequest, "email already verified", []appError.Error{})
 	}
 
-	if _, appErr := s.utilsConfig.JwtService.IssueToken(ctx, FormatUUID(account.ID)); appErr != nil {
+	if _, appErr := s.utilsConfig.JwtService.IssueToken(ctx, utils.FormatUUID(account.ID)); appErr != nil {
 		return appErr
 	}
 

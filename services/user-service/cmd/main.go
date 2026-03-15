@@ -87,7 +87,7 @@ func main() {
 		JwtService:  jwtService,
 	})
 
-	s3Storage, err := storage.NewS3Storage(
+	s3Storage := storage.NewS3StorageService(
 		ctx,
 		env.StorageEndpoint,
 		env.StorageAccessKey,
@@ -95,9 +95,6 @@ func main() {
 		env.StorageBucket,
 		env.StoragePublicKey,
 	)
-	if err != nil {
-		panic(err)
-	}
 	s3Storage.CreateBucket(ctx, env.StorageBucket)
 
 	utilsCfg := &services.UtilsConfig{

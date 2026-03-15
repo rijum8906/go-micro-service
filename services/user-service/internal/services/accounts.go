@@ -11,6 +11,7 @@ import (
 	"github.com/rijum8906/go-micro-service/packages/common/jwt"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/dto"
+	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 func (s *accountService) DeleteAccount(
@@ -203,4 +204,13 @@ func (s *accountService) GenerateScopedToken(
 	return &dto.GenerateScopedTokenResult{
 		Token: token,
 	}, nil
+}
+
+func (s *accountService) Signout(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError {
+	redisKey := utils.GenerateRedisLoginKey(authzMetadata.UserID.String(), reqMetadata.DeviceID)
+	err := s.utilsConfig.JwtService.RevokeSession(ctx, redisKey)
+	if err != nil {
+		return errors.ErrInternal.WithInternal(err)
+	}
+	return nil
 }

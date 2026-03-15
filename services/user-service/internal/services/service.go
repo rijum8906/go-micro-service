@@ -13,6 +13,7 @@ import (
 type AuthService interface {
 	Signin(ctx context.Context, dto dto.SigninRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, *errors.AppError)
 	SignUp(ctx context.Context, dto dto.SignupRequest, reqMetadata dto.RequestMetadata) (*dto.AuthResponse, *errors.AppError)
+
 	RequestEmailVerification(ctx context.Context, dto dto.RequestEmailVerificationRequest, reqMetadata dto.RequestMetadata) *errors.AppError
 	RequestPasswordReset(ctx context.Context, dto dto.RequestPasswordResetRequest, reqMetadata dto.RequestMetadata) *errors.AppError
 	VerifyEmail(ctx context.Context, dto dto.VerifyEmailRequest, reqMetadata dto.RequestMetadata) *errors.AppError
@@ -39,6 +40,7 @@ func NewAuth(queries *db.Queries, cfg *UtilsConfig, env *env.Env) AuthService {
 }
 
 type AccountService interface {
+	Signout(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
 	CheckAccountExist(ctx context.Context, id pgtype.UUID) (*dto.CheckAccountExistResult, *errors.AppError)
 	DeleteAccount(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) *errors.AppError
 	MyAccount(ctx context.Context, reqMetadata dto.RequestMetadata, authzMetadata dto.AuthzMetadata) (*dto.MyAccountResult, *errors.AppError)
