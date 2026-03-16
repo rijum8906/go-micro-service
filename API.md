@@ -354,7 +354,7 @@ Authorization: Bearer YOUR_TOKEN_HERE
   "success": true,
   "message": "Email changed successfully",
   "data": {
-    "email": "test@example.com
+    "email": "test@example.com"
   }
 }
 ```
@@ -415,7 +415,7 @@ Authorization: Bearer YOUR_TOKEN_HERE
 ```json
 {
   "success": true,
-  "message": "Account deleted successfully"",
+  "message": "Account deleted successfully",
 }
 ```
 
