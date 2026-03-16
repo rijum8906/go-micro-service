@@ -14,8 +14,7 @@ type UpdateProfileRequest struct {
 }
 
 type GetProfileRequest struct {
-	ProfileID string   `form:"profileId" binding:"required,uuid4"`
-	Metadata  Metadata `form:"metadata"  binding:"required"`
+	ProfileID string `form:"profileId" binding:"required,uuid4"`
 }
 
 type DeleteProfileRequest struct {
