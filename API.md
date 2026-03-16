@@ -73,7 +73,7 @@ http://localhost:8080/api/v1
 {
   "email": "test@example.com",
   "password": "password123",
-    "metadata": {
+  "metadata": {
     "deviceId": "something_id_ksaal23ua"
   }
 }
@@ -100,6 +100,102 @@ http://localhost:8080/api/v1
 }
 ```
 
+### Request Email Verification
+
+**Endpoint:** `POST /auth/request-email-verification`
+
+**Request Body:**
+
+```json
+{
+  "email": "test@example.com",
+  "metadata": {
+    "deviceId": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Verification email sent"
+}
+```
+
+### Request Password Reset
+
+**Endpoint:** `POST /auth/request-password-reset`
+
+**Request Body:**
+
+```json
+{
+  "email": "test@example.com",
+  "metadata": {
+    "deviceId": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Successful message"
+}
+```
+
+### verify email
+
+**endpoint:** `post /auth/verify-email`
+
+**request body:**
+
+```json
+{
+  "token": "your-verification-token",
+  "metadata": {
+    "deviceid": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Verification email sent"
+}
+```
+
+### Reset Password
+
+**endpoint:** `post /auth/verify-email`
+
+**request body:**
+
+```json
+{
+  "token": "your-verification-token",
+  "metadata": {
+    "deviceid": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Successful message"
+}
+```
+
 ---
 
 ## Authorization
@@ -110,7 +206,7 @@ http://localhost:8080/api/v1
 
 **Headers:**
 
-```
+```typescript
 Authorization: Bearer YOUR_TOKEN_HERE
 ```
 
@@ -125,7 +221,7 @@ Authorization: Bearer YOUR_TOKEN_HERE
 
 ---
 
-## Users
+## Profiles
 
 ### Get User Profile (Public)
 
@@ -141,15 +237,13 @@ Authorization: Bearer YOUR_TOKEN_HERE
 }
 ```
 
----
-
 ### Update Profile
 
 **Endpoint:** `PUT /profiles/:id`
 
 **Headers:**
 
-```
+```typescript
 Authorization: Bearer YOUR_TOKEN_HERE
 ```
 
@@ -173,6 +267,35 @@ Authorization: Bearer YOUR_TOKEN_HERE
     "firstName": "John",
     "lastName": "Doe",
     "avatarUrl": "https://example.com/avatar.jpg"
+}
+```
+
+### Delete Profile
+
+**Endpoint:** `DELETE /profiles/:id`
+
+**Headers:**
+
+```typescript
+Authorization: Bearer YOUR_TOKEN_HERE
+```
+
+**Request Body:**
+
+```json
+{
+  "metadata": {
+    "deviceId": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Profile deleted successfully"
 }
 ```
 
