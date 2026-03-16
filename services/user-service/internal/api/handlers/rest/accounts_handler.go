@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	httpRes "github.com/rijum8906/go-micro-service/packages/common/response"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
@@ -20,7 +19,7 @@ func SetupAccountsHandlers(router *gin.RouterGroup, service account.AccountServi
 	router.PUT("/change-email", middlewareService.AuthMiddleware(), changeEmail(service))
 	router.PUT("/change-password", middlewareService.AuthMiddleware(), changePassword(service))
 	router.DELETE("/:id", middlewareService.AuthMiddleware(), deleteAccount(service))
-	router.GET("/my-account", middlewareService.AuthMiddleware(), myAccount(service))
+	router.GET("/me", middlewareService.AuthMiddleware(), myAccount(service))
 	router.POST("/generate-scoped-token", middlewareService.AuthMiddleware(), generateScopedToken(service))
 }
 
@@ -39,13 +38,17 @@ func myAccount(service account.AccountService) gin.HandlerFunc {
 			return
 		}
 
-		account, appErr := service.MyAccount(ctx, reqMetadata, authMetadata)
+		myAccount, appErr := service.MyAccount(ctx, reqMetadata, authMetadata)
 		if appErr != nil {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
 
-		ctx.JSON(http.StatusOK, account)
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*response.MyAccountRespose]{
+			Success: true,
+			Message: "Account deleted successfully",
+			Data:    myAccount,
+		})
 	}
 }
 
@@ -84,13 +87,7 @@ func deleteAccount(service account.AccountService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
-		ctx.JSON(http.DefaultMaxHeaderBytes, httpRes.NewError("Fuck you", "FUCK_YOU").WithFieldErrors([]httpRes.FieldError{
-			{
-				Field:   "fuck",
-				Message: "you",
-			},
-		}))
-		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[bool]{
+		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[any]{
 			Success: true,
 			Message: "Account deleted successfully",
 		})

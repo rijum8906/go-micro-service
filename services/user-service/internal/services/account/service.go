@@ -127,13 +127,8 @@ func (s *accountService) MyAccount(
 	ctx context.Context,
 	reqMetadata request.RequestMetadata,
 	authzMetadata request.AuthzMetadata,
-) (*response.MyAccountResult, *errors.AppError) {
+) (*response.MyAccountRespose, *errors.AppError) {
 	account, err := s.q.GetAccount(ctx, authzMetadata.UserID)
-	if err != nil {
-		return nil, errors.ErrDBError.WithInternal(err)
-	}
-
-	profiles, err := s.q.GetProfilesByAccountID(ctx, authzMetadata.UserID)
 	if err != nil {
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
@@ -143,16 +138,13 @@ func (s *accountService) MyAccount(
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
 
-	oAuths, err := s.q.GetOAuthsByAccountID(ctx, authzMetadata.UserID)
-	if err != nil {
-		return nil, errors.ErrDBError.WithInternal(err)
-	}
-
-	return &response.MyAccountResult{
-		Account:         &account,
-		Profiles:        &profiles,
-		AccountSecurity: &accountSecuriry,
-		OAuths:          &oAuths,
+	return &response.MyAccountRespose{
+		ID:               account.ID,
+		Email:            account.Email,
+		IsEmailVerified:  accountSecuriry.IsEmailVerified,
+		TwoFactorEnabled: accountSecuriry.TwoFactorEnabled,
+		CreatedAt:        account.CreatedAt,
+		UpdatedAt:        account.UpdatedAt,
 	}, nil
 }
 
