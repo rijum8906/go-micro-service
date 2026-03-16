@@ -20,6 +20,28 @@ http://localhost:8080/api/v1
 }
 ```
 
+### Base Authorization Type
+
+```go
+const (
+  PassAuthzType = "password_authorization"
+  MFAAuthzType  = "mfa_authorization"
+)
+```
+
+### Base Scope Actions
+
+```go
+const (
+ ActionChangePassword = "change_password"
+ ActionChangeEmail    = "change_email"
+ ActionChangeName     = "change_name"
+ ActionChangePhone    = "change_phone"
+ ActionChangeRole     = "change_role"
+ ActionChangeStatus   = "change_status"
+)
+```
+
 ## Authentication
 
 ### Register User
@@ -300,3 +322,160 @@ Authorization: Bearer YOUR_TOKEN_HERE
 ```
 
 ---
+
+## Accounts
+
+### Change Email
+
+**Endpoint:** `PUT /accounts/change-email`
+
+**Headers:**
+
+```typescript
+Authorization: Bearer YOUR_TOKEN_HERE
+```
+
+**Request Body:**
+
+```json
+{
+  "token": "your-verification-token",
+  "newEmail": "test@example.com",
+  "metadata": {
+    "deviceId": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Email changed successfully",
+  "data": {
+    "email": "test@example.com
+  }
+}
+```
+
+### Change Password
+
+**Endpoint:** `PUT /accounts/change-password`
+
+**Headers:**
+
+```typescript
+Authorization: Bearer YOUR_TOKEN_HERE
+```
+
+**Request Body:**
+
+```json
+{
+  "token": "your-verification-token",
+  "newPassword": "test@example.com",
+  "metadata": {
+    "deviceId": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Password changed successfully",
+}
+```
+
+### Delete Account
+
+**Endpoint:** `DELETE /accounts/:id`
+
+**Headers:**
+
+```typescript
+Authorization: Bearer YOUR_TOKEN_HERE
+```
+
+**Request Body:**
+
+```json
+{
+  "metadata": {
+    "deviceId": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "success": true,
+  "message": "Account deleted successfully"",
+}
+```
+
+### My Account
+
+**Endpoint:** `GET /accounts/me`
+
+**Headers:**
+
+```typescript
+Authorization: Bearer YOUR_TOKEN_HERE
+```
+
+**Response Body:**
+
+```json
+{
+  "id": "123xyz123xyz",
+  "email": "test@example.com",
+  "isEmailVerified": true,
+  "twoFactorEnabled": false,
+  "createdAt": "2023-09-20T12:34:56Z",
+  "updatedAt": "2023-09-20T12:34:56Z"
+}
+```
+
+### Generate Scoped Token
+
+**Endpoint:** `POST /accounts/generate-scoped-token`
+
+**Headers:**
+
+```typescript
+Authorization: Bearer YOUR_TOKEN_HERE
+```
+
+**Request Body:**
+
+```json
+{
+  "scope": "change_password", // base scope actions
+  "authorization": {
+    "type": "password_authorization", // base authorization type
+    "value": "password"
+  },
+  "metadata": {
+    "deviceId": "something_id_ksaal23ua"
+  }
+}
+```
+
+**Response Body:**
+
+```json
+{
+  "id": "123xyz123xyz",
+  "email": "test@example.com",
+  "isEmailVerified": true,
+  "twoFactorEnabled": false,
+  "createdAt": "2023-09-20T12:34:56Z",
+  "updatedAt": "2023-09-20T12:34:56Z"
+}
+```
