@@ -1,8 +1,6 @@
 // Package response contains response data transfer objects for the auth service.
 package response
 
-import db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-
 // BaseSuccessResponse represents a consistent API response envelope.
 type BaseSuccessResponse[T any] struct {
 	Success bool   `json:"success"`
@@ -21,15 +19,4 @@ type BaseErrorResponse struct {
 type BaseResponseError struct {
 	Field   string `json:"field,omitempty"`
 	Message string `json:"message"`
-}
-
-type Token struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-type AuthResponse struct {
-	Account  *db.Account   `json:"account"`
-	Profiles *[]db.Profile `json:"profiles"`
-	Token    *Token        `json:"token"`
 }

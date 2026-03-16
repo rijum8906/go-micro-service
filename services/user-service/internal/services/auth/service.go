@@ -15,8 +15,6 @@ import (
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
-// ToPgUUID converts a string to pgtype.UUID or returns a professional 400 error.
-// Useful for bridging between domain strings and database-specific types.
 // --- Authentication Logic ---
 
 // Signin handles the full authentication flow: verification, session creation, and token issuance.
@@ -66,10 +64,25 @@ func (s *authService) Signin(ctx context.Context, data request.SigninRequest, re
 		return nil, appError.ErrInternal.WithInternal(err2)
 	}
 
+	parsedProfiles := make([]*response.ProfileResponse, 0, len(profiles))
+
+	for _, p := range profiles {
+		parsedProfiles = append(parsedProfiles, &response.ProfileResponse{
+			ID:          p.ID,
+			FirstName:   p.FirstName,
+			LastName:    p.LastName,
+			DisplayName: p.DisplayName,
+			AvatarUrl:   p.AvatarUrl,
+		})
+	}
+
 	return &response.AuthResponse{
-		Account:  &account,
-		Profiles: &profiles,
-		Token:    &response.Token{AccessToken: accessToken, RefreshToken: refreshToken},
+		Account: &response.AccountResponse{
+			ID:    account.ID,
+			Email: account.Email,
+		},
+		Profiles: parsedProfiles,
+		Token:    &response.TokenResponse{AccessToken: accessToken, RefreshToken: refreshToken},
 	}, nil
 }
 
@@ -131,10 +144,23 @@ func (s *authService) SignUp(ctx context.Context, data request.SignupRequest, re
 		return nil, appError.ErrInternal.WithInternal(appErr)
 	}
 
+	parsedProfiles := make([]*response.ProfileResponse, 0, 1)
+
+	parsedProfiles = append(parsedProfiles, &response.ProfileResponse{
+		ID:          profile.ID,
+		FirstName:   profile.FirstName,
+		LastName:    profile.LastName,
+		DisplayName: profile.DisplayName,
+		AvatarUrl:   profile.AvatarUrl,
+	})
+
 	return &response.AuthResponse{
-		Account:  &account,
-		Profiles: &[]db.Profile{profile},
-		Token:    &response.Token{AccessToken: accessToken, RefreshToken: refreshToken},
+		Account: &response.AccountResponse{
+			ID:    account.ID,
+			Email: account.Email,
+		},
+		Profiles: parsedProfiles,
+		Token:    &response.TokenResponse{AccessToken: accessToken, RefreshToken: refreshToken},
 	}, nil
 }
 
