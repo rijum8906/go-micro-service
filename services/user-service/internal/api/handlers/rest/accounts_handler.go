@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	httpRes "github.com/rijum8906/go-micro-service/packages/common/response"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
@@ -16,16 +17,11 @@ func SetupAccountsHandlers(router *gin.RouterGroup, service account.AccountServi
 	router.GET("/:id/exists", checkAccountExist(service))
 
 	// Private routes
-	authorized := router.Group("/")
-	authorized.Use(middlewareService.AuthMiddleware())
-	{
-		authorized.POST("/signout", signOutHandler(service))
-		authorized.PUT("/change-email", changeEmail(service))
-		authorized.PUT("/change-password", changePassword(service))
-		authorized.DELETE("/:id", deleteAccount(service))
-		authorized.GET("/my-account", myAccount(service))
-		authorized.POST("/generate-scoped-token", generateScopedToken(service))
-	}
+	router.PUT("/change-email", middlewareService.AuthMiddleware(), changeEmail(service))
+	router.PUT("/change-password", middlewareService.AuthMiddleware(), changePassword(service))
+	router.DELETE("/:id", middlewareService.AuthMiddleware(), deleteAccount(service))
+	router.GET("/my-account", middlewareService.AuthMiddleware(), myAccount(service))
+	router.POST("/generate-scoped-token", middlewareService.AuthMiddleware(), generateScopedToken(service))
 }
 
 func myAccount(service account.AccountService) gin.HandlerFunc {
@@ -88,6 +84,12 @@ func deleteAccount(service account.AccountService) gin.HandlerFunc {
 			utils.HandleServiceError(ctx, appErr)
 			return
 		}
+		ctx.JSON(http.DefaultMaxHeaderBytes, httpRes.NewError("Fuck you", "FUCK_YOU").WithFieldErrors([]httpRes.FieldError{
+			{
+				Field:   "fuck",
+				Message: "you",
+			},
+		}))
 		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[bool]{
 			Success: true,
 			Message: "Account deleted successfully",
@@ -198,33 +200,6 @@ func generateScopedToken(service account.AccountService) gin.HandlerFunc {
 			Success: true,
 			Message: "Scoped token generated successfully",
 			Data:    result,
-		})
-	}
-}
-
-func signOutHandler(service account.AccountService) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		var input request.SignoutRequest
-		if err := ctx.ShouldBindJSON(&input); err != nil {
-			utils.HandleBindError(ctx, err)
-			return
-		}
-
-		reqMetadata := utils.ExtractReqMetadata(input.Metadata.DeviceID, ctx)
-		authMetadata, appErr := utils.ExtractAuthzMeatadata(ctx)
-		if appErr != nil {
-			utils.HandleServiceError(ctx, appErr)
-			return
-		}
-
-		appErr = service.Signout(ctx, reqMetadata, authMetadata)
-		if appErr != nil {
-			utils.HandleServiceError(ctx, appErr)
-			return
-		}
-		ctx.JSON(http.StatusOK, response.BaseSuccessResponse[*response.GenerateScopedTokenResult]{
-			Success: true,
-			Message: "Signed out successfully",
 		})
 	}
 }

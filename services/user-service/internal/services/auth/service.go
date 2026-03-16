@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
@@ -18,16 +17,6 @@ import (
 
 // ToPgUUID converts a string to pgtype.UUID or returns a professional 400 error.
 // Useful for bridging between domain strings and database-specific types.
-func ToPgUUID(idStr string) (pgtype.UUID, *appError.AppError) {
-	parsed, err := uuid.Parse(idStr)
-	if err != nil {
-		return pgtype.UUID{}, appError.NewAppError(http.StatusBadRequest, "bad request", []appError.Error{
-			{Field: "id", Message: "The provided ID is not a valid UUID format."},
-		})
-	}
-	return pgtype.UUID{Bytes: parsed, Valid: true}, nil
-}
-
 // --- Authentication Logic ---
 
 // Signin handles the full authentication flow: verification, session creation, and token issuance.
@@ -186,7 +175,7 @@ func (s *authService) ResetPassword(ctx context.Context, data request.ResetPassw
 	}
 
 	// 3. Map Domain ID to DB ID
-	pgUUID, appErr := ToPgUUID(claims.UserID)
+	pgUUID, appErr := utils.StrIDToPgUUID(claims.UserID)
 	if appErr != nil {
 		return appErr
 	}
@@ -208,7 +197,7 @@ func (s *authService) VerifyEmail(ctx context.Context, data request.VerifyEmailR
 		return appErr
 	}
 
-	pgUUID, appErr := ToPgUUID(claims.UserID)
+	pgUUID, appErr := utils.StrIDToPgUUID(claims.UserID)
 	if appErr != nil {
 		return appErr
 	}
@@ -251,5 +240,14 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data request
 		return appErr
 	}
 
+	return nil
+}
+
+func (s *authService) Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *appError.AppError {
+	redisKey := utils.GenerateRedisLoginKey(authzMetadata.UserID.String(), reqMetadata.DeviceID)
+	err := s.utilsConfig.JwtService.RevokeSession(ctx, redisKey)
+	if err != nil {
+		return appError.ErrInternal.WithInternal(err)
+	}
 	return nil
 }

@@ -13,7 +13,6 @@ import (
 )
 
 type AccountService interface {
-	Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
 	CheckAccountExist(ctx context.Context, id pgtype.UUID) (*response.CheckAccountExistResult, *errors.AppError)
 	DeleteAccount(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
 	MyAccount(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.MyAccountResult, *errors.AppError)
