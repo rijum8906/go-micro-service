@@ -1,2 +1,2 @@
-# go-micro-service
+# relay
 a microservice
