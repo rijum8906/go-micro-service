@@ -9,7 +9,7 @@ extend type Mutation {
     resetPassword(input: ResetPasswordInput!): Response! @public
     
     # Email verification
-    requestEmailVerification: Response! @authenticated @rateLimit(limit: 3, duration: 3600)
+    requestEmailVerification(input: RequestEmailVerificationInput!): Response! @authenticated @rateLimit(limit: 3, duration: 3600)
     verifyEmail(input: VerifyEmailInput!): Response! @public
     
 }

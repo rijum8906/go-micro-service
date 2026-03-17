@@ -91,7 +91,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		Empty                    func(childComplexity int) int
-		RequestEmailVerification func(childComplexity int) int
+		RequestEmailVerification func(childComplexity int, input model.RequestEmailVerificationInput) int
 		RequestPasswordReset     func(childComplexity int, input model.RequestPasswordResetInput) int
 		ResetPassword            func(childComplexity int, input model.ResetPasswordInput) int
 		Signin                   func(childComplexity int, input model.SigninInput) int
@@ -329,7 +329,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.complexity.Mutation.RequestEmailVerification(childComplexity), true
+		args, err := ec.field_Mutation_requestEmailVerification_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestEmailVerification(childComplexity, args["input"].(model.RequestEmailVerificationInput)), true
 
 	case "Mutation.requestPasswordReset":
 		if e.complexity.Mutation.RequestPasswordReset == nil {
@@ -456,7 +461,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDateRangeInput,
 		ec.unmarshalInputMetadataInput,
 		ec.unmarshalInputPaginationInput,
-		ec.unmarshalInputRequestEmailVerification,
+		ec.unmarshalInputRequestEmailVerificationInput,
 		ec.unmarshalInputRequestPasswordResetInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputSigninInput,
@@ -650,9 +655,7 @@ scalar JSON
 scalar Email
 scalar URL
 `, BuiltIn: false},
-	{Name: "../schema/schema.graphqls", Input: `# graph/schema.graphqls
-
-schema {
+	{Name: "../schema/schema.graphqls", Input: `schema {
     query: Query
     mutation: Mutation
 }
@@ -693,9 +696,9 @@ input ResetPasswordInput {
     metadata: MetadataInput!
 }
 
-input RequestEmailVerification {
-  email: String!
-  metadata: MetadataInput!
+input RequestEmailVerificationInput {
+    email: Email!
+    metadata: MetadataInput!
 }
 
 input VerifyEmailInput {
@@ -714,7 +717,7 @@ input VerifyEmailInput {
     resetPassword(input: ResetPasswordInput!): Response! @public
     
     # Email verification
-    requestEmailVerification: Response! @authenticated @rateLimit(limit: 3, duration: 3600)
+    requestEmailVerification(input: RequestEmailVerificationInput!): Response! @authenticated @rateLimit(limit: 3, duration: 3600)
     verifyEmail(input: VerifyEmailInput!): Response! @public
     
 }

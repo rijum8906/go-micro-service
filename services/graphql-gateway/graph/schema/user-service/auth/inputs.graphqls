@@ -27,9 +27,9 @@ input ResetPasswordInput {
     metadata: MetadataInput!
 }
 
-input RequestEmailVerification {
-  email: String!
-  metadata: MetadataInput!
+input RequestEmailVerificationInput {
+    email: Email!
+    metadata: MetadataInput!
 }
 
 input VerifyEmailInput {

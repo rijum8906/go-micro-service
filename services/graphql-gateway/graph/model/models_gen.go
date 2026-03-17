@@ -85,7 +85,7 @@ type PaginationInput struct {
 type Query struct {
 }
 
-type RequestEmailVerification struct {
+type RequestEmailVerificationInput struct {
 	Email    string         `json:"email"`
 	Metadata *MetadataInput `json:"metadata"`
 }
