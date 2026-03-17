@@ -25,7 +25,7 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/rijum8906/go-micro-service/packages/common v0.0.8
-	github.com/rs/cors v1.11.1 // indirect
+	github.com/rs/cors v1.11.1
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/urfave/cli/v3 v3.7.0 // indirect
 	golang.org/x/mod v0.33.0 // indirect
