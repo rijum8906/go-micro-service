@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	UserServiceBaseURl = "http://user-service:8906/api/v1"
+	UserServiceBaseURL = "http://user-service:8906/api/v1"
 )
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
 
 	logger := slog.NewLogLogger(slog.NewJSONHandler(os.Stdout, nil), slog.LevelDebug)
 	httpClient := client.NewClient(&client.ClientConfig{
-		BaseURL:       UserServiceBaseURl,
+		BaseURL:       UserServiceBaseURL,
 		Timeout:       30 * time.Second,
 		MaxRetries:    3,
 		RetryWaitTime: 100 * time.Millisecond,
