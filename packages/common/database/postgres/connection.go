@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/rijum8906/go-micro-service/packages/common/errors"
+	"github.com/rijum8906/relay/packages/common/errors"
 )
 
 type Config struct {

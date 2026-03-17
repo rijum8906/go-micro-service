@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/rijum8906/go-micro-service/packages/common/errors"
+	"github.com/rijum8906/relay/packages/common/errors"
 )
 
 const (
