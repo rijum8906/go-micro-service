@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { updateProfile as updateProfileApi } from '@/api/auth'
 import { useAuthStore } from '@/store/auth'
-import { generateDeviceId } from '@/lib/device'
 import { useForm } from '@tanstack/react-form'
 
 export default function EditProfilePage() {
@@ -27,27 +26,27 @@ export default function EditProfilePage() {
       avatar: null as File | null,
     },
     onSubmit: async ({ value }) => {
-      if (!profile?.id) return
+  if (!profile?.id) return
 
-      const formData = new FormData()
-      if (value.firstName && value.firstName !== profile.firstName) formData.append('firstName', value.firstName)
-      if (value.lastName && value.lastName !== profile.lastName) formData.append('lastName', value.lastName)
-      if (value.avatar) formData.append('avatar', value.avatar)
-      formData.append('metadata', JSON.stringify({ deviceId: generateDeviceId() }))
+  const res = await updateProfileApi(profile.id, {
+    firstName: value.firstName,
+    lastName: value.lastName,
+    displayName: value.displayName,
+    avatar: value.avatar ?? undefined,
+  })
 
-      const res = await updateProfileApi(profile.id, formData)
-      if (res.success) {
-        updateProfileStore(profile.id, {
-          firstName: value.firstName,
-          lastName: value.lastName,
-          avatarUrl: res.data.avatarUrl,
-        })
-        toast.success('Profile updated successfully')
-        router.push('/my-account')
-      } else {
-        toast.error(res.message)
-      }
-    },
+  if (res.success) {
+    updateProfileStore(profile.id, {
+      firstName: value.firstName,
+      lastName: value.lastName,
+      avatarUrl: res.data.avatarUrl,
+    })
+    toast.success('Profile updated successfully')
+    router.push('/my-account')
+  } else {
+    toast.error(res.message)
+  }
+},
   })
 
   if (!isSignedIn || !profile) return null
