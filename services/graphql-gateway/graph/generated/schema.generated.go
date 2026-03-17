@@ -23,7 +23,7 @@ type MutationResolver interface {
 	Signout(ctx context.Context, input model.SignoutInput) (*model.Response, error)
 	RequestPasswordReset(ctx context.Context, input model.RequestPasswordResetInput) (*model.Response, error)
 	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.Response, error)
-	RequestEmailVerification(ctx context.Context) (*model.Response, error)
+	RequestEmailVerification(ctx context.Context, input model.RequestEmailVerificationInput) (*model.Response, error)
 	VerifyEmail(ctx context.Context, input model.VerifyEmailInput) (*model.Response, error)
 }
 type QueryResolver interface {
@@ -33,6 +33,17 @@ type QueryResolver interface {
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_requestEmailVerification_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestEmailVerificationInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestEmailVerificationInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_requestPasswordReset_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
@@ -510,7 +521,8 @@ func (ec *executionContext) _Mutation_requestEmailVerification(ctx context.Conte
 		field,
 		ec.fieldContext_Mutation_requestEmailVerification,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Mutation().RequestEmailVerification(ctx)
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RequestEmailVerification(ctx, fc.Args["input"].(model.RequestEmailVerificationInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -549,7 +561,7 @@ func (ec *executionContext) _Mutation_requestEmailVerification(ctx context.Conte
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_requestEmailVerification(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_requestEmailVerification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -564,6 +576,17 @@ func (ec *executionContext) fieldContext_Mutation_requestEmailVerification(_ con
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Response", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_requestEmailVerification_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }

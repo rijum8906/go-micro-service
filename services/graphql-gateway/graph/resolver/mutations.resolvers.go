@@ -38,7 +38,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 }
 
 // RequestEmailVerification is the resolver for the requestEmailVerification field.
-func (r *mutationResolver) RequestEmailVerification(ctx context.Context) (*model.Response, error) {
+func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input model.RequestEmailVerificationInput) (*model.Response, error) {
 	panic(fmt.Errorf("not implemented: RequestEmailVerification - requestEmailVerification"))
 }
 
