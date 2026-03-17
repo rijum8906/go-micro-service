@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/rijum8906/relay/proto/common/v1;common";
+
+// Error codes
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+
+  // Client errors (4xx)
+  ERROR_CODE_BAD_REQUEST = 40000;
+  ERROR_CODE_UNAUTHORIZED = 40100;
+  ERROR_CODE_FORBIDDEN = 40300;
+  ERROR_CODE_NOT_FOUND = 40400;
+  ERROR_CODE_CONFLICT = 40900;
+  ERROR_CODE_VALIDATION = 42200;
+  ERROR_CODE_TOO_MANY_REQUESTS = 42900;
+
+  // Server errors (5xx)
+  ERROR_CODE_INTERNAL = 50000;
+  ERROR_CODE_SERVICE_UNAVAILABLE = 50300;
+  ERROR_CODE_DEADLINE_EXCEEDED = 50400;
+}
+
+// Validation error details
+message ValidationError {
+  string field = 1;
+  string message = 2;
+  string code = 3;
+  string value = 4;
+}
+
+// Error details for responses
+message ErrorDetails {
+  ErrorCode code = 1;
+  string message = 2;
+  string request_id = 3;
+  repeated ValidationError validation_errors = 4;
+  map<string, string> metadata = 5;
+}
+
+// Extended error info
+message ErrorInfo {
+  string reason = 1;
+  string domain = 2;
+  map<string, string> metadata = 3;
+}
+
+// Error response wrapper
+message ErrorResponse {
+  ErrorDetails error = 1;
+}
