@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
@@ -15,18 +14,6 @@ import (
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
-
-// ToPgUUID converts a string to pgtype.UUID or returns a professional 400 error.
-// Useful for bridging between domain strings and database-specific types.
-func ToPgUUID(idStr string) (pgtype.UUID, *appError.AppError) {
-	parsed, err := uuid.Parse(idStr)
-	if err != nil {
-		return pgtype.UUID{}, appError.NewAppError(http.StatusBadRequest, "bad request", []appError.Error{
-			{Field: "id", Message: "The provided ID is not a valid UUID format."},
-		})
-	}
-	return pgtype.UUID{Bytes: parsed, Valid: true}, nil
-}
 
 // --- Authentication Logic ---
 
@@ -77,10 +64,25 @@ func (s *authService) Signin(ctx context.Context, data request.SigninRequest, re
 		return nil, appError.ErrInternal.WithInternal(err2)
 	}
 
+	parsedProfiles := make([]*response.ProfileResponse, 0, len(profiles))
+
+	for _, p := range profiles {
+		parsedProfiles = append(parsedProfiles, &response.ProfileResponse{
+			ID:          p.ID,
+			FirstName:   p.FirstName,
+			LastName:    p.LastName,
+			DisplayName: p.DisplayName,
+			AvatarUrl:   p.AvatarUrl,
+		})
+	}
+
 	return &response.AuthResponse{
-		Account:  &account,
-		Profiles: &profiles,
-		Token:    &response.Token{AccessToken: accessToken, RefreshToken: refreshToken},
+		Account: &response.AccountResponse{
+			ID:    account.ID,
+			Email: account.Email,
+		},
+		Profiles: parsedProfiles,
+		Token:    &response.TokenResponse{AccessToken: accessToken, RefreshToken: refreshToken},
 	}, nil
 }
 
@@ -142,10 +144,23 @@ func (s *authService) SignUp(ctx context.Context, data request.SignupRequest, re
 		return nil, appError.ErrInternal.WithInternal(appErr)
 	}
 
+	parsedProfiles := make([]*response.ProfileResponse, 0, 1)
+
+	parsedProfiles = append(parsedProfiles, &response.ProfileResponse{
+		ID:          profile.ID,
+		FirstName:   profile.FirstName,
+		LastName:    profile.LastName,
+		DisplayName: profile.DisplayName,
+		AvatarUrl:   profile.AvatarUrl,
+	})
+
 	return &response.AuthResponse{
-		Account:  &account,
-		Profiles: &[]db.Profile{profile},
-		Token:    &response.Token{AccessToken: accessToken, RefreshToken: refreshToken},
+		Account: &response.AccountResponse{
+			ID:    account.ID,
+			Email: account.Email,
+		},
+		Profiles: parsedProfiles,
+		Token:    &response.TokenResponse{AccessToken: accessToken, RefreshToken: refreshToken},
 	}, nil
 }
 
@@ -186,7 +201,7 @@ func (s *authService) ResetPassword(ctx context.Context, data request.ResetPassw
 	}
 
 	// 3. Map Domain ID to DB ID
-	pgUUID, appErr := ToPgUUID(claims.UserID)
+	pgUUID, appErr := utils.StrIDToPgUUID(claims.UserID)
 	if appErr != nil {
 		return appErr
 	}
@@ -208,7 +223,7 @@ func (s *authService) VerifyEmail(ctx context.Context, data request.VerifyEmailR
 		return appErr
 	}
 
-	pgUUID, appErr := ToPgUUID(claims.UserID)
+	pgUUID, appErr := utils.StrIDToPgUUID(claims.UserID)
 	if appErr != nil {
 		return appErr
 	}
@@ -251,5 +266,14 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data request
 		return appErr
 	}
 
+	return nil
+}
+
+func (s *authService) Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *appError.AppError {
+	redisKey := utils.GenerateRedisLoginKey(authzMetadata.UserID.String(), reqMetadata.DeviceID)
+	err := s.utilsConfig.JwtService.RevokeSession(ctx, redisKey)
+	if err != nil {
+		return appError.ErrInternal.WithInternal(err)
+	}
 	return nil
 }

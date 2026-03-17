@@ -13,10 +13,9 @@ import (
 )
 
 type AccountService interface {
-	Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
 	CheckAccountExist(ctx context.Context, id pgtype.UUID) (*response.CheckAccountExistResult, *errors.AppError)
 	DeleteAccount(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
-	MyAccount(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.MyAccountResult, *errors.AppError)
+	MyAccount(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.MyAccountRespose, *errors.AppError)
 	ChangeEmail(ctx context.Context, data request.ChangeEmailRequest, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.ChangeEmailResult, *errors.AppError)
 	ChangePassword(ctx context.Context, data request.ChangePasswordRequest, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
 	GenerateScopedToken(ctx context.Context, data request.GenerateScopedTokenRequest, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.GenerateScopedTokenResult, *errors.AppError)

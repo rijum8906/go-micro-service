@@ -1,0 +1,19 @@
+# graph/common/inputs.graphqls
+
+input PaginationInput {
+    first: Int
+    after: String
+    last: Int
+    before: String
+    limit: Int = 20
+    offset: Int = 0
+}
+
+input DateRangeInput {
+    startDate: DateTime!
+    endDate: DateTime!
+}
+
+input MetadataInput {
+    deviceId: String!
+}

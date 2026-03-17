@@ -138,7 +138,7 @@ func main() {
 		})
 	})
 
-	handler.RegisterHandlers(authRouter, authService)
+	handler.RegisterHandlers(authRouter, authService, middlewareService)
 	handler.SetupProfilesHandlers(profilesRouter, profileService, middlewareService)
 	handler.SetupAccountsHandlers(accountRouter, accountService, middlewareService)
 

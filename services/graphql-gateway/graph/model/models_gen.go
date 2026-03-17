@@ -2,188 +2,365 @@
 
 package model
 
-type Account struct {
-	ID       string     `json:"id"`
-	Email    string     `json:"email"`
-	Profiles []*Profile `json:"profiles"`
-	CretedAt string     `json:"cretedAt"`
-	UpdedAt  string     `json:"updedAt"`
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+
+	"github.com/google/uuid"
+)
+
+type AuthAccount struct {
+	ID               uuid.UUID `json:"id"`
+	Email            string    `json:"email"`
+	IsEmailVerified  bool      `json:"isEmailVerified"`
+	TwoFactorEnabled bool      `json:"twoFactorEnabled"`
+	CreatedAt        string    `json:"createdAt"`
+	UpdatedAt        string    `json:"updatedAt"`
+	LastLoginAt      *string   `json:"lastLoginAt,omitempty"`
+	Roles            []string  `json:"roles"`
+	Permissions      []string  `json:"permissions"`
 }
 
-type AccountSecurity struct {
-	ID                 string  `json:"id"`
-	AccountID          string  `json:"accountId"`
-	IsEmailVerified    bool    `json:"isEmailVerified"`
-	EmailVerifiedAt    *string `json:"emailVerifiedAt,omitempty"`
-	TwoFactorEnabled   bool    `json:"twoFactorEnabled"`
-	TwoFactorEnabledAt *string `json:"twoFactorEnabledAt,omitempty"`
-	CretedAt           string  `json:"cretedAt"`
-	UpdedAt            string  `json:"updedAt"`
+type AuthPayload struct {
+	Account  *AuthAccount   `json:"account"`
+	Tokens   *AuthToken     `json:"tokens"`
+	Profiles []*AuthProfile `json:"profiles"`
 }
 
-type AuthResult struct {
-	Success bool            `json:"success"`
-	Message string          `json:"message"`
-	Data    *AuthResultData `json:"data,omitempty"`
-	Errors  []*BaseError    `json:"errors,omitempty"`
+type AuthProfile struct {
+	ID          string  `json:"id"`
+	FirstName   string  `json:"firstName"`
+	LastName    string  `json:"lastName"`
+	DisplayName *string `json:"displayName,omitempty"`
+	AvatarURL   *string `json:"avatarUrl,omitempty"`
 }
 
-type AuthResultData struct {
-	Account *Account             `json:"account"`
-	Tokens  *AuthResultTokenData `json:"tokens"`
-}
-
-type AuthResultTokenData struct {
+type AuthToken struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }
 
-type BaseData struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
+type DateRangeInput struct {
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
 }
 
-type BaseError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
+type Error struct {
+	Message string  `json:"message"`
+	Field   *string `json:"field,omitempty"`
 }
 
-type BaseResult struct {
-	Success bool         `json:"success"`
-	Message string       `json:"message"`
-	Data    *BaseData    `json:"data,omitempty"`
-	Errors  []*BaseError `json:"errors,omitempty"`
+type Metadata struct {
+	DeviceID   string      `json:"deviceId"`
+	DeviceType *DeviceType `json:"deviceType,omitempty"`
+	UserAgent  *string     `json:"userAgent,omitempty"`
+	IPAddress  *string     `json:"ipAddress,omitempty"`
+	Timestamp  string      `json:"timestamp"`
 }
 
-type BaseResultData struct {
-	ID string `json:"id"`
-}
-
-type FilterResult struct {
-	Limit int32  `json:"limit"`
-	Skip  *int32 `json:"skip,omitempty"`
-}
-
-type GetAccountsResult struct {
-	Success bool                   `json:"success"`
-	Message string                 `json:"message"`
-	Data    *GetAccountsResultData `json:"data,omitempty"`
-	Errors  []*BaseError           `json:"errors,omitempty"`
-}
-
-type GetAccountsResultData struct {
-	ID          string `json:"id"`
-	Email       string `json:"email"`
-	DisplayName string `json:"displayName"`
-}
-
-type GetProfileResult struct {
-	Success bool                  `json:"success"`
-	Message string                `json:"message"`
-	Data    *GetProfileResultData `json:"data,omitempty"`
-	Errors  []*BaseError          `json:"errors,omitempty"`
-}
-
-type GetProfileResultData struct {
-	ID         string `json:"id"`
-	DiplayName string `json:"diplayName"`
-}
-
-type GetSessionResult struct {
-	Success bool                  `json:"success"`
-	Message string                `json:"message"`
-	Data    *GetSessionResultData `json:"data,omitempty"`
-	Errors  []*BaseError          `json:"errors,omitempty"`
-}
-
-type GetSessionResultData struct {
-	ID           string `json:"id"`
-	RefreshToken string `json:"refreshToken"`
-	UserAgent    string `json:"userAgent"`
-	IPAddress    string `json:"ipAddress"`
-	Location     string `json:"location"`
-	DeviceaID    string `json:"deviceaId"`
-	ExpiresAt    string `json:"expiresAt"`
-	IsRevoked    bool   `json:"isRevoked"`
+type MetadataInput struct {
+	DeviceID string `json:"deviceId"`
 }
 
 type Mutation struct {
 }
 
-type OAuth struct {
-	ID                   string `json:"id"`
-	AccountID            string `json:"accountId"`
-	Provider             string `json:"provider"`
-	ProviderAccountID    string `json:"providerAccountId"`
-	AccessToken          string `json:"accessToken"`
-	AccessTokenExpiresAt string `json:"accessTokenExpiresAt"`
-	CretedAt             string `json:"cretedAt"`
-	UpdedAt              string `json:"updedAt"`
+type PageInfo struct {
+	HasNextPage     bool  `json:"hasNextPage"`
+	HasPreviousPage bool  `json:"hasPreviousPage"`
+	TotalCount      int32 `json:"totalCount"`
 }
 
-type Profile struct {
-	ID          string `json:"id"`
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
-	DisplayName string `json:"displayName"`
-	CretedAt    string `json:"cretedAt"`
-	UpdedAt     string `json:"updedAt"`
+type PaginationInput struct {
+	First  *int32  `json:"first,omitempty"`
+	After  *string `json:"after,omitempty"`
+	Last   *int32  `json:"last,omitempty"`
+	Before *string `json:"before,omitempty"`
+	Limit  *int32  `json:"limit,omitempty"`
+	Offset *int32  `json:"offset,omitempty"`
 }
 
 type Query struct {
 }
 
-type RevokeAllSessionsResult struct {
-	Success bool                         `json:"success"`
-	Message string                       `json:"message"`
-	Data    *RevokeAllSessionsResultData `json:"data,omitempty"`
-	Errors  []*BaseError                 `json:"errors,omitempty"`
+type RequestEmailVerificationInput struct {
+	Email    string         `json:"email"`
+	Metadata *MetadataInput `json:"metadata"`
 }
 
-type RevokeAllSessionsResultData struct {
-	AccountID string `json:"accountId"`
-	Count     int32  `json:"count"`
+type RequestPasswordResetInput struct {
+	Email    string         `json:"email"`
+	Metadata *MetadataInput `json:"metadata"`
 }
 
-type RevokeSessionResult struct {
-	Success bool                     `json:"success"`
-	Message string                   `json:"message"`
-	Data    *RevokeSessionResultData `json:"data,omitempty"`
-	Errors  []*BaseError             `json:"errors,omitempty"`
+type ResetPasswordInput struct {
+	Token       string         `json:"token"`
+	NewPassword string         `json:"newPassword"`
+	Metadata    *MetadataInput `json:"metadata"`
 }
 
-type RevokeSessionResultData struct {
-	ID string `json:"id"`
-}
-
-type Session struct {
-	ID           string `json:"id"`
-	AccountID    string `json:"accountId"`
-	RefreshToken string `json:"refreshToken"`
-	UserAgent    string `json:"userAgent"`
-	IPAddress    string `json:"ipAddress"`
-	Location     string `json:"location"`
-	DeviceaID    string `json:"deviceaId"`
-	LastActiveAt string `json:"lastActiveAt"`
-	ExpiresAt    string `json:"expiresAt"`
-	IsRevoked    bool   `json:"isRevoked"`
-	CreatedAt    string `json:"createdAt"`
-	UpdatedAt    string `json:"updatedAt"`
-}
-
-type ChangePasswordInput struct {
-	OldPassword string `json:"oldPassword"`
-	NewPassword string `json:"newPassword"`
+type Response struct {
+	Success bool    `json:"success"`
+	Message *string `json:"message,omitempty"`
 }
 
 type SigninInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string         `json:"email"`
+	Password string         `json:"password"`
+	Metadata *MetadataInput `json:"metadata"`
+}
+
+type SignoutInput struct {
+	Metadata *MetadataInput `json:"metadata"`
 }
 
 type SignupInput struct {
-	Email     string  `json:"email"`
-	Password  *string `json:"password,omitempty"`
-	FirstName string  `json:"firstName"`
-	LastName  string  `json:"lastName"`
+	Email     string         `json:"email"`
+	Password  string         `json:"password"`
+	FirstName string         `json:"firstName"`
+	LastName  string         `json:"lastName"`
+	Metadata  *MetadataInput `json:"metadata"`
+}
+
+type VerifyEmailInput struct {
+	Token    string         `json:"token"`
+	Metadata *MetadataInput `json:"metadata"`
+}
+
+type ContentType string
+
+const (
+	ContentTypeVideo ContentType = "VIDEO"
+	ContentTypeShort ContentType = "SHORT"
+	ContentTypeLive  ContentType = "LIVE"
+	ContentTypePost  ContentType = "POST"
+)
+
+var AllContentType = []ContentType{
+	ContentTypeVideo,
+	ContentTypeShort,
+	ContentTypeLive,
+	ContentTypePost,
+}
+
+func (e ContentType) IsValid() bool {
+	switch e {
+	case ContentTypeVideo, ContentTypeShort, ContentTypeLive, ContentTypePost:
+		return true
+	}
+	return false
+}
+
+func (e ContentType) String() string {
+	return string(e)
+}
+
+func (e *ContentType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ContentType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ContentType", str)
+	}
+	return nil
+}
+
+func (e ContentType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ContentType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ContentType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type DeviceType string
+
+const (
+	DeviceTypeMobile  DeviceType = "MOBILE"
+	DeviceTypeTablet  DeviceType = "TABLET"
+	DeviceTypeDesktop DeviceType = "DESKTOP"
+	DeviceTypeWeb     DeviceType = "WEB"
+	DeviceTypeAPI     DeviceType = "API"
+)
+
+var AllDeviceType = []DeviceType{
+	DeviceTypeMobile,
+	DeviceTypeTablet,
+	DeviceTypeDesktop,
+	DeviceTypeWeb,
+	DeviceTypeAPI,
+}
+
+func (e DeviceType) IsValid() bool {
+	switch e {
+	case DeviceTypeMobile, DeviceTypeTablet, DeviceTypeDesktop, DeviceTypeWeb, DeviceTypeAPI:
+		return true
+	}
+	return false
+}
+
+func (e DeviceType) String() string {
+	return string(e)
+}
+
+func (e *DeviceType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DeviceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DeviceType", str)
+	}
+	return nil
+}
+
+func (e DeviceType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *DeviceType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e DeviceType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SortOrder string
+
+const (
+	SortOrderAsc  SortOrder = "ASC"
+	SortOrderDesc SortOrder = "DESC"
+)
+
+var AllSortOrder = []SortOrder{
+	SortOrderAsc,
+	SortOrderDesc,
+}
+
+func (e SortOrder) IsValid() bool {
+	switch e {
+	case SortOrderAsc, SortOrderDesc:
+		return true
+	}
+	return false
+}
+
+func (e SortOrder) String() string {
+	return string(e)
+}
+
+func (e *SortOrder) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortOrder(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortOrder", str)
+	}
+	return nil
+}
+
+func (e SortOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SortOrder) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SortOrder) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type TimeRange string
+
+const (
+	TimeRangeToday TimeRange = "TODAY"
+	TimeRangeWeek  TimeRange = "WEEK"
+	TimeRangeMonth TimeRange = "MONTH"
+	TimeRangeYear  TimeRange = "YEAR"
+	TimeRangeAll   TimeRange = "ALL"
+)
+
+var AllTimeRange = []TimeRange{
+	TimeRangeToday,
+	TimeRangeWeek,
+	TimeRangeMonth,
+	TimeRangeYear,
+	TimeRangeAll,
+}
+
+func (e TimeRange) IsValid() bool {
+	switch e {
+	case TimeRangeToday, TimeRangeWeek, TimeRangeMonth, TimeRangeYear, TimeRangeAll:
+		return true
+	}
+	return false
+}
+
+func (e TimeRange) String() string {
+	return string(e)
+}
+
+func (e *TimeRange) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TimeRange(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TimeRange", str)
+	}
+	return nil
+}
+
+func (e TimeRange) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *TimeRange) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e TimeRange) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

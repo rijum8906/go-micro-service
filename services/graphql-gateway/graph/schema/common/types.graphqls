@@ -1,0 +1,25 @@
+# graph/common/types.graphqls
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    totalCount: Int!
+}
+
+type Error {
+    message: String!
+    field: String
+}
+
+type Response {
+    success: Boolean!
+    message: String
+}
+
+type Metadata {
+    deviceId: String!
+    deviceType: DeviceType
+    userAgent: String
+    ipAddress: String
+    timestamp: DateTime!
+}

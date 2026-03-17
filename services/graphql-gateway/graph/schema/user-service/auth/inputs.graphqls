@@ -1,0 +1,38 @@
+input SignupInput {
+    email: Email!
+    password: String!
+    firstName: String!
+    lastName: String!
+    metadata: MetadataInput!
+}
+
+input SigninInput {
+    email: Email!
+    password: String!
+    metadata: MetadataInput!
+}
+
+input SignoutInput {
+    metadata: MetadataInput!
+}
+
+input RequestPasswordResetInput {
+    email: Email!
+    metadata: MetadataInput!
+}
+
+input ResetPasswordInput {
+    token: String!
+    newPassword: String!
+    metadata: MetadataInput!
+}
+
+input RequestEmailVerificationInput {
+    email: Email!
+    metadata: MetadataInput!
+}
+
+input VerifyEmailInput {
+    token: String!
+    metadata: MetadataInput!
+}

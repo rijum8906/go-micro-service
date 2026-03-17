@@ -15,6 +15,7 @@ import (
 type AuthService interface {
 	Signin(ctx context.Context, dto request.SigninRequest, reqMetadata request.RequestMetadata) (*response.AuthResponse, *errors.AppError)
 	SignUp(ctx context.Context, dto request.SignupRequest, reqMetadata request.RequestMetadata) (*response.AuthResponse, *errors.AppError)
+	Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
 
 	RequestEmailVerification(ctx context.Context, dto request.RequestEmailVerificationRequest, reqMetadata request.RequestMetadata) *errors.AppError
 	RequestPasswordReset(ctx context.Context, dto request.RequestPasswordResetRequest, reqMetadata request.RequestMetadata) *errors.AppError

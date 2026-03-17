@@ -7,19 +7,20 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/generated"
 )
 
 // Empty is the resolver for the _empty field.
 func (r *mutationResolver) Empty(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented: Empty - _empty"))
+	message := "graphql gateway mutation root is available"
+	return &message, nil
 }
 
 // Empty is the resolver for the _empty field.
 func (r *queryResolver) Empty(ctx context.Context) (*string, error) {
-	panic(fmt.Errorf("not implemented: Empty - _empty"))
+	message := "graphql gateway query root is available"
+	return &message, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

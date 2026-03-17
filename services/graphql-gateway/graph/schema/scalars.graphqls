@@ -1,0 +1,8 @@
+# graph/scalars.graphqls
+
+scalar UUID
+scalar DateTime
+scalar Upload
+scalar JSON
+scalar Email
+scalar URL

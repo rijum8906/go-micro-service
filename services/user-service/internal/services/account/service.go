@@ -13,7 +13,6 @@ import (
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
 	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
 )
 
 func (s *accountService) DeleteAccount(
@@ -128,13 +127,8 @@ func (s *accountService) MyAccount(
 	ctx context.Context,
 	reqMetadata request.RequestMetadata,
 	authzMetadata request.AuthzMetadata,
-) (*response.MyAccountResult, *errors.AppError) {
+) (*response.MyAccountRespose, *errors.AppError) {
 	account, err := s.q.GetAccount(ctx, authzMetadata.UserID)
-	if err != nil {
-		return nil, errors.ErrDBError.WithInternal(err)
-	}
-
-	profiles, err := s.q.GetProfilesByAccountID(ctx, authzMetadata.UserID)
 	if err != nil {
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
@@ -144,16 +138,13 @@ func (s *accountService) MyAccount(
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
 
-	oAuths, err := s.q.GetOAuthsByAccountID(ctx, authzMetadata.UserID)
-	if err != nil {
-		return nil, errors.ErrDBError.WithInternal(err)
-	}
-
-	return &response.MyAccountResult{
-		Account:         &account,
-		Profiles:        &profiles,
-		AccountSecurity: &accountSecuriry,
-		OAuths:          &oAuths,
+	return &response.MyAccountRespose{
+		ID:               account.ID,
+		Email:            account.Email,
+		IsEmailVerified:  accountSecuriry.IsEmailVerified,
+		TwoFactorEnabled: accountSecuriry.TwoFactorEnabled,
+		CreatedAt:        account.CreatedAt,
+		UpdatedAt:        account.UpdatedAt,
 	}, nil
 }
 
@@ -206,13 +197,4 @@ func (s *accountService) GenerateScopedToken(
 	return &response.GenerateScopedTokenResult{
 		Token: token,
 	}, nil
-}
-
-func (s *accountService) Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError {
-	redisKey := utils.GenerateRedisLoginKey(authzMetadata.UserID.String(), reqMetadata.DeviceID)
-	err := s.utilsConfig.JwtService.RevokeSession(ctx, redisKey)
-	if err != nil {
-		return errors.ErrInternal.WithInternal(err)
-	}
-	return nil
 }
