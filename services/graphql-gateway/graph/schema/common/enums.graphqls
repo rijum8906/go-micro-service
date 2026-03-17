@@ -1,0 +1,27 @@
+enum DeviceType {
+    MOBILE
+    TABLET
+    DESKTOP
+    WEB
+    API
+}
+
+enum ContentType {
+    VIDEO
+    SHORT
+    LIVE
+    POST
+}
+
+enum SortOrder {
+    ASC
+    DESC
+}
+
+enum TimeRange {
+    TODAY
+    WEEK
+    MONTH
+    YEAR
+    ALL
+}

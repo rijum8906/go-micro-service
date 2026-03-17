@@ -1,0 +1,6 @@
+# graph/directives.graphqls
+
+directive @authenticated on FIELD_DEFINITION
+directive @public on FIELD_DEFINITION
+directive @rateLimit(limit: Int!, duration: Int!) on FIELD_DEFINITION
+directive @hasRole(role: String!) on FIELD_DEFINITION

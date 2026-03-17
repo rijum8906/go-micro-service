@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/rijum8906/go-micro-service/packages/common/database/postgres"
+	"github.com/rijum8906/relay/packages/common/database/postgres"
 )
 
 func TestConnect(t *testing.T) {

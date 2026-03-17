@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/rijum8906/go-micro-service/packages/common/database/redis"
+	"github.com/rijum8906/relay/packages/common/database/redis"
 )
 
 func TestConnect(t *testing.T) {

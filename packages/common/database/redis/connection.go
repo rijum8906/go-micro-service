@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/rijum8906/go-micro-service/packages/common/errors"
+	"github.com/rijum8906/relay/packages/common/errors"
 )
 
 type Config struct {

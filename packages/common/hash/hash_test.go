@@ -3,7 +3,7 @@ package hash_test
 import (
 	"testing"
 
-	"github.com/rijum8906/go-micro-service/packages/common/hash"
+	"github.com/rijum8906/relay/packages/common/hash"
 )
 
 func TestHashPassword(t *testing.T) {
