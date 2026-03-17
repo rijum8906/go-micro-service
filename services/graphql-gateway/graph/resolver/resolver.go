@@ -1,10 +1,10 @@
 package resolver
 
 import (
-	"github.com/rijum8906/go-micro-service/packages/common/env"
-	"github.com/rijum8906/go-micro-service/packages/common/jwt"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/generated"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/internal/client"
+	"github.com/rijum8906/relay/packages/common/env"
+	"github.com/rijum8906/relay/packages/common/jwt"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/client"
 )
 
 // This file will not be regenerated automatically.

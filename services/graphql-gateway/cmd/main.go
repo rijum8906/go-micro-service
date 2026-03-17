@@ -12,13 +12,13 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/rijum8906/go-micro-service/packages/common/database/redis"
-	"github.com/rijum8906/go-micro-service/packages/common/env"
-	"github.com/rijum8906/go-micro-service/packages/common/jwt"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/generated"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/resolver"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/internal/client"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/internal/middleware"
+	"github.com/rijum8906/relay/packages/common/database/redis"
+	"github.com/rijum8906/relay/packages/common/env"
+	"github.com/rijum8906/relay/packages/common/jwt"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/client"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
 	"github.com/rs/cors"
 )
 

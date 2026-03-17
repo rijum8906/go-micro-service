@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/generated"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 )
 
 const (
