@@ -7,11 +7,10 @@
 package user_servicev1
 
 import (
-	reflect "reflect"
-	unsafe "unsafe"
-
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	unsafe "unsafe"
 )
 
 const (
@@ -25,12 +24,12 @@ var File_user_service_v1_auth_proto protoreflect.FileDescriptor
 
 const file_user_service_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser_service/v1/auth.proto\x12\x0fuser_service.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1cuser_service/v1/models.proto2\xc2\x02\n" +
-	"\vAuthService\x12c\n" +
-	"\x06Signup\x12\x1e.user_service.v1.SignupRequest\x1a\x1d.user_service.v1.AuthResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/auth/signup\x12c\n" +
-	"\x06Signin\x12\x1e.user_service.v1.SigninRequest\x1a\x1d.user_service.v1.AuthResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/auth/signin\x12i\n" +
-	"\aSignout\x12\x1f.user_service.v1.SignoutRequest\x1a .user_service.v1.SignoutResponse\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/v1/auth/signoutB\xbd\x01\n" +
-	"\x13com.user_service.v1B\tAuthProtoP\x01ZBgithub.com/rijum8906/relay/proto/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
+	"\x1auser_service/v1/auth.proto\x12\x0fuser_service.v1\x1a\x1cuser_service/v1/models.proto2\xed\x01\n" +
+	"\vAuthService\x12G\n" +
+	"\x06Signup\x12\x1e.user_service.v1.SignupRequest\x1a\x1d.user_service.v1.AuthResponse\x12G\n" +
+	"\x06Signin\x12\x1e.user_service.v1.SigninRequest\x1a\x1d.user_service.v1.AuthResponse\x12L\n" +
+	"\aSignout\x12\x1f.user_service.v1.SignoutRequest\x1a .user_service.v1.SignoutResponseB\xc0\x01\n" +
+	"\x13com.user_service.v1B\tAuthProtoP\x01ZEgithub.com/rijum8906/relay/packages/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
 
 var file_user_service_v1_auth_proto_goTypes = []any{
 	(*SignupRequest)(nil),   // 0: user_service.v1.SignupRequest
@@ -39,7 +38,6 @@ var file_user_service_v1_auth_proto_goTypes = []any{
 	(*AuthResponse)(nil),    // 3: user_service.v1.AuthResponse
 	(*SignoutResponse)(nil), // 4: user_service.v1.SignoutResponse
 }
-
 var file_user_service_v1_auth_proto_depIdxs = []int32{
 	0, // 0: user_service.v1.AuthService.Signup:input_type -> user_service.v1.SignupRequest
 	1, // 1: user_service.v1.AuthService.Signin:input_type -> user_service.v1.SigninRequest

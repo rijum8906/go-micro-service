@@ -389,8 +389,8 @@ const file_common_v1_errors_proto_rawDesc = "" +
 	"\x1cERROR_CODE_TOO_MANY_REQUESTS\x10\x94\xcf\x02\x12\x19\n" +
 	"\x13ERROR_CODE_INTERNAL\x10І\x03\x12$\n" +
 	"\x1eERROR_CODE_SERVICE_UNAVAILABLE\x10\xfc\x88\x03\x12\"\n" +
-	"\x1cERROR_CODE_DEADLINE_EXCEEDED\x10\xe0\x89\x03B\x99\x01\n" +
-	"\rcom.common.v1B\vErrorsProtoP\x01Z6github.com/rijum8906/relay/proto/pb/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
+	"\x1cERROR_CODE_DEADLINE_EXCEEDED\x10\xe0\x89\x03B\x9c\x01\n" +
+	"\rcom.common.v1B\vErrorsProtoP\x01Z9github.com/rijum8906/relay/packages/pb/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
 	"Common::V1b\x06proto3"
 
 var (

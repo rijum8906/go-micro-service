@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package user_service.v1;
 
-import "google/api/annotations.proto";
 import "user_service/v1/models.proto";
 
 option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservice";
@@ -12,28 +11,13 @@ service AuthService {
   // Sign up new user
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
-  rpc Signup(SignupRequest) returns (AuthResponse) {
-    option (google.api.http) = {
-      post: "/v1/auth/signup"
-      body: "*"
-    };
-  }
+  rpc Signup(SignupRequest) returns (AuthResponse);
 
   // Sign in existing user
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
-  rpc Signin(SigninRequest) returns (AuthResponse) {
-    option (google.api.http) = {
-      post: "/v1/auth/signin"
-      body: "*"
-    };
-  }
+  rpc Signin(SigninRequest) returns (AuthResponse);
 
   // Sign out
-  rpc Signout(SignoutRequest) returns (SignoutResponse) {
-    option (google.api.http) = {
-      post: "/v1/auth/signout"
-      body: "*"
-    };
-  }
+  rpc Signout(SignoutRequest) returns (SignoutResponse);
 }

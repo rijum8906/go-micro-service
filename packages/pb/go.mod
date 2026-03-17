@@ -1,4 +1,4 @@
-module github.com/rijum8906/relay/proto/pb
+module github.com/rijum8906/relay/packages/pb
 
 go 1.26.1
 

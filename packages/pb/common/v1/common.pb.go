@@ -338,8 +338,8 @@ const file_common_v1_common_proto_rawDesc = "" +
 	"\x12PaginationResponse\x12&\n" +
 	"\x0fnext_page_token\x18\x01 \x01(\tR\rnextPageToken\x12\x1d\n" +
 	"\n" +
-	"total_size\x18\x02 \x01(\x05R\ttotalSizeB\x99\x01\n" +
-	"\rcom.common.v1B\vCommonProtoP\x01Z6github.com/rijum8906/relay/proto/pb/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
+	"total_size\x18\x02 \x01(\x05R\ttotalSizeB\x9c\x01\n" +
+	"\rcom.common.v1B\vCommonProtoP\x01Z9github.com/rijum8906/relay/packages/pb/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
 	"Common::V1b\x06proto3"
 
 var (

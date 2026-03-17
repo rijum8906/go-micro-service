@@ -7,14 +7,13 @@
 package user_servicev1
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
-	v1 "github.com/rijum8906/relay/proto/pb/common/v1"
+	v1 "github.com/rijum8906/relay/packages/pb/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -762,8 +761,8 @@ const file_user_service_v1_models_proto_rawDesc = "" +
 	"\x0eSignoutRequest\x126\n" +
 	"\bmetadata\x18\x01 \x01(\v2\x1a.common.v1.RequestMetadataR\bmetadata\"+\n" +
 	"\x0fSignoutResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB\xbf\x01\n" +
-	"\x13com.user_service.v1B\vModelsProtoP\x01ZBgithub.com/rijum8906/relay/proto/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
+	"\asuccess\x18\x01 \x01(\bR\asuccessB\xc2\x01\n" +
+	"\x13com.user_service.v1B\vModelsProtoP\x01ZEgithub.com/rijum8906/relay/packages/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
 
 var (
 	file_user_service_v1_models_proto_rawDescOnce sync.Once
@@ -777,22 +776,20 @@ func file_user_service_v1_models_proto_rawDescGZIP() []byte {
 	return file_user_service_v1_models_proto_rawDescData
 }
 
-var (
-	file_user_service_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-	file_user_service_v1_models_proto_goTypes  = []any{
-		(*Account)(nil),               // 0: user_service.v1.Account
-		(*Profile)(nil),               // 1: user_service.v1.Profile
-		(*Session)(nil),               // 2: user_service.v1.Session
-		(*TokenPair)(nil),             // 3: user_service.v1.TokenPair
-		(*SignupRequest)(nil),         // 4: user_service.v1.SignupRequest
-		(*SigninRequest)(nil),         // 5: user_service.v1.SigninRequest
-		(*AuthResponse)(nil),          // 6: user_service.v1.AuthResponse
-		(*SignoutRequest)(nil),        // 7: user_service.v1.SignoutRequest
-		(*SignoutResponse)(nil),       // 8: user_service.v1.SignoutResponse
-		(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
-		(*v1.RequestMetadata)(nil),    // 10: common.v1.RequestMetadata
-	}
-)
+var file_user_service_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_user_service_v1_models_proto_goTypes = []any{
+	(*Account)(nil),               // 0: user_service.v1.Account
+	(*Profile)(nil),               // 1: user_service.v1.Profile
+	(*Session)(nil),               // 2: user_service.v1.Session
+	(*TokenPair)(nil),             // 3: user_service.v1.TokenPair
+	(*SignupRequest)(nil),         // 4: user_service.v1.SignupRequest
+	(*SigninRequest)(nil),         // 5: user_service.v1.SigninRequest
+	(*AuthResponse)(nil),          // 6: user_service.v1.AuthResponse
+	(*SignoutRequest)(nil),        // 7: user_service.v1.SignoutRequest
+	(*SignoutResponse)(nil),       // 8: user_service.v1.SignoutResponse
+	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
+	(*v1.RequestMetadata)(nil),    // 10: common.v1.RequestMetadata
+}
 var file_user_service_v1_models_proto_depIdxs = []int32{
 	9,  // 0: user_service.v1.Account.created_at:type_name -> google.protobuf.Timestamp
 	9,  // 1: user_service.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
