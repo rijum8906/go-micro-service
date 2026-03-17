@@ -4,7 +4,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/rijum8906/go-micro-service/packages/common/env"
+	"github.com/rijum8906/relay/packages/common/env"
 )
 
 type Middleware interface {

@@ -6,11 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/auth"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
+	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
+	"github.com/rijum8906/relay/services/user-service/internal/services/auth"
+	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 // RegisterHandlers sets up routes for the auth service.

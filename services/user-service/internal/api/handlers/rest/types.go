@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
+	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 )
 
 type Handler interface{}

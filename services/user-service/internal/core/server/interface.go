@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rijum8906/go-micro-service/packages/common/env"
+	"github.com/rijum8906/relay/packages/common/env"
 )
 
 const (

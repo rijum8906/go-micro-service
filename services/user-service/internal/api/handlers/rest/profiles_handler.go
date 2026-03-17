@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
-	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/profile"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
+	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
+	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
+	"github.com/rijum8906/relay/services/user-service/internal/services/profile"
+	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 func SetupProfilesHandlers(router *gin.RouterGroup, service profile.ProfileService, middlewareService middleware.Middleware) {

@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/model"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 )
 
 // Signup is the resolver for the signup field.

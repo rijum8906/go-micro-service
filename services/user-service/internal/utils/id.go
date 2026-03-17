@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/rijum8906/go-micro-service/packages/common/errors"
+	"github.com/rijum8906/relay/packages/common/errors"
 )
 
 func StrIDToPgUUID(idStr string) (pgtype.UUID, *errors.AppError) {

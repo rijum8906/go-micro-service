@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
+	appError "github.com/rijum8906/relay/packages/common/errors"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 )
 
 // ValidationErrorHandler handles validation and binding errors consistently

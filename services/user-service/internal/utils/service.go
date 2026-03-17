@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"github.com/rijum8906/go-micro-service/packages/common/hash"
-	"github.com/rijum8906/go-micro-service/packages/common/jwt"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/storage"
+	"github.com/rijum8906/relay/packages/common/hash"
+	"github.com/rijum8906/relay/packages/common/jwt"
+	"github.com/rijum8906/relay/services/user-service/internal/services/storage"
 )
 
 type UtilsConfig struct {

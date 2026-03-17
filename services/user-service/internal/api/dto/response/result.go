@@ -1,7 +1,7 @@
 // Package result contains result data transfer objects for the auth service.
 package response
 
-import db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
+import db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
 
 type MyAccountResult struct {
 	Account         *db.Account         `json:"account"`

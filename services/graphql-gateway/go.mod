@@ -1,4 +1,4 @@
-module github.com/rijum8906/go-micro-service/services/graphql-gateway
+module github.com/rijum8906/relay/services/graphql-gateway
 
 go 1.25.6
 
@@ -24,7 +24,7 @@ require (
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/rijum8906/go-micro-service/packages/common v0.0.8
+	github.com/rijum8906/relay/packages/common v0.0.8
 	github.com/rs/cors v1.11.1
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/urfave/cli/v3 v3.7.0 // indirect

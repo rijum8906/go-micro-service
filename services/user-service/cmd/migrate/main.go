@@ -5,9 +5,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/rijum8906/go-micro-service/packages/common/database/postgres"
-	"github.com/rijum8906/go-micro-service/packages/common/env"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/db"
+	"github.com/rijum8906/relay/packages/common/database/postgres"
+	"github.com/rijum8906/relay/packages/common/env"
+	"github.com/rijum8906/relay/services/user-service/internal/db"
 )
 
 func main() {

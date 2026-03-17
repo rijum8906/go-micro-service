@@ -7,7 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/rijum8906/go-micro-service/packages/common/errors"
+	"github.com/rijum8906/relay/packages/common/errors"
 )
 
 // Bucket operations

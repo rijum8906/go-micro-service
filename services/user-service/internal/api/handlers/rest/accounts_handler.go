@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/services/account"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
+	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
+	"github.com/rijum8906/relay/services/user-service/internal/services/account"
+	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 func SetupAccountsHandlers(router *gin.RouterGroup, service account.AccountService, middlewareService middleware.Middleware) {

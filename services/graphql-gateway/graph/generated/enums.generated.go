@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/model"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -44,7 +44,7 @@ func (ec *executionContext) unmarshalODeviceType2ᚖgithubᚗcomᚋrijum8906ᚋg
 	if v == nil {
 		return nil, nil
 	}
-	var res = new(model.DeviceType)
+	res := new(model.DeviceType)
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

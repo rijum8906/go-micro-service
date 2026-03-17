@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/middleware"
+	appError "github.com/rijum8906/relay/packages/common/errors"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 )
 
 func ExtractAuthzMeatadata(ctx *gin.Context) (request.AuthzMetadata, *appError.AppError) {

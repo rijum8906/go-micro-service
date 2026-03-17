@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/model"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 )
 
 // region    ************************** generated!.gotpl **************************

@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	appError "github.com/rijum8906/go-micro-service/packages/common/errors"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/api/dto/response"
-	db "github.com/rijum8906/go-micro-service/services/user-service/internal/db/generated"
-	"github.com/rijum8906/go-micro-service/services/user-service/internal/utils"
+	appError "github.com/rijum8906/relay/packages/common/errors"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
+	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
+	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 // --- Authentication Logic ---

@@ -3,8 +3,8 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rijum8906/go-micro-service/packages/common/hash"
-	"github.com/rijum8906/go-micro-service/packages/common/jwt"
+	"github.com/rijum8906/relay/packages/common/hash"
+	"github.com/rijum8906/relay/packages/common/jwt"
 )
 
 type Middleware interface {
