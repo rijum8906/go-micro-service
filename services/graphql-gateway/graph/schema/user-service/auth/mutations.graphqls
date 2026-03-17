@@ -1,0 +1,15 @@
+extend type Mutation {
+    # Authentication
+    signup(input: SignupInput!): AuthPayload! @public @rateLimit(limit: 5, duration: 3600)
+    signin(input: SigninInput!): AuthPayload! @public @rateLimit(limit: 10, duration: 300)
+    signout(input: SignoutInput!): Response! @authenticated
+    
+    # Password management
+    requestPasswordReset(input: RequestPasswordResetInput!): Response! @public @rateLimit(limit: 3, duration: 3600)
+    resetPassword(input: ResetPasswordInput!): Response! @public
+    
+    # Email verification
+    requestEmailVerification: Response! @authenticated @rateLimit(limit: 3, duration: 3600)
+    verifyEmail(input: VerifyEmailInput!): Response! @public
+    
+}

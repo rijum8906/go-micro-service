@@ -38,186 +38,81 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Authenticated func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	HasRole       func(ctx context.Context, obj any, next graphql.Resolver, role string) (res any, err error)
+	Public        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	RateLimit     func(ctx context.Context, obj any, next graphql.Resolver, limit int32, duration int32) (res any, err error)
 }
 
 type ComplexityRoot struct {
-	Account struct {
-		CretedAt func(childComplexity int) int
-		Email    func(childComplexity int) int
-		ID       func(childComplexity int) int
+	AuthAccount struct {
+		CreatedAt        func(childComplexity int) int
+		Email            func(childComplexity int) int
+		ID               func(childComplexity int) int
+		IsEmailVerified  func(childComplexity int) int
+		LastLoginAt      func(childComplexity int) int
+		Permissions      func(childComplexity int) int
+		Roles            func(childComplexity int) int
+		TwoFactorEnabled func(childComplexity int) int
+		UpdatedAt        func(childComplexity int) int
+	}
+
+	AuthPayload struct {
+		Account  func(childComplexity int) int
 		Profiles func(childComplexity int) int
-		UpdedAt  func(childComplexity int) int
+		Tokens   func(childComplexity int) int
 	}
 
-	AccountSecurity struct {
-		AccountID          func(childComplexity int) int
-		CretedAt           func(childComplexity int) int
-		EmailVerifiedAt    func(childComplexity int) int
-		ID                 func(childComplexity int) int
-		IsEmailVerified    func(childComplexity int) int
-		TwoFactorEnabled   func(childComplexity int) int
-		TwoFactorEnabledAt func(childComplexity int) int
-		UpdedAt            func(childComplexity int) int
-	}
-
-	AuthResult struct {
-		Data    func(childComplexity int) int
-		Errors  func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	AuthResultData struct {
-		Account func(childComplexity int) int
-		Tokens  func(childComplexity int) int
-	}
-
-	AuthResultTokenData struct {
-		AccessToken  func(childComplexity int) int
-		RefreshToken func(childComplexity int) int
-	}
-
-	BaseData struct {
-		Field   func(childComplexity int) int
-		Message func(childComplexity int) int
-	}
-
-	BaseError struct {
-		Field   func(childComplexity int) int
-		Message func(childComplexity int) int
-	}
-
-	BaseResult struct {
-		Data    func(childComplexity int) int
-		Errors  func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	BaseResultData struct {
-		ID func(childComplexity int) int
-	}
-
-	GetAccountsResult struct {
-		Data    func(childComplexity int) int
-		Errors  func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	GetAccountsResultData struct {
-		DisplayName func(childComplexity int) int
-		Email       func(childComplexity int) int
-		ID          func(childComplexity int) int
-	}
-
-	GetProfileResult struct {
-		Data    func(childComplexity int) int
-		Errors  func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	GetProfileResultData struct {
-		DiplayName func(childComplexity int) int
-		ID         func(childComplexity int) int
-	}
-
-	GetSessionResult struct {
-		Data    func(childComplexity int) int
-		Errors  func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	GetSessionResultData struct {
-		DeviceaID    func(childComplexity int) int
-		ExpiresAt    func(childComplexity int) int
-		ID           func(childComplexity int) int
-		IPAddress    func(childComplexity int) int
-		IsRevoked    func(childComplexity int) int
-		Location     func(childComplexity int) int
-		RefreshToken func(childComplexity int) int
-		UserAgent    func(childComplexity int) int
-	}
-
-	Mutation struct {
-		ChangePassword              func(childComplexity int, input model.ChangePasswordInput) int
-		Empty                       func(childComplexity int) int
-		ResendEmailVerificationLink func(childComplexity int) int
-		ResetPassword               func(childComplexity int, email string) int
-		RevokeAllSessions           func(childComplexity int, accountID string) int
-		RevokeSession               func(childComplexity int, id string) int
-		Signin                      func(childComplexity int, input model.SigninInput) int
-		Signup                      func(childComplexity int, input model.SignupInput) int
-		VerifyEmail                 func(childComplexity int, token string) int
-	}
-
-	OAuth struct {
-		AccessToken          func(childComplexity int) int
-		AccessTokenExpiresAt func(childComplexity int) int
-		AccountID            func(childComplexity int) int
-		CretedAt             func(childComplexity int) int
-		ID                   func(childComplexity int) int
-		Provider             func(childComplexity int) int
-		ProviderAccountID    func(childComplexity int) int
-		UpdedAt              func(childComplexity int) int
-	}
-
-	Profile struct {
-		CretedAt    func(childComplexity int) int
+	AuthProfile struct {
+		AvatarURL   func(childComplexity int) int
 		DisplayName func(childComplexity int) int
 		FirstName   func(childComplexity int) int
 		ID          func(childComplexity int) int
 		LastName    func(childComplexity int) int
-		UpdedAt     func(childComplexity int) int
+	}
+
+	AuthToken struct {
+		AccessToken  func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
+	}
+
+	Error struct {
+		Field   func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
+	Metadata struct {
+		DeviceID   func(childComplexity int) int
+		DeviceType func(childComplexity int) int
+		IPAddress  func(childComplexity int) int
+		Timestamp  func(childComplexity int) int
+		UserAgent  func(childComplexity int) int
+	}
+
+	Mutation struct {
+		Empty                    func(childComplexity int) int
+		RequestEmailVerification func(childComplexity int) int
+		RequestPasswordReset     func(childComplexity int, input model.RequestPasswordResetInput) int
+		ResetPassword            func(childComplexity int, input model.ResetPasswordInput) int
+		Signin                   func(childComplexity int, input model.SigninInput) int
+		Signout                  func(childComplexity int, input model.SignoutInput) int
+		Signup                   func(childComplexity int, input model.SignupInput) int
+		VerifyEmail              func(childComplexity int, input model.VerifyEmailInput) int
+	}
+
+	PageInfo struct {
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+		TotalCount      func(childComplexity int) int
 	}
 
 	Query struct {
-		Empty                     func(childComplexity int) int
-		GetProfile                func(childComplexity int, id string) int
-		GetSession                func(childComplexity int, id string) int
-		GetSessions               func(childComplexity int, accountID string, filter model.FilterResult) int
-		GetSessionsByRefreshToken func(childComplexity int, refreshToken string) int
-		Me                        func(childComplexity int) int
+		Empty func(childComplexity int) int
 	}
 
-	RevokeAllSessionsResult struct {
-		Data    func(childComplexity int) int
-		Errors  func(childComplexity int) int
+	Response struct {
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
-	}
-
-	RevokeAllSessionsResultData struct {
-		AccountID func(childComplexity int) int
-		Count     func(childComplexity int) int
-	}
-
-	RevokeSessionResult struct {
-		Data    func(childComplexity int) int
-		Errors  func(childComplexity int) int
-		Message func(childComplexity int) int
-		Success func(childComplexity int) int
-	}
-
-	RevokeSessionResultData struct {
-		ID func(childComplexity int) int
-	}
-
-	Session struct {
-		AccountID    func(childComplexity int) int
-		CreatedAt    func(childComplexity int) int
-		DeviceaID    func(childComplexity int) int
-		ExpiresAt    func(childComplexity int) int
-		ID           func(childComplexity int) int
-		IPAddress    func(childComplexity int) int
-		IsRevoked    func(childComplexity int) int
-		LastActiveAt func(childComplexity int) int
-		Location     func(childComplexity int) int
-		RefreshToken func(childComplexity int) int
-		UpdatedAt    func(childComplexity int) int
-		UserAgent    func(childComplexity int) int
 	}
 }
 
@@ -240,402 +135,187 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Account.cretedAt":
-		if e.complexity.Account.CretedAt == nil {
+	case "AuthAccount.createdAt":
+		if e.complexity.AuthAccount.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Account.CretedAt(childComplexity), true
+		return e.complexity.AuthAccount.CreatedAt(childComplexity), true
 
-	case "Account.email":
-		if e.complexity.Account.Email == nil {
+	case "AuthAccount.email":
+		if e.complexity.AuthAccount.Email == nil {
 			break
 		}
 
-		return e.complexity.Account.Email(childComplexity), true
+		return e.complexity.AuthAccount.Email(childComplexity), true
 
-	case "Account.id":
-		if e.complexity.Account.ID == nil {
+	case "AuthAccount.id":
+		if e.complexity.AuthAccount.ID == nil {
 			break
 		}
 
-		return e.complexity.Account.ID(childComplexity), true
+		return e.complexity.AuthAccount.ID(childComplexity), true
 
-	case "Account.profiles":
-		if e.complexity.Account.Profiles == nil {
+	case "AuthAccount.isEmailVerified":
+		if e.complexity.AuthAccount.IsEmailVerified == nil {
 			break
 		}
 
-		return e.complexity.Account.Profiles(childComplexity), true
+		return e.complexity.AuthAccount.IsEmailVerified(childComplexity), true
 
-	case "Account.updedAt":
-		if e.complexity.Account.UpdedAt == nil {
+	case "AuthAccount.lastLoginAt":
+		if e.complexity.AuthAccount.LastLoginAt == nil {
 			break
 		}
 
-		return e.complexity.Account.UpdedAt(childComplexity), true
+		return e.complexity.AuthAccount.LastLoginAt(childComplexity), true
 
-	case "AccountSecurity.accountId":
-		if e.complexity.AccountSecurity.AccountID == nil {
+	case "AuthAccount.permissions":
+		if e.complexity.AuthAccount.Permissions == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.AccountID(childComplexity), true
+		return e.complexity.AuthAccount.Permissions(childComplexity), true
 
-	case "AccountSecurity.cretedAt":
-		if e.complexity.AccountSecurity.CretedAt == nil {
+	case "AuthAccount.roles":
+		if e.complexity.AuthAccount.Roles == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.CretedAt(childComplexity), true
+		return e.complexity.AuthAccount.Roles(childComplexity), true
 
-	case "AccountSecurity.emailVerifiedAt":
-		if e.complexity.AccountSecurity.EmailVerifiedAt == nil {
+	case "AuthAccount.twoFactorEnabled":
+		if e.complexity.AuthAccount.TwoFactorEnabled == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.EmailVerifiedAt(childComplexity), true
+		return e.complexity.AuthAccount.TwoFactorEnabled(childComplexity), true
 
-	case "AccountSecurity.id":
-		if e.complexity.AccountSecurity.ID == nil {
+	case "AuthAccount.updatedAt":
+		if e.complexity.AuthAccount.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.ID(childComplexity), true
+		return e.complexity.AuthAccount.UpdatedAt(childComplexity), true
 
-	case "AccountSecurity.isEmailVerified":
-		if e.complexity.AccountSecurity.IsEmailVerified == nil {
+	case "AuthPayload.account":
+		if e.complexity.AuthPayload.Account == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.IsEmailVerified(childComplexity), true
+		return e.complexity.AuthPayload.Account(childComplexity), true
 
-	case "AccountSecurity.twoFactorEnabled":
-		if e.complexity.AccountSecurity.TwoFactorEnabled == nil {
+	case "AuthPayload.profiles":
+		if e.complexity.AuthPayload.Profiles == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.TwoFactorEnabled(childComplexity), true
+		return e.complexity.AuthPayload.Profiles(childComplexity), true
 
-	case "AccountSecurity.twoFactorEnabledAt":
-		if e.complexity.AccountSecurity.TwoFactorEnabledAt == nil {
+	case "AuthPayload.tokens":
+		if e.complexity.AuthPayload.Tokens == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.TwoFactorEnabledAt(childComplexity), true
+		return e.complexity.AuthPayload.Tokens(childComplexity), true
 
-	case "AccountSecurity.updedAt":
-		if e.complexity.AccountSecurity.UpdedAt == nil {
+	case "AuthProfile.avatarUrl":
+		if e.complexity.AuthProfile.AvatarURL == nil {
 			break
 		}
 
-		return e.complexity.AccountSecurity.UpdedAt(childComplexity), true
+		return e.complexity.AuthProfile.AvatarURL(childComplexity), true
 
-	case "AuthResult.data":
-		if e.complexity.AuthResult.Data == nil {
+	case "AuthProfile.displayName":
+		if e.complexity.AuthProfile.DisplayName == nil {
 			break
 		}
 
-		return e.complexity.AuthResult.Data(childComplexity), true
+		return e.complexity.AuthProfile.DisplayName(childComplexity), true
 
-	case "AuthResult.errors":
-		if e.complexity.AuthResult.Errors == nil {
+	case "AuthProfile.firstName":
+		if e.complexity.AuthProfile.FirstName == nil {
 			break
 		}
 
-		return e.complexity.AuthResult.Errors(childComplexity), true
+		return e.complexity.AuthProfile.FirstName(childComplexity), true
 
-	case "AuthResult.message":
-		if e.complexity.AuthResult.Message == nil {
+	case "AuthProfile.id":
+		if e.complexity.AuthProfile.ID == nil {
 			break
 		}
 
-		return e.complexity.AuthResult.Message(childComplexity), true
+		return e.complexity.AuthProfile.ID(childComplexity), true
 
-	case "AuthResult.success":
-		if e.complexity.AuthResult.Success == nil {
+	case "AuthProfile.lastName":
+		if e.complexity.AuthProfile.LastName == nil {
 			break
 		}
 
-		return e.complexity.AuthResult.Success(childComplexity), true
+		return e.complexity.AuthProfile.LastName(childComplexity), true
 
-	case "AuthResultData.account":
-		if e.complexity.AuthResultData.Account == nil {
+	case "AuthToken.accessToken":
+		if e.complexity.AuthToken.AccessToken == nil {
 			break
 		}
 
-		return e.complexity.AuthResultData.Account(childComplexity), true
+		return e.complexity.AuthToken.AccessToken(childComplexity), true
 
-	case "AuthResultData.tokens":
-		if e.complexity.AuthResultData.Tokens == nil {
+	case "AuthToken.refreshToken":
+		if e.complexity.AuthToken.RefreshToken == nil {
 			break
 		}
 
-		return e.complexity.AuthResultData.Tokens(childComplexity), true
+		return e.complexity.AuthToken.RefreshToken(childComplexity), true
 
-	case "AuthResultTokenData.accessToken":
-		if e.complexity.AuthResultTokenData.AccessToken == nil {
+	case "Error.field":
+		if e.complexity.Error.Field == nil {
 			break
 		}
 
-		return e.complexity.AuthResultTokenData.AccessToken(childComplexity), true
+		return e.complexity.Error.Field(childComplexity), true
 
-	case "AuthResultTokenData.refreshToken":
-		if e.complexity.AuthResultTokenData.RefreshToken == nil {
+	case "Error.message":
+		if e.complexity.Error.Message == nil {
 			break
 		}
 
-		return e.complexity.AuthResultTokenData.RefreshToken(childComplexity), true
+		return e.complexity.Error.Message(childComplexity), true
 
-	case "BaseData.field":
-		if e.complexity.BaseData.Field == nil {
+	case "Metadata.deviceId":
+		if e.complexity.Metadata.DeviceID == nil {
 			break
 		}
 
-		return e.complexity.BaseData.Field(childComplexity), true
+		return e.complexity.Metadata.DeviceID(childComplexity), true
 
-	case "BaseData.message":
-		if e.complexity.BaseData.Message == nil {
+	case "Metadata.deviceType":
+		if e.complexity.Metadata.DeviceType == nil {
 			break
 		}
 
-		return e.complexity.BaseData.Message(childComplexity), true
+		return e.complexity.Metadata.DeviceType(childComplexity), true
 
-	case "BaseError.field":
-		if e.complexity.BaseError.Field == nil {
+	case "Metadata.ipAddress":
+		if e.complexity.Metadata.IPAddress == nil {
 			break
 		}
 
-		return e.complexity.BaseError.Field(childComplexity), true
+		return e.complexity.Metadata.IPAddress(childComplexity), true
 
-	case "BaseError.message":
-		if e.complexity.BaseError.Message == nil {
+	case "Metadata.timestamp":
+		if e.complexity.Metadata.Timestamp == nil {
 			break
 		}
 
-		return e.complexity.BaseError.Message(childComplexity), true
+		return e.complexity.Metadata.Timestamp(childComplexity), true
 
-	case "BaseResult.data":
-		if e.complexity.BaseResult.Data == nil {
+	case "Metadata.userAgent":
+		if e.complexity.Metadata.UserAgent == nil {
 			break
 		}
 
-		return e.complexity.BaseResult.Data(childComplexity), true
-
-	case "BaseResult.errors":
-		if e.complexity.BaseResult.Errors == nil {
-			break
-		}
-
-		return e.complexity.BaseResult.Errors(childComplexity), true
-
-	case "BaseResult.message":
-		if e.complexity.BaseResult.Message == nil {
-			break
-		}
-
-		return e.complexity.BaseResult.Message(childComplexity), true
-
-	case "BaseResult.success":
-		if e.complexity.BaseResult.Success == nil {
-			break
-		}
-
-		return e.complexity.BaseResult.Success(childComplexity), true
-
-	case "BaseResultData.id":
-		if e.complexity.BaseResultData.ID == nil {
-			break
-		}
-
-		return e.complexity.BaseResultData.ID(childComplexity), true
-
-	case "GetAccountsResult.data":
-		if e.complexity.GetAccountsResult.Data == nil {
-			break
-		}
-
-		return e.complexity.GetAccountsResult.Data(childComplexity), true
-
-	case "GetAccountsResult.errors":
-		if e.complexity.GetAccountsResult.Errors == nil {
-			break
-		}
-
-		return e.complexity.GetAccountsResult.Errors(childComplexity), true
-
-	case "GetAccountsResult.message":
-		if e.complexity.GetAccountsResult.Message == nil {
-			break
-		}
-
-		return e.complexity.GetAccountsResult.Message(childComplexity), true
-
-	case "GetAccountsResult.success":
-		if e.complexity.GetAccountsResult.Success == nil {
-			break
-		}
-
-		return e.complexity.GetAccountsResult.Success(childComplexity), true
-
-	case "GetAccountsResultData.displayName":
-		if e.complexity.GetAccountsResultData.DisplayName == nil {
-			break
-		}
-
-		return e.complexity.GetAccountsResultData.DisplayName(childComplexity), true
-
-	case "GetAccountsResultData.email":
-		if e.complexity.GetAccountsResultData.Email == nil {
-			break
-		}
-
-		return e.complexity.GetAccountsResultData.Email(childComplexity), true
-
-	case "GetAccountsResultData.id":
-		if e.complexity.GetAccountsResultData.ID == nil {
-			break
-		}
-
-		return e.complexity.GetAccountsResultData.ID(childComplexity), true
-
-	case "GetProfileResult.data":
-		if e.complexity.GetProfileResult.Data == nil {
-			break
-		}
-
-		return e.complexity.GetProfileResult.Data(childComplexity), true
-
-	case "GetProfileResult.errors":
-		if e.complexity.GetProfileResult.Errors == nil {
-			break
-		}
-
-		return e.complexity.GetProfileResult.Errors(childComplexity), true
-
-	case "GetProfileResult.message":
-		if e.complexity.GetProfileResult.Message == nil {
-			break
-		}
-
-		return e.complexity.GetProfileResult.Message(childComplexity), true
-
-	case "GetProfileResult.success":
-		if e.complexity.GetProfileResult.Success == nil {
-			break
-		}
-
-		return e.complexity.GetProfileResult.Success(childComplexity), true
-
-	case "GetProfileResultData.diplayName":
-		if e.complexity.GetProfileResultData.DiplayName == nil {
-			break
-		}
-
-		return e.complexity.GetProfileResultData.DiplayName(childComplexity), true
-
-	case "GetProfileResultData.id":
-		if e.complexity.GetProfileResultData.ID == nil {
-			break
-		}
-
-		return e.complexity.GetProfileResultData.ID(childComplexity), true
-
-	case "GetSessionResult.data":
-		if e.complexity.GetSessionResult.Data == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResult.Data(childComplexity), true
-
-	case "GetSessionResult.errors":
-		if e.complexity.GetSessionResult.Errors == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResult.Errors(childComplexity), true
-
-	case "GetSessionResult.message":
-		if e.complexity.GetSessionResult.Message == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResult.Message(childComplexity), true
-
-	case "GetSessionResult.success":
-		if e.complexity.GetSessionResult.Success == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResult.Success(childComplexity), true
-
-	case "GetSessionResultData.deviceaId":
-		if e.complexity.GetSessionResultData.DeviceaID == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.DeviceaID(childComplexity), true
-
-	case "GetSessionResultData.expiresAt":
-		if e.complexity.GetSessionResultData.ExpiresAt == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.ExpiresAt(childComplexity), true
-
-	case "GetSessionResultData.id":
-		if e.complexity.GetSessionResultData.ID == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.ID(childComplexity), true
-
-	case "GetSessionResultData.ipAddress":
-		if e.complexity.GetSessionResultData.IPAddress == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.IPAddress(childComplexity), true
-
-	case "GetSessionResultData.isRevoked":
-		if e.complexity.GetSessionResultData.IsRevoked == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.IsRevoked(childComplexity), true
-
-	case "GetSessionResultData.location":
-		if e.complexity.GetSessionResultData.Location == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.Location(childComplexity), true
-
-	case "GetSessionResultData.refreshToken":
-		if e.complexity.GetSessionResultData.RefreshToken == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.RefreshToken(childComplexity), true
-
-	case "GetSessionResultData.userAgent":
-		if e.complexity.GetSessionResultData.UserAgent == nil {
-			break
-		}
-
-		return e.complexity.GetSessionResultData.UserAgent(childComplexity), true
-
-	case "Mutation.changePassword":
-		if e.complexity.Mutation.ChangePassword == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_changePassword_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.ChangePassword(childComplexity, args["input"].(model.ChangePasswordInput)), true
+		return e.complexity.Metadata.UserAgent(childComplexity), true
 
 	case "Mutation._empty":
 		if e.complexity.Mutation.Empty == nil {
@@ -644,12 +324,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.Empty(childComplexity), true
 
-	case "Mutation.resendEmailVerificationLink":
-		if e.complexity.Mutation.ResendEmailVerificationLink == nil {
+	case "Mutation.requestEmailVerification":
+		if e.complexity.Mutation.RequestEmailVerification == nil {
 			break
 		}
 
-		return e.complexity.Mutation.ResendEmailVerificationLink(childComplexity), true
+		return e.complexity.Mutation.RequestEmailVerification(childComplexity), true
+
+	case "Mutation.requestPasswordReset":
+		if e.complexity.Mutation.RequestPasswordReset == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_requestPasswordReset_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestPasswordReset(childComplexity, args["input"].(model.RequestPasswordResetInput)), true
 
 	case "Mutation.resetPassword":
 		if e.complexity.Mutation.ResetPassword == nil {
@@ -661,31 +353,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetPassword(childComplexity, args["email"].(string)), true
-
-	case "Mutation.revokeAllSessions":
-		if e.complexity.Mutation.RevokeAllSessions == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_revokeAllSessions_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RevokeAllSessions(childComplexity, args["accountId"].(string)), true
-
-	case "Mutation.revokeSession":
-		if e.complexity.Mutation.RevokeSession == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_revokeSession_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.RevokeSession(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.ResetPassword(childComplexity, args["input"].(model.ResetPasswordInput)), true
 
 	case "Mutation.signin":
 		if e.complexity.Mutation.Signin == nil {
@@ -698,6 +366,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Signin(childComplexity, args["input"].(model.SigninInput)), true
+
+	case "Mutation.signout":
+		if e.complexity.Mutation.Signout == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_signout_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Signout(childComplexity, args["input"].(model.SignoutInput)), true
 
 	case "Mutation.signup":
 		if e.complexity.Mutation.Signup == nil {
@@ -721,105 +401,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.VerifyEmail(childComplexity, args["token"].(string)), true
+		return e.complexity.Mutation.VerifyEmail(childComplexity, args["input"].(model.VerifyEmailInput)), true
 
-	case "OAuth.accessToken":
-		if e.complexity.OAuth.AccessToken == nil {
+	case "PageInfo.hasNextPage":
+		if e.complexity.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.OAuth.AccessToken(childComplexity), true
+		return e.complexity.PageInfo.HasNextPage(childComplexity), true
 
-	case "OAuth.accessTokenExpiresAt":
-		if e.complexity.OAuth.AccessTokenExpiresAt == nil {
+	case "PageInfo.hasPreviousPage":
+		if e.complexity.PageInfo.HasPreviousPage == nil {
 			break
 		}
 
-		return e.complexity.OAuth.AccessTokenExpiresAt(childComplexity), true
+		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
 
-	case "OAuth.accountId":
-		if e.complexity.OAuth.AccountID == nil {
+	case "PageInfo.totalCount":
+		if e.complexity.PageInfo.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.OAuth.AccountID(childComplexity), true
-
-	case "OAuth.cretedAt":
-		if e.complexity.OAuth.CretedAt == nil {
-			break
-		}
-
-		return e.complexity.OAuth.CretedAt(childComplexity), true
-
-	case "OAuth.id":
-		if e.complexity.OAuth.ID == nil {
-			break
-		}
-
-		return e.complexity.OAuth.ID(childComplexity), true
-
-	case "OAuth.provider":
-		if e.complexity.OAuth.Provider == nil {
-			break
-		}
-
-		return e.complexity.OAuth.Provider(childComplexity), true
-
-	case "OAuth.providerAccountId":
-		if e.complexity.OAuth.ProviderAccountID == nil {
-			break
-		}
-
-		return e.complexity.OAuth.ProviderAccountID(childComplexity), true
-
-	case "OAuth.updedAt":
-		if e.complexity.OAuth.UpdedAt == nil {
-			break
-		}
-
-		return e.complexity.OAuth.UpdedAt(childComplexity), true
-
-	case "Profile.cretedAt":
-		if e.complexity.Profile.CretedAt == nil {
-			break
-		}
-
-		return e.complexity.Profile.CretedAt(childComplexity), true
-
-	case "Profile.displayName":
-		if e.complexity.Profile.DisplayName == nil {
-			break
-		}
-
-		return e.complexity.Profile.DisplayName(childComplexity), true
-
-	case "Profile.firstName":
-		if e.complexity.Profile.FirstName == nil {
-			break
-		}
-
-		return e.complexity.Profile.FirstName(childComplexity), true
-
-	case "Profile.id":
-		if e.complexity.Profile.ID == nil {
-			break
-		}
-
-		return e.complexity.Profile.ID(childComplexity), true
-
-	case "Profile.lastName":
-		if e.complexity.Profile.LastName == nil {
-			break
-		}
-
-		return e.complexity.Profile.LastName(childComplexity), true
-
-	case "Profile.updedAt":
-		if e.complexity.Profile.UpdedAt == nil {
-			break
-		}
-
-		return e.complexity.Profile.UpdedAt(childComplexity), true
+		return e.complexity.PageInfo.TotalCount(childComplexity), true
 
 	case "Query._empty":
 		if e.complexity.Query.Empty == nil {
@@ -828,221 +431,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Empty(childComplexity), true
 
-	case "Query.getProfile":
-		if e.complexity.Query.GetProfile == nil {
+	case "Response.message":
+		if e.complexity.Response.Message == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getProfile_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
+		return e.complexity.Response.Message(childComplexity), true
 
-		return e.complexity.Query.GetProfile(childComplexity, args["id"].(string)), true
-
-	case "Query.getSession":
-		if e.complexity.Query.GetSession == nil {
+	case "Response.success":
+		if e.complexity.Response.Success == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getSession_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSession(childComplexity, args["id"].(string)), true
-
-	case "Query.getSessions":
-		if e.complexity.Query.GetSessions == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getSessions_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSessions(childComplexity, args["accountId"].(string), args["filter"].(model.FilterResult)), true
-
-	case "Query.getSessionsByRefreshToken":
-		if e.complexity.Query.GetSessionsByRefreshToken == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getSessionsByRefreshToken_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetSessionsByRefreshToken(childComplexity, args["refreshToken"].(string)), true
-
-	case "Query.me":
-		if e.complexity.Query.Me == nil {
-			break
-		}
-
-		return e.complexity.Query.Me(childComplexity), true
-
-	case "RevokeAllSessionsResult.data":
-		if e.complexity.RevokeAllSessionsResult.Data == nil {
-			break
-		}
-
-		return e.complexity.RevokeAllSessionsResult.Data(childComplexity), true
-
-	case "RevokeAllSessionsResult.errors":
-		if e.complexity.RevokeAllSessionsResult.Errors == nil {
-			break
-		}
-
-		return e.complexity.RevokeAllSessionsResult.Errors(childComplexity), true
-
-	case "RevokeAllSessionsResult.message":
-		if e.complexity.RevokeAllSessionsResult.Message == nil {
-			break
-		}
-
-		return e.complexity.RevokeAllSessionsResult.Message(childComplexity), true
-
-	case "RevokeAllSessionsResult.success":
-		if e.complexity.RevokeAllSessionsResult.Success == nil {
-			break
-		}
-
-		return e.complexity.RevokeAllSessionsResult.Success(childComplexity), true
-
-	case "RevokeAllSessionsResultData.accountId":
-		if e.complexity.RevokeAllSessionsResultData.AccountID == nil {
-			break
-		}
-
-		return e.complexity.RevokeAllSessionsResultData.AccountID(childComplexity), true
-
-	case "RevokeAllSessionsResultData.count":
-		if e.complexity.RevokeAllSessionsResultData.Count == nil {
-			break
-		}
-
-		return e.complexity.RevokeAllSessionsResultData.Count(childComplexity), true
-
-	case "RevokeSessionResult.data":
-		if e.complexity.RevokeSessionResult.Data == nil {
-			break
-		}
-
-		return e.complexity.RevokeSessionResult.Data(childComplexity), true
-
-	case "RevokeSessionResult.errors":
-		if e.complexity.RevokeSessionResult.Errors == nil {
-			break
-		}
-
-		return e.complexity.RevokeSessionResult.Errors(childComplexity), true
-
-	case "RevokeSessionResult.message":
-		if e.complexity.RevokeSessionResult.Message == nil {
-			break
-		}
-
-		return e.complexity.RevokeSessionResult.Message(childComplexity), true
-
-	case "RevokeSessionResult.success":
-		if e.complexity.RevokeSessionResult.Success == nil {
-			break
-		}
-
-		return e.complexity.RevokeSessionResult.Success(childComplexity), true
-
-	case "RevokeSessionResultData.id":
-		if e.complexity.RevokeSessionResultData.ID == nil {
-			break
-		}
-
-		return e.complexity.RevokeSessionResultData.ID(childComplexity), true
-
-	case "Session.accountId":
-		if e.complexity.Session.AccountID == nil {
-			break
-		}
-
-		return e.complexity.Session.AccountID(childComplexity), true
-
-	case "Session.createdAt":
-		if e.complexity.Session.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Session.CreatedAt(childComplexity), true
-
-	case "Session.deviceaId":
-		if e.complexity.Session.DeviceaID == nil {
-			break
-		}
-
-		return e.complexity.Session.DeviceaID(childComplexity), true
-
-	case "Session.expiresAt":
-		if e.complexity.Session.ExpiresAt == nil {
-			break
-		}
-
-		return e.complexity.Session.ExpiresAt(childComplexity), true
-
-	case "Session.id":
-		if e.complexity.Session.ID == nil {
-			break
-		}
-
-		return e.complexity.Session.ID(childComplexity), true
-
-	case "Session.ipAddress":
-		if e.complexity.Session.IPAddress == nil {
-			break
-		}
-
-		return e.complexity.Session.IPAddress(childComplexity), true
-
-	case "Session.isRevoked":
-		if e.complexity.Session.IsRevoked == nil {
-			break
-		}
-
-		return e.complexity.Session.IsRevoked(childComplexity), true
-
-	case "Session.lastActiveAt":
-		if e.complexity.Session.LastActiveAt == nil {
-			break
-		}
-
-		return e.complexity.Session.LastActiveAt(childComplexity), true
-
-	case "Session.location":
-		if e.complexity.Session.Location == nil {
-			break
-		}
-
-		return e.complexity.Session.Location(childComplexity), true
-
-	case "Session.refreshToken":
-		if e.complexity.Session.RefreshToken == nil {
-			break
-		}
-
-		return e.complexity.Session.RefreshToken(childComplexity), true
-
-	case "Session.updatedAt":
-		if e.complexity.Session.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.Session.UpdatedAt(childComplexity), true
-
-	case "Session.userAgent":
-		if e.complexity.Session.UserAgent == nil {
-			break
-		}
-
-		return e.complexity.Session.UserAgent(childComplexity), true
+		return e.complexity.Response.Success(childComplexity), true
 
 	}
 	return 0, false
@@ -1052,10 +453,16 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputFilterResult,
-		ec.unmarshalInputchangePasswordInput,
-		ec.unmarshalInputsigninInput,
-		ec.unmarshalInputsignupInput,
+		ec.unmarshalInputDateRangeInput,
+		ec.unmarshalInputMetadataInput,
+		ec.unmarshalInputPaginationInput,
+		ec.unmarshalInputRequestEmailVerification,
+		ec.unmarshalInputRequestPasswordResetInput,
+		ec.unmarshalInputResetPasswordInput,
+		ec.unmarshalInputSigninInput,
+		ec.unmarshalInputSignoutInput,
+		ec.unmarshalInputSignupInput,
+		ec.unmarshalInputVerifyEmailInput,
 	)
 	first := true
 
@@ -1153,247 +560,199 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../../../../packages/contracts/graphql/schema/account.graphqls", Input: `######### TYPES #########
-type Account {
-  id: ID!
-
-  email: String!
-
-  profiles: [Profile!]!
-
-  cretedAt: DateTime!
-  updedAt: DateTime!
+	{Name: "../schema/common/enums.graphqls", Input: `enum DeviceType {
+    MOBILE
+    TABLET
+    DESKTOP
+    WEB
+    API
 }
 
-type Profile {
-  id: ID!
-
-  firstName: String!
-  lastName: String!
-  displayName: String!
-
-  cretedAt: DateTime!
-  updedAt: DateTime!
+enum ContentType {
+    VIDEO
+    SHORT
+    LIVE
+    POST
 }
 
-type OAuth {
-  id: ID!
-  accountId: ID!
-
-  provider: String!
-  providerAccountId: String!
-  accessToken: String!
-  accessTokenExpiresAt: DateTime!
-
-  cretedAt: DateTime!
-  updedAt: DateTime!
+enum SortOrder {
+    ASC
+    DESC
 }
 
-type AccountSecurity {
-  id: ID!
-  accountId: ID!
-
-  isEmailVerified: Boolean!
-  emailVerifiedAt: DateTime
-  twoFactorEnabled: Boolean!
-  twoFactorEnabledAt: DateTime
-
-  cretedAt: DateTime!
-  updedAt: DateTime!
-}
-
-######### INPUTS ##########
-input signinInput {
-  email: String!
-  password: String!
-}
-
-input signupInput {
-  email: String!
-  password: String
-
-  firstName: String!
-  lastName: String!
-}
-
-input changePasswordInput {
-  oldPassword: String!
-  newPassword: String!
-}
-
-########## QUERIES ##########
-extend type Query {
-  me: Account!
-  getProfile(id: String!): GetProfileResult!
-}
-
-########## MUTATIONS ##########
-extend type Mutation {
-
-  # Auth
-  signin(input: signinInput!): AuthResult!
-  signup(input: signupInput!): AuthResult!
-
-  # Account
-  changePassword(input: changePasswordInput!): BaseResult!
-  resetPassword(email: String!): BaseResult!
-
-  # AccountSecurity
-  verifyEmail(token: String!): BaseResult!
-  resendEmailVerificationLink : BaseResult!
+enum TimeRange {
+    TODAY
+    WEEK
+    MONTH
+    YEAR
+    ALL
 }
 `, BuiltIn: false},
-	{Name: "../../../../packages/contracts/graphql/schema/common.graphqls", Input: `scalar DateTime 
+	{Name: "../schema/common/inputs.graphqls", Input: `# graph/common/inputs.graphqls
 
-type Query{
-  _empty: String
+input PaginationInput {
+    first: Int
+    after: String
+    last: Int
+    before: String
+    limit: Int = 20
+    offset: Int = 0
 }
 
-type Mutation{
-  _empty: String
+input DateRangeInput {
+    startDate: DateTime!
+    endDate: DateTime!
 }
 
-input FilterResult {
-  limit: Int!
-  skip: Int
-}
-
-type BaseError {
-  field: String!
-  message: String!
+input MetadataInput {
+    deviceId: String!
 }
 `, BuiltIn: false},
-	{Name: "../../../../packages/contracts/graphql/schema/response.graphqls", Input: `######## BASE #########
-type BaseResult {
-  success: Boolean!
-  message: String!
-  data: BaseData
-  errors: [BaseError!]
+	{Name: "../schema/common/types.graphqls", Input: `# graph/common/types.graphqls
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    totalCount: Int!
 }
 
-type BaseResultData {
-  id: ID!
+type Error {
+    message: String!
+    field: String
 }
 
-type BaseData {
-  field: String!
-  message: String!
+type Response {
+    success: Boolean!
+    message: String
 }
 
-######## ACCOUNTS ###########
-type GetProfileResult {
-  success: Boolean!
-  message: String!
-  data: GetProfileResultData
-  errors: [BaseError!]
+type Metadata {
+    deviceId: String!
+    deviceType: DeviceType
+    userAgent: String
+    ipAddress: String
+    timestamp: DateTime!
+}
+`, BuiltIn: false},
+	{Name: "../schema/directives.graphqls", Input: `# graph/directives.graphqls
+
+directive @authenticated on FIELD_DEFINITION
+directive @public on FIELD_DEFINITION
+directive @rateLimit(limit: Int!, duration: Int!) on FIELD_DEFINITION
+directive @hasRole(role: String!) on FIELD_DEFINITION
+`, BuiltIn: false},
+	{Name: "../schema/scalars.graphqls", Input: `# graph/scalars.graphqls
+
+scalar UUID
+scalar DateTime
+scalar Upload
+scalar JSON
+scalar Email
+scalar URL
+`, BuiltIn: false},
+	{Name: "../schema/schema.graphqls", Input: `# graph/schema.graphqls
+
+schema {
+    query: Query
+    mutation: Mutation
 }
 
-type GetProfileResultData {
-  id: ID!
-  diplayName: String!
+type Query {
+    _empty: String
+}
+type Mutation {
+    _empty: String
+}
+`, BuiltIn: false},
+	{Name: "../schema/user-service/auth/inputs.graphqls", Input: `input SignupInput {
+    email: Email!
+    password: String!
+    firstName: String!
+    lastName: String!
+    metadata: MetadataInput!
 }
 
-type GetAccountsResult {
-  success: Boolean!
-  message: String!
-  data: GetAccountsResultData
-  errors: [BaseError!]
+input SigninInput {
+    email: Email!
+    password: String!
+    metadata: MetadataInput!
 }
 
-type GetAccountsResultData {
-  id: ID!
+input SignoutInput {
+    metadata: MetadataInput!
+}
+
+input RequestPasswordResetInput {
+    email: Email!
+    metadata: MetadataInput!
+}
+
+input ResetPasswordInput {
+    token: String!
+    newPassword: String!
+    metadata: MetadataInput!
+}
+
+input RequestEmailVerification {
   email: String!
-  displayName: String!
+  metadata: MetadataInput!
 }
 
-type AuthResult {
-  success: Boolean!
-  message: String!
-  data: AuthResultData
-  errors: [BaseError!]
+input VerifyEmailInput {
+    token: String!
+    metadata: MetadataInput!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user-service/auth/mutations.graphqls", Input: `extend type Mutation {
+    # Authentication
+    signup(input: SignupInput!): AuthPayload! @public @rateLimit(limit: 5, duration: 3600)
+    signin(input: SigninInput!): AuthPayload! @public @rateLimit(limit: 10, duration: 300)
+    signout(input: SignoutInput!): Response! @authenticated
+    
+    # Password management
+    requestPasswordReset(input: RequestPasswordResetInput!): Response! @public @rateLimit(limit: 3, duration: 3600)
+    resetPassword(input: ResetPasswordInput!): Response! @public
+    
+    # Email verification
+    requestEmailVerification: Response! @authenticated @rateLimit(limit: 3, duration: 3600)
+    verifyEmail(input: VerifyEmailInput!): Response! @public
+    
+}
+`, BuiltIn: false},
+	{Name: "../schema/user-service/auth/types.graphqls", Input: `type AuthAccount {
+    id: UUID!
+    email: Email!
+    isEmailVerified: Boolean!
+    twoFactorEnabled: Boolean!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    lastLoginAt: DateTime
+    roles: [String!]!
+    permissions: [String!]!
 }
 
-type AuthResultData {
-  account: Account!
-  tokens: AuthResultTokenData!
-}
-
-type AuthResultTokenData {
+type AuthToken {
     accessToken: String!
     refreshToken: String!
-  }
-
-######## SESSIONS ###########
-type GetSessionResult {
-  success: Boolean!
-  message: String!
-  data: GetSessionResultData
-  errors: [BaseError!]
 }
 
-type GetSessionResultData {
-  id: ID!
-  refreshToken: String!
-  userAgent: String!
-  ipAddress: String!
-  location: String!
-  deviceaId: String!
-  expiresAt: DateTime!
-  isRevoked: Boolean!
+type AuthProfile {
+  id: String!
+  firstName: String!
+  lastName: String!
+  displayName: String
+  avatarUrl: String
 }
 
-type RevokeSessionResult {
-  success: Boolean!
-  message: String!
-  data: RevokeSessionResultData
-  errors: [BaseError!]
-}
-
-type RevokeSessionResultData {
-  id: ID!
-}
-
-type RevokeAllSessionsResult {
-  success: Boolean!
-  message: String!
-  data: RevokeAllSessionsResultData
-  errors: [BaseError!]
-}
-
-type RevokeAllSessionsResultData {
-  accountId: ID!
-  count: Int!
+type AuthPayload {
+    account: AuthAccount!
+    tokens: AuthToken!
+    profiles: [AuthProfile!]!
 }
 
 `, BuiltIn: false},
-	{Name: "../../../../packages/contracts/graphql/schema/session.graphqls", Input: `########## TYPES ##########
-type Session {
-  id: ID!
-  accountId: ID!
-  refreshToken: String!
-  userAgent: String!
-  ipAddress: String!
-  location: String!
-  deviceaId: String!
-  lastActiveAt: DateTime!
-  expiresAt: DateTime!
-  isRevoked: Boolean!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-########## QUERIES ##########
-extend type Query {
-  getSession(id: ID!): GetSessionResult!
-  getSessions(accountId: ID!, filter: FilterResult!): [GetSessionResult!]!
-  getSessionsByRefreshToken(refreshToken: String!): GetSessionResult!
-}
-
-########## MUTATIONS ##########
-extend type Mutation {
-  revokeSession(id: ID!): RevokeSessionResult!
-  revokeAllSessions(accountId: ID!): RevokeAllSessionsResult!
-}
-`, BuiltIn: false},
+	{Name: "../schema/user-service/profile/inputs.graphqls", Input: ``, BuiltIn: false},
+	{Name: "../schema/user-service/profile/mutations.graphqls", Input: ``, BuiltIn: false},
+	{Name: "../schema/user-service/profile/types.graphqls", Input: ``, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

@@ -1,0 +1,31 @@
+type AuthAccount {
+    id: UUID!
+    email: Email!
+    isEmailVerified: Boolean!
+    twoFactorEnabled: Boolean!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    lastLoginAt: DateTime
+    roles: [String!]!
+    permissions: [String!]!
+}
+
+type AuthToken {
+    accessToken: String!
+    refreshToken: String!
+}
+
+type AuthProfile {
+  id: String!
+  firstName: String!
+  lastName: String!
+  displayName: String
+  avatarUrl: String
+}
+
+type AuthPayload {
+    account: AuthAccount!
+    tokens: AuthToken!
+    profiles: [AuthProfile!]!
+}
+
