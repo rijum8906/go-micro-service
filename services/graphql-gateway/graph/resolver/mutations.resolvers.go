@@ -9,40 +9,64 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/rijum8906/go-micro-service/services/graphql-gateway/graph/model"
 )
 
 // Signup is the resolver for the signup field.
 func (r *mutationResolver) Signup(ctx context.Context, input model.SignupInput) (*model.AuthPayload, error) {
-	panic(fmt.Errorf("not implemented: Signup - signup"))
+	return &model.AuthPayload{
+		Account: &model.AuthAccount{
+			ID:    uuid.New(),
+			Email: "mail@mail.com",
+		},
+		Profiles: []*model.AuthProfile{
+			{
+				ID:        uuid.New().String(),
+				FirstName: "John",
+				LastName:  "Doe",
+			},
+		},
+		Tokens: &model.AuthToken{
+			AccessToken:  "access-token",
+			RefreshToken: "Refresh-token",
+		},
+	}, nil
 }
 
 // Signin is the resolver for the signin field.
 func (r *mutationResolver) Signin(ctx context.Context, input model.SigninInput) (*model.AuthPayload, error) {
-	panic(fmt.Errorf("not implemented: Signin - signin"))
+	return nil, fmt.Errorf("signin resolver is not implemented")
 }
 
 // Signout is the resolver for the signout field.
 func (r *mutationResolver) Signout(ctx context.Context, input model.SignoutInput) (*model.Response, error) {
-	panic(fmt.Errorf("not implemented: Signout - signout"))
+	return failureResponse("signout resolver is not implemented"), nil
 }
 
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input model.RequestPasswordResetInput) (*model.Response, error) {
-	panic(fmt.Errorf("not implemented: RequestPasswordReset - requestPasswordReset"))
+	return failureResponse("requestPasswordReset resolver is not implemented"), nil
 }
 
 // ResetPassword is the resolver for the resetPassword field.
 func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.Response, error) {
-	panic(fmt.Errorf("not implemented: ResetPassword - resetPassword"))
+	return failureResponse("resetPassword resolver is not implemented"), nil
 }
 
 // RequestEmailVerification is the resolver for the requestEmailVerification field.
 func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input model.RequestEmailVerificationInput) (*model.Response, error) {
-	panic(fmt.Errorf("not implemented: RequestEmailVerification - requestEmailVerification"))
+	return failureResponse("requestEmailVerification resolver is not implemented"), nil
 }
 
 // VerifyEmail is the resolver for the verifyEmail field.
 func (r *mutationResolver) VerifyEmail(ctx context.Context, input model.VerifyEmailInput) (*model.Response, error) {
-	panic(fmt.Errorf("not implemented: VerifyEmail - verifyEmail"))
+	return failureResponse("verifyEmail resolver is not implemented"), nil
+}
+
+func failureResponse(message string) *model.Response {
+	return &model.Response{
+		Success: false,
+		Message: &message,
+	}
 }

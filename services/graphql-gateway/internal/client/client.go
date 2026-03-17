@@ -62,6 +62,7 @@ func NewClient(config *ClientConfig) *Client {
 		},
 		headers: config.Headers,
 		logger:  config.Logger,
+		config:  config,
 	}
 }
 
