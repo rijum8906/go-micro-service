@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "github.com/rijum8906/relay/proto/common/v1;common";
+
+// Metadata for requests (device info, etc.)
+message RequestMetadata {
+  string device_id = 1;
+  string user_agent = 2;
+  string ip_address = 3;
+}
+
+// Empty response for operations that don't return data
+message EmptyResponse {}
+
+// ID wrapper
+message ID {
+  string id = 1;
+}
+
+// IDs wrapper for batch operations
+message IDs {
+  repeated string ids = 1;
+}
+
+// Pagination request
+message PaginationRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+// Pagination response
+message PaginationResponse {
+  string next_page_token = 1;
+  int32 total_size = 2;
+}
