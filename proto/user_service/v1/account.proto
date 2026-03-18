@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package user_service.v1;
+
+import "buf/validate/validate.proto";
+import "common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservice";
+
+// enum
+enum ScopedActions {
+  SCOPED_ACTIONS_UNSPECIFIED = 0;
+
+  // Change
+  SCOPED_ACTIONS_CHANGE_PASSWORD = 1;
+  SCOPED_ACTIONS_CHANGE_EMAIL = 2;
+
+  // Delete
+  SCOPED_ACTIONS_DELETE_ACCOUNT = 3;
+  SCOPED_ACTIONS_DELETE_PROFILE = 4;
+}
+
+enum AuthType {
+  AUTH_TYPE_UNSPECIFIED = 0;
+  AUTH_TYPE_PASSWORD = 1;
+}
+
+// Generate Scoped Token
+message GenerateScopedTokenRequest {
+  ScopedActions scope = 1;
+  AuthType auth_type = 2;
+  common.v1.String value = 3 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
+}
+
+message GenerateScopedTokenResponse {
+  common.v1.Token token = 1 [(buf.validate.field).required = true];
+}
+
+// Change Password
+message ChangePasswordRequest {
+  common.v1.String token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
+}
+
+message ChangePasswordResponse {
+  bool success = 1;
+}
+
+// Get My Account
+message GetMyAccountRequest {
+  common.v1.RequestMetadata metadata = 1 [(buf.validate.field).required = true];
+}
+
+message GetMyAccountSecurityResponse {
+  bool is_email_verified = 1;
+  google.protobuf.Timestamp email_verified_at = 2;
+  bool two_factor_enabled = 3;
+  google.protobuf.Timestamp two_factor_enabled_at = 4;
+}
+
+message GetMyAccountResponse {
+  common.v1.UUID id = 1 [(buf.validate.field).required = true];
+  common.v1.Email email = 2 [(buf.validate.field).required = true];
+  GetMyAccountSecurityResponse security = 3;
+  google.protobuf.Timestamp created_at = 4 [(buf.validate.field).required = true];
+  google.protobuf.Timestamp updated_at = 5 [(buf.validate.field).required = true];
+}
+
+// Delete Account
+message DeleteAccountRequest {
+  common.v1.String token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message DeleteAccountResponse {
+  bool success = 1;
+}

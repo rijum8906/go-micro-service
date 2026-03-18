@@ -2,7 +2,9 @@ syntax = "proto3";
 
 package user_service.v1;
 
+import "user_service/v1/account.proto";
 import "user_service/v1/models.proto";
+import "user_service/v1/profile.proto";
 
 option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservice";
 
@@ -32,4 +34,17 @@ service AuthService {
 
   // Reset password
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+
+  // Change Password
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+
+  rpc GetMyAccount(GetMyAccountRequest) returns (GetMyAccountResponse);
+
+  rpc GetMyProfile(GetMyProfileRequest) returns (GetMyProfileResponse);
+
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+
+  rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
+
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
 }
