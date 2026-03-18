@@ -3,25 +3,27 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
 	"net/http"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/rijum8906/relay/packages/common/database/postgres"
 	"github.com/rijum8906/relay/packages/common/database/redis"
 	"github.com/rijum8906/relay/packages/common/env"
 	"github.com/rijum8906/relay/packages/common/hash"
 	"github.com/rijum8906/relay/packages/common/jwt"
-	handler "github.com/rijum8906/relay/services/user-service/internal/api/handlers/rest"
+	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
+	grpc_handler "github.com/rijum8906/relay/services/user-service/internal/api/handlers/grpc"
 	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 	dbRoot "github.com/rijum8906/relay/services/user-service/internal/db"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
-	"github.com/rijum8906/relay/services/user-service/internal/services/account"
 	"github.com/rijum8906/relay/services/user-service/internal/services/auth"
-	"github.com/rijum8906/relay/services/user-service/internal/services/profile"
 	"github.com/rijum8906/relay/services/user-service/internal/services/storage"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -113,24 +115,9 @@ func main() {
 	}
 
 	authService := auth.NewAuth(db.New(pgPool), utilsCfg, env)
-	accountService := account.NewAccountService(db.New(pgPool), utilsCfg, env)
-	profileService := profile.NewProfileService(db.New(pgPool), utilsCfg, env)
+	// accountService := account.NewAccountService(db.New(pgPool), utilsCfg, env)
+	// profileService := profile.NewProfileService(db.New(pgPool), utilsCfg, env)
 	// server logic starts here...
-
-	// Configure CORS
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     env.CorsAllowedOrigins,
-		AllowMethods:     env.CorsAllowedMethods,
-		AllowHeaders:     env.CorsAllowedHeaders,
-		ExposeHeaders:    []string{"Content-Length", "X-Request-ID"},
-		AllowCredentials: true,
-	}))
-
-	apiRouterV1 := router.Group("/api/v1")
-
-	authRouter := apiRouterV1.Group("/auth")
-	profilesRouter := apiRouterV1.Group("/profiles")
-	accountRouter := apiRouterV1.Group("/accounts")
 
 	router.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
@@ -138,12 +125,21 @@ func main() {
 		})
 	})
 
-	handler.RegisterHandlers(authRouter, authService, middlewareService)
-	handler.SetupProfilesHandlers(profilesRouter, profileService, middlewareService)
-	handler.SetupAccountsHandlers(accountRouter, accountService, middlewareService)
+	lis, errr := net.Listen("tcp", fmt.Sprintf(":%s", env.AppPort))
+	if errr != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
 
-	error := router.Run(fmt.Sprintf(":%s", env.AppPort))
-	if error != nil {
-		panic(error)
+	s := grpc.NewServer()
+
+	authHandler := grpc_handler.NewAuthHandler(authService, middlewareService)
+	user_servicev1.RegisterAuthServiceServer(s, authHandler)
+
+	// Enable reflection (allows tools like Postman/grpcurl to "see" API)
+	reflection.Register(s)
+
+	log.Printf("gRPC server listening at %v", lis.Addr())
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 }

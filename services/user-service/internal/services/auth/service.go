@@ -9,6 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	appError "github.com/rijum8906/relay/packages/common/errors"
+	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
@@ -87,7 +88,7 @@ func (s *authService) Signin(ctx context.Context, data request.SigninRequest, re
 }
 
 // SignUp orchestrates account creation and immediate profile initialization.
-func (s *authService) SignUp(ctx context.Context, data request.SignupRequest, reqMetadata request.RequestMetadata) (*response.AuthResponse, *appError.AppError) {
+func (s *authService) SignUp(ctx context.Context, data *user_servicev1.SignupRequest) (*user_servicev1.AuthResponse, *appError.AppError) {
 	// 1. Idempotency/Duplicate Check
 	_, err := s.q.GetAccountByEmail(ctx, data.Email)
 	if err == nil {
@@ -113,6 +114,11 @@ func (s *authService) SignUp(ctx context.Context, data request.SignupRequest, re
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
+	accountSecurity, err := s.q.CreateAccountSecurity(ctx, account.ID)
+	if err != nil {
+		return nil, appError.ErrInternal.WithInternal(err)
+	}
+
 	profile, err := s.q.CreateProfile(ctx, db.CreateProfileParams{
 		AccountID: account.ID,
 		FirstName: data.FirstName,
@@ -130,9 +136,9 @@ func (s *authService) SignUp(ctx context.Context, data request.SignupRequest, re
 	createdSession, err := s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
 		RefreshToken: refreshToken,
-		UserAgent:    reqMetadata.UserAgent,
-		IpAddr:       reqMetadata.IPAddr,
-		DeviceID:     reqMetadata.DeviceID,
+		UserAgent:    data.Metadata.UserAgent,
+		IpAddr:       data.Metadata.IpAddress,
+		DeviceID:     data.Metadata.DeviceId,
 		ExpiresAt:    pgtype.Timestamptz{Time: time.Now().Add(s.env.JwtExpiration), Valid: true},
 	})
 	if err != nil {
@@ -144,23 +150,26 @@ func (s *authService) SignUp(ctx context.Context, data request.SignupRequest, re
 		return nil, appError.ErrInternal.WithInternal(appErr)
 	}
 
-	parsedProfiles := make([]*response.ProfileResponse, 0, 1)
+	parsedProfiles := make([]*user_servicev1.Profile, 0, 1)
 
-	parsedProfiles = append(parsedProfiles, &response.ProfileResponse{
-		ID:          profile.ID,
+	parsedProfiles = append(parsedProfiles, &user_servicev1.Profile{
+		Id:          profile.ID.String(),
+		AccountId:   account.ID.String(),
 		FirstName:   profile.FirstName,
 		LastName:    profile.LastName,
-		DisplayName: profile.DisplayName,
-		AvatarUrl:   profile.AvatarUrl,
+		DisplayName: &profile.DisplayName.String,
+		AvatarUrl:   &profile.AvatarUrl.String,
 	})
 
-	return &response.AuthResponse{
-		Account: &response.AccountResponse{
-			ID:    account.ID,
-			Email: account.Email,
+	return &user_servicev1.AuthResponse{
+		Account: &user_servicev1.Account{
+			Id:               account.ID.String(),
+			Email:            account.Email,
+			EmailVerified:    accountSecurity.IsEmailVerified,
+			TwoFactorEnabled: accountSecurity.TwoFactorEnabled,
 		},
 		Profiles: parsedProfiles,
-		Token:    &response.TokenResponse{AccessToken: accessToken, RefreshToken: refreshToken},
+		Tokens:   &user_servicev1.TokenPair{AccessToken: accessToken, RefreshToken: refreshToken},
 	}, nil
 }
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/rijum8906/relay/packages/common/env"
 	"github.com/rijum8906/relay/packages/common/errors"
+	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
@@ -14,7 +15,7 @@ import (
 
 type AuthService interface {
 	Signin(ctx context.Context, dto request.SigninRequest, reqMetadata request.RequestMetadata) (*response.AuthResponse, *errors.AppError)
-	SignUp(ctx context.Context, dto request.SignupRequest, reqMetadata request.RequestMetadata) (*response.AuthResponse, *errors.AppError)
+	SignUp(ctx context.Context, dto *user_servicev1.SignupRequest) (*user_servicev1.AuthResponse, *errors.AppError)
 	Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
 
 	RequestEmailVerification(ctx context.Context, dto request.RequestEmailVerificationRequest, reqMetadata request.RequestMetadata) *errors.AppError
