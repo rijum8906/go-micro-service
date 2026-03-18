@@ -33,15 +33,25 @@ function SignUpPage() {
       confirmPassword: '',
     } as SignupSchemaType,
     onSubmit: async ({ value }) => {
-      const response = await signup(value)
+      const response = await signup(value) as any
       if (response.success) {
-        createAccount(response.data.account)
-        response.data.profiles.forEach(createProfile)
-        createToken(response.data.token)
-        toast.success(response.message || 'Account created successfully')
+        const payload = response.data.signup
+        createAccount({ id: payload.account.id, email: payload.account.email, createdAt: '', updatedAt: '', passwordHash: '' })
+        payload.profiles.forEach((p: any) => createProfile({
+          id: p.id,
+          firstName: p.firstName,
+          lastName: p.lastName,
+          displayName: p.displayName,
+          avatarUrl: p.avatarUrl,
+          accountId: payload.account.id,
+          createdAt: '',
+          updatedAt: '',
+        }))
+        createToken({ access_token: payload.tokens.accessToken, refresh_token: payload.tokens.refreshToken })
+        toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {
-        toast.error(response.message || 'Registration failed')
+        toast.error(response.message || 'Authentication failed')
       }
     },
   })
