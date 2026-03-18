@@ -56,13 +56,13 @@ services:
     ports:
       - "8080:8080"
 
-# web-v2
+  # web-v2
   web-v2:
     build:
       context: ./services/web-v2
       dockerfile: Dockerfile
     environment:
-      VITE_GRAPHQL_URL: "http://graphql-gateway:8080/query"
+      GRAPHQL_URL: "http://graphql-gateway:8080/query"
     ports:
       - "3000:3000"
     depends_on:
