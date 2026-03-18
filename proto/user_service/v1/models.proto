@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package user_service.v1;
 
+import "buf/validate/validate.proto";
 import "common/v1/common.proto";
 import "google/protobuf/timestamp.proto";
 
@@ -9,11 +10,11 @@ option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservic
 
 // Account represents a user account
 message Account {
-  string id = 1;
-  string email = 2;
+  common.v1.Id id = 1;
+  common.v1.Email email = 2;
   bool email_verified = 3;
   bool two_factor_enabled = 4;
-  string role = 5;
+  string role = 5 [(buf.validate.field).string.min_len = 1];
   google.protobuf.Timestamp created_at = 6;
   google.protobuf.Timestamp updated_at = 7;
   google.protobuf.Timestamp last_login_at = 8;
@@ -21,56 +22,69 @@ message Account {
 
 // Profile represents a user profile
 message Profile {
-  string id = 1;
-  string account_id = 2;
-  string first_name = 3;
-  string last_name = 4;
-  optional string display_name = 5;
-  optional string avatar_url = 6;
-  optional string bio = 7;
+  string id = 1 [(buf.validate.field).string.min_len = 1];
+  string account_id = 2 [(buf.validate.field).string.min_len = 1];
+  common.v1.Name first_name = 3;
+  common.v1.Name last_name = 4;
+  optional string display_name = 5 [(buf.validate.field).string.max_len = 150];
+  optional string avatar_url = 6 [(buf.validate.field).string.uri = true];
+  optional string bio = 7 [(buf.validate.field).string.max_len = 500];
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
 }
 
 // Session represents a user session
 message Session {
-  string id = 1;
-  string account_id = 2;
-  string device_id = 3;
-  string device_type = 4;
-  string ip_address = 5;
-  string user_agent = 6;
+  common.v1.Id id = 1;
+  common.v1.Id account_id = 2;
+  string device_id = 3 [(buf.validate.field).string.min_len = 1];
+  string device_type = 4 [(buf.validate.field).string.min_len = 1];
+  string ip_address = 5 [(buf.validate.field).string.min_len = 1];
+  string user_agent = 6 [(buf.validate.field).string.min_len = 1];
   google.protobuf.Timestamp created_at = 7;
   google.protobuf.Timestamp expires_at = 8;
   google.protobuf.Timestamp last_active_at = 9;
 }
 
+message AccountResponse {
+  common.v1.Id id = 1;
+  common.v1.Email email = 2;
+}
+
+message ProfileResponse {
+  common.v1.Id id = 1;
+  common.v1.Name first_name = 2;
+  common.v1.Name last_name = 3;
+  optional string display_name = 4 [(buf.validate.field).string.max_len = 150];
+  optional string avatar_url = 5 [(buf.validate.field).string.uri = true];
+}
+
 // Token pair for authentication
-message TokenPair {
-  string access_token = 1;
-  string refresh_token = 2;
+message AuthTokenResponse {
+  common.v1.Token access_token = 1;
+  common.v1.Token refresh_token = 2;
 }
 
 // Request/Response messages
 message SignupRequest {
-  string email = 1;
-  string password = 2;
-  string first_name = 3;
-  string last_name = 4;
+  common.v1.Email email = 1;
+  common.v1.Password password = 2;
+  common.v1.Name first_name = 3;
+  common.v1.Name last_name = 4;
   common.v1.RequestMetadata metadata = 5;
 }
 
 message SigninRequest {
-  string email = 1;
-  string password = 2;
-  optional string two_factor_code = 3;
+  common.v1.Email email = 1;
+  common.v1.Password password = 2;
+  optional string two_factor_code = 3 [(buf.validate.field).string.pattern = "^[0-9]{6}$"];
   common.v1.RequestMetadata metadata = 4;
 }
 
 message AuthResponse {
-  Account account = 1;
-  repeated Profile profiles = 2;
-  TokenPair tokens = 3;
+  AuthTokenResponse account = 1 [(buf.validate.field).required = true];
+  repeated ProfileResponse profiles = 2;
+  AuthTokenResponse tokens = 3 [(buf.validate.field).required = true];
 }
 
 message SignoutRequest {
@@ -78,5 +92,24 @@ message SignoutRequest {
 }
 
 message SignoutResponse {
+  bool success = 1;
+}
+
+// Email Verification
+message EmailVerificationRequest {
+  common.v1.Email email = 1;
+  common.v1.RequestMetadata metadata = 2;
+}
+
+message EmailVerificationResponse {
+  bool success = 1;
+}
+
+message VerifyEmailRequest {
+  common.v1.Token token = 1;
+  common.v1.RequestMetadata metadata = 2;
+}
+
+message VerifyEmailResponse {
   bool success = 1;
 }

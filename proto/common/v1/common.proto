@@ -2,6 +2,9 @@ syntax = "proto3";
 
 package common.v1;
 
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/rijum8906/relay/proto/common/v1;common";
 
 // Metadata for requests (device info, etc.)
@@ -34,4 +37,34 @@ message PaginationRequest {
 message PaginationResponse {
   string next_page_token = 1;
   int32 total_size = 2;
+}
+
+message Name {
+  string value = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 50
+  }];
+}
+
+message Email {
+  string value = 1 [(buf.validate.field).string = {
+    min_len: 1
+    email: true
+  }];
+}
+
+message Password {
+  string value = 1 [(buf.validate.field).string = {
+    min_len: 8
+    max_len: 50
+  }];
+}
+
+message Id {
+  string value = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message Token {
+  string value = 1 [(buf.validate.field).string.min_len = 1];
+  google.protobuf.Timestamp expires_at = 2;
 }
