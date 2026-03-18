@@ -15,12 +15,12 @@ import (
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 	"github.com/rs/cors"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func main() {
-	ctx := context.Background()
-
 	// Initialize env
 	env, appErr := env.Load()
 	if appErr != nil {
@@ -38,6 +38,10 @@ func main() {
 			},
 		),
 	)
+
+	srv.SetErrorPresenter(func(ctx context.Context, err error) *gqlerror.Error {
+		return utils.PresentError(ctx, err, os.Getenv("ENV") == "development")
+	})
 
 	// Create Service
 	middleware := middleware.NewService(env)

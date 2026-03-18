@@ -28,7 +28,7 @@ func (r *mutationResolver) Signup(ctx context.Context, input model.SignupInput) 
 		return nil, err
 	}
 
-	return mapAuthPayload(resp), nil
+	return utils.MapAuthPayload(resp), nil
 }
 
 // Signin is the resolver for the signin field.
@@ -42,7 +42,7 @@ func (r *mutationResolver) Signin(ctx context.Context, input model.SigninInput) 
 		return nil, err
 	}
 
-	return mapAuthPayload(resp), nil
+	return utils.MapAuthPayload(resp), nil
 }
 
 // Signout is the resolver for the signout field.
@@ -54,7 +54,7 @@ func (r *mutationResolver) Signout(ctx context.Context, input model.SignoutInput
 		return nil, err
 	}
 
-	return mapResponse(resp.GetSuccess()), nil
+	return utils.MapResponse(resp.GetSuccess()), nil
 }
 
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
@@ -67,7 +67,7 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input model
 		return nil, err
 	}
 
-	return mapResponse(resp.GetSuccess()), nil
+	return utils.MapResponse(resp.GetSuccess()), nil
 }
 
 // ResetPassword is the resolver for the resetPassword field.
@@ -81,7 +81,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 		return nil, err
 	}
 
-	return mapResponse(resp.GetSuccess()), nil
+	return utils.MapResponse(resp.GetSuccess()), nil
 }
 
 // RequestEmailVerification is the resolver for the requestEmailVerification field.
@@ -94,7 +94,7 @@ func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input m
 		return nil, err
 	}
 
-	return mapResponse(resp.GetSuccess()), nil
+	return utils.MapResponse(resp.GetSuccess()), nil
 }
 
 // VerifyEmail is the resolver for the verifyEmail field.
@@ -107,7 +107,7 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input model.VerifyEm
 		return nil, err
 	}
 
-	return mapResponse(resp.GetSuccess()), nil
+	return utils.MapResponse(resp.GetSuccess()), nil
 }
 
 func requestMetadataFromContext(ctx context.Context, input *model.MetadataInput) *commonv1.RequestMetadata {
