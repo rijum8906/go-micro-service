@@ -42,15 +42,14 @@ spec:
                 name: user-service-config
             - secretRef:
                 name: user-service-secrets
+
           readinessProbe:
-            httpGet:
-              path: /health
-              port: 8906
+            grpc:
+            port: 8906
             initialDelaySeconds: 5
             periodSeconds: 5
           livenessProbe:
-            httpGet:
-              path: /health
-              port: 8906
+            grpc:
+            port: 8906
             initialDelaySeconds: 30
             periodSeconds: 10

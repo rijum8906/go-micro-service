@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/rijum8906/relay/packages/common/database/postgres"
 	"github.com/rijum8906/relay/packages/common/database/redis"
 	"github.com/rijum8906/relay/packages/common/env"
@@ -34,13 +32,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	router := gin.New()
-
-	// Global middlewares
-	router.Use(middleware.RecoveryMiddleware())
-	router.Use(middleware.RequestIDMiddleware())
-	router.Use(middleware.LoggerMiddleware())
 
 	postgresCfg := postgres.Config{
 		Host:     env.DBHost,
@@ -118,12 +109,6 @@ func main() {
 	// accountService := account.NewAccountService(db.New(pgPool), utilsCfg, env)
 	// profileService := profile.NewProfileService(db.New(pgPool), utilsCfg, env)
 	// server logic starts here...
-
-	router.GET("/health", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"status": "ok",
-		})
-	})
 
 	lis, errr := net.Listen("tcp", fmt.Sprintf(":%s", env.AppPort))
 	if errr != nil {
