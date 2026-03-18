@@ -10,6 +10,7 @@ managed:
   disable:
     - module: buf.build/googleapis/googleapis
     - module: buf.build/protocolbuffers/well-known-types
+    - module: buf.build/bufbuild/protovalidate
 
 plugins:
   - local: protoc-gen-go

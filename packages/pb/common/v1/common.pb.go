@@ -7,8 +7,10 @@
 package commonv1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -315,11 +317,239 @@ func (x *PaginationResponse) GetTotalSize() int32 {
 	return 0
 }
 
+type Name struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Name) Reset() {
+	*x = Name{}
+	mi := &file_common_v1_common_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Name) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Name) ProtoMessage() {}
+
+func (x *Name) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Name.ProtoReflect.Descriptor instead.
+func (*Name) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Name) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+type Email struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Email) Reset() {
+	*x = Email{}
+	mi := &file_common_v1_common_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Email) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Email) ProtoMessage() {}
+
+func (x *Email) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Email.ProtoReflect.Descriptor instead.
+func (*Email) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *Email) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+type Password struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Password) Reset() {
+	*x = Password{}
+	mi := &file_common_v1_common_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Password) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Password) ProtoMessage() {}
+
+func (x *Password) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Password.ProtoReflect.Descriptor instead.
+func (*Password) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *Password) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+type Id struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Id) Reset() {
+	*x = Id{}
+	mi := &file_common_v1_common_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Id) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Id) ProtoMessage() {}
+
+func (x *Id) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Id.ProtoReflect.Descriptor instead.
+func (*Id) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *Id) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+type Token struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Token) Reset() {
+	*x = Token{}
+	mi := &file_common_v1_common_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Token) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Token) ProtoMessage() {}
+
+func (x *Token) ProtoReflect() protoreflect.Message {
+	mi := &file_common_v1_common_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Token.ProtoReflect.Descriptor instead.
+func (*Token) Descriptor() ([]byte, []int) {
+	return file_common_v1_common_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *Token) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+func (x *Token) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return nil
+}
+
 var File_common_v1_common_proto protoreflect.FileDescriptor
 
 const file_common_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x16common/v1/common.proto\x12\tcommon.v1\"l\n" +
+	"\x16common/v1/common.proto\x12\tcommon.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"l\n" +
 	"\x0fRequestMetadata\x12\x1b\n" +
 	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\x12\x1d\n" +
 	"\n" +
@@ -338,7 +568,19 @@ const file_common_v1_common_proto_rawDesc = "" +
 	"\x12PaginationResponse\x12&\n" +
 	"\x0fnext_page_token\x18\x01 \x01(\tR\rnextPageToken\x12\x1d\n" +
 	"\n" +
-	"total_size\x18\x02 \x01(\x05R\ttotalSizeB\x9c\x01\n" +
+	"total_size\x18\x02 \x01(\x05R\ttotalSize\"'\n" +
+	"\x04Name\x12\x1f\n" +
+	"\x05value\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x182R\x05value\"(\n" +
+	"\x05Email\x12\x1f\n" +
+	"\x05value\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01`\x01R\x05value\"+\n" +
+	"\bPassword\x12\x1f\n" +
+	"\x05value\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\b\x182R\x05value\"#\n" +
+	"\x02Id\x12\x1d\n" +
+	"\x05value\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05value\"a\n" +
+	"\x05Token\x12\x1d\n" +
+	"\x05value\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x05value\x129\n" +
+	"\n" +
+	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAtB\x9c\x01\n" +
 	"\rcom.common.v1B\vCommonProtoP\x01Z9github.com/rijum8906/relay/packages/pb/common/v1;commonv1\xa2\x02\x03CXX\xaa\x02\tCommon.V1\xca\x02\tCommon\\V1\xe2\x02\x15Common\\V1\\GPBMetadata\xea\x02\n" +
 	"Common::V1b\x06proto3"
 
@@ -354,21 +596,28 @@ func file_common_v1_common_proto_rawDescGZIP() []byte {
 	return file_common_v1_common_proto_rawDescData
 }
 
-var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_common_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_common_v1_common_proto_goTypes = []any{
-	(*RequestMetadata)(nil),    // 0: common.v1.RequestMetadata
-	(*EmptyResponse)(nil),      // 1: common.v1.EmptyResponse
-	(*ID)(nil),                 // 2: common.v1.ID
-	(*IDs)(nil),                // 3: common.v1.IDs
-	(*PaginationRequest)(nil),  // 4: common.v1.PaginationRequest
-	(*PaginationResponse)(nil), // 5: common.v1.PaginationResponse
+	(*RequestMetadata)(nil),       // 0: common.v1.RequestMetadata
+	(*EmptyResponse)(nil),         // 1: common.v1.EmptyResponse
+	(*ID)(nil),                    // 2: common.v1.ID
+	(*IDs)(nil),                   // 3: common.v1.IDs
+	(*PaginationRequest)(nil),     // 4: common.v1.PaginationRequest
+	(*PaginationResponse)(nil),    // 5: common.v1.PaginationResponse
+	(*Name)(nil),                  // 6: common.v1.Name
+	(*Email)(nil),                 // 7: common.v1.Email
+	(*Password)(nil),              // 8: common.v1.Password
+	(*Id)(nil),                    // 9: common.v1.Id
+	(*Token)(nil),                 // 10: common.v1.Token
+	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
 }
 var file_common_v1_common_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	11, // 0: common.v1.Token.expires_at:type_name -> google.protobuf.Timestamp
+	1,  // [1:1] is the sub-list for method output_type
+	1,  // [1:1] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_common_v1_common_proto_init() }
@@ -382,7 +631,7 @@ func file_common_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_v1_common_proto_rawDesc), len(file_common_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

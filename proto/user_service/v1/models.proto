@@ -113,3 +113,23 @@ message VerifyEmailRequest {
 message VerifyEmailResponse {
   bool success = 1;
 }
+
+// Password Reset
+message RequestPasswordResetRequest {
+  common.v1.Email email = 1;
+  common.v1.RequestMetadata metadata = 2;
+}
+
+message RequestPasswordResetResponse {
+  bool success = 1;
+}
+
+message ResetPasswordRequest {
+  common.v1.Token token = 1;
+  common.v1.Password new_password = 2;
+  common.v1.RequestMetadata metadata = 3;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+}
