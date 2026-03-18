@@ -10,7 +10,7 @@ option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservic
 
 // Account represents a user account
 message Account {
-  common.v1.Id id = 1;
+  common.v1.UUID id = 1;
   common.v1.Email email = 2;
   bool email_verified = 3;
   bool two_factor_enabled = 4;
@@ -35,8 +35,8 @@ message Profile {
 
 // Session represents a user session
 message Session {
-  common.v1.Id id = 1;
-  common.v1.Id account_id = 2;
+  common.v1.UUID id = 1;
+  common.v1.UUID account_id = 2;
   string device_id = 3 [(buf.validate.field).string.min_len = 1];
   string device_type = 4 [(buf.validate.field).string.min_len = 1];
   string ip_address = 5 [(buf.validate.field).string.min_len = 1];
@@ -47,12 +47,12 @@ message Session {
 }
 
 message AccountResponse {
-  common.v1.Id id = 1;
+  common.v1.UUID id = 1;
   common.v1.Email email = 2;
 }
 
 message ProfileResponse {
-  common.v1.Id id = 1;
+  common.v1.UUID id = 1;
   common.v1.Name first_name = 2;
   common.v1.Name last_name = 3;
   optional string display_name = 4 [(buf.validate.field).string.max_len = 150];
@@ -82,7 +82,7 @@ message SigninRequest {
 }
 
 message AuthResponse {
-  AuthTokenResponse account = 1 [(buf.validate.field).required = true];
+  AccountResponse account = 1 [(buf.validate.field).required = true];
   repeated ProfileResponse profiles = 2;
   AuthTokenResponse tokens = 3 [(buf.validate.field).required = true];
 }

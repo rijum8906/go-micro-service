@@ -27,7 +27,7 @@ const (
 // Account represents a user account
 type Account struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
-	Id               *v1.Id                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id               *v1.UUID               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Email            *v1.Email              `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	EmailVerified    bool                   `protobuf:"varint,3,opt,name=email_verified,json=emailVerified,proto3" json:"email_verified,omitempty"`
 	TwoFactorEnabled bool                   `protobuf:"varint,4,opt,name=two_factor_enabled,json=twoFactorEnabled,proto3" json:"two_factor_enabled,omitempty"`
@@ -69,7 +69,7 @@ func (*Account) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Account) GetId() *v1.Id {
+func (x *Account) GetId() *v1.UUID {
 	if x != nil {
 		return x.Id
 	}
@@ -237,8 +237,8 @@ func (x *Profile) GetUpdatedAt() *timestamppb.Timestamp {
 // Session represents a user session
 type Session struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *v1.Id                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	AccountId     *v1.Id                 `protobuf:"bytes,2,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	Id            *v1.UUID               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	AccountId     *v1.UUID               `protobuf:"bytes,2,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
 	DeviceId      string                 `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
 	DeviceType    string                 `protobuf:"bytes,4,opt,name=device_type,json=deviceType,proto3" json:"device_type,omitempty"`
 	IpAddress     string                 `protobuf:"bytes,5,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
@@ -280,14 +280,14 @@ func (*Session) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Session) GetId() *v1.Id {
+func (x *Session) GetId() *v1.UUID {
 	if x != nil {
 		return x.Id
 	}
 	return nil
 }
 
-func (x *Session) GetAccountId() *v1.Id {
+func (x *Session) GetAccountId() *v1.UUID {
 	if x != nil {
 		return x.AccountId
 	}
@@ -345,7 +345,7 @@ func (x *Session) GetLastActiveAt() *timestamppb.Timestamp {
 
 type AccountResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *v1.Id                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            *v1.UUID               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Email         *v1.Email              `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -381,7 +381,7 @@ func (*AccountResponse) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *AccountResponse) GetId() *v1.Id {
+func (x *AccountResponse) GetId() *v1.UUID {
 	if x != nil {
 		return x.Id
 	}
@@ -397,7 +397,7 @@ func (x *AccountResponse) GetEmail() *v1.Email {
 
 type ProfileResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *v1.Id                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            *v1.UUID               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	FirstName     *v1.Name               `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	LastName      *v1.Name               `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
 	DisplayName   *string                `protobuf:"bytes,4,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
@@ -436,7 +436,7 @@ func (*ProfileResponse) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ProfileResponse) GetId() *v1.Id {
+func (x *ProfileResponse) GetId() *v1.UUID {
 	if x != nil {
 		return x.Id
 	}
@@ -1215,9 +1215,9 @@ var File_user_service_v1_models_proto protoreflect.FileDescriptor
 
 const file_user_service_v1_models_proto_rawDesc = "" +
 	"\n" +
-	"\x1cuser_service/v1/models.proto\x12\x0fuser_service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf8\x02\n" +
-	"\aAccount\x12\x1d\n" +
-	"\x02id\x18\x01 \x01(\v2\r.common.v1.IdR\x02id\x12&\n" +
+	"\x1cuser_service/v1/models.proto\x12\x0fuser_service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfa\x02\n" +
+	"\aAccount\x12\x1f\n" +
+	"\x02id\x18\x01 \x01(\v2\x0f.common.v1.UUIDR\x02id\x12&\n" +
 	"\x05email\x18\x02 \x01(\v2\x10.common.v1.EmailR\x05email\x12%\n" +
 	"\x0eemail_verified\x18\x03 \x01(\bR\remailVerified\x12,\n" +
 	"\x12two_factor_enabled\x18\x04 \x01(\bR\x10twoFactorEnabled\x12\x1b\n" +
@@ -1244,11 +1244,11 @@ const file_user_service_v1_models_proto_rawDesc = "" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\x0f\n" +
 	"\r_display_nameB\r\n" +
 	"\v_avatar_urlB\x06\n" +
-	"\x04_bio\"\xae\x03\n" +
-	"\aSession\x12\x1d\n" +
-	"\x02id\x18\x01 \x01(\v2\r.common.v1.IdR\x02id\x12,\n" +
+	"\x04_bio\"\xb2\x03\n" +
+	"\aSession\x12\x1f\n" +
+	"\x02id\x18\x01 \x01(\v2\x0f.common.v1.UUIDR\x02id\x12.\n" +
 	"\n" +
-	"account_id\x18\x02 \x01(\v2\r.common.v1.IdR\taccountId\x12$\n" +
+	"account_id\x18\x02 \x01(\v2\x0f.common.v1.UUIDR\taccountId\x12$\n" +
 	"\tdevice_id\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\bdeviceId\x12(\n" +
 	"\vdevice_type\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
 	"deviceType\x12&\n" +
@@ -1260,12 +1260,12 @@ const file_user_service_v1_models_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"expires_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12@\n" +
-	"\x0elast_active_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\flastActiveAt\"X\n" +
-	"\x0fAccountResponse\x12\x1d\n" +
-	"\x02id\x18\x01 \x01(\v2\r.common.v1.IdR\x02id\x12&\n" +
-	"\x05email\x18\x02 \x01(\v2\x10.common.v1.EmailR\x05email\"\x8e\x02\n" +
-	"\x0fProfileResponse\x12\x1d\n" +
-	"\x02id\x18\x01 \x01(\v2\r.common.v1.IdR\x02id\x12.\n" +
+	"\x0elast_active_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\flastActiveAt\"Z\n" +
+	"\x0fAccountResponse\x12\x1f\n" +
+	"\x02id\x18\x01 \x01(\v2\x0f.common.v1.UUIDR\x02id\x12&\n" +
+	"\x05email\x18\x02 \x01(\v2\x10.common.v1.EmailR\x05email\"\x90\x02\n" +
+	"\x0fProfileResponse\x12\x1f\n" +
+	"\x02id\x18\x01 \x01(\v2\x0f.common.v1.UUIDR\x02id\x12.\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\v2\x0f.common.v1.NameR\tfirstName\x12,\n" +
 	"\tlast_name\x18\x03 \x01(\v2\x0f.common.v1.NameR\blastName\x120\n" +
@@ -1355,7 +1355,7 @@ var file_user_service_v1_models_proto_goTypes = []any{
 	(*RequestPasswordResetResponse)(nil), // 16: user_service.v1.RequestPasswordResetResponse
 	(*ResetPasswordRequest)(nil),         // 17: user_service.v1.ResetPasswordRequest
 	(*ResetPasswordResponse)(nil),        // 18: user_service.v1.ResetPasswordResponse
-	(*v1.Id)(nil),                        // 19: common.v1.Id
+	(*v1.UUID)(nil),                      // 19: common.v1.UUID
 	(*v1.Email)(nil),                     // 20: common.v1.Email
 	(*timestamppb.Timestamp)(nil),        // 21: google.protobuf.Timestamp
 	(*v1.Name)(nil),                      // 22: common.v1.Name
@@ -1364,7 +1364,7 @@ var file_user_service_v1_models_proto_goTypes = []any{
 	(*v1.RequestMetadata)(nil),           // 25: common.v1.RequestMetadata
 }
 var file_user_service_v1_models_proto_depIdxs = []int32{
-	19, // 0: user_service.v1.Account.id:type_name -> common.v1.Id
+	19, // 0: user_service.v1.Account.id:type_name -> common.v1.UUID
 	20, // 1: user_service.v1.Account.email:type_name -> common.v1.Email
 	21, // 2: user_service.v1.Account.created_at:type_name -> google.protobuf.Timestamp
 	21, // 3: user_service.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
@@ -1373,14 +1373,14 @@ var file_user_service_v1_models_proto_depIdxs = []int32{
 	22, // 6: user_service.v1.Profile.last_name:type_name -> common.v1.Name
 	21, // 7: user_service.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
 	21, // 8: user_service.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
-	19, // 9: user_service.v1.Session.id:type_name -> common.v1.Id
-	19, // 10: user_service.v1.Session.account_id:type_name -> common.v1.Id
+	19, // 9: user_service.v1.Session.id:type_name -> common.v1.UUID
+	19, // 10: user_service.v1.Session.account_id:type_name -> common.v1.UUID
 	21, // 11: user_service.v1.Session.created_at:type_name -> google.protobuf.Timestamp
 	21, // 12: user_service.v1.Session.expires_at:type_name -> google.protobuf.Timestamp
 	21, // 13: user_service.v1.Session.last_active_at:type_name -> google.protobuf.Timestamp
-	19, // 14: user_service.v1.AccountResponse.id:type_name -> common.v1.Id
+	19, // 14: user_service.v1.AccountResponse.id:type_name -> common.v1.UUID
 	20, // 15: user_service.v1.AccountResponse.email:type_name -> common.v1.Email
-	19, // 16: user_service.v1.ProfileResponse.id:type_name -> common.v1.Id
+	19, // 16: user_service.v1.ProfileResponse.id:type_name -> common.v1.UUID
 	22, // 17: user_service.v1.ProfileResponse.first_name:type_name -> common.v1.Name
 	22, // 18: user_service.v1.ProfileResponse.last_name:type_name -> common.v1.Name
 	23, // 19: user_service.v1.AuthTokenResponse.access_token:type_name -> common.v1.Token

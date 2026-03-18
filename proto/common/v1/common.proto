@@ -17,16 +17,6 @@ message RequestMetadata {
 // Empty response for operations that don't return data
 message EmptyResponse {}
 
-// ID wrapper
-message ID {
-  string id = 1;
-}
-
-// IDs wrapper for batch operations
-message IDs {
-  repeated string ids = 1;
-}
-
 // Pagination request
 message PaginationRequest {
   int32 page_size = 1;
@@ -53,15 +43,31 @@ message Email {
   }];
 }
 
+message UUID {
+  string value = 1 [(buf.validate.field).string = {uuid: true}];
+}
+
+message String {
+  string value = 1 [(buf.validate.field).string = {min_len: 1}];
+}
+
+message Url {
+  string value = 1 [(buf.validate.field).string = {uri: true}];
+}
+
+message IPAddr {
+  string value = 1 [(buf.validate.field).string = {ipv4: true}];
+}
+
+message IPV6Addr {
+  string value = 1 [(buf.validate.field).string = {ipv6: true}];
+}
+
 message Password {
   string value = 1 [(buf.validate.field).string = {
     min_len: 8
     max_len: 50
   }];
-}
-
-message Id {
-  string value = 1 [(buf.validate.field).string.min_len = 1];
 }
 
 message Token {
