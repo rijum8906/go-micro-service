@@ -1,10 +1,10 @@
-import type { SigninSchemaType, SignupSchemaType, ChangePasswordSchemaType } from '#/schemas/auth'
+import type { SigninSchemaType, SignupSchemaType } from '#/schemas/auth'
 import type { AuthResponse, BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
 import { useAuthStore } from '#/store/auth'
 import { generateDeviceId } from '#/lib/device'
 
 function getGraphQLUrl(): string {
-  return import.meta.env.VITE_GRAPHQL_URL ?? 'http://localhost:8080/query'
+  return (window as any).__CONFIG__?.GRAPHQL_URL ?? 'http://localhost:8080/query'
 }
 
 function getAccessToken(): string | undefined {
