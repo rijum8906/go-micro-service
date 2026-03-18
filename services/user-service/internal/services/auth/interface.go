@@ -8,20 +8,19 @@ import (
 	"github.com/rijum8906/relay/packages/common/errors"
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 type AuthService interface {
-	Signin(ctx context.Context, dto request.SigninRequest, reqMetadata request.RequestMetadata) (*response.AuthResponse, *errors.AppError)
+	Signin(ctx context.Context, dto *user_servicev1.SigninRequest) (*user_servicev1.AuthResponse, *errors.AppError)
 	SignUp(ctx context.Context, dto *user_servicev1.SignupRequest) (*user_servicev1.AuthResponse, *errors.AppError)
-	Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
+	Signout(ctx context.Context, req *user_servicev1.SignoutRequest, authzMetadata request.AuthzMetadata) *errors.AppError
 
-	RequestEmailVerification(ctx context.Context, dto request.RequestEmailVerificationRequest, reqMetadata request.RequestMetadata) *errors.AppError
-	RequestPasswordReset(ctx context.Context, dto request.RequestPasswordResetRequest, reqMetadata request.RequestMetadata) *errors.AppError
-	VerifyEmail(ctx context.Context, dto request.VerifyEmailRequest, reqMetadata request.RequestMetadata) *errors.AppError
-	ResetPassword(ctx context.Context, dto request.ResetPasswordRequest, reqMetadata request.RequestMetadata) *errors.AppError
+	RequestEmailVerification(ctx context.Context, dto *user_servicev1.EmailVerificationRequest) *errors.AppError
+	RequestPasswordReset(ctx context.Context, dto *user_servicev1.RequestPasswordResetRequest) *errors.AppError
+	VerifyEmail(ctx context.Context, dto *user_servicev1.VerifyEmailRequest) *errors.AppError
+	ResetPassword(ctx context.Context, dto *user_servicev1.ResetPasswordRequest) *errors.AppError
 }
 
 type authService struct {

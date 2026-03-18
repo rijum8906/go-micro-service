@@ -11,7 +11,6 @@ import (
 	appError "github.com/rijum8906/relay/packages/common/errors"
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
@@ -19,9 +18,9 @@ import (
 // --- Authentication Logic ---
 
 // Signin handles the full authentication flow: verification, session creation, and token issuance.
-func (s *authService) Signin(ctx context.Context, data request.SigninRequest, reqMetadata request.RequestMetadata) (*response.AuthResponse, *appError.AppError) {
+func (s *authService) Signin(ctx context.Context, req *user_servicev1.SigninRequest) (*user_servicev1.AuthResponse, *appError.AppError) {
 	// 1. Verify Account Existence
-	account, err := s.q.GetAccountByEmail(ctx, data.Email)
+	account, err := s.q.GetAccountByEmail(ctx, req.Email.Value)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, appError.ErrInvalidCredentials // Hide user existence for security
@@ -30,7 +29,7 @@ func (s *authService) Signin(ctx context.Context, data request.SigninRequest, re
 	}
 
 	// 2. Credential Verification
-	if err := s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, data.Password); err != nil {
+	if err := s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, req.Password.Value); err != nil {
 		return nil, appError.ErrInvalidCredentials
 	}
 
@@ -50,9 +49,9 @@ func (s *authService) Signin(ctx context.Context, data request.SigninRequest, re
 	createdSession, err := s.q.CreateSession(ctx, db.CreateSessionParams{
 		AccountID:    account.ID,
 		RefreshToken: refreshToken,
-		UserAgent:    reqMetadata.UserAgent,
-		IpAddr:       reqMetadata.IPAddr,
-		DeviceID:     reqMetadata.DeviceID,
+		UserAgent:    req.Metadata.UserAgent,
+		IpAddr:       req.Metadata.IpAddress,
+		DeviceID:     req.Metadata.DeviceId,
 		ExpiresAt:    pgtype.Timestamptz{Time: time.Now().Add(s.env.JwtExpiration), Valid: true},
 	})
 	if err != nil {
@@ -65,25 +64,28 @@ func (s *authService) Signin(ctx context.Context, data request.SigninRequest, re
 		return nil, appError.ErrInternal.WithInternal(err2)
 	}
 
-	parsedProfiles := make([]*response.ProfileResponse, 0, len(profiles))
+	parsedProfiles := make([]*user_servicev1.ProfileResponse, 0, len(profiles))
 
-	for _, p := range profiles {
-		parsedProfiles = append(parsedProfiles, &response.ProfileResponse{
-			ID:          p.ID,
-			FirstName:   p.FirstName,
-			LastName:    p.LastName,
-			DisplayName: p.DisplayName,
-			AvatarUrl:   p.AvatarUrl,
+	for _, profile := range profiles {
+		parsedProfiles = append(parsedProfiles, &user_servicev1.ProfileResponse{
+			Id:          utils.NewID(profile.ID.String()),
+			FirstName:   utils.NewName(profile.FirstName),
+			LastName:    utils.NewName(profile.LastName),
+			AvatarUrl:   utils.NewURL(profile.AvatarUrl.String),
+			DisplayName: utils.NewName(profile.DisplayName.String),
 		})
 	}
 
-	return &response.AuthResponse{
-		Account: &response.AccountResponse{
-			ID:    account.ID,
-			Email: account.Email,
+	return &user_servicev1.AuthResponse{
+		Account: &user_servicev1.AccountResponse{
+			Id:    utils.NewID(account.ID.String()),
+			Email: utils.NewEmail(account.Email),
 		},
 		Profiles: parsedProfiles,
-		Token:    &response.TokenResponse{AccessToken: accessToken, RefreshToken: refreshToken},
+		Tokens: &user_servicev1.AuthTokenResponse{
+			AccessToken:  utils.NewToken(accessToken, int64(s.env.JwtExpiration.Seconds())),
+			RefreshToken: utils.NewToken(refreshToken, 7*24*3600),
+		},
 	}, nil
 }
 
@@ -156,8 +158,8 @@ func (s *authService) SignUp(ctx context.Context, data *user_servicev1.SignupReq
 		Id:          utils.NewID(profile.ID.String()),
 		FirstName:   utils.NewName(profile.FirstName),
 		LastName:    utils.NewName(profile.LastName),
-		AvatarUrl:   &profile.AvatarUrl.String,
-		DisplayName: &profile.DisplayName.String,
+		AvatarUrl:   utils.NewURL(profile.AvatarUrl.String),
+		DisplayName: utils.NewName(profile.DisplayName.String),
 	})
 
 	return &user_servicev1.AuthResponse{
@@ -177,8 +179,8 @@ func (s *authService) SignUp(ctx context.Context, data *user_servicev1.SignupReq
 
 // RequestPasswordReset sends a secure link. Note: We return "NotFound" specifically
 // here because reset requests are usually initiated by users who know their email.
-func (s *authService) RequestPasswordReset(ctx context.Context, data request.RequestPasswordResetRequest, reqMetadata request.RequestMetadata) *appError.AppError {
-	account, err := s.q.GetAccountByEmail(ctx, data.Email)
+func (s *authService) RequestPasswordReset(ctx context.Context, req *user_servicev1.RequestPasswordResetRequest) *appError.AppError {
+	account, err := s.q.GetAccountByEmail(ctx, req.Email.Value)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return appError.ErrNotFound
@@ -196,15 +198,15 @@ func (s *authService) RequestPasswordReset(ctx context.Context, data request.Req
 }
 
 // ResetPassword consumes a token to update credentials.
-func (s *authService) ResetPassword(ctx context.Context, data request.ResetPasswordRequest, reqMetadata request.RequestMetadata) *appError.AppError {
+func (s *authService) ResetPassword(ctx context.Context, req *user_servicev1.ResetPasswordRequest) *appError.AppError {
 	// 1. Verify Action Token Integrity
-	claims, appErr := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
+	claims, appErr := s.utilsConfig.JwtService.ValidateToken(ctx, req.Token.Value)
 	if appErr != nil {
 		return appErr
 	}
 
 	// 2. Hash New Credentials
-	hashPass, err := s.utilsConfig.HashService.HashPassword(data.NewPassword)
+	hashPass, err := s.utilsConfig.HashService.HashPassword(req.NewPassword.Value)
 	if err != nil {
 		return appError.ErrInternal.WithInternal(err)
 	}
@@ -226,8 +228,8 @@ func (s *authService) ResetPassword(ctx context.Context, data request.ResetPassw
 }
 
 // VerifyEmail marks an account as trusted after validating the provided token.
-func (s *authService) VerifyEmail(ctx context.Context, data request.VerifyEmailRequest, reqMetadata request.RequestMetadata) *appError.AppError {
-	claims, appErr := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token)
+func (s *authService) VerifyEmail(ctx context.Context, data *user_servicev1.VerifyEmailRequest) *appError.AppError {
+	claims, appErr := s.utilsConfig.JwtService.ValidateToken(ctx, data.Token.Value)
 	if appErr != nil {
 		return appErr
 	}
@@ -253,8 +255,8 @@ func (s *authService) VerifyEmail(ctx context.Context, data request.VerifyEmailR
 	return nil
 }
 
-func (s *authService) RequestEmailVerification(ctx context.Context, data request.RequestEmailVerificationRequest, reqMetadata request.RequestMetadata) *appError.AppError {
-	account, err := s.q.GetAccountByEmail(ctx, data.Email)
+func (s *authService) RequestEmailVerification(ctx context.Context, data *user_servicev1.EmailVerificationRequest) *appError.AppError {
+	account, err := s.q.GetAccountByEmail(ctx, data.Email.Value)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return appError.ErrNotFound
@@ -278,8 +280,8 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data request
 	return nil
 }
 
-func (s *authService) Signout(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *appError.AppError {
-	redisKey := utils.GenerateRedisLoginKey(authzMetadata.UserID.String(), reqMetadata.DeviceID)
+func (s *authService) Signout(ctx context.Context, req *user_servicev1.SignoutRequest, authzMetadata request.AuthzMetadata) *appError.AppError {
+	redisKey := utils.GenerateRedisLoginKey(authzMetadata.UserID.String(), req.Metadata.DeviceId)
 	err := s.utilsConfig.JwtService.RevokeSession(ctx, redisKey)
 	if err != nil {
 		return appError.ErrInternal.WithInternal(err)
