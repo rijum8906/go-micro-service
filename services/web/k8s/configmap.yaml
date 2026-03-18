@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config
-  namespace: go-micro-service
+  namespace: relay
 data:
   API_BASE_URL: http://user-service:8906/api/v1
   INTERNAL_API_BASE_URL: http://user-service:8906/api/v1
