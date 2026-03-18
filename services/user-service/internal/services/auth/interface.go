@@ -17,7 +17,7 @@ type AuthService interface {
 	SignUp(ctx context.Context, dto *user_servicev1.SignupRequest) (*user_servicev1.AuthResponse, *errors.AppError)
 	Signout(ctx context.Context, req *user_servicev1.SignoutRequest, authzMetadata request.AuthzMetadata) *errors.AppError
 
-	RequestEmailVerification(ctx context.Context, dto *user_servicev1.EmailVerificationRequest) *errors.AppError
+	RequestEmailVerification(ctx context.Context, dto *user_servicev1.RequestEmailVerificationRequest) *errors.AppError
 	RequestPasswordReset(ctx context.Context, dto *user_servicev1.RequestPasswordResetRequest) *errors.AppError
 	VerifyEmail(ctx context.Context, dto *user_servicev1.VerifyEmailRequest) *errors.AppError
 	ResetPassword(ctx context.Context, dto *user_servicev1.ResetPasswordRequest) *errors.AppError

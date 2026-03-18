@@ -255,7 +255,7 @@ func (s *authService) VerifyEmail(ctx context.Context, data *user_servicev1.Veri
 	return nil
 }
 
-func (s *authService) RequestEmailVerification(ctx context.Context, data *user_servicev1.EmailVerificationRequest) *appError.AppError {
+func (s *authService) RequestEmailVerification(ctx context.Context, data *user_servicev1.RequestEmailVerificationRequest) *appError.AppError {
 	account, err := s.q.GetAccountByEmail(ctx, data.Email.Value)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
