@@ -56,17 +56,6 @@ services:
     ports:
       - "8080:8080"
 
-  # web-service
-  web-service:
-    build:
-      context: ./services/web # Path to your web-service folder
-    environment:
-      API_BASE_URL: "http://user-service:8906/api/v1"
-    ports:
-      - "3000:3000"
-    depends_on:
-      - user-service
-
 volumes:
   pg_data:
   redis:
