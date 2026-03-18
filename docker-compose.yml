@@ -35,7 +35,8 @@ services:
   # user-service
   user-service:
     build:
-      context: ./services/user-service # Path to your user-service folder
+      context: .
+      dockerfile: ./services/user-service/Dockerfile
     environment:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
     ports:
@@ -44,6 +45,16 @@ services:
       - postgres
       - redis
       - minio
+
+  # graphql-gateway
+  graphql-gateway:
+    build:
+      context: .
+      dockerfile: ./services/graphql-gateway/Dockerfile
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+    ports:
+      - "8080:8080"
 
   # web-service
   web-service:
