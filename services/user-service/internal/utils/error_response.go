@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	appError "github.com/rijum8906/relay/packages/common/errors"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 )
 
@@ -108,14 +107,4 @@ func (h *ValidationErrorHandler) getValidationErrorMessage(fe validator.FieldErr
 func HandleBindError(ctx *gin.Context, err error) {
 	handler := NewValidationErrorHandler()
 	handler.HandleBindingError(ctx, err)
-}
-
-func HandleServiceError(ctx *gin.Context, err *appError.AppError) {
-	errorResponse := gin.H{
-		"success": false,
-		"message": err.Message,
-		"errors":  err.Errors,
-	}
-
-	ctx.JSON(err.StatusCode, errorResponse)
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/rijum8906/relay/packages/common/database/redis"
+	"github.com/rijum8906/relay/packages/common/errors"
 )
 
 func TestConnect(t *testing.T) {
@@ -14,7 +15,7 @@ func TestConnect(t *testing.T) {
 		name         string
 		cfg          redis.Config
 		wantErr      bool
-		expectedCode int
+		expectedCode string
 	}{
 		{
 			name: "Success - Correct Configuration",
@@ -31,7 +32,7 @@ func TestConnect(t *testing.T) {
 				Port: 1234,
 			},
 			wantErr:      true,
-			expectedCode: 500,
+			expectedCode: errors.ErrDBConnection.Code,
 		},
 	}
 
@@ -43,8 +44,8 @@ func TestConnect(t *testing.T) {
 			if tt.wantErr {
 				if appErr == nil {
 					t.Errorf("Connect() expected error, got nil")
-				} else if appErr.StatusCode != tt.expectedCode {
-					t.Errorf("Connect() status = %v, want %v", appErr.StatusCode, tt.expectedCode)
+				} else if appErr.Code != tt.expectedCode {
+					t.Errorf("Connect() status = %v, want %v", appErr.Code, tt.expectedCode)
 				}
 			} else {
 				if appErr != nil {

@@ -2,10 +2,10 @@
 package errors
 
 type AppError struct {
-	StatusCode int     `json:"-"`
-	Message    string  `json:"message"`
-	Errors     []Error `json:"errors,omitempty"`
-	Internal   error   `json:"-"`
+	Code     string  `json:"code"`
+	Message  string  `json:"message"`
+	Errors   []Error `json:"errors,omitempty"`
+	Internal error   `json:"-"`
 }
 
 type Error struct {
@@ -28,10 +28,10 @@ func (e *AppError) Unwrap() error {
 // WithInternal returns a new AppError with the internal error set
 func (e *AppError) WithInternal(err error) *AppError {
 	return &AppError{
-		StatusCode: e.StatusCode,
-		Message:    e.Message,
-		Internal:   err,
-		Errors:     e.Errors,
+		Code:     e.Code,
+		Message:  e.Message,
+		Internal: err,
+		Errors:   e.Errors,
 	}
 }
 
@@ -39,17 +39,17 @@ func (e *AppError) WithInternal(err error) *AppError {
 func (e *AppError) WithField(field, message string) *AppError {
 	newErrors := append(e.Errors, Error{Field: field, Message: message})
 	return &AppError{
-		StatusCode: e.StatusCode,
-		Message:    e.Message,
-		Internal:   e.Internal,
-		Errors:     newErrors,
+		Code:     e.Code,
+		Message:  e.Message,
+		Internal: e.Internal,
+		Errors:   newErrors,
 	}
 }
 
-func NewAppError(code int, message string, errors []Error) *AppError {
+func NewAppError(code string, message string, errors []Error) *AppError {
 	return &AppError{
-		StatusCode: code,
-		Message:    message,
-		Errors:     errors,
+		Code:    code,
+		Message: message,
+		Errors:  errors,
 	}
 }

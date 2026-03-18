@@ -17,7 +17,7 @@ func (s *S3Storage) CreateBucket(ctx context.Context, bucketName string) *errors
 		Bucket: aws.String(bucketName),
 	})
 	if err != nil {
-		return errors.NewAppError(500, "error creating bucket", []errors.Error{}).WithInternal(err)
+		return errors.NewAppError(errors.ErrInternal.Code, "error creating bucket", []errors.Error{}).WithInternal(err)
 	}
 	return nil
 }
@@ -42,7 +42,7 @@ func (s *S3Storage) UploadFile(ctx context.Context, fileName string, file io.Rea
 		ContentType: aws.String(contentType),
 	})
 	if err != nil {
-		return "", errors.NewAppError(500, "error uploading file", []errors.Error{}).WithInternal(err)
+		return "", errors.NewAppError(errors.ErrInternal.Code, "error uploading file", []errors.Error{}).WithInternal(err)
 	}
 	return s.publicURL + fileName, nil
 }
