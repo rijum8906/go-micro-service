@@ -5,11 +5,9 @@ package generated
 import (
 	"bytes"
 	"context"
-	"errors"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -17,20 +15,10 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
-type Config struct {
-	Schema     *ast.Schema
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
+type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
@@ -46,15 +34,8 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	AuthAccount struct {
-		CreatedAt        func(childComplexity int) int
-		Email            func(childComplexity int) int
-		ID               func(childComplexity int) int
-		IsEmailVerified  func(childComplexity int) int
-		LastLoginAt      func(childComplexity int) int
-		Permissions      func(childComplexity int) int
-		Roles            func(childComplexity int) int
-		TwoFactorEnabled func(childComplexity int) int
-		UpdatedAt        func(childComplexity int) int
+		Email func(childComplexity int) int
+		ID    func(childComplexity int) int
 	}
 
 	AuthPayload struct {
@@ -114,218 +95,169 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 		Success func(childComplexity int) int
 	}
+
+	Token struct {
+		ExpiresAt func(childComplexity int) int
+		Value     func(childComplexity int) int
+	}
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
 
 func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
-	ec := executionContext{nil, e, 0, 0, nil}
+	ec := newExecutionContext(nil, e, nil)
 	_ = ec
 	switch typeName + "." + field {
 
-	case "AuthAccount.createdAt":
-		if e.complexity.AuthAccount.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.AuthAccount.CreatedAt(childComplexity), true
-
 	case "AuthAccount.email":
-		if e.complexity.AuthAccount.Email == nil {
+		if e.ComplexityRoot.AuthAccount.Email == nil {
 			break
 		}
 
-		return e.complexity.AuthAccount.Email(childComplexity), true
+		return e.ComplexityRoot.AuthAccount.Email(childComplexity), true
 
 	case "AuthAccount.id":
-		if e.complexity.AuthAccount.ID == nil {
+		if e.ComplexityRoot.AuthAccount.ID == nil {
 			break
 		}
 
-		return e.complexity.AuthAccount.ID(childComplexity), true
-
-	case "AuthAccount.isEmailVerified":
-		if e.complexity.AuthAccount.IsEmailVerified == nil {
-			break
-		}
-
-		return e.complexity.AuthAccount.IsEmailVerified(childComplexity), true
-
-	case "AuthAccount.lastLoginAt":
-		if e.complexity.AuthAccount.LastLoginAt == nil {
-			break
-		}
-
-		return e.complexity.AuthAccount.LastLoginAt(childComplexity), true
-
-	case "AuthAccount.permissions":
-		if e.complexity.AuthAccount.Permissions == nil {
-			break
-		}
-
-		return e.complexity.AuthAccount.Permissions(childComplexity), true
-
-	case "AuthAccount.roles":
-		if e.complexity.AuthAccount.Roles == nil {
-			break
-		}
-
-		return e.complexity.AuthAccount.Roles(childComplexity), true
-
-	case "AuthAccount.twoFactorEnabled":
-		if e.complexity.AuthAccount.TwoFactorEnabled == nil {
-			break
-		}
-
-		return e.complexity.AuthAccount.TwoFactorEnabled(childComplexity), true
-
-	case "AuthAccount.updatedAt":
-		if e.complexity.AuthAccount.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.AuthAccount.UpdatedAt(childComplexity), true
+		return e.ComplexityRoot.AuthAccount.ID(childComplexity), true
 
 	case "AuthPayload.account":
-		if e.complexity.AuthPayload.Account == nil {
+		if e.ComplexityRoot.AuthPayload.Account == nil {
 			break
 		}
 
-		return e.complexity.AuthPayload.Account(childComplexity), true
+		return e.ComplexityRoot.AuthPayload.Account(childComplexity), true
 
 	case "AuthPayload.profiles":
-		if e.complexity.AuthPayload.Profiles == nil {
+		if e.ComplexityRoot.AuthPayload.Profiles == nil {
 			break
 		}
 
-		return e.complexity.AuthPayload.Profiles(childComplexity), true
+		return e.ComplexityRoot.AuthPayload.Profiles(childComplexity), true
 
 	case "AuthPayload.tokens":
-		if e.complexity.AuthPayload.Tokens == nil {
+		if e.ComplexityRoot.AuthPayload.Tokens == nil {
 			break
 		}
 
-		return e.complexity.AuthPayload.Tokens(childComplexity), true
+		return e.ComplexityRoot.AuthPayload.Tokens(childComplexity), true
 
 	case "AuthProfile.avatarUrl":
-		if e.complexity.AuthProfile.AvatarURL == nil {
+		if e.ComplexityRoot.AuthProfile.AvatarURL == nil {
 			break
 		}
 
-		return e.complexity.AuthProfile.AvatarURL(childComplexity), true
+		return e.ComplexityRoot.AuthProfile.AvatarURL(childComplexity), true
 
 	case "AuthProfile.displayName":
-		if e.complexity.AuthProfile.DisplayName == nil {
+		if e.ComplexityRoot.AuthProfile.DisplayName == nil {
 			break
 		}
 
-		return e.complexity.AuthProfile.DisplayName(childComplexity), true
+		return e.ComplexityRoot.AuthProfile.DisplayName(childComplexity), true
 
 	case "AuthProfile.firstName":
-		if e.complexity.AuthProfile.FirstName == nil {
+		if e.ComplexityRoot.AuthProfile.FirstName == nil {
 			break
 		}
 
-		return e.complexity.AuthProfile.FirstName(childComplexity), true
+		return e.ComplexityRoot.AuthProfile.FirstName(childComplexity), true
 
 	case "AuthProfile.id":
-		if e.complexity.AuthProfile.ID == nil {
+		if e.ComplexityRoot.AuthProfile.ID == nil {
 			break
 		}
 
-		return e.complexity.AuthProfile.ID(childComplexity), true
+		return e.ComplexityRoot.AuthProfile.ID(childComplexity), true
 
 	case "AuthProfile.lastName":
-		if e.complexity.AuthProfile.LastName == nil {
+		if e.ComplexityRoot.AuthProfile.LastName == nil {
 			break
 		}
 
-		return e.complexity.AuthProfile.LastName(childComplexity), true
+		return e.ComplexityRoot.AuthProfile.LastName(childComplexity), true
 
 	case "AuthToken.accessToken":
-		if e.complexity.AuthToken.AccessToken == nil {
+		if e.ComplexityRoot.AuthToken.AccessToken == nil {
 			break
 		}
 
-		return e.complexity.AuthToken.AccessToken(childComplexity), true
+		return e.ComplexityRoot.AuthToken.AccessToken(childComplexity), true
 
 	case "AuthToken.refreshToken":
-		if e.complexity.AuthToken.RefreshToken == nil {
+		if e.ComplexityRoot.AuthToken.RefreshToken == nil {
 			break
 		}
 
-		return e.complexity.AuthToken.RefreshToken(childComplexity), true
+		return e.ComplexityRoot.AuthToken.RefreshToken(childComplexity), true
 
 	case "Error.field":
-		if e.complexity.Error.Field == nil {
+		if e.ComplexityRoot.Error.Field == nil {
 			break
 		}
 
-		return e.complexity.Error.Field(childComplexity), true
+		return e.ComplexityRoot.Error.Field(childComplexity), true
 
 	case "Error.message":
-		if e.complexity.Error.Message == nil {
+		if e.ComplexityRoot.Error.Message == nil {
 			break
 		}
 
-		return e.complexity.Error.Message(childComplexity), true
+		return e.ComplexityRoot.Error.Message(childComplexity), true
 
 	case "Metadata.deviceId":
-		if e.complexity.Metadata.DeviceID == nil {
+		if e.ComplexityRoot.Metadata.DeviceID == nil {
 			break
 		}
 
-		return e.complexity.Metadata.DeviceID(childComplexity), true
+		return e.ComplexityRoot.Metadata.DeviceID(childComplexity), true
 
 	case "Metadata.deviceType":
-		if e.complexity.Metadata.DeviceType == nil {
+		if e.ComplexityRoot.Metadata.DeviceType == nil {
 			break
 		}
 
-		return e.complexity.Metadata.DeviceType(childComplexity), true
+		return e.ComplexityRoot.Metadata.DeviceType(childComplexity), true
 
 	case "Metadata.ipAddress":
-		if e.complexity.Metadata.IPAddress == nil {
+		if e.ComplexityRoot.Metadata.IPAddress == nil {
 			break
 		}
 
-		return e.complexity.Metadata.IPAddress(childComplexity), true
+		return e.ComplexityRoot.Metadata.IPAddress(childComplexity), true
 
 	case "Metadata.timestamp":
-		if e.complexity.Metadata.Timestamp == nil {
+		if e.ComplexityRoot.Metadata.Timestamp == nil {
 			break
 		}
 
-		return e.complexity.Metadata.Timestamp(childComplexity), true
+		return e.ComplexityRoot.Metadata.Timestamp(childComplexity), true
 
 	case "Metadata.userAgent":
-		if e.complexity.Metadata.UserAgent == nil {
+		if e.ComplexityRoot.Metadata.UserAgent == nil {
 			break
 		}
 
-		return e.complexity.Metadata.UserAgent(childComplexity), true
+		return e.ComplexityRoot.Metadata.UserAgent(childComplexity), true
 
 	case "Mutation._empty":
-		if e.complexity.Mutation.Empty == nil {
+		if e.ComplexityRoot.Mutation.Empty == nil {
 			break
 		}
 
-		return e.complexity.Mutation.Empty(childComplexity), true
+		return e.ComplexityRoot.Mutation.Empty(childComplexity), true
 
 	case "Mutation.requestEmailVerification":
-		if e.complexity.Mutation.RequestEmailVerification == nil {
+		if e.ComplexityRoot.Mutation.RequestEmailVerification == nil {
 			break
 		}
 
@@ -334,10 +266,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RequestEmailVerification(childComplexity, args["input"].(model.RequestEmailVerificationInput)), true
+		return e.ComplexityRoot.Mutation.RequestEmailVerification(childComplexity, args["input"].(model.RequestEmailVerificationInput)), true
 
 	case "Mutation.requestPasswordReset":
-		if e.complexity.Mutation.RequestPasswordReset == nil {
+		if e.ComplexityRoot.Mutation.RequestPasswordReset == nil {
 			break
 		}
 
@@ -346,10 +278,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RequestPasswordReset(childComplexity, args["input"].(model.RequestPasswordResetInput)), true
+		return e.ComplexityRoot.Mutation.RequestPasswordReset(childComplexity, args["input"].(model.RequestPasswordResetInput)), true
 
 	case "Mutation.resetPassword":
-		if e.complexity.Mutation.ResetPassword == nil {
+		if e.ComplexityRoot.Mutation.ResetPassword == nil {
 			break
 		}
 
@@ -358,10 +290,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ResetPassword(childComplexity, args["input"].(model.ResetPasswordInput)), true
+		return e.ComplexityRoot.Mutation.ResetPassword(childComplexity, args["input"].(model.ResetPasswordInput)), true
 
 	case "Mutation.signin":
-		if e.complexity.Mutation.Signin == nil {
+		if e.ComplexityRoot.Mutation.Signin == nil {
 			break
 		}
 
@@ -370,10 +302,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Signin(childComplexity, args["input"].(model.SigninInput)), true
+		return e.ComplexityRoot.Mutation.Signin(childComplexity, args["input"].(model.SigninInput)), true
 
 	case "Mutation.signout":
-		if e.complexity.Mutation.Signout == nil {
+		if e.ComplexityRoot.Mutation.Signout == nil {
 			break
 		}
 
@@ -382,10 +314,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Signout(childComplexity, args["input"].(model.SignoutInput)), true
+		return e.ComplexityRoot.Mutation.Signout(childComplexity, args["input"].(model.SignoutInput)), true
 
 	case "Mutation.signup":
-		if e.complexity.Mutation.Signup == nil {
+		if e.ComplexityRoot.Mutation.Signup == nil {
 			break
 		}
 
@@ -394,10 +326,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Signup(childComplexity, args["input"].(model.SignupInput)), true
+		return e.ComplexityRoot.Mutation.Signup(childComplexity, args["input"].(model.SignupInput)), true
 
 	case "Mutation.verifyEmail":
-		if e.complexity.Mutation.VerifyEmail == nil {
+		if e.ComplexityRoot.Mutation.VerifyEmail == nil {
 			break
 		}
 
@@ -406,49 +338,63 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.VerifyEmail(childComplexity, args["input"].(model.VerifyEmailInput)), true
+		return e.ComplexityRoot.Mutation.VerifyEmail(childComplexity, args["input"].(model.VerifyEmailInput)), true
 
 	case "PageInfo.hasNextPage":
-		if e.complexity.PageInfo.HasNextPage == nil {
+		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+		return e.ComplexityRoot.PageInfo.HasNextPage(childComplexity), true
 
 	case "PageInfo.hasPreviousPage":
-		if e.complexity.PageInfo.HasPreviousPage == nil {
+		if e.ComplexityRoot.PageInfo.HasPreviousPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+		return e.ComplexityRoot.PageInfo.HasPreviousPage(childComplexity), true
 
 	case "PageInfo.totalCount":
-		if e.complexity.PageInfo.TotalCount == nil {
+		if e.ComplexityRoot.PageInfo.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.TotalCount(childComplexity), true
+		return e.ComplexityRoot.PageInfo.TotalCount(childComplexity), true
 
 	case "Query._empty":
-		if e.complexity.Query.Empty == nil {
+		if e.ComplexityRoot.Query.Empty == nil {
 			break
 		}
 
-		return e.complexity.Query.Empty(childComplexity), true
+		return e.ComplexityRoot.Query.Empty(childComplexity), true
 
 	case "Response.message":
-		if e.complexity.Response.Message == nil {
+		if e.ComplexityRoot.Response.Message == nil {
 			break
 		}
 
-		return e.complexity.Response.Message(childComplexity), true
+		return e.ComplexityRoot.Response.Message(childComplexity), true
 
 	case "Response.success":
-		if e.complexity.Response.Success == nil {
+		if e.ComplexityRoot.Response.Success == nil {
 			break
 		}
 
-		return e.complexity.Response.Success(childComplexity), true
+		return e.ComplexityRoot.Response.Success(childComplexity), true
+
+	case "Token.expiresAt":
+		if e.ComplexityRoot.Token.ExpiresAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Token.ExpiresAt(childComplexity), true
+
+	case "Token.value":
+		if e.ComplexityRoot.Token.Value == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Token.Value(childComplexity), true
 
 	}
 	return 0, false
@@ -456,7 +402,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
-	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
+	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputDateRangeInput,
 		ec.unmarshalInputMetadataInput,
@@ -481,9 +427,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
-				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
-					result := <-ec.deferredResults
-					atomic.AddInt32(&ec.pendingDeferred, -1)
+				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
+					result := <-ec.DeferredResults
+					atomic.AddInt32(&ec.PendingDeferred, -1)
 					data = result.Result
 					response.Path = result.Path
 					response.Label = result.Label
@@ -495,8 +441,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
-			if atomic.LoadInt32(&ec.deferred) > 0 {
-				hasNext := atomic.LoadInt32(&ec.pendingDeferred) > 0
+			if atomic.LoadInt32(&ec.Deferred) > 0 {
+				hasNext := atomic.LoadInt32(&ec.PendingDeferred) > 0
 				response.HasNext = &hasNext
 			}
 
@@ -524,44 +470,22 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 }
 
 type executionContext struct {
-	*graphql.OperationContext
-	*executableSchema
-	deferred        int32
-	pendingDeferred int32
-	deferredResults chan graphql.DeferredResult
+	*graphql.ExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 }
 
-func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
-	atomic.AddInt32(&ec.pendingDeferred, 1)
-	go func() {
-		ctx := graphql.WithFreshResponseContext(dg.Context)
-		dg.FieldSet.Dispatch(ctx)
-		ds := graphql.DeferredResult{
-			Path:   dg.Path,
-			Label:  dg.Label,
-			Result: dg.FieldSet,
-			Errors: graphql.GetErrors(ctx),
-		}
-		// null fields should bubble up
-		if dg.FieldSet.Invalids > 0 {
-			ds.Result = graphql.Null
-		}
-		ec.deferredResults <- ds
-	}()
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
+func newExecutionContext(
+	opCtx *graphql.OperationContext,
+	execSchema *executableSchema,
+	deferredResults chan graphql.DeferredResult,
+) executionContext {
+	return executionContext{
+		ExecutionContextState: graphql.NewExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot](
+			opCtx,
+			(*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot])(execSchema),
+			parsedSchema,
+			deferredResults,
+		),
 	}
-	return introspection.WrapSchema(ec.Schema()), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 var sources = []*ast.Source{
@@ -725,13 +649,11 @@ input VerifyEmailInput {
 	{Name: "../schema/user-service/auth/types.graphqls", Input: `type AuthAccount {
     id: UUID!
     email: Email!
-    isEmailVerified: Boolean!
-    twoFactorEnabled: Boolean!
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    lastLoginAt: DateTime
-    roles: [String!]!
-    permissions: [String!]!
+}
+
+type Token {
+  value: String!
+  expiresAt: DateTime
 }
 
 type AuthToken {

@@ -40,16 +40,16 @@ import (
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalODeviceType2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDeviceType(ctx context.Context, v any) (*model.DeviceType, error) {
+func (ec *executionContext) unmarshalODeviceType2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDeviceType(ctx context.Context, v any) (*model.DeviceType, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res := new(model.DeviceType)
+	var res = new(model.DeviceType)
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalODeviceType2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDeviceType(ctx context.Context, sel ast.SelectionSet, v *model.DeviceType) graphql.Marshaler {
+func (ec *executionContext) marshalODeviceType2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDeviceType(ctx context.Context, sel ast.SelectionSet, v *model.DeviceType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

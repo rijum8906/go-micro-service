@@ -12,15 +12,8 @@ import (
 )
 
 type AuthAccount struct {
-	ID               uuid.UUID `json:"id"`
-	Email            string    `json:"email"`
-	IsEmailVerified  bool      `json:"isEmailVerified"`
-	TwoFactorEnabled bool      `json:"twoFactorEnabled"`
-	CreatedAt        string    `json:"createdAt"`
-	UpdatedAt        string    `json:"updatedAt"`
-	LastLoginAt      *string   `json:"lastLoginAt,omitempty"`
-	Roles            []string  `json:"roles"`
-	Permissions      []string  `json:"permissions"`
+	ID    uuid.UUID `json:"id"`
+	Email string    `json:"email"`
 }
 
 type AuthPayload struct {
@@ -122,6 +115,11 @@ type SignupInput struct {
 	FirstName string         `json:"firstName"`
 	LastName  string         `json:"lastName"`
 	Metadata  *MetadataInput `json:"metadata"`
+}
+
+type Token struct {
+	Value     string  `json:"value"`
+	ExpiresAt *string `json:"expiresAt,omitempty"`
 }
 
 type VerifyEmailInput struct {

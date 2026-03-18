@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,18 +11,11 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/rijum8906/relay/packages/common/database/redis"
 	"github.com/rijum8906/relay/packages/common/env"
-	"github.com/rijum8906/relay/packages/common/jwt"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
-	"github.com/rijum8906/relay/services/graphql-gateway/internal/client"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
 	"github.com/rs/cors"
-)
-
-const (
-	UserServiceBaseURL = "http://user-service:8906/api/v1"
 )
 
 func main() {
@@ -35,43 +27,8 @@ func main() {
 		panic(appErr)
 	}
 
-	logger := slog.NewLogLogger(slog.NewJSONHandler(os.Stdout, nil), slog.LevelDebug)
-	httpClient := client.NewClient(&client.ClientConfig{
-		BaseURL:       UserServiceBaseURL,
-		Timeout:       30 * time.Second,
-		MaxRetries:    3,
-		RetryWaitTime: 100 * time.Millisecond,
-		Logger:        logger,
-	})
-
-	redisCfg := redis.Config{
-		Database: env.RedisDatabase,
-		Host:     env.RedisHost,
-		Port:     env.RedisPort,
-		User:     env.RedisUser,
-		Password: env.RedisPassword,
-	}
-	// Pass context to Redis connection
-	redisClient, err := redis.Connect(ctx, redisCfg)
-	if err != nil {
-		panic(err.Message)
-	}
-	jwtService := jwt.NewService(redisClient, jwt.Config{
-		Secret:     env.JwtSecret,
-		Issuer:     env.JwtIssuer,
-		Expiration: env.JwtExpiration,
-	})
-
 	// Create resolver with all services
-	rootResolver := resolver.NewResolver(
-		env,
-		&resolver.Services{
-			JWTService: jwtService,
-		},
-		&resolver.HTTPClinets{
-			UserServiceClient: httpClient,
-		},
-	)
+	rootResolver := resolver.NewResolver(env)
 
 	srv := handler.NewDefaultServer(
 		generated.NewExecutableSchema(

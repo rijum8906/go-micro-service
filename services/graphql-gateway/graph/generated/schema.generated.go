@@ -37,7 +37,7 @@ type QueryResolver interface {
 func (ec *executionContext) field_Mutation_requestEmailVerification_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestEmailVerificationInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestEmailVerificationInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestEmailVerificationInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestEmailVerificationInput)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (ec *executionContext) field_Mutation_requestEmailVerification_args(ctx con
 func (ec *executionContext) field_Mutation_requestPasswordReset_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestPasswordResetInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestPasswordResetInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestPasswordResetInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestPasswordResetInput)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (ec *executionContext) field_Mutation_requestPasswordReset_args(ctx context
 func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNResetPasswordInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResetPasswordInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNResetPasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResetPasswordInput)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (ec *executionContext) field_Mutation_resetPassword_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_signin_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSigninInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSigninInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSigninInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSigninInput)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (ec *executionContext) field_Mutation_signin_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_signout_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSignoutInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSignoutInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSignoutInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSignoutInput)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (ec *executionContext) field_Mutation_signout_args(ctx context.Context, raw
 func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSignupInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSignupInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSignupInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSignupInput)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_verifyEmail_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNVerifyEmailInput2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐVerifyEmailInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNVerifyEmailInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐVerifyEmailInput)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (ec *executionContext) _Mutation__empty(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Mutation__empty,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Mutation().Empty(ctx)
+			return ec.Resolvers.Mutation().Empty(ctx)
 		},
 		nil,
 		ec.marshalOString2ᚖstring,
@@ -167,17 +167,17 @@ func (ec *executionContext) _Mutation_signup(ctx context.Context, field graphql.
 		ec.fieldContext_Mutation_signup,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().Signup(ctx, fc.Args["input"].(model.SignupInput))
+			return ec.Resolvers.Mutation().Signup(ctx, fc.Args["input"].(model.SignupInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Public == nil {
+				if ec.Directives.Public == nil {
 					var zeroVal *model.AuthPayload
 					return zeroVal, errors.New("directive public is not implemented")
 				}
-				return ec.directives.Public(ctx, nil, directive0)
+				return ec.Directives.Public(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				limit, err := ec.unmarshalNInt2int32(ctx, 5)
@@ -190,17 +190,17 @@ func (ec *executionContext) _Mutation_signup(ctx context.Context, field graphql.
 					var zeroVal *model.AuthPayload
 					return zeroVal, err
 				}
-				if ec.directives.RateLimit == nil {
+				if ec.Directives.RateLimit == nil {
 					var zeroVal *model.AuthPayload
 					return zeroVal, errors.New("directive rateLimit is not implemented")
 				}
-				return ec.directives.RateLimit(ctx, nil, directive1, limit, duration)
+				return ec.Directives.RateLimit(ctx, nil, directive1, limit, duration)
 			}
 
 			next = directive2
 			return next
 		},
-		ec.marshalNAuthPayload2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload,
+		ec.marshalNAuthPayload2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload,
 		true,
 		true,
 	)
@@ -246,17 +246,17 @@ func (ec *executionContext) _Mutation_signin(ctx context.Context, field graphql.
 		ec.fieldContext_Mutation_signin,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().Signin(ctx, fc.Args["input"].(model.SigninInput))
+			return ec.Resolvers.Mutation().Signin(ctx, fc.Args["input"].(model.SigninInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Public == nil {
+				if ec.Directives.Public == nil {
 					var zeroVal *model.AuthPayload
 					return zeroVal, errors.New("directive public is not implemented")
 				}
-				return ec.directives.Public(ctx, nil, directive0)
+				return ec.Directives.Public(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				limit, err := ec.unmarshalNInt2int32(ctx, 10)
@@ -269,17 +269,17 @@ func (ec *executionContext) _Mutation_signin(ctx context.Context, field graphql.
 					var zeroVal *model.AuthPayload
 					return zeroVal, err
 				}
-				if ec.directives.RateLimit == nil {
+				if ec.Directives.RateLimit == nil {
 					var zeroVal *model.AuthPayload
 					return zeroVal, errors.New("directive rateLimit is not implemented")
 				}
-				return ec.directives.RateLimit(ctx, nil, directive1, limit, duration)
+				return ec.Directives.RateLimit(ctx, nil, directive1, limit, duration)
 			}
 
 			next = directive2
 			return next
 		},
-		ec.marshalNAuthPayload2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload,
+		ec.marshalNAuthPayload2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload,
 		true,
 		true,
 	)
@@ -325,23 +325,23 @@ func (ec *executionContext) _Mutation_signout(ctx context.Context, field graphql
 		ec.fieldContext_Mutation_signout,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().Signout(ctx, fc.Args["input"].(model.SignoutInput))
+			return ec.Resolvers.Mutation().Signout(ctx, fc.Args["input"].(model.SignoutInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Authenticated == nil {
+				if ec.Directives.Authenticated == nil {
 					var zeroVal *model.Response
 					return zeroVal, errors.New("directive authenticated is not implemented")
 				}
-				return ec.directives.Authenticated(ctx, nil, directive0)
+				return ec.Directives.Authenticated(ctx, nil, directive0)
 			}
 
 			next = directive1
 			return next
 		},
-		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
+		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
 		true,
 		true,
 	)
@@ -385,17 +385,17 @@ func (ec *executionContext) _Mutation_requestPasswordReset(ctx context.Context, 
 		ec.fieldContext_Mutation_requestPasswordReset,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RequestPasswordReset(ctx, fc.Args["input"].(model.RequestPasswordResetInput))
+			return ec.Resolvers.Mutation().RequestPasswordReset(ctx, fc.Args["input"].(model.RequestPasswordResetInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Public == nil {
+				if ec.Directives.Public == nil {
 					var zeroVal *model.Response
 					return zeroVal, errors.New("directive public is not implemented")
 				}
-				return ec.directives.Public(ctx, nil, directive0)
+				return ec.Directives.Public(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				limit, err := ec.unmarshalNInt2int32(ctx, 3)
@@ -408,17 +408,17 @@ func (ec *executionContext) _Mutation_requestPasswordReset(ctx context.Context, 
 					var zeroVal *model.Response
 					return zeroVal, err
 				}
-				if ec.directives.RateLimit == nil {
+				if ec.Directives.RateLimit == nil {
 					var zeroVal *model.Response
 					return zeroVal, errors.New("directive rateLimit is not implemented")
 				}
-				return ec.directives.RateLimit(ctx, nil, directive1, limit, duration)
+				return ec.Directives.RateLimit(ctx, nil, directive1, limit, duration)
 			}
 
 			next = directive2
 			return next
 		},
-		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
+		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
 		true,
 		true,
 	)
@@ -462,23 +462,23 @@ func (ec *executionContext) _Mutation_resetPassword(ctx context.Context, field g
 		ec.fieldContext_Mutation_resetPassword,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().ResetPassword(ctx, fc.Args["input"].(model.ResetPasswordInput))
+			return ec.Resolvers.Mutation().ResetPassword(ctx, fc.Args["input"].(model.ResetPasswordInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Public == nil {
+				if ec.Directives.Public == nil {
 					var zeroVal *model.Response
 					return zeroVal, errors.New("directive public is not implemented")
 				}
-				return ec.directives.Public(ctx, nil, directive0)
+				return ec.Directives.Public(ctx, nil, directive0)
 			}
 
 			next = directive1
 			return next
 		},
-		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
+		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
 		true,
 		true,
 	)
@@ -522,17 +522,17 @@ func (ec *executionContext) _Mutation_requestEmailVerification(ctx context.Conte
 		ec.fieldContext_Mutation_requestEmailVerification,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RequestEmailVerification(ctx, fc.Args["input"].(model.RequestEmailVerificationInput))
+			return ec.Resolvers.Mutation().RequestEmailVerification(ctx, fc.Args["input"].(model.RequestEmailVerificationInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Authenticated == nil {
+				if ec.Directives.Authenticated == nil {
 					var zeroVal *model.Response
 					return zeroVal, errors.New("directive authenticated is not implemented")
 				}
-				return ec.directives.Authenticated(ctx, nil, directive0)
+				return ec.Directives.Authenticated(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				limit, err := ec.unmarshalNInt2int32(ctx, 3)
@@ -545,17 +545,17 @@ func (ec *executionContext) _Mutation_requestEmailVerification(ctx context.Conte
 					var zeroVal *model.Response
 					return zeroVal, err
 				}
-				if ec.directives.RateLimit == nil {
+				if ec.Directives.RateLimit == nil {
 					var zeroVal *model.Response
 					return zeroVal, errors.New("directive rateLimit is not implemented")
 				}
-				return ec.directives.RateLimit(ctx, nil, directive1, limit, duration)
+				return ec.Directives.RateLimit(ctx, nil, directive1, limit, duration)
 			}
 
 			next = directive2
 			return next
 		},
-		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
+		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
 		true,
 		true,
 	)
@@ -599,23 +599,23 @@ func (ec *executionContext) _Mutation_verifyEmail(ctx context.Context, field gra
 		ec.fieldContext_Mutation_verifyEmail,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().VerifyEmail(ctx, fc.Args["input"].(model.VerifyEmailInput))
+			return ec.Resolvers.Mutation().VerifyEmail(ctx, fc.Args["input"].(model.VerifyEmailInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Public == nil {
+				if ec.Directives.Public == nil {
 					var zeroVal *model.Response
 					return zeroVal, errors.New("directive public is not implemented")
 				}
-				return ec.directives.Public(ctx, nil, directive0)
+				return ec.Directives.Public(ctx, nil, directive0)
 			}
 
 			next = directive1
 			return next
 		},
-		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
+		ec.marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse,
 		true,
 		true,
 	)
@@ -658,7 +658,7 @@ func (ec *executionContext) _Query__empty(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query__empty,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Empty(ctx)
+			return ec.Resolvers.Query().Empty(ctx)
 		},
 		nil,
 		ec.marshalOString2ᚖstring,
@@ -688,7 +688,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query___type,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.introspectType(fc.Args["name"].(string))
+			return ec.IntrospectType(fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
@@ -752,7 +752,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query___schema,
 		func(ctx context.Context) (any, error) {
-			return ec.introspectSchema()
+			return ec.IntrospectSchema()
 		},
 		nil,
 		ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema,
@@ -881,10 +881,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -950,10 +950,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,

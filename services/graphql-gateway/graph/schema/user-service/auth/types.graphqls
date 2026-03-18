@@ -1,13 +1,11 @@
 type AuthAccount {
     id: UUID!
     email: Email!
-    isEmailVerified: Boolean!
-    twoFactorEnabled: Boolean!
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    lastLoginAt: DateTime
-    roles: [String!]!
-    permissions: [String!]!
+}
+
+type Token {
+  value: String!
+  expiresAt: DateTime
 }
 
 type AuthToken {

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sync"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -87,209 +86,6 @@ func (ec *executionContext) fieldContext_AuthAccount_email(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _AuthAccount_isEmailVerified(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthAccount_isEmailVerified,
-		func(ctx context.Context) (any, error) {
-			return obj.IsEmailVerified, nil
-		},
-		nil,
-		ec.marshalNBoolean2bool,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthAccount_isEmailVerified(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AuthAccount_twoFactorEnabled(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthAccount_twoFactorEnabled,
-		func(ctx context.Context) (any, error) {
-			return obj.TwoFactorEnabled, nil
-		},
-		nil,
-		ec.marshalNBoolean2bool,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthAccount_twoFactorEnabled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AuthAccount_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthAccount_createdAt,
-		func(ctx context.Context) (any, error) {
-			return obj.CreatedAt, nil
-		},
-		nil,
-		ec.marshalNDateTime2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthAccount_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AuthAccount_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthAccount_updatedAt,
-		func(ctx context.Context) (any, error) {
-			return obj.UpdatedAt, nil
-		},
-		nil,
-		ec.marshalNDateTime2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthAccount_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AuthAccount_lastLoginAt(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthAccount_lastLoginAt,
-		func(ctx context.Context) (any, error) {
-			return obj.LastLoginAt, nil
-		},
-		nil,
-		ec.marshalODateTime2ᚖstring,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthAccount_lastLoginAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DateTime does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AuthAccount_roles(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthAccount_roles,
-		func(ctx context.Context) (any, error) {
-			return obj.Roles, nil
-		},
-		nil,
-		ec.marshalNString2ᚕstringᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthAccount_roles(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AuthAccount_permissions(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AuthAccount_permissions,
-		func(ctx context.Context) (any, error) {
-			return obj.Permissions, nil
-		},
-		nil,
-		ec.marshalNString2ᚕstringᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_AuthAccount_permissions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AuthAccount",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _AuthPayload_account(ctx context.Context, field graphql.CollectedField, obj *model.AuthPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -300,7 +96,7 @@ func (ec *executionContext) _AuthPayload_account(ctx context.Context, field grap
 			return obj.Account, nil
 		},
 		nil,
-		ec.marshalNAuthAccount2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthAccount,
+		ec.marshalNAuthAccount2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthAccount,
 		true,
 		true,
 	)
@@ -318,20 +114,6 @@ func (ec *executionContext) fieldContext_AuthPayload_account(_ context.Context, 
 				return ec.fieldContext_AuthAccount_id(ctx, field)
 			case "email":
 				return ec.fieldContext_AuthAccount_email(ctx, field)
-			case "isEmailVerified":
-				return ec.fieldContext_AuthAccount_isEmailVerified(ctx, field)
-			case "twoFactorEnabled":
-				return ec.fieldContext_AuthAccount_twoFactorEnabled(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_AuthAccount_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_AuthAccount_updatedAt(ctx, field)
-			case "lastLoginAt":
-				return ec.fieldContext_AuthAccount_lastLoginAt(ctx, field)
-			case "roles":
-				return ec.fieldContext_AuthAccount_roles(ctx, field)
-			case "permissions":
-				return ec.fieldContext_AuthAccount_permissions(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AuthAccount", field.Name)
 		},
@@ -349,7 +131,7 @@ func (ec *executionContext) _AuthPayload_tokens(ctx context.Context, field graph
 			return obj.Tokens, nil
 		},
 		nil,
-		ec.marshalNAuthToken2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthToken,
+		ec.marshalNAuthToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthToken,
 		true,
 		true,
 	)
@@ -384,7 +166,7 @@ func (ec *executionContext) _AuthPayload_profiles(ctx context.Context, field gra
 			return obj.Profiles, nil
 		},
 		nil,
-		ec.marshalNAuthProfile2ᚕᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfileᚄ,
+		ec.marshalNAuthProfile2ᚕᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfileᚄ,
 		true,
 		true,
 	)
@@ -715,7 +497,7 @@ func (ec *executionContext) _Metadata_deviceType(ctx context.Context, field grap
 			return obj.DeviceType, nil
 		},
 		nil,
-		ec.marshalODeviceType2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDeviceType,
+		ec.marshalODeviceType2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDeviceType,
 		true,
 		false,
 	)
@@ -966,6 +748,64 @@ func (ec *executionContext) fieldContext_Response_message(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Token_value(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Token_value,
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Token_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Token",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Token_expiresAt(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Token_expiresAt,
+		func(ctx context.Context) (any, error) {
+			return obj.ExpiresAt, nil
+		},
+		nil,
+		ec.marshalODateTime2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Token_expiresAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Token",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -999,38 +839,6 @@ func (ec *executionContext) _AuthAccount(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "isEmailVerified":
-			out.Values[i] = ec._AuthAccount_isEmailVerified(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "twoFactorEnabled":
-			out.Values[i] = ec._AuthAccount_twoFactorEnabled(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createdAt":
-			out.Values[i] = ec._AuthAccount_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updatedAt":
-			out.Values[i] = ec._AuthAccount_updatedAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "lastLoginAt":
-			out.Values[i] = ec._AuthAccount_lastLoginAt(ctx, field, obj)
-		case "roles":
-			out.Values[i] = ec._AuthAccount_roles(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "permissions":
-			out.Values[i] = ec._AuthAccount_permissions(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1040,10 +848,10 @@ func (ec *executionContext) _AuthAccount(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1089,10 +897,10 @@ func (ec *executionContext) _AuthPayload(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1142,10 +950,10 @@ func (ec *executionContext) _AuthProfile(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1186,10 +994,10 @@ func (ec *executionContext) _AuthToken(ctx context.Context, sel ast.SelectionSet
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1227,10 +1035,10 @@ func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, ob
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1277,10 +1085,10 @@ func (ec *executionContext) _Metadata(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1326,10 +1134,10 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1367,10 +1175,51 @@ func (ec *executionContext) _Response(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var tokenImplementors = []string{"Token"}
+
+func (ec *executionContext) _Token(ctx context.Context, sel ast.SelectionSet, obj *model.Token) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tokenImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Token")
+		case "value":
+			out.Values[i] = ec._Token_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "expiresAt":
+			out.Values[i] = ec._Token_expiresAt(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -1385,7 +1234,7 @@ func (ec *executionContext) _Response(ctx context.Context, sel ast.SelectionSet,
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAuthAccount2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthAccount(ctx context.Context, sel ast.SelectionSet, v *model.AuthAccount) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthAccount2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthAccount(ctx context.Context, sel ast.SelectionSet, v *model.AuthAccount) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -1395,11 +1244,11 @@ func (ec *executionContext) marshalNAuthAccount2ᚖgithubᚗcomᚋrijum8906ᚋgo
 	return ec._AuthAccount(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAuthPayload2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v model.AuthPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthPayload2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v model.AuthPayload) graphql.Marshaler {
 	return ec._AuthPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAuthPayload2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v *model.AuthPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthPayload2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthPayload(ctx context.Context, sel ast.SelectionSet, v *model.AuthPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -1409,40 +1258,12 @@ func (ec *executionContext) marshalNAuthPayload2ᚖgithubᚗcomᚋrijum8906ᚋgo
 	return ec._AuthPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAuthProfile2ᚕᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.AuthProfile) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAuthProfile2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfile(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+func (ec *executionContext) marshalNAuthProfile2ᚕᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.AuthProfile) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNAuthProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfile(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -1453,7 +1274,7 @@ func (ec *executionContext) marshalNAuthProfile2ᚕᚖgithubᚗcomᚋrijum8906�
 	return ret
 }
 
-func (ec *executionContext) marshalNAuthProfile2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfile(ctx context.Context, sel ast.SelectionSet, v *model.AuthProfile) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthProfile(ctx context.Context, sel ast.SelectionSet, v *model.AuthProfile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -1463,7 +1284,7 @@ func (ec *executionContext) marshalNAuthProfile2ᚖgithubᚗcomᚋrijum8906ᚋgo
 	return ec._AuthProfile(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAuthToken2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthToken(ctx context.Context, sel ast.SelectionSet, v *model.AuthToken) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthToken(ctx context.Context, sel ast.SelectionSet, v *model.AuthToken) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -1473,11 +1294,11 @@ func (ec *executionContext) marshalNAuthToken2ᚖgithubᚗcomᚋrijum8906ᚋgo�
 	return ec._AuthToken(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNResponse2githubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v model.Response) graphql.Marshaler {
+func (ec *executionContext) marshalNResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v model.Response) graphql.Marshaler {
 	return ec._Response(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋgoᚑmicroᚑserviceᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v *model.Response) graphql.Marshaler {
+func (ec *executionContext) marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v *model.Response) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
