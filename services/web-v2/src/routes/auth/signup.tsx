@@ -157,7 +157,17 @@ function SignUpPage() {
               )}
             </form.Field>
 
-            <form.Field name="confirmPassword">
+            <form.Field
+              name="confirmPassword"
+              validators={{
+                onChangeListenTo: ['password'],
+                onChange: ({ value, fieldApi }) => {
+                  if (value !== fieldApi.form.getFieldValue('password')) {
+                    return 'Passwords do not match'
+                  }
+                },
+              }}
+            >
               {(field) => (
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-[#262526]">Confirm password</label>
