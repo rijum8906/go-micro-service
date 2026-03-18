@@ -3,4 +3,9 @@ kind: Kustomization
 namespace: relay
 resources:
   - namespace.yaml
-  - web-service.yaml
+  - config-map.yaml
+  - secret.yaml
+  - postgres.yaml
+  - redis.yaml
+  - mnio.yaml
+  - deployment.yaml

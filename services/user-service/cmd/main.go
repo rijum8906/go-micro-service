@@ -21,6 +21,8 @@ import (
 	"github.com/rijum8906/relay/services/user-service/internal/services/storage"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -116,6 +118,10 @@ func main() {
 	}
 
 	s := grpc.NewServer()
+	healthServer := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(s, healthServer)
+
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 
 	authHandler := grpc_handler.NewAuthHandler(authService, middlewareService)
 	user_servicev1.RegisterAuthServiceServer(s, authHandler)

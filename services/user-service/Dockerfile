@@ -8,6 +8,7 @@ COPY go.work go.work.sum ./
 COPY go.mod ./
 COPY packages/pb/go.mod packages/pb/go.mod
 COPY packages/common/go.mod packages/common/go.mod
+COPY packages/pb/go.mod packages/pb/go.mod
 COPY services/user-service/go.mod services/user-service/go.mod
 COPY services/graphql-gateway/go.mod services/graphql-gateway/go.mod
 
