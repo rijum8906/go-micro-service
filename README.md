@@ -17,10 +17,18 @@ go work init
 ```bash
 go work use ./services/*
 go work use ./packages/common
+go work use ./packages/pb
 ```
 
 #### Step 3: Sync go work
 
 ```bash
 go work sync
+
+```
+
+#### Step 4: Install go dependencies
+
+```bash
+go mod download
 ```
