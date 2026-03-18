@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	goredis "github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/common/database/postgres"
 	"github.com/rijum8906/relay/packages/common/database/redis"
 	"github.com/rijum8906/relay/packages/common/env"
@@ -17,7 +20,9 @@ import (
 	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 	dbRoot "github.com/rijum8906/relay/services/user-service/internal/db"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
+	"github.com/rijum8906/relay/services/user-service/internal/services/account"
 	"github.com/rijum8906/relay/services/user-service/internal/services/auth"
+	"github.com/rijum8906/relay/services/user-service/internal/services/profile"
 	"github.com/rijum8906/relay/services/user-service/internal/services/storage"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
 	"google.golang.org/grpc"
@@ -27,64 +32,103 @@ import (
 )
 
 func main() {
-	// Initialize a global background context
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+type infrastructure struct {
+	env         *env.Env
+	pgPool      *pgxpool.Pool
+	redisClient *goredis.Client
+}
+
+type application struct {
+	authHandler *handlers.AuthHandler
+}
+
+func run() error {
 	ctx := context.Background()
 
-	env, err := env.Load()
+	infra, err := bootstrapInfrastructure(ctx)
 	if err != nil {
-		panic(err)
+		return err
+	}
+	defer infra.pgPool.Close()
+	defer infra.redisClient.Close()
+
+	app := bootstrapApplication(ctx, infra)
+
+	return serveGRPC(infra.env, app)
+}
+
+func bootstrapInfrastructure(ctx context.Context) (*infrastructure, error) {
+	appEnv, loadErr := env.Load()
+	if loadErr != nil {
+		return nil, fmt.Errorf("load environment: %w", toError(loadErr))
 	}
 
-	postgresCfg := postgres.Config{
-		Host:     env.DBHost,
-		Port:     env.DBPort,
-		User:     env.DBUser,
-		Password: env.DBPassword,
-		Database: env.DBName,
+	pgPool, err := connectPostgres(ctx, appEnv)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := dbRoot.RunMigrations(ctx, pgPool); err != nil {
+		pgPool.Close()
+		return nil, fmt.Errorf("run migrations: %w", err)
+	}
+
+	redisClient, err := connectRedis(ctx, appEnv)
+	if err != nil {
+		pgPool.Close()
+		return nil, err
+	}
+
+	return &infrastructure{
+		env:         appEnv,
+		pgPool:      pgPool,
+		redisClient: redisClient,
+	}, nil
+}
+
+func connectPostgres(ctx context.Context, appEnv *env.Env) (*pgxpool.Pool, error) {
+	pgPool, err := postgres.Connect(ctx, postgres.Config{
+		Host:     appEnv.DBHost,
+		Port:     appEnv.DBPort,
+		User:     appEnv.DBUser,
+		Password: appEnv.DBPassword,
+		Database: appEnv.DBName,
 		SSLMode:  "disable",
 		Options: &postgres.Options{
 			RetryAttempts: 5,
-			RetryDelay:    time.Second * 2,
+			RetryDelay:    2 * time.Second,
 		},
-	}
-	// Pass context to Postgres connection
-	pgPool, err := postgres.Connect(ctx, postgresCfg)
-	if err != nil {
-		panic(err.Message)
-	}
-
-	errr := dbRoot.RunMigrations(ctx, pgPool)
-	if errr != nil {
-		panic(errr)
-	}
-
-	redisCfg := redis.Config{
-		Database: env.RedisDatabase,
-		Host:     env.RedisHost,
-		Port:     env.RedisPort,
-		User:     env.RedisUser,
-		Password: env.RedisPassword,
-	}
-	// Pass context to Redis connection
-	redisClient, err := redis.Connect(ctx, redisCfg)
-	if err != nil {
-		panic(err.Message)
-	}
-
-	jwtService := jwt.NewService(redisClient, jwt.Config{
-		Secret:     env.JwtSecret,
-		Issuer:     env.JwtIssuer,
-		Expiration: env.JwtExpiration,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("connect postgres: %w", toError(err))
+	}
 
-	scopedJWTService := jwt.NewScopedActionJWT(redisClient, jwt.Config{
-		Secret:     env.ScopedJwtSecret,
-		Issuer:     env.JwtIssuer,
-		Expiration: env.ScopedJwtExpiration,
+	return pgPool, nil
+}
+
+func connectRedis(ctx context.Context, appEnv *env.Env) (*goredis.Client, error) {
+	redisClient, err := redis.Connect(ctx, redis.Config{
+		Database: appEnv.RedisDatabase,
+		Host:     appEnv.RedisHost,
+		Port:     appEnv.RedisPort,
+		User:     appEnv.RedisUser,
+		Password: appEnv.RedisPassword,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("connect redis: %w", toError(err))
+	}
 
-	hashService := hash.NewService(env.BcryptCost)
+	return redisClient, nil
+}
 
+func bootstrapApplication(ctx context.Context, infra *infrastructure) *application {
+	hashService := hash.NewService(infra.env.BcryptCost)
+	jwtService, scopedJWTService := buildJWTServices(infra.env, infra.redisClient)
 	middlewareService := middleware.NewMiddleware(middleware.Services{
 		HashService: hashService,
 		JwtService:  jwtService,
@@ -92,13 +136,13 @@ func main() {
 
 	s3Storage := storage.NewS3StorageService(
 		ctx,
-		env.StorageEndpoint,
-		env.StorageAccessKey,
-		env.StorageSecretKey,
-		env.StorageBucket,
-		env.StoragePublicKey,
+		infra.env.StorageEndpoint,
+		infra.env.StorageAccessKey,
+		infra.env.StorageSecretKey,
+		infra.env.StorageBucket,
+		infra.env.StoragePublicKey,
 	)
-	s3Storage.CreateBucket(ctx, env.StorageBucket)
+	s3Storage.CreateBucket(ctx, infra.env.StorageBucket)
 
 	utilsCfg := &utils.UtilsConfig{
 		HashService:      hashService,
@@ -107,30 +151,65 @@ func main() {
 		Storage:          s3Storage,
 	}
 
-	authService := auth.NewAuth(db.New(pgPool), utilsCfg, env)
-	// accountService := account.NewAccountService(db.New(pgPool), utilsCfg, env)
-	// profileService := profile.NewProfileService(db.New(pgPool), utilsCfg, env)
-	// server logic starts here...
+	queries := db.New(infra.pgPool)
+	authService := auth.NewAuth(queries, utilsCfg, infra.env)
+	accountService := account.NewAccountService(queries, utilsCfg, infra.env)
+	profileService := profile.NewProfileService(queries, utilsCfg, infra.env)
 
-	lis, errr := net.Listen("tcp", fmt.Sprintf(":%s", env.AppPort))
-	if errr != nil {
-		log.Fatalf("failed to listen: %v", err)
+	authHandler := handlers.NewAuthHandler(&handlers.Services{
+		AuthService:    authService,
+		AccountService: accountService,
+		Profileservice: profileService,
+	}, middlewareService)
+
+	return &application{
+		authHandler: authHandler,
+	}
+}
+
+func buildJWTServices(appEnv *env.Env, redisClient *goredis.Client) (jwt.Service, jwt.ScopedActionJWT) {
+	jwtService := jwt.NewService(redisClient, jwt.Config{
+		Secret:     appEnv.JwtSecret,
+		Issuer:     appEnv.JwtIssuer,
+		Expiration: appEnv.JwtExpiration,
+	})
+
+	scopedJWTService := jwt.NewScopedActionJWT(redisClient, jwt.Config{
+		Secret:     appEnv.ScopedJwtSecret,
+		Issuer:     appEnv.JwtIssuer,
+		Expiration: appEnv.ScopedJwtExpiration,
+	})
+
+	return jwtService, scopedJWTService
+}
+
+func serveGRPC(appEnv *env.Env, app *application) error {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", appEnv.AppPort))
+	if err != nil {
+		return fmt.Errorf("listen on port %s: %w", appEnv.AppPort, err)
 	}
 
-	s := grpc.NewServer()
+	server := grpc.NewServer()
 	healthServer := health.NewServer()
-	grpc_health_v1.RegisterHealthServer(s, healthServer)
-
+	grpc_health_v1.RegisterHealthServer(server, healthServer)
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 
-	authHandler := handlers.NewAuthHandler(authService, middlewareService)
-	user_servicev1.RegisterAuthServiceServer(s, authHandler)
-
-	// Enable reflection (allows tools like Postman/grpcurl to "see" API)
-	reflection.Register(s)
+	user_servicev1.RegisterAuthServiceServer(server, app.authHandler)
+	reflection.Register(server)
 
 	log.Printf("gRPC server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	if err := server.Serve(lis); err != nil {
+		return fmt.Errorf("serve grpc: %w", err)
 	}
+
+	return nil
+}
+
+func toError(err interface{ Error() string }) error {
+	var target error
+	if errors.As(err, &target) {
+		return target
+	}
+
+	return errors.New(err.Error())
 }
