@@ -1,0 +1,16 @@
+{
+  "projectName": "web-v2",
+  "mode": "file-router",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "pnpm",
+  "git": true,
+  "install": true,
+  "addOnOptions": {},
+  "includeExamples": false,
+  "envVarValues": {},
+  "routerOnly": true,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": []
+}
