@@ -70,7 +70,7 @@ func (s *service) ValidateToken(
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
 	if exists == 0 {
-		return nil, errors.NewAppError(400, "session not found", []errors.Error{})
+		return nil, errors.NewAppError("SESSION_NOT_FOUND", "session not found", []errors.Error{})
 	}
 
 	return &Claims{

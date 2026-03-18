@@ -1,36 +1,44 @@
 package errors
 
 var (
-	// HTTP Responses
-	ErrNotFound     = NewAppError(404, "not found", []Error{})
-	ErrInternal     = NewAppError(500, "internal server error", []Error{})
-	ErrUnauthorized = NewAppError(401, "unauthorized", []Error{})
-	ErrForbidden    = NewAppError(403, "forbidden", []Error{})
-	ErrBadRequest   = NewAppError(400, "bad request", []Error{})
-	ErrConflict     = NewAppError(409, "conflict", []Error{})
+	// 400 Bad Request
+	ErrBadRequest   = NewAppError("BAD_REQUEST", "bad request", nil)
+	ErrInvalidBody  = NewAppError("INVALID_BODY", "invalid request body", nil)
+	ErrInvalidInput = NewAppError("INVALID_INPUT", "invalid input provided", nil)
+	ErrMissingField = NewAppError("MISSING_FIELD", "required field missing", nil)
 
-	// Database errors
-	ErrDBConnection = NewAppError(500, "database connection error", []Error{})
-	ErrDBNotFound   = NewAppError(404, "database not found", []Error{})
-	ErrDBConflict   = NewAppError(409, "database conflict", []Error{})
-	ErrDBError      = NewAppError(500, "database error", []Error{})
+	// 401 Unauthorized
+	ErrUnauthorized       = NewAppError("UNAUTHORIZED", "unauthorized", nil)
+	ErrInvalidCredentials = NewAppError("INVALID_CREDENTIALS", "invalid email or password", nil)
+	ErrInvalidToken       = NewAppError("INVALID_TOKEN", "invalid or malformed token", nil)
+	ErrInvalidTokenFormat = NewAppError("INVALID_TOKEN_FORMAT", "invalid token format", nil)
+	ErrExpiredToken       = NewAppError("EXPIRED_TOKEN", "token has expired", nil)
+	ErrInvalidTokenClaims = NewAppError("INVALID_TOKEN_CLAIMS", "invalid token claims", nil)
+	ErrInvalidPassword    = NewAppError("INVALID_PASSWORD", "invalid password", nil)
+	ErrInvalidEmail       = NewAppError("INVALID_EMAIL", "invalid email address", nil)
+	ErrInvalidUser        = NewAppError("INVALID_USER", "user not found", nil)
+	ErrInvalidScope       = NewAppError("INVALID_SCOPE", "invalid token scope", nil)
 
-	// Validation errors
-	ErrValidation         = NewAppError(400, "validation error", []Error{})
-	ErrInvalidToken       = NewAppError(401, "invalid token", []Error{})
-	ErrInvalidBody        = NewAppError(400, "invalid body", []Error{})
-	ErrInvalidCredentials = NewAppError(401, "invalid credentials", []Error{})
+	// 403 Forbidden
+	ErrForbidden   = NewAppError("FORBIDDEN", "access forbidden", nil)
+	ErrInvalidRole = NewAppError("INVALID_ROLE", "insufficient permissions", nil)
 
-	// Authentication errors
-	ErrInvalidPassword = NewAppError(401, "invalid password", []Error{})
-	ErrInvalidEmail    = NewAppError(401, "invalid email", []Error{})
-	ErrInvalidUser     = NewAppError(401, "invalid user", []Error{})
-	ErrInvalidRole     = NewAppError(401, "invalid role", []Error{})
-	ErrInvalidScope    = NewAppError(401, "invalid scope", []Error{})
-	ErrUserExists      = NewAppError(409, "user already exists", []Error{})
+	// 404 Not Found
+	ErrNotFound   = NewAppError("NOT_FOUND", "resource not found", nil)
+	ErrDBNotFound = NewAppError("DB_NOT_FOUND", "database record not found", nil)
 
-	// JWT errors
-	ErrInvalidTokenFormat = NewAppError(401, "invalid token format", []Error{})
-	ErrExpiredToken       = NewAppError(401, "token expired", []Error{})
-	ErrInvalidTokenClaims = NewAppError(401, "invalid token claims", []Error{})
+	// 409 Conflict
+	ErrConflict   = NewAppError("CONFLICT", "resource conflict", nil)
+	ErrUserExists = NewAppError("USER_EXISTS", "user already exists", nil)
+	ErrDBConflict = NewAppError("DB_CONFLICT", "database conflict", nil)
+
+	// 422 Validation
+	ErrValidation = NewAppError("VALIDATION_ERROR", "validation failed", nil)
+
+	// Database Errors
+	ErrDBConnection = NewAppError("DB_CONNECTION_ERROR", "database connection error", nil)
+	ErrDBError      = NewAppError("DB_ERROR", "database error", nil)
+
+	// Internal Server Errors
+	ErrInternal = NewAppError("INTERNAL_SERVER_ERROR", "internal server error", nil)
 )

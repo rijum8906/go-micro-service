@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	stdErrors "errors"
-	"net/http"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/common/errors"
@@ -54,13 +53,13 @@ func (s *accountService) ChangePassword(
 	}
 
 	if claims.Subject != authzMetadata.UserID.String() {
-		return errors.NewAppError(http.StatusForbidden, "forbidden", []errors.Error{
+		return errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
 			{Field: "auth", Message: "You do not have permission to perform this action."},
 		})
 	}
 
 	if claims.Scope != jwt.ActionChangePassword {
-		return errors.NewAppError(http.StatusForbidden, "forbidden", []errors.Error{
+		return errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
 			{Field: "auth", Message: "You do not have permission to perform this action."},
 		})
 	}
@@ -96,13 +95,13 @@ func (s *accountService) ChangeEmail(
 	}
 
 	if claims.Subject != authzMetadata.UserID.String() {
-		return nil, errors.NewAppError(http.StatusForbidden, "forbidden", []errors.Error{
+		return nil, errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
 			{Field: "auth", Message: "You do not have permission to perform this action."},
 		})
 	}
 
 	if claims.Scope != jwt.ActionChangeEmail {
-		return nil, errors.NewAppError(http.StatusForbidden, "forbidden", []errors.Error{
+		return nil, errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
 			{Field: "auth", Message: "You do not have permission to perform this action."},
 		})
 	}
@@ -166,13 +165,13 @@ func (s *accountService) GenerateScopedToken(
 		}
 	}
 	if !isAvailable {
-		return nil, errors.NewAppError(http.StatusForbidden, "forbidden", []errors.Error{
+		return nil, errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
 			{Field: "auth", Message: "You do not have permission to perform this action."},
 		})
 	}
 
 	if data.Authorization.Type != request.PassAuthzType {
-		return nil, errors.NewAppError(http.StatusForbidden, "forbidden", []errors.Error{
+		return nil, errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
 			{Field: "auth", Message: "Other authorization types are not supported yet."},
 		})
 	}

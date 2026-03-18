@@ -3,7 +3,6 @@ package utils
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -13,7 +12,7 @@ import (
 func StrIDToPgUUID(idStr string) (pgtype.UUID, *errors.AppError) {
 	parsed, err := uuid.Parse(idStr)
 	if err != nil {
-		return pgtype.UUID{}, errors.NewAppError(http.StatusBadRequest, "bad request", []errors.Error{
+		return pgtype.UUID{}, errors.NewAppError(errors.ErrBadRequest.Code, "bad request", []errors.Error{
 			{Field: "id", Message: "The provided ID is not a valid UUID format."},
 		})
 	}

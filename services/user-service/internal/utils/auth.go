@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	appError "github.com/rijum8906/relay/packages/common/errors"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
@@ -12,7 +10,7 @@ import (
 func ExtractAuthzMeatadata(ctx *gin.Context) (request.AuthzMetadata, *appError.AppError) {
 	userID, ok := middleware.GetUserID(ctx)
 	if !ok {
-		return request.AuthzMetadata{}, appError.NewAppError(http.StatusForbidden, "forbidden", []appError.Error{
+		return request.AuthzMetadata{}, appError.NewAppError(appError.ErrForbidden.Code, "forbidden", []appError.Error{
 			{Field: "auth", Message: "You do not have permission to perform this action."},
 		})
 	}

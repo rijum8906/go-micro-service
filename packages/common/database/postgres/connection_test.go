@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/rijum8906/relay/packages/common/database/postgres"
+	"github.com/rijum8906/relay/packages/common/errors"
 )
 
 func TestConnect(t *testing.T) {
@@ -12,7 +13,7 @@ func TestConnect(t *testing.T) {
 		name         string
 		cfg          postgres.Config
 		wantErr      bool
-		expectedCode int
+		expectedCode string
 	}{
 		{
 			name: "Invalid DSN - Connection Failure",
@@ -25,7 +26,7 @@ func TestConnect(t *testing.T) {
 				SSLMode:  "disable",
 			},
 			wantErr:      false,
-			expectedCode: 500,
+			expectedCode: errors.ErrDBConnection.Code,
 		},
 		{
 			name: "Valid DSN - Connection Success",
@@ -50,8 +51,8 @@ func TestConnect(t *testing.T) {
 					t.Fatal("Connect() expected an error but got nil")
 				}
 				// Verify it's using your custom AppError correctly
-				if gotErr.StatusCode != tt.expectedCode {
-					t.Errorf("Connect() error code = %v, want %v", gotErr.StatusCode, tt.expectedCode)
+				if gotErr.Code != tt.expectedCode {
+					t.Errorf("Connect() error code = %v, want %v", gotErr.Code, tt.expectedCode)
 				}
 				if gotPool != nil {
 					t.Error("Connect() returned a pool on failure, expected nil")

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"net/http"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -270,7 +269,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, data *user_s
 	}
 
 	if sec.IsEmailVerified {
-		return appError.NewAppError(http.StatusBadRequest, "email already verified", []appError.Error{})
+		return appError.NewAppError(appError.ErrBadRequest.Code, "email already verified", []appError.Error{})
 	}
 
 	if _, appErr := s.utilsConfig.JwtService.IssueToken(ctx, utils.FormatUUID(account.ID)); appErr != nil {
