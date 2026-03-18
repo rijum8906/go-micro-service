@@ -27,12 +27,22 @@ function SignInPage() {
   const form = useForm({
     defaultValues: { email: '', password: '' } as SigninSchemaType,
     onSubmit: async ({ value }) => {
-      const response = await signin(value)
+      const response = await signin(value) as any
       if (response.success) {
-        createAccount(response.data.account)
-        response.data.profiles.forEach(createProfile)
-        createToken(response.data.token)
-        toast.success(response.message || 'Logged in successfully')
+        const payload = response.data.signin
+        createAccount({ id: payload.account.id, email: payload.account.email, createdAt: '', updatedAt: '', passwordHash: '' })
+        payload.profiles.forEach((p: any) => createProfile({
+          id: p.id,
+          firstName: p.firstName,
+          lastName: p.lastName,
+          displayName: p.displayName,
+          avatarUrl: p.avatarUrl,
+          accountId: payload.account.id,
+          createdAt: '',
+          updatedAt: '',
+        }))
+        createToken({ access_token: payload.tokens.accessToken, refresh_token: payload.tokens.refreshToken })
+        toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {
         toast.error(response.message || 'Authentication failed')
