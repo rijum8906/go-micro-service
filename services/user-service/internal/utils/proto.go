@@ -5,9 +5,27 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func NewID(id string) *commonv1.Id {
-	return &commonv1.Id{
+func NewID(id string) *commonv1.UUID {
+	return &commonv1.UUID{
 		Value: id,
+	}
+}
+
+func NewURL(url string) *commonv1.Url {
+	return &commonv1.Url{
+		Value: url,
+	}
+}
+
+func NewIPAddr(ipAddr string) *commonv1.IPAddr {
+	return &commonv1.IPAddr{
+		Value: ipAddr,
+	}
+}
+
+func NewIPV6Addr(ipv6Addr string) *commonv1.IPV6Addr {
+	return &commonv1.IPV6Addr{
+		Value: ipv6Addr,
 	}
 }
 
