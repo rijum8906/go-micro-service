@@ -65,17 +65,17 @@ message AuthTokenResponse {
 
 // Request/Response messages
 message SignupRequest {
-  common.v1.Email email = 1;
-  common.v1.Password password = 2;
-  common.v1.Name first_name = 3;
-  common.v1.Name last_name = 4;
-  common.v1.RequestMetadata metadata = 5;
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.Password password = 2 [(buf.validate.field).required = true];
+  common.v1.Name first_name = 3 [(buf.validate.field).required = true];
+  common.v1.Name last_name = 4 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 5 [(buf.validate.field).required = true];
 }
 
 message SigninRequest {
-  common.v1.Email email = 1;
-  common.v1.Password password = 2;
-  common.v1.RequestMetadata metadata = 4;
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.Password password = 2 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
 }
 
 message AuthResponse {
@@ -85,7 +85,7 @@ message AuthResponse {
 }
 
 message SignoutRequest {
-  common.v1.RequestMetadata metadata = 1;
+  common.v1.RequestMetadata metadata = 1 [(buf.validate.field).required = true];
 }
 
 message SignoutResponse {
@@ -94,8 +94,8 @@ message SignoutResponse {
 
 // Email Verification
 message EmailVerificationRequest {
-  common.v1.Email email = 1;
-  common.v1.RequestMetadata metadata = 2;
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
 }
 
 message EmailVerificationResponse {
@@ -103,8 +103,8 @@ message EmailVerificationResponse {
 }
 
 message VerifyEmailRequest {
-  common.v1.Token token = 1;
-  common.v1.RequestMetadata metadata = 2;
+  common.v1.Token token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
 }
 
 message VerifyEmailResponse {
@@ -113,8 +113,8 @@ message VerifyEmailResponse {
 
 // Password Reset
 message RequestPasswordResetRequest {
-  common.v1.Email email = 1;
-  common.v1.RequestMetadata metadata = 2;
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
 }
 
 message RequestPasswordResetResponse {
@@ -122,9 +122,9 @@ message RequestPasswordResetResponse {
 }
 
 message ResetPasswordRequest {
-  common.v1.Token token = 1;
-  common.v1.Password new_password = 2;
-  common.v1.RequestMetadata metadata = 3;
+  common.v1.Token token = 1 [(buf.validate.field).required = true];
+  common.v1.Password new_password = 2 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
 }
 
 message ResetPasswordResponse {
