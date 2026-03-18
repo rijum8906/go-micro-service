@@ -13,7 +13,7 @@ import (
 	"github.com/rijum8906/relay/packages/common/hash"
 	"github.com/rijum8906/relay/packages/common/jwt"
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
-	grpc_handler "github.com/rijum8906/relay/services/user-service/internal/api/handlers/grpc"
+	handlers "github.com/rijum8906/relay/services/user-service/internal/api/handlers/grpc"
 	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 	dbRoot "github.com/rijum8906/relay/services/user-service/internal/db"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
@@ -123,7 +123,7 @@ func main() {
 
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 
-	authHandler := grpc_handler.NewAuthHandler(authService, middlewareService)
+	authHandler := handlers.NewAuthHandler(authService, middlewareService)
 	user_servicev1.RegisterAuthServiceServer(s, authHandler)
 
 	// Enable reflection (allows tools like Postman/grpcurl to "see" API)

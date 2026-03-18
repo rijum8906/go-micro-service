@@ -7,12 +7,12 @@
 package user_servicev1
 
 import (
-	_ "github.com/rijum8906/relay/packages/pb/buf/validate"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -225,13 +225,16 @@ func file_user_service_v1_common_proto_rawDescGZIP() []byte {
 	return file_user_service_v1_common_proto_rawDescData
 }
 
-var file_user_service_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
-var file_user_service_v1_common_proto_goTypes = []any{
-	(*Name)(nil),     // 0: user_service.v1.Name
-	(*Email)(nil),    // 1: user_service.v1.Email
-	(*Password)(nil), // 2: user_service.v1.Password
-	(*Id)(nil),       // 3: user_service.v1.Id
-}
+var (
+	file_user_service_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+	file_user_service_v1_common_proto_goTypes  = []any{
+		(*Name)(nil),     // 0: user_service.v1.Name
+		(*Email)(nil),    // 1: user_service.v1.Email
+		(*Password)(nil), // 2: user_service.v1.Password
+		(*Id)(nil),       // 3: user_service.v1.Id
+	}
+)
+
 var file_user_service_v1_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type

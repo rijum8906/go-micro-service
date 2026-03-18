@@ -90,7 +90,7 @@ func (s *authService) Signin(ctx context.Context, data request.SigninRequest, re
 // SignUp orchestrates account creation and immediate profile initialization.
 func (s *authService) SignUp(ctx context.Context, data *user_servicev1.SignupRequest) (*user_servicev1.AuthResponse, *appError.AppError) {
 	// 1. Idempotency/Duplicate Check
-	_, err := s.q.GetAccountByEmail(ctx, data.Email)
+	_, err := s.q.GetAccountByEmail(ctx, data.Email.Value)
 	if err == nil {
 		return nil, appError.ErrUserExists.WithField("email", "An account with this email already exists.")
 	}
@@ -99,7 +99,7 @@ func (s *authService) SignUp(ctx context.Context, data *user_servicev1.SignupReq
 	}
 
 	// 2. Security: Securely Hash Password
-	passHash, err := s.utilsConfig.HashService.HashPassword(data.Password)
+	passHash, err := s.utilsConfig.HashService.HashPassword(data.Password.Value)
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
@@ -107,22 +107,22 @@ func (s *authService) SignUp(ctx context.Context, data *user_servicev1.SignupReq
 	// 3. Database Write Operations
 	// TODO: Wrap in a DB transaction to ensure Account + Profile are atomic.
 	account, err := s.q.CreateAccount(ctx, db.CreateAccountParams{
-		Email:        data.Email,
+		Email:        data.Email.Value,
 		PasswordHash: passHash,
 	})
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
-	accountSecurity, err := s.q.CreateAccountSecurity(ctx, account.ID)
+	_, err = s.q.CreateAccountSecurity(ctx, account.ID)
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
 	}
 
 	profile, err := s.q.CreateProfile(ctx, db.CreateProfileParams{
 		AccountID: account.ID,
-		FirstName: data.FirstName,
-		LastName:  data.LastName,
+		FirstName: data.FirstName.Value,
+		LastName:  data.LastName.Value,
 	})
 	if err != nil {
 		return nil, appError.ErrInternal.WithInternal(err)
@@ -150,26 +150,26 @@ func (s *authService) SignUp(ctx context.Context, data *user_servicev1.SignupReq
 		return nil, appError.ErrInternal.WithInternal(appErr)
 	}
 
-	parsedProfiles := make([]*user_servicev1.Profile, 0, 1)
+	parsedProfiles := make([]*user_servicev1.ProfileResponse, 0, 1)
 
-	parsedProfiles = append(parsedProfiles, &user_servicev1.Profile{
-		Id:          profile.ID.String(),
-		AccountId:   account.ID.String(),
-		FirstName:   profile.FirstName,
-		LastName:    profile.LastName,
-		DisplayName: &profile.DisplayName.String,
+	parsedProfiles = append(parsedProfiles, &user_servicev1.ProfileResponse{
+		Id:          utils.NewID(profile.ID.String()),
+		FirstName:   utils.NewName(profile.FirstName),
+		LastName:    utils.NewName(profile.LastName),
 		AvatarUrl:   &profile.AvatarUrl.String,
+		DisplayName: &profile.DisplayName.String,
 	})
 
 	return &user_servicev1.AuthResponse{
-		Account: &user_servicev1.Account{
-			Id:               account.ID.String(),
-			Email:            account.Email,
-			EmailVerified:    accountSecurity.IsEmailVerified,
-			TwoFactorEnabled: accountSecurity.TwoFactorEnabled,
+		Account: &user_servicev1.AccountResponse{
+			Id:    utils.NewID(account.ID.String()),
+			Email: utils.NewEmail(account.Email),
 		},
 		Profiles: parsedProfiles,
-		Tokens:   &user_servicev1.TokenPair{AccessToken: accessToken, RefreshToken: refreshToken},
+		Tokens: &user_servicev1.AuthTokenResponse{
+			AccessToken:  utils.NewToken(accessToken, int64(s.env.JwtExpiration.Seconds())),
+			RefreshToken: utils.NewToken(refreshToken, 7*24*3600),
+		},
 	}, nil
 }
 

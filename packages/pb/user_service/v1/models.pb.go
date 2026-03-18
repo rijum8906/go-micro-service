@@ -671,7 +671,7 @@ func (x *SigninRequest) GetMetadata() *v1.RequestMetadata {
 
 type AuthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Account       *AuthTokenResponse     `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Account       *AccountResponse       `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 	Profiles      []*ProfileResponse     `protobuf:"bytes,2,rep,name=profiles,proto3" json:"profiles,omitempty"`
 	Tokens        *AuthTokenResponse     `protobuf:"bytes,3,opt,name=tokens,proto3" json:"tokens,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -708,7 +708,7 @@ func (*AuthResponse) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *AuthResponse) GetAccount() *AuthTokenResponse {
+func (x *AuthResponse) GetAccount() *AccountResponse {
 	if x != nil {
 		return x.Account
 	}
@@ -1290,9 +1290,9 @@ const file_user_service_v1_models_proto_rawDesc = "" +
 	"\x0ftwo_factor_code\x18\x03 \x01(\tB\x11\xbaH\x0er\f2\n" +
 	"^[0-9]{6}$H\x00R\rtwoFactorCode\x88\x01\x01\x126\n" +
 	"\bmetadata\x18\x04 \x01(\v2\x1a.common.v1.RequestMetadataR\bmetadataB\x12\n" +
-	"\x10_two_factor_code\"\xd6\x01\n" +
-	"\fAuthResponse\x12D\n" +
-	"\aaccount\x18\x01 \x01(\v2\".user_service.v1.AuthTokenResponseB\x06\xbaH\x03\xc8\x01\x01R\aaccount\x12<\n" +
+	"\x10_two_factor_code\"\xd4\x01\n" +
+	"\fAuthResponse\x12B\n" +
+	"\aaccount\x18\x01 \x01(\v2 .user_service.v1.AccountResponseB\x06\xbaH\x03\xc8\x01\x01R\aaccount\x12<\n" +
 	"\bprofiles\x18\x02 \x03(\v2 .user_service.v1.ProfileResponseR\bprofiles\x12B\n" +
 	"\x06tokens\x18\x03 \x01(\v2\".user_service.v1.AuthTokenResponseB\x06\xbaH\x03\xc8\x01\x01R\x06tokens\"H\n" +
 	"\x0eSignoutRequest\x126\n" +
@@ -1393,7 +1393,7 @@ var file_user_service_v1_models_proto_depIdxs = []int32{
 	20, // 26: user_service.v1.SigninRequest.email:type_name -> common.v1.Email
 	24, // 27: user_service.v1.SigninRequest.password:type_name -> common.v1.Password
 	25, // 28: user_service.v1.SigninRequest.metadata:type_name -> common.v1.RequestMetadata
-	5,  // 29: user_service.v1.AuthResponse.account:type_name -> user_service.v1.AuthTokenResponse
+	3,  // 29: user_service.v1.AuthResponse.account:type_name -> user_service.v1.AccountResponse
 	4,  // 30: user_service.v1.AuthResponse.profiles:type_name -> user_service.v1.ProfileResponse
 	5,  // 31: user_service.v1.AuthResponse.tokens:type_name -> user_service.v1.AuthTokenResponse
 	25, // 32: user_service.v1.SignoutRequest.metadata:type_name -> common.v1.RequestMetadata
