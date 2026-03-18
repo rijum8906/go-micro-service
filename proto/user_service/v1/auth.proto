@@ -20,4 +20,16 @@ service AuthService {
 
   // Sign out
   rpc Signout(SignoutRequest) returns (SignoutResponse);
+
+  // Request email verification
+  rpc RequestEmailVerfication(RequestEmailVerificationRequest) returns (RequestEmailVerificationResponse);
+
+  // Verify email
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+
+  // Request password reset
+  rpc RequestPasswordReset(RequestPasswordResetRequest) returns (RequestPasswordResetResponse);
+
+  // Reset password
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
 }

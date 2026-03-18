@@ -794,7 +794,7 @@ func (x *SignoutResponse) GetSuccess() bool {
 }
 
 // Email Verification
-type EmailVerificationRequest struct {
+type RequestEmailVerificationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         *v1.Email              `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Metadata      *v1.RequestMetadata    `protobuf:"bytes,2,opt,name=metadata,proto3" json:"metadata,omitempty"`
@@ -802,20 +802,20 @@ type EmailVerificationRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *EmailVerificationRequest) Reset() {
-	*x = EmailVerificationRequest{}
+func (x *RequestEmailVerificationRequest) Reset() {
+	*x = RequestEmailVerificationRequest{}
 	mi := &file_user_service_v1_models_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EmailVerificationRequest) String() string {
+func (x *RequestEmailVerificationRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EmailVerificationRequest) ProtoMessage() {}
+func (*RequestEmailVerificationRequest) ProtoMessage() {}
 
-func (x *EmailVerificationRequest) ProtoReflect() protoreflect.Message {
+func (x *RequestEmailVerificationRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_service_v1_models_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -827,46 +827,46 @@ func (x *EmailVerificationRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EmailVerificationRequest.ProtoReflect.Descriptor instead.
-func (*EmailVerificationRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use RequestEmailVerificationRequest.ProtoReflect.Descriptor instead.
+func (*RequestEmailVerificationRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *EmailVerificationRequest) GetEmail() *v1.Email {
+func (x *RequestEmailVerificationRequest) GetEmail() *v1.Email {
 	if x != nil {
 		return x.Email
 	}
 	return nil
 }
 
-func (x *EmailVerificationRequest) GetMetadata() *v1.RequestMetadata {
+func (x *RequestEmailVerificationRequest) GetMetadata() *v1.RequestMetadata {
 	if x != nil {
 		return x.Metadata
 	}
 	return nil
 }
 
-type EmailVerificationResponse struct {
+type RequestEmailVerificationResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *EmailVerificationResponse) Reset() {
-	*x = EmailVerificationResponse{}
+func (x *RequestEmailVerificationResponse) Reset() {
+	*x = RequestEmailVerificationResponse{}
 	mi := &file_user_service_v1_models_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EmailVerificationResponse) String() string {
+func (x *RequestEmailVerificationResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EmailVerificationResponse) ProtoMessage() {}
+func (*RequestEmailVerificationResponse) ProtoMessage() {}
 
-func (x *EmailVerificationResponse) ProtoReflect() protoreflect.Message {
+func (x *RequestEmailVerificationResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_user_service_v1_models_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -878,12 +878,12 @@ func (x *EmailVerificationResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EmailVerificationResponse.ProtoReflect.Descriptor instead.
-func (*EmailVerificationResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use RequestEmailVerificationResponse.ProtoReflect.Descriptor instead.
+func (*RequestEmailVerificationResponse) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *EmailVerificationResponse) GetSuccess() bool {
+func (x *RequestEmailVerificationResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
@@ -1267,11 +1267,11 @@ const file_user_service_v1_models_proto_rawDesc = "" +
 	"\x0eSignoutRequest\x12>\n" +
 	"\bmetadata\x18\x01 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"+\n" +
 	"\x0fSignoutResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x8a\x01\n" +
-	"\x18EmailVerificationRequest\x12.\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x91\x01\n" +
+	"\x1fRequestEmailVerificationRequest\x12.\n" +
 	"\x05email\x18\x01 \x01(\v2\x10.common.v1.EmailB\x06\xbaH\x03\xc8\x01\x01R\x05email\x12>\n" +
-	"\bmetadata\x18\x02 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"5\n" +
-	"\x19EmailVerificationResponse\x12\x18\n" +
+	"\bmetadata\x18\x02 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"<\n" +
+	" RequestEmailVerificationResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x84\x01\n" +
 	"\x12VerifyEmailRequest\x12.\n" +
 	"\x05token\x18\x01 \x01(\v2\x10.common.v1.TokenB\x06\xbaH\x03\xc8\x01\x01R\x05token\x12>\n" +
@@ -1305,35 +1305,35 @@ func file_user_service_v1_models_proto_rawDescGZIP() []byte {
 
 var file_user_service_v1_models_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_user_service_v1_models_proto_goTypes = []any{
-	(*Account)(nil),                      // 0: user_service.v1.Account
-	(*Profile)(nil),                      // 1: user_service.v1.Profile
-	(*Session)(nil),                      // 2: user_service.v1.Session
-	(*AccountResponse)(nil),              // 3: user_service.v1.AccountResponse
-	(*ProfileResponse)(nil),              // 4: user_service.v1.ProfileResponse
-	(*AuthTokenResponse)(nil),            // 5: user_service.v1.AuthTokenResponse
-	(*SignupRequest)(nil),                // 6: user_service.v1.SignupRequest
-	(*SigninRequest)(nil),                // 7: user_service.v1.SigninRequest
-	(*AuthResponse)(nil),                 // 8: user_service.v1.AuthResponse
-	(*SignoutRequest)(nil),               // 9: user_service.v1.SignoutRequest
-	(*SignoutResponse)(nil),              // 10: user_service.v1.SignoutResponse
-	(*EmailVerificationRequest)(nil),     // 11: user_service.v1.EmailVerificationRequest
-	(*EmailVerificationResponse)(nil),    // 12: user_service.v1.EmailVerificationResponse
-	(*VerifyEmailRequest)(nil),           // 13: user_service.v1.VerifyEmailRequest
-	(*VerifyEmailResponse)(nil),          // 14: user_service.v1.VerifyEmailResponse
-	(*RequestPasswordResetRequest)(nil),  // 15: user_service.v1.RequestPasswordResetRequest
-	(*RequestPasswordResetResponse)(nil), // 16: user_service.v1.RequestPasswordResetResponse
-	(*ResetPasswordRequest)(nil),         // 17: user_service.v1.ResetPasswordRequest
-	(*ResetPasswordResponse)(nil),        // 18: user_service.v1.ResetPasswordResponse
-	(*v1.UUID)(nil),                      // 19: common.v1.UUID
-	(*v1.Email)(nil),                     // 20: common.v1.Email
-	(*v1.String)(nil),                    // 21: common.v1.String
-	(*timestamppb.Timestamp)(nil),        // 22: google.protobuf.Timestamp
-	(*v1.Name)(nil),                      // 23: common.v1.Name
-	(*v1.Url)(nil),                       // 24: common.v1.Url
-	(*v1.IPAddr)(nil),                    // 25: common.v1.IPAddr
-	(*v1.Token)(nil),                     // 26: common.v1.Token
-	(*v1.Password)(nil),                  // 27: common.v1.Password
-	(*v1.RequestMetadata)(nil),           // 28: common.v1.RequestMetadata
+	(*Account)(nil),                          // 0: user_service.v1.Account
+	(*Profile)(nil),                          // 1: user_service.v1.Profile
+	(*Session)(nil),                          // 2: user_service.v1.Session
+	(*AccountResponse)(nil),                  // 3: user_service.v1.AccountResponse
+	(*ProfileResponse)(nil),                  // 4: user_service.v1.ProfileResponse
+	(*AuthTokenResponse)(nil),                // 5: user_service.v1.AuthTokenResponse
+	(*SignupRequest)(nil),                    // 6: user_service.v1.SignupRequest
+	(*SigninRequest)(nil),                    // 7: user_service.v1.SigninRequest
+	(*AuthResponse)(nil),                     // 8: user_service.v1.AuthResponse
+	(*SignoutRequest)(nil),                   // 9: user_service.v1.SignoutRequest
+	(*SignoutResponse)(nil),                  // 10: user_service.v1.SignoutResponse
+	(*RequestEmailVerificationRequest)(nil),  // 11: user_service.v1.RequestEmailVerificationRequest
+	(*RequestEmailVerificationResponse)(nil), // 12: user_service.v1.RequestEmailVerificationResponse
+	(*VerifyEmailRequest)(nil),               // 13: user_service.v1.VerifyEmailRequest
+	(*VerifyEmailResponse)(nil),              // 14: user_service.v1.VerifyEmailResponse
+	(*RequestPasswordResetRequest)(nil),      // 15: user_service.v1.RequestPasswordResetRequest
+	(*RequestPasswordResetResponse)(nil),     // 16: user_service.v1.RequestPasswordResetResponse
+	(*ResetPasswordRequest)(nil),             // 17: user_service.v1.ResetPasswordRequest
+	(*ResetPasswordResponse)(nil),            // 18: user_service.v1.ResetPasswordResponse
+	(*v1.UUID)(nil),                          // 19: common.v1.UUID
+	(*v1.Email)(nil),                         // 20: common.v1.Email
+	(*v1.String)(nil),                        // 21: common.v1.String
+	(*timestamppb.Timestamp)(nil),            // 22: google.protobuf.Timestamp
+	(*v1.Name)(nil),                          // 23: common.v1.Name
+	(*v1.Url)(nil),                           // 24: common.v1.Url
+	(*v1.IPAddr)(nil),                        // 25: common.v1.IPAddr
+	(*v1.Token)(nil),                         // 26: common.v1.Token
+	(*v1.Password)(nil),                      // 27: common.v1.Password
+	(*v1.RequestMetadata)(nil),               // 28: common.v1.RequestMetadata
 }
 var file_user_service_v1_models_proto_depIdxs = []int32{
 	19, // 0: user_service.v1.Account.id:type_name -> common.v1.UUID
@@ -1379,8 +1379,8 @@ var file_user_service_v1_models_proto_depIdxs = []int32{
 	4,  // 40: user_service.v1.AuthResponse.profiles:type_name -> user_service.v1.ProfileResponse
 	5,  // 41: user_service.v1.AuthResponse.tokens:type_name -> user_service.v1.AuthTokenResponse
 	28, // 42: user_service.v1.SignoutRequest.metadata:type_name -> common.v1.RequestMetadata
-	20, // 43: user_service.v1.EmailVerificationRequest.email:type_name -> common.v1.Email
-	28, // 44: user_service.v1.EmailVerificationRequest.metadata:type_name -> common.v1.RequestMetadata
+	20, // 43: user_service.v1.RequestEmailVerificationRequest.email:type_name -> common.v1.Email
+	28, // 44: user_service.v1.RequestEmailVerificationRequest.metadata:type_name -> common.v1.RequestMetadata
 	26, // 45: user_service.v1.VerifyEmailRequest.token:type_name -> common.v1.Token
 	28, // 46: user_service.v1.VerifyEmailRequest.metadata:type_name -> common.v1.RequestMetadata
 	20, // 47: user_service.v1.RequestPasswordResetRequest.email:type_name -> common.v1.Email

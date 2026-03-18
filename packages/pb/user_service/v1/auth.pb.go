@@ -24,32 +24,52 @@ var File_user_service_v1_auth_proto protoreflect.FileDescriptor
 
 const file_user_service_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser_service/v1/auth.proto\x12\x0fuser_service.v1\x1a\x1cuser_service/v1/models.proto2\xed\x01\n" +
+	"\x1auser_service/v1/auth.proto\x12\x0fuser_service.v1\x1a\x1cuser_service/v1/models.proto2\x9c\x05\n" +
 	"\vAuthService\x12G\n" +
 	"\x06Signup\x12\x1e.user_service.v1.SignupRequest\x1a\x1d.user_service.v1.AuthResponse\x12G\n" +
 	"\x06Signin\x12\x1e.user_service.v1.SigninRequest\x1a\x1d.user_service.v1.AuthResponse\x12L\n" +
-	"\aSignout\x12\x1f.user_service.v1.SignoutRequest\x1a .user_service.v1.SignoutResponseB\xc0\x01\n" +
+	"\aSignout\x12\x1f.user_service.v1.SignoutRequest\x1a .user_service.v1.SignoutResponse\x12~\n" +
+	"\x17RequestEmailVerfication\x120.user_service.v1.RequestEmailVerificationRequest\x1a1.user_service.v1.RequestEmailVerificationResponse\x12X\n" +
+	"\vVerifyEmail\x12#.user_service.v1.VerifyEmailRequest\x1a$.user_service.v1.VerifyEmailResponse\x12s\n" +
+	"\x14RequestPasswordReset\x12,.user_service.v1.RequestPasswordResetRequest\x1a-.user_service.v1.RequestPasswordResetResponse\x12^\n" +
+	"\rResetPassword\x12%.user_service.v1.ResetPasswordRequest\x1a&.user_service.v1.ResetPasswordResponseB\xc0\x01\n" +
 	"\x13com.user_service.v1B\tAuthProtoP\x01ZEgithub.com/rijum8906/relay/packages/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
 
 var file_user_service_v1_auth_proto_goTypes = []any{
-	(*SignupRequest)(nil),   // 0: user_service.v1.SignupRequest
-	(*SigninRequest)(nil),   // 1: user_service.v1.SigninRequest
-	(*SignoutRequest)(nil),  // 2: user_service.v1.SignoutRequest
-	(*AuthResponse)(nil),    // 3: user_service.v1.AuthResponse
-	(*SignoutResponse)(nil), // 4: user_service.v1.SignoutResponse
+	(*SignupRequest)(nil),                    // 0: user_service.v1.SignupRequest
+	(*SigninRequest)(nil),                    // 1: user_service.v1.SigninRequest
+	(*SignoutRequest)(nil),                   // 2: user_service.v1.SignoutRequest
+	(*RequestEmailVerificationRequest)(nil),  // 3: user_service.v1.RequestEmailVerificationRequest
+	(*VerifyEmailRequest)(nil),               // 4: user_service.v1.VerifyEmailRequest
+	(*RequestPasswordResetRequest)(nil),      // 5: user_service.v1.RequestPasswordResetRequest
+	(*ResetPasswordRequest)(nil),             // 6: user_service.v1.ResetPasswordRequest
+	(*AuthResponse)(nil),                     // 7: user_service.v1.AuthResponse
+	(*SignoutResponse)(nil),                  // 8: user_service.v1.SignoutResponse
+	(*RequestEmailVerificationResponse)(nil), // 9: user_service.v1.RequestEmailVerificationResponse
+	(*VerifyEmailResponse)(nil),              // 10: user_service.v1.VerifyEmailResponse
+	(*RequestPasswordResetResponse)(nil),     // 11: user_service.v1.RequestPasswordResetResponse
+	(*ResetPasswordResponse)(nil),            // 12: user_service.v1.ResetPasswordResponse
 }
 var file_user_service_v1_auth_proto_depIdxs = []int32{
-	0, // 0: user_service.v1.AuthService.Signup:input_type -> user_service.v1.SignupRequest
-	1, // 1: user_service.v1.AuthService.Signin:input_type -> user_service.v1.SigninRequest
-	2, // 2: user_service.v1.AuthService.Signout:input_type -> user_service.v1.SignoutRequest
-	3, // 3: user_service.v1.AuthService.Signup:output_type -> user_service.v1.AuthResponse
-	3, // 4: user_service.v1.AuthService.Signin:output_type -> user_service.v1.AuthResponse
-	4, // 5: user_service.v1.AuthService.Signout:output_type -> user_service.v1.SignoutResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: user_service.v1.AuthService.Signup:input_type -> user_service.v1.SignupRequest
+	1,  // 1: user_service.v1.AuthService.Signin:input_type -> user_service.v1.SigninRequest
+	2,  // 2: user_service.v1.AuthService.Signout:input_type -> user_service.v1.SignoutRequest
+	3,  // 3: user_service.v1.AuthService.RequestEmailVerfication:input_type -> user_service.v1.RequestEmailVerificationRequest
+	4,  // 4: user_service.v1.AuthService.VerifyEmail:input_type -> user_service.v1.VerifyEmailRequest
+	5,  // 5: user_service.v1.AuthService.RequestPasswordReset:input_type -> user_service.v1.RequestPasswordResetRequest
+	6,  // 6: user_service.v1.AuthService.ResetPassword:input_type -> user_service.v1.ResetPasswordRequest
+	7,  // 7: user_service.v1.AuthService.Signup:output_type -> user_service.v1.AuthResponse
+	7,  // 8: user_service.v1.AuthService.Signin:output_type -> user_service.v1.AuthResponse
+	8,  // 9: user_service.v1.AuthService.Signout:output_type -> user_service.v1.SignoutResponse
+	9,  // 10: user_service.v1.AuthService.RequestEmailVerfication:output_type -> user_service.v1.RequestEmailVerificationResponse
+	10, // 11: user_service.v1.AuthService.VerifyEmail:output_type -> user_service.v1.VerifyEmailResponse
+	11, // 12: user_service.v1.AuthService.RequestPasswordReset:output_type -> user_service.v1.RequestPasswordResetResponse
+	12, // 13: user_service.v1.AuthService.ResetPassword:output_type -> user_service.v1.ResetPasswordResponse
+	7,  // [7:14] is the sub-list for method output_type
+	0,  // [0:7] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_user_service_v1_auth_proto_init() }

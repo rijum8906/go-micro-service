@@ -93,12 +93,12 @@ message SignoutResponse {
 }
 
 // Email Verification
-message EmailVerificationRequest {
+message RequestEmailVerificationRequest {
   common.v1.Email email = 1 [(buf.validate.field).required = true];
   common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
 }
 
-message EmailVerificationResponse {
+message RequestEmailVerificationResponse {
   bool success = 1;
 }
 
