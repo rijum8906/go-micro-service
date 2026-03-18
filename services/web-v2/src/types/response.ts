@@ -51,3 +51,24 @@ export interface UpdateProfileResponse extends BaseResponse {
 export interface GetProfileResponse extends BaseResponse {
   data: GetProfileResult;
 }
+
+export interface GqlAuthPayload {
+  account: { id: string; email: string }
+  tokens: { accessToken: string; refreshToken: string }
+  profiles: Array<{
+    id: string
+    firstName: string
+    lastName: string
+    displayName: string | null
+    avatarUrl: string | null
+  }>
+}
+
+export interface GqlAuthResponse {
+  success: boolean
+  message: string
+  data: {
+    signin?: GqlAuthPayload
+    signup?: GqlAuthPayload
+  }
+}
