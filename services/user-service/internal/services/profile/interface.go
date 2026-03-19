@@ -2,33 +2,40 @@
 package profile
 
 import (
+	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/common/env"
+	"github.com/rijum8906/relay/packages/common/errors"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	profilev1 "github.com/rijum8906/relay/packages/pb/user_service/profile/v1"
+	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 type ProfileService interface {
 	// Core functions
-	GetProfile()
-	GetProfilesByAccountID()
-	UpdateProfile()
-	UpdateDisplayName()
-	UpdateAvatarURL()
-	UpdateName()
-
-	// Public Access
-	GetProfileByUsername()
+	CreateProfile(ctx context.Context, data *authv1.SignupRequest, authzMetadata *request.AuthzMetadata) (*db.Profile, *errors.AppError)
+	GetProfile(ctx context.Context, profileID pgtype.UUID) (*db.Profile, *errors.AppError)
+	GetProfilesByAccountID(ctx context.Context, accountID pgtype.UUID) (*[]db.Profile, *errors.AppError)
+	UpdateProfile(ctx context.Context, profileID pgtype.UUID, data *profilev1.UpdateProfileRequest) (*db.Profile, *errors.AppError)
+	UpdateDisplayName(ctx context.Context, profileID pgtype.UUID, data *profilev1.UpdateDisplayNameRequest) (*db.Profile, *errors.AppError)
+	UpdateAvatarURL(ctx context.Context, profileID pgtype.UUID, data *profilev1.UpdateAvatarUrlRequest) (*db.Profile, *errors.AppError)
+	UpdateName(ctx context.Context, profileID pgtype.UUID, data *profilev1.UpdateNameRequest) (*db.Profile, *errors.AppError)
 }
 
 type profileService struct {
+	repo        *profileRepository
 	q           *db.Queries
 	utilsConfig *utils.UtilsConfig
 	env         *env.Env
 }
 
-func NewProfileService(queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) ProfileService {
+func NewProfileService(repo *profileRepository, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) ProfileService {
 	return &profileService{
-		q: queries,
+		repo: repo,
+		q:    queries,
 		utilsConfig: &utils.UtilsConfig{
 			HashService:      cfg.HashService,
 			JwtService:       cfg.JwtService,
@@ -40,10 +47,10 @@ func NewProfileService(queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env
 }
 
 type ProfileRepository interface {
-	CreateProfile()
-	GetProfilesByAccountID()
-	GetProfile()
-	UpdateProfile()
+	CreateProfile(ctx context.Context, accountID pgtype.UUID, data *authv1.SignupRequest) (*db.Profile, *errors.AppError)
+	GetProfilesByAccountID(ctx context.Context, accountID pgtype.UUID) (*[]db.Profile, *errors.AppError)
+	GetProfile(ctx context.Context, profileID pgtype.UUID) (*db.Profile, *errors.AppError)
+	UpdateProfile(ctx context.Context, profileID pgtype.UUID, data *profilev1.UpdateProfileRequest) (*db.Profile, *errors.AppError)
 }
 
 type profileRepository struct {
