@@ -197,12 +197,30 @@ func serveGRPC(appEnv *env.Env, app *application) error {
 	}
 
 	server := grpc.NewServer()
+
+	// Register health server properly
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(server, healthServer)
-	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 
+	// Set serving status for all services
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("user_service.auth.v1.AuthService", grpc_health_v1.HealthCheckResponse_SERVING)
+
+	// Register your auth service
 	authv1.RegisterAuthServiceServer(server, app.authHandler)
+
+	// Enable reflection
 	reflection.Register(server)
+
+	// Log all registered methods for debugging
+	log.Println("=== Registered gRPC Methods ===")
+	for serviceName, serviceInfo := range server.GetServiceInfo() {
+		log.Printf("Service: %s", serviceName)
+		for _, method := range serviceInfo.Methods {
+			log.Printf("  └─ Method: %s", method.Name)
+		}
+	}
+	log.Println("===============================")
 
 	log.Printf("gRPC server listening at %v", lis.Addr())
 	if err := server.Serve(lis); err != nil {
