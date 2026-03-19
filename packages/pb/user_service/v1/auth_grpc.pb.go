@@ -32,6 +32,7 @@ const (
 	AuthService_UpdateProfile_FullMethodName           = "/user_service.v1.AuthService/UpdateProfile"
 	AuthService_DeleteProfile_FullMethodName           = "/user_service.v1.AuthService/DeleteProfile"
 	AuthService_DeleteAccount_FullMethodName           = "/user_service.v1.AuthService/DeleteAccount"
+	AuthService_GenerateScopedToken_FullMethodName     = "/user_service.v1.AuthService/GenerateScopedToken"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -65,6 +66,7 @@ type AuthServiceClient interface {
 	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileResponse, error)
 	DeleteProfile(ctx context.Context, in *DeleteProfileRequest, opts ...grpc.CallOption) (*DeleteProfileResponse, error)
 	DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*DeleteAccountResponse, error)
+	GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenRequest, opts ...grpc.CallOption) (*GenerateScopedTokenResponse, error)
 }
 
 type authServiceClient struct {
@@ -205,6 +207,16 @@ func (c *authServiceClient) DeleteAccount(ctx context.Context, in *DeleteAccount
 	return out, nil
 }
 
+func (c *authServiceClient) GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenRequest, opts ...grpc.CallOption) (*GenerateScopedTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateScopedTokenResponse)
+	err := c.cc.Invoke(ctx, AuthService_GenerateScopedToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations should embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -236,6 +248,7 @@ type AuthServiceServer interface {
 	UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error)
 	DeleteProfile(context.Context, *DeleteProfileRequest) (*DeleteProfileResponse, error)
 	DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error)
+	GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error)
 }
 
 // UnimplementedAuthServiceServer should be embedded to have
@@ -283,6 +296,9 @@ func (UnimplementedAuthServiceServer) DeleteProfile(context.Context, *DeleteProf
 }
 func (UnimplementedAuthServiceServer) DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteAccount not implemented")
+}
+func (UnimplementedAuthServiceServer) GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GenerateScopedToken not implemented")
 }
 func (UnimplementedAuthServiceServer) testEmbeddedByValue() {}
 
@@ -538,6 +554,24 @@ func _AuthService_DeleteAccount_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_GenerateScopedToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateScopedTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GenerateScopedToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GenerateScopedToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GenerateScopedToken(ctx, req.(*GenerateScopedTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -596,6 +630,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAccount",
 			Handler:    _AuthService_DeleteAccount_Handler,
+		},
+		{
+			MethodName: "GenerateScopedToken",
+			Handler:    _AuthService_GenerateScopedToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

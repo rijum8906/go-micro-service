@@ -25,60 +25,60 @@ const (
 )
 
 // enum
-type ScopedActions int32
+type ScopedAction int32
 
 const (
-	ScopedActions_SCOPED_ACTIONS_UNSPECIFIED ScopedActions = 0
+	ScopedAction_SCOPED_ACTION_UNSPECIFIED ScopedAction = 0
 	// Change
-	ScopedActions_SCOPED_ACTIONS_CHANGE_PASSWORD ScopedActions = 1
-	ScopedActions_SCOPED_ACTIONS_CHANGE_EMAIL    ScopedActions = 2
+	ScopedAction_SCOPED_ACTION_CHANGE_PASSWORD ScopedAction = 1
+	ScopedAction_SCOPED_ACTION_CHANGE_EMAIL    ScopedAction = 2
 	// Delete
-	ScopedActions_SCOPED_ACTIONS_DELETE_ACCOUNT ScopedActions = 3
-	ScopedActions_SCOPED_ACTIONS_DELETE_PROFILE ScopedActions = 4
+	ScopedAction_SCOPED_ACTION_DELETE_ACCOUNT ScopedAction = 3
+	ScopedAction_SCOPED_ACTION_DELETE_PROFILE ScopedAction = 4
 )
 
-// Enum value maps for ScopedActions.
+// Enum value maps for ScopedAction.
 var (
-	ScopedActions_name = map[int32]string{
-		0: "SCOPED_ACTIONS_UNSPECIFIED",
-		1: "SCOPED_ACTIONS_CHANGE_PASSWORD",
-		2: "SCOPED_ACTIONS_CHANGE_EMAIL",
-		3: "SCOPED_ACTIONS_DELETE_ACCOUNT",
-		4: "SCOPED_ACTIONS_DELETE_PROFILE",
+	ScopedAction_name = map[int32]string{
+		0: "SCOPED_ACTION_UNSPECIFIED",
+		1: "SCOPED_ACTION_CHANGE_PASSWORD",
+		2: "SCOPED_ACTION_CHANGE_EMAIL",
+		3: "SCOPED_ACTION_DELETE_ACCOUNT",
+		4: "SCOPED_ACTION_DELETE_PROFILE",
 	}
-	ScopedActions_value = map[string]int32{
-		"SCOPED_ACTIONS_UNSPECIFIED":     0,
-		"SCOPED_ACTIONS_CHANGE_PASSWORD": 1,
-		"SCOPED_ACTIONS_CHANGE_EMAIL":    2,
-		"SCOPED_ACTIONS_DELETE_ACCOUNT":  3,
-		"SCOPED_ACTIONS_DELETE_PROFILE":  4,
+	ScopedAction_value = map[string]int32{
+		"SCOPED_ACTION_UNSPECIFIED":     0,
+		"SCOPED_ACTION_CHANGE_PASSWORD": 1,
+		"SCOPED_ACTION_CHANGE_EMAIL":    2,
+		"SCOPED_ACTION_DELETE_ACCOUNT":  3,
+		"SCOPED_ACTION_DELETE_PROFILE":  4,
 	}
 )
 
-func (x ScopedActions) Enum() *ScopedActions {
-	p := new(ScopedActions)
+func (x ScopedAction) Enum() *ScopedAction {
+	p := new(ScopedAction)
 	*p = x
 	return p
 }
 
-func (x ScopedActions) String() string {
+func (x ScopedAction) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (ScopedActions) Descriptor() protoreflect.EnumDescriptor {
+func (ScopedAction) Descriptor() protoreflect.EnumDescriptor {
 	return file_user_service_v1_account_proto_enumTypes[0].Descriptor()
 }
 
-func (ScopedActions) Type() protoreflect.EnumType {
+func (ScopedAction) Type() protoreflect.EnumType {
 	return &file_user_service_v1_account_proto_enumTypes[0]
 }
 
-func (x ScopedActions) Number() protoreflect.EnumNumber {
+func (x ScopedAction) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use ScopedActions.Descriptor instead.
-func (ScopedActions) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use ScopedAction.Descriptor instead.
+func (ScopedAction) EnumDescriptor() ([]byte, []int) {
 	return file_user_service_v1_account_proto_rawDescGZIP(), []int{0}
 }
 
@@ -128,12 +128,58 @@ func (AuthType) EnumDescriptor() ([]byte, []int) {
 	return file_user_service_v1_account_proto_rawDescGZIP(), []int{1}
 }
 
+type XHeader int32
+
+const (
+	XHeader_X_HEADER_UNSPECIFIED XHeader = 0
+	XHeader_X_HEADER_USER_ID     XHeader = 1
+)
+
+// Enum value maps for XHeader.
+var (
+	XHeader_name = map[int32]string{
+		0: "X_HEADER_UNSPECIFIED",
+		1: "X_HEADER_USER_ID",
+	}
+	XHeader_value = map[string]int32{
+		"X_HEADER_UNSPECIFIED": 0,
+		"X_HEADER_USER_ID":     1,
+	}
+)
+
+func (x XHeader) Enum() *XHeader {
+	p := new(XHeader)
+	*p = x
+	return p
+}
+
+func (x XHeader) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (XHeader) Descriptor() protoreflect.EnumDescriptor {
+	return file_user_service_v1_account_proto_enumTypes[2].Descriptor()
+}
+
+func (XHeader) Type() protoreflect.EnumType {
+	return &file_user_service_v1_account_proto_enumTypes[2]
+}
+
+func (x XHeader) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use XHeader.Descriptor instead.
+func (XHeader) EnumDescriptor() ([]byte, []int) {
+	return file_user_service_v1_account_proto_rawDescGZIP(), []int{2}
+}
+
 // Generate Scoped Token
 type GenerateScopedTokenRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Scope         ScopedActions          `protobuf:"varint,1,opt,name=scope,proto3,enum=user_service.v1.ScopedActions" json:"scope,omitempty"`
+	Scope         ScopedAction           `protobuf:"varint,1,opt,name=scope,proto3,enum=user_service.v1.ScopedAction" json:"scope,omitempty"`
 	AuthType      AuthType               `protobuf:"varint,2,opt,name=auth_type,json=authType,proto3,enum=user_service.v1.AuthType" json:"auth_type,omitempty"`
-	Value         *v1.String             `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	Auth          *v1.String             `protobuf:"bytes,3,opt,name=auth,proto3" json:"auth,omitempty"`
 	Metadata      *v1.RequestMetadata    `protobuf:"bytes,4,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -169,11 +215,11 @@ func (*GenerateScopedTokenRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_account_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *GenerateScopedTokenRequest) GetScope() ScopedActions {
+func (x *GenerateScopedTokenRequest) GetScope() ScopedAction {
 	if x != nil {
 		return x.Scope
 	}
-	return ScopedActions_SCOPED_ACTIONS_UNSPECIFIED
+	return ScopedAction_SCOPED_ACTION_UNSPECIFIED
 }
 
 func (x *GenerateScopedTokenRequest) GetAuthType() AuthType {
@@ -183,9 +229,9 @@ func (x *GenerateScopedTokenRequest) GetAuthType() AuthType {
 	return AuthType_AUTH_TYPE_UNSPECIFIED
 }
 
-func (x *GenerateScopedTokenRequest) GetValue() *v1.String {
+func (x *GenerateScopedTokenRequest) GetAuth() *v1.String {
 	if x != nil {
-		return x.Value
+		return x.Auth
 	}
 	return nil
 }
@@ -628,11 +674,11 @@ var File_user_service_v1_account_proto protoreflect.FileDescriptor
 
 const file_user_service_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x1duser_service/v1/account.proto\x12\x0fuser_service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfb\x01\n" +
-	"\x1aGenerateScopedTokenRequest\x124\n" +
-	"\x05scope\x18\x01 \x01(\x0e2\x1e.user_service.v1.ScopedActionsR\x05scope\x126\n" +
-	"\tauth_type\x18\x02 \x01(\x0e2\x19.user_service.v1.AuthTypeR\bauthType\x12/\n" +
-	"\x05value\x18\x03 \x01(\v2\x11.common.v1.StringB\x06\xbaH\x03\xc8\x01\x01R\x05value\x12>\n" +
+	"\x1duser_service/v1/account.proto\x12\x0fuser_service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf8\x01\n" +
+	"\x1aGenerateScopedTokenRequest\x123\n" +
+	"\x05scope\x18\x01 \x01(\x0e2\x1d.user_service.v1.ScopedActionR\x05scope\x126\n" +
+	"\tauth_type\x18\x02 \x01(\x0e2\x19.user_service.v1.AuthTypeR\bauthType\x12-\n" +
+	"\x04auth\x18\x03 \x01(\v2\x11.common.v1.StringB\x06\xbaH\x03\xc8\x01\x01R\x04auth\x12>\n" +
 	"\bmetadata\x18\x04 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"M\n" +
 	"\x1bGenerateScopedTokenResponse\x12.\n" +
 	"\x05token\x18\x01 \x01(\v2\x10.common.v1.TokenB\x06\xbaH\x03\xc8\x01\x01R\x05token\"\x88\x01\n" +
@@ -660,16 +706,19 @@ const file_user_service_v1_account_proto_rawDesc = "" +
 	"\x05token\x18\x01 \x01(\v2\x11.common.v1.StringB\x06\xbaH\x03\xc8\x01\x01R\x05token\x12>\n" +
 	"\bmetadata\x18\x02 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"1\n" +
 	"\x15DeleteAccountResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess*\xba\x01\n" +
-	"\rScopedActions\x12\x1e\n" +
-	"\x1aSCOPED_ACTIONS_UNSPECIFIED\x10\x00\x12\"\n" +
-	"\x1eSCOPED_ACTIONS_CHANGE_PASSWORD\x10\x01\x12\x1f\n" +
-	"\x1bSCOPED_ACTIONS_CHANGE_EMAIL\x10\x02\x12!\n" +
-	"\x1dSCOPED_ACTIONS_DELETE_ACCOUNT\x10\x03\x12!\n" +
-	"\x1dSCOPED_ACTIONS_DELETE_PROFILE\x10\x04*=\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess*\xb4\x01\n" +
+	"\fScopedAction\x12\x1d\n" +
+	"\x19SCOPED_ACTION_UNSPECIFIED\x10\x00\x12!\n" +
+	"\x1dSCOPED_ACTION_CHANGE_PASSWORD\x10\x01\x12\x1e\n" +
+	"\x1aSCOPED_ACTION_CHANGE_EMAIL\x10\x02\x12 \n" +
+	"\x1cSCOPED_ACTION_DELETE_ACCOUNT\x10\x03\x12 \n" +
+	"\x1cSCOPED_ACTION_DELETE_PROFILE\x10\x04*=\n" +
 	"\bAuthType\x12\x19\n" +
 	"\x15AUTH_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12AUTH_TYPE_PASSWORD\x10\x01B\xc3\x01\n" +
+	"\x12AUTH_TYPE_PASSWORD\x10\x01*9\n" +
+	"\aXHeader\x12\x18\n" +
+	"\x14X_HEADER_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10X_HEADER_USER_ID\x10\x01B\xc3\x01\n" +
 	"\x13com.user_service.v1B\fAccountProtoP\x01ZEgithub.com/rijum8906/relay/packages/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
 
 var (
@@ -684,45 +733,46 @@ func file_user_service_v1_account_proto_rawDescGZIP() []byte {
 	return file_user_service_v1_account_proto_rawDescData
 }
 
-var file_user_service_v1_account_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_user_service_v1_account_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_user_service_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_user_service_v1_account_proto_goTypes = []any{
-	(ScopedActions)(0),                   // 0: user_service.v1.ScopedActions
+	(ScopedAction)(0),                    // 0: user_service.v1.ScopedAction
 	(AuthType)(0),                        // 1: user_service.v1.AuthType
-	(*GenerateScopedTokenRequest)(nil),   // 2: user_service.v1.GenerateScopedTokenRequest
-	(*GenerateScopedTokenResponse)(nil),  // 3: user_service.v1.GenerateScopedTokenResponse
-	(*ChangePasswordRequest)(nil),        // 4: user_service.v1.ChangePasswordRequest
-	(*ChangePasswordResponse)(nil),       // 5: user_service.v1.ChangePasswordResponse
-	(*GetMyAccountRequest)(nil),          // 6: user_service.v1.GetMyAccountRequest
-	(*GetMyAccountSecurityResponse)(nil), // 7: user_service.v1.GetMyAccountSecurityResponse
-	(*GetMyAccountResponse)(nil),         // 8: user_service.v1.GetMyAccountResponse
-	(*DeleteAccountRequest)(nil),         // 9: user_service.v1.DeleteAccountRequest
-	(*DeleteAccountResponse)(nil),        // 10: user_service.v1.DeleteAccountResponse
-	(*v1.String)(nil),                    // 11: common.v1.String
-	(*v1.RequestMetadata)(nil),           // 12: common.v1.RequestMetadata
-	(*v1.Token)(nil),                     // 13: common.v1.Token
-	(*timestamppb.Timestamp)(nil),        // 14: google.protobuf.Timestamp
-	(*v1.UUID)(nil),                      // 15: common.v1.UUID
-	(*v1.Email)(nil),                     // 16: common.v1.Email
+	(XHeader)(0),                         // 2: user_service.v1.XHeader
+	(*GenerateScopedTokenRequest)(nil),   // 3: user_service.v1.GenerateScopedTokenRequest
+	(*GenerateScopedTokenResponse)(nil),  // 4: user_service.v1.GenerateScopedTokenResponse
+	(*ChangePasswordRequest)(nil),        // 5: user_service.v1.ChangePasswordRequest
+	(*ChangePasswordResponse)(nil),       // 6: user_service.v1.ChangePasswordResponse
+	(*GetMyAccountRequest)(nil),          // 7: user_service.v1.GetMyAccountRequest
+	(*GetMyAccountSecurityResponse)(nil), // 8: user_service.v1.GetMyAccountSecurityResponse
+	(*GetMyAccountResponse)(nil),         // 9: user_service.v1.GetMyAccountResponse
+	(*DeleteAccountRequest)(nil),         // 10: user_service.v1.DeleteAccountRequest
+	(*DeleteAccountResponse)(nil),        // 11: user_service.v1.DeleteAccountResponse
+	(*v1.String)(nil),                    // 12: common.v1.String
+	(*v1.RequestMetadata)(nil),           // 13: common.v1.RequestMetadata
+	(*v1.Token)(nil),                     // 14: common.v1.Token
+	(*timestamppb.Timestamp)(nil),        // 15: google.protobuf.Timestamp
+	(*v1.UUID)(nil),                      // 16: common.v1.UUID
+	(*v1.Email)(nil),                     // 17: common.v1.Email
 }
 var file_user_service_v1_account_proto_depIdxs = []int32{
-	0,  // 0: user_service.v1.GenerateScopedTokenRequest.scope:type_name -> user_service.v1.ScopedActions
+	0,  // 0: user_service.v1.GenerateScopedTokenRequest.scope:type_name -> user_service.v1.ScopedAction
 	1,  // 1: user_service.v1.GenerateScopedTokenRequest.auth_type:type_name -> user_service.v1.AuthType
-	11, // 2: user_service.v1.GenerateScopedTokenRequest.value:type_name -> common.v1.String
-	12, // 3: user_service.v1.GenerateScopedTokenRequest.metadata:type_name -> common.v1.RequestMetadata
-	13, // 4: user_service.v1.GenerateScopedTokenResponse.token:type_name -> common.v1.Token
-	11, // 5: user_service.v1.ChangePasswordRequest.token:type_name -> common.v1.String
-	12, // 6: user_service.v1.ChangePasswordRequest.metadata:type_name -> common.v1.RequestMetadata
-	12, // 7: user_service.v1.GetMyAccountRequest.metadata:type_name -> common.v1.RequestMetadata
-	14, // 8: user_service.v1.GetMyAccountSecurityResponse.email_verified_at:type_name -> google.protobuf.Timestamp
-	14, // 9: user_service.v1.GetMyAccountSecurityResponse.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
-	15, // 10: user_service.v1.GetMyAccountResponse.id:type_name -> common.v1.UUID
-	16, // 11: user_service.v1.GetMyAccountResponse.email:type_name -> common.v1.Email
-	7,  // 12: user_service.v1.GetMyAccountResponse.security:type_name -> user_service.v1.GetMyAccountSecurityResponse
-	14, // 13: user_service.v1.GetMyAccountResponse.created_at:type_name -> google.protobuf.Timestamp
-	14, // 14: user_service.v1.GetMyAccountResponse.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 15: user_service.v1.DeleteAccountRequest.token:type_name -> common.v1.String
-	12, // 16: user_service.v1.DeleteAccountRequest.metadata:type_name -> common.v1.RequestMetadata
+	12, // 2: user_service.v1.GenerateScopedTokenRequest.auth:type_name -> common.v1.String
+	13, // 3: user_service.v1.GenerateScopedTokenRequest.metadata:type_name -> common.v1.RequestMetadata
+	14, // 4: user_service.v1.GenerateScopedTokenResponse.token:type_name -> common.v1.Token
+	12, // 5: user_service.v1.ChangePasswordRequest.token:type_name -> common.v1.String
+	13, // 6: user_service.v1.ChangePasswordRequest.metadata:type_name -> common.v1.RequestMetadata
+	13, // 7: user_service.v1.GetMyAccountRequest.metadata:type_name -> common.v1.RequestMetadata
+	15, // 8: user_service.v1.GetMyAccountSecurityResponse.email_verified_at:type_name -> google.protobuf.Timestamp
+	15, // 9: user_service.v1.GetMyAccountSecurityResponse.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
+	16, // 10: user_service.v1.GetMyAccountResponse.id:type_name -> common.v1.UUID
+	17, // 11: user_service.v1.GetMyAccountResponse.email:type_name -> common.v1.Email
+	8,  // 12: user_service.v1.GetMyAccountResponse.security:type_name -> user_service.v1.GetMyAccountSecurityResponse
+	15, // 13: user_service.v1.GetMyAccountResponse.created_at:type_name -> google.protobuf.Timestamp
+	15, // 14: user_service.v1.GetMyAccountResponse.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 15: user_service.v1.DeleteAccountRequest.token:type_name -> common.v1.String
+	13, // 16: user_service.v1.DeleteAccountRequest.metadata:type_name -> common.v1.RequestMetadata
 	17, // [17:17] is the sub-list for method output_type
 	17, // [17:17] is the sub-list for method input_type
 	17, // [17:17] is the sub-list for extension type_name
@@ -740,7 +790,7 @@ func file_user_service_v1_account_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_v1_account_proto_rawDesc), len(file_user_service_v1_account_proto_rawDesc)),
-			NumEnums:      2,
+			NumEnums:      3,
 			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,

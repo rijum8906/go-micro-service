@@ -9,16 +9,16 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservice";
 
 // enum
-enum ScopedActions {
-  SCOPED_ACTIONS_UNSPECIFIED = 0;
+enum ScopedAction {
+  SCOPED_ACTION_UNSPECIFIED = 0;
 
   // Change
-  SCOPED_ACTIONS_CHANGE_PASSWORD = 1;
-  SCOPED_ACTIONS_CHANGE_EMAIL = 2;
+  SCOPED_ACTION_CHANGE_PASSWORD = 1;
+  SCOPED_ACTION_CHANGE_EMAIL = 2;
 
   // Delete
-  SCOPED_ACTIONS_DELETE_ACCOUNT = 3;
-  SCOPED_ACTIONS_DELETE_PROFILE = 4;
+  SCOPED_ACTION_DELETE_ACCOUNT = 3;
+  SCOPED_ACTION_DELETE_PROFILE = 4;
 }
 
 enum AuthType {
@@ -26,11 +26,16 @@ enum AuthType {
   AUTH_TYPE_PASSWORD = 1;
 }
 
+enum XHeader {
+  X_HEADER_UNSPECIFIED = 0;
+  X_HEADER_USER_ID = 1;
+}
+
 // Generate Scoped Token
 message GenerateScopedTokenRequest {
-  ScopedActions scope = 1;
+  ScopedAction scope = 1;
   AuthType auth_type = 2;
-  common.v1.String value = 3 [(buf.validate.field).required = true];
+  common.v1.String auth = 3 [(buf.validate.field).required = true];
   common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
 }
 

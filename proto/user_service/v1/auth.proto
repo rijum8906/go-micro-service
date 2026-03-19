@@ -47,4 +47,6 @@ service AuthService {
   rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
 
   rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+
+  rpc GenerateScopedToken(GenerateScopedTokenRequest) returns (GenerateScopedTokenResponse);
 }

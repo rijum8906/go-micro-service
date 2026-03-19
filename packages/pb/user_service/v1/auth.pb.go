@@ -24,7 +24,8 @@ var File_user_service_v1_auth_proto protoreflect.FileDescriptor
 
 const file_user_service_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser_service/v1/auth.proto\x12\x0fuser_service.v1\x1a\x1duser_service/v1/account.proto\x1a\x1cuser_service/v1/models.proto\x1a\x1duser_service/v1/profile.proto2\xd9\t\n" +
+	"\x1auser_service/v1/auth.proto\x12\x0fuser_service.v1\x1a\x1duser_service/v1/account.proto\x1a\x1cuser_service/v1/models.proto\x1a\x1duser_service/v1/profile.proto2\xcb\n" +
+	"\n" +
 	"\vAuthService\x12G\n" +
 	"\x06Signup\x12\x1e.user_service.v1.SignupRequest\x1a\x1d.user_service.v1.AuthResponse\x12G\n" +
 	"\x06Signin\x12\x1e.user_service.v1.SigninRequest\x1a\x1d.user_service.v1.AuthResponse\x12L\n" +
@@ -38,7 +39,8 @@ const file_user_service_v1_auth_proto_rawDesc = "" +
 	"\fGetMyProfile\x12$.user_service.v1.GetMyProfileRequest\x1a%.user_service.v1.GetMyProfileResponse\x12^\n" +
 	"\rUpdateProfile\x12%.user_service.v1.UpdateProfileRequest\x1a&.user_service.v1.UpdateProfileResponse\x12^\n" +
 	"\rDeleteProfile\x12%.user_service.v1.DeleteProfileRequest\x1a&.user_service.v1.DeleteProfileResponse\x12^\n" +
-	"\rDeleteAccount\x12%.user_service.v1.DeleteAccountRequest\x1a&.user_service.v1.DeleteAccountResponseB\xc0\x01\n" +
+	"\rDeleteAccount\x12%.user_service.v1.DeleteAccountRequest\x1a&.user_service.v1.DeleteAccountResponse\x12p\n" +
+	"\x13GenerateScopedToken\x12+.user_service.v1.GenerateScopedTokenRequest\x1a,.user_service.v1.GenerateScopedTokenResponseB\xc0\x01\n" +
 	"\x13com.user_service.v1B\tAuthProtoP\x01ZEgithub.com/rijum8906/relay/packages/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
 
 var file_user_service_v1_auth_proto_goTypes = []any{
@@ -55,18 +57,20 @@ var file_user_service_v1_auth_proto_goTypes = []any{
 	(*UpdateProfileRequest)(nil),             // 10: user_service.v1.UpdateProfileRequest
 	(*DeleteProfileRequest)(nil),             // 11: user_service.v1.DeleteProfileRequest
 	(*DeleteAccountRequest)(nil),             // 12: user_service.v1.DeleteAccountRequest
-	(*AuthResponse)(nil),                     // 13: user_service.v1.AuthResponse
-	(*SignoutResponse)(nil),                  // 14: user_service.v1.SignoutResponse
-	(*RequestEmailVerificationResponse)(nil), // 15: user_service.v1.RequestEmailVerificationResponse
-	(*VerifyEmailResponse)(nil),              // 16: user_service.v1.VerifyEmailResponse
-	(*RequestPasswordResetResponse)(nil),     // 17: user_service.v1.RequestPasswordResetResponse
-	(*ResetPasswordResponse)(nil),            // 18: user_service.v1.ResetPasswordResponse
-	(*ChangePasswordResponse)(nil),           // 19: user_service.v1.ChangePasswordResponse
-	(*GetMyAccountResponse)(nil),             // 20: user_service.v1.GetMyAccountResponse
-	(*GetMyProfileResponse)(nil),             // 21: user_service.v1.GetMyProfileResponse
-	(*UpdateProfileResponse)(nil),            // 22: user_service.v1.UpdateProfileResponse
-	(*DeleteProfileResponse)(nil),            // 23: user_service.v1.DeleteProfileResponse
-	(*DeleteAccountResponse)(nil),            // 24: user_service.v1.DeleteAccountResponse
+	(*GenerateScopedTokenRequest)(nil),       // 13: user_service.v1.GenerateScopedTokenRequest
+	(*AuthResponse)(nil),                     // 14: user_service.v1.AuthResponse
+	(*SignoutResponse)(nil),                  // 15: user_service.v1.SignoutResponse
+	(*RequestEmailVerificationResponse)(nil), // 16: user_service.v1.RequestEmailVerificationResponse
+	(*VerifyEmailResponse)(nil),              // 17: user_service.v1.VerifyEmailResponse
+	(*RequestPasswordResetResponse)(nil),     // 18: user_service.v1.RequestPasswordResetResponse
+	(*ResetPasswordResponse)(nil),            // 19: user_service.v1.ResetPasswordResponse
+	(*ChangePasswordResponse)(nil),           // 20: user_service.v1.ChangePasswordResponse
+	(*GetMyAccountResponse)(nil),             // 21: user_service.v1.GetMyAccountResponse
+	(*GetMyProfileResponse)(nil),             // 22: user_service.v1.GetMyProfileResponse
+	(*UpdateProfileResponse)(nil),            // 23: user_service.v1.UpdateProfileResponse
+	(*DeleteProfileResponse)(nil),            // 24: user_service.v1.DeleteProfileResponse
+	(*DeleteAccountResponse)(nil),            // 25: user_service.v1.DeleteAccountResponse
+	(*GenerateScopedTokenResponse)(nil),      // 26: user_service.v1.GenerateScopedTokenResponse
 }
 var file_user_service_v1_auth_proto_depIdxs = []int32{
 	0,  // 0: user_service.v1.AuthService.Signup:input_type -> user_service.v1.SignupRequest
@@ -82,21 +86,23 @@ var file_user_service_v1_auth_proto_depIdxs = []int32{
 	10, // 10: user_service.v1.AuthService.UpdateProfile:input_type -> user_service.v1.UpdateProfileRequest
 	11, // 11: user_service.v1.AuthService.DeleteProfile:input_type -> user_service.v1.DeleteProfileRequest
 	12, // 12: user_service.v1.AuthService.DeleteAccount:input_type -> user_service.v1.DeleteAccountRequest
-	13, // 13: user_service.v1.AuthService.Signup:output_type -> user_service.v1.AuthResponse
-	13, // 14: user_service.v1.AuthService.Signin:output_type -> user_service.v1.AuthResponse
-	14, // 15: user_service.v1.AuthService.Signout:output_type -> user_service.v1.SignoutResponse
-	15, // 16: user_service.v1.AuthService.RequestEmailVerfication:output_type -> user_service.v1.RequestEmailVerificationResponse
-	16, // 17: user_service.v1.AuthService.VerifyEmail:output_type -> user_service.v1.VerifyEmailResponse
-	17, // 18: user_service.v1.AuthService.RequestPasswordReset:output_type -> user_service.v1.RequestPasswordResetResponse
-	18, // 19: user_service.v1.AuthService.ResetPassword:output_type -> user_service.v1.ResetPasswordResponse
-	19, // 20: user_service.v1.AuthService.ChangePassword:output_type -> user_service.v1.ChangePasswordResponse
-	20, // 21: user_service.v1.AuthService.GetMyAccount:output_type -> user_service.v1.GetMyAccountResponse
-	21, // 22: user_service.v1.AuthService.GetMyProfile:output_type -> user_service.v1.GetMyProfileResponse
-	22, // 23: user_service.v1.AuthService.UpdateProfile:output_type -> user_service.v1.UpdateProfileResponse
-	23, // 24: user_service.v1.AuthService.DeleteProfile:output_type -> user_service.v1.DeleteProfileResponse
-	24, // 25: user_service.v1.AuthService.DeleteAccount:output_type -> user_service.v1.DeleteAccountResponse
-	13, // [13:26] is the sub-list for method output_type
-	0,  // [0:13] is the sub-list for method input_type
+	13, // 13: user_service.v1.AuthService.GenerateScopedToken:input_type -> user_service.v1.GenerateScopedTokenRequest
+	14, // 14: user_service.v1.AuthService.Signup:output_type -> user_service.v1.AuthResponse
+	14, // 15: user_service.v1.AuthService.Signin:output_type -> user_service.v1.AuthResponse
+	15, // 16: user_service.v1.AuthService.Signout:output_type -> user_service.v1.SignoutResponse
+	16, // 17: user_service.v1.AuthService.RequestEmailVerfication:output_type -> user_service.v1.RequestEmailVerificationResponse
+	17, // 18: user_service.v1.AuthService.VerifyEmail:output_type -> user_service.v1.VerifyEmailResponse
+	18, // 19: user_service.v1.AuthService.RequestPasswordReset:output_type -> user_service.v1.RequestPasswordResetResponse
+	19, // 20: user_service.v1.AuthService.ResetPassword:output_type -> user_service.v1.ResetPasswordResponse
+	20, // 21: user_service.v1.AuthService.ChangePassword:output_type -> user_service.v1.ChangePasswordResponse
+	21, // 22: user_service.v1.AuthService.GetMyAccount:output_type -> user_service.v1.GetMyAccountResponse
+	22, // 23: user_service.v1.AuthService.GetMyProfile:output_type -> user_service.v1.GetMyProfileResponse
+	23, // 24: user_service.v1.AuthService.UpdateProfile:output_type -> user_service.v1.UpdateProfileResponse
+	24, // 25: user_service.v1.AuthService.DeleteProfile:output_type -> user_service.v1.DeleteProfileResponse
+	25, // 26: user_service.v1.AuthService.DeleteAccount:output_type -> user_service.v1.DeleteAccountResponse
+	26, // 27: user_service.v1.AuthService.GenerateScopedToken:output_type -> user_service.v1.GenerateScopedTokenResponse
+	14, // [14:28] is the sub-list for method output_type
+	0,  // [0:14] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
