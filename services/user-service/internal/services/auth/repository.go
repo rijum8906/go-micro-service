@@ -52,7 +52,7 @@ func (r *authRepository) RevokeSession(ctx context.Context, id pgtype.UUID, auth
 }
 
 func (r *authRepository) RevokeAllSessions(ctx context.Context, authzMetadata request.AuthzMetadata) *errors.AppError {
-	err := r.q.RevokeAllAccountSessions(ctx, authzMetadata.UserID)
+	_, err := r.q.RevokeAllAccountSessions(ctx, authzMetadata.UserID)
 	if err != nil {
 		return errors.ErrInternal.WithInternal(err)
 	}

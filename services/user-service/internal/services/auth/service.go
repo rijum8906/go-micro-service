@@ -91,11 +91,29 @@ func (s *authService) Signup(ctx context.Context, req *authv1.SignupRequest) (*u
 }
 
 func (s *authService) Logout(ctx context.Context, req *authv1.LogoutRequest, auth request.AuthzMetadata) (*authv1.LogoutResponse, *errors.AppError) {
-	return nil, nil
+	session, appErr := s.repo.authRepo.GetSessionByRefreshToken(ctx, auth.RefreshToken, auth)
+	if appErr != nil {
+		return nil, appErr
+	}
+	err := s.repo.authRepo.RevokeSession(ctx, session.ID, auth)
+	if err != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
+
+	return &authv1.LogoutResponse{
+		Success: true,
+	}, nil
 }
 
 func (s *authService) LogoutAllDevices(ctx context.Context, req *authv1.LogoutAllDeviceRequest, auth request.AuthzMetadata) (*authv1.LogoutAllDeviceResponse, *errors.AppError) {
-	return nil, nil
+	res, err := s.q.RevokeAllAccountSessions(ctx, auth.UserID)
+	if err != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
+
+	return &authv1.LogoutAllDeviceResponse{
+		RevokedCount: uint32(res.RowsAffected()),
+	}, nil
 }
 
 func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) *errors.AppError {
@@ -123,9 +141,23 @@ func (s *authService) GetSessions(ctx context.Context, req *authv1.GetSessionsRe
 }
 
 func (s *authService) RevokeSession(ctx context.Context, req *authv1.RevokeSessionRequest, authzMetadata request.AuthzMetadata) (*authv1.RevokeSessionResponse, *errors.AppError) {
-	return nil, nil
+	err := s.q.RevokeSession(ctx, authzMetadata.UserID)
+	if err != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
+
+	return &authv1.RevokeSessionResponse{
+		Success: true,
+	}, nil
 }
 
 func (s *authService) RevokeAllSessions(ctx context.Context, req *authv1.RevokeAllSessionsRequest, authzMetadata request.AuthzMetadata) (*authv1.RevokeAllSessionsResponse, *errors.AppError) {
-	return nil, nil
+	res, err := s.q.RevokeAllAccountSessions(ctx, authzMetadata.UserID)
+	if err != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
+
+	return &authv1.RevokeAllSessionsResponse{
+		RevokedCount: uint32(res.RowsAffected()),
+	}, nil
 }

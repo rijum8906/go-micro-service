@@ -19,7 +19,8 @@ type RequestMetadata struct {
 }
 
 type AuthzMetadata struct {
-	UserID pgtype.UUID `json:"userId" binding:"required"`
+	UserID       pgtype.UUID `json:"userId" binding:"required"`
+	RefreshToken string      `json:"refreshToken" binding:"required"`
 }
 
 type Authorization struct {

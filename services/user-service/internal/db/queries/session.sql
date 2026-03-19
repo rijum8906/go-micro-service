@@ -14,12 +14,20 @@ SELECT * FROM sessions WHERE account_id = $1 ORDER BY last_login_at DESC LIMIT 1
 -- name: GetSessionsByAccountID :many
 SELECT * FROM sessions WHERE account_id = $1 ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
 
+-- name: GetActiveSessions :many
+SELECT * FROM sessions WHERE account_id = $1 AND is_revoked = FALSE ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
+
 -- name: RevokeSession :exec
 UPDATE sessions 
 SET is_revoked = TRUE, updated_at = NOW() 
 WHERE id = $1;
 
--- name: RevokeAllAccountSessions :exec
+-- name: RevokeSessionByRefreshToken :exec
+UPDATE sessions 
+SET is_revoked = TRUE, updated_at = NOW() 
+WHERE refresh_token = $1;
+
+-- name: RevokeAllAccountSessions :execresult
 UPDATE sessions 
 SET is_revoked = TRUE, updated_at = NOW() 
 WHERE account_id = $1 AND is_revoked = FALSE;

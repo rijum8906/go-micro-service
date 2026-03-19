@@ -8,6 +8,7 @@ package db
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -70,6 +71,48 @@ DELETE FROM sessions WHERE id = $1
 func (q *Queries) DeleteSession(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteSession, id)
 	return err
+}
+
+const getActiveSessions = `-- name: GetActiveSessions :many
+SELECT id, account_id, refresh_token, user_agent, ip_addr, device_id, last_login_at, is_revoked, expires_at, created_at, updated_at FROM sessions WHERE account_id = $1 AND is_revoked = FALSE ORDER BY last_login_at DESC LIMIT $2 OFFSET $3
+`
+
+type GetActiveSessionsParams struct {
+	AccountID pgtype.UUID `json:"accountId"`
+	Limit     int32       `json:"limit"`
+	Offset    int32       `json:"offset"`
+}
+
+func (q *Queries) GetActiveSessions(ctx context.Context, arg GetActiveSessionsParams) ([]Session, error) {
+	rows, err := q.db.Query(ctx, getActiveSessions, arg.AccountID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Session
+	for rows.Next() {
+		var i Session
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.RefreshToken,
+			&i.UserAgent,
+			&i.IpAddr,
+			&i.DeviceID,
+			&i.LastLoginAt,
+			&i.IsRevoked,
+			&i.ExpiresAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getSessionByAccountID = `-- name: GetSessionByAccountID :one
@@ -160,15 +203,14 @@ func (q *Queries) GetSessionsByAccountID(ctx context.Context, arg GetSessionsByA
 	return items, nil
 }
 
-const revokeAllAccountSessions = `-- name: RevokeAllAccountSessions :exec
+const revokeAllAccountSessions = `-- name: RevokeAllAccountSessions :execresult
 UPDATE sessions 
 SET is_revoked = TRUE, updated_at = NOW() 
 WHERE account_id = $1 AND is_revoked = FALSE
 `
 
-func (q *Queries) RevokeAllAccountSessions(ctx context.Context, accountID pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, revokeAllAccountSessions, accountID)
-	return err
+func (q *Queries) RevokeAllAccountSessions(ctx context.Context, accountID pgtype.UUID) (pgconn.CommandTag, error) {
+	return q.db.Exec(ctx, revokeAllAccountSessions, accountID)
 }
 
 const revokeSession = `-- name: RevokeSession :exec
@@ -179,6 +221,17 @@ WHERE id = $1
 
 func (q *Queries) RevokeSession(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, revokeSession, id)
+	return err
+}
+
+const revokeSessionByRefreshToken = `-- name: RevokeSessionByRefreshToken :exec
+UPDATE sessions 
+SET is_revoked = TRUE, updated_at = NOW() 
+WHERE refresh_token = $1
+`
+
+func (q *Queries) RevokeSessionByRefreshToken(ctx context.Context, refreshToken string) error {
+	_, err := q.db.Exec(ctx, revokeSessionByRefreshToken, refreshToken)
 	return err
 }
 
