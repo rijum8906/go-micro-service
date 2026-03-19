@@ -31,29 +31,6 @@ enum XHeader {
   X_HEADER_USER_ID = 1;
 }
 
-// Generate Scoped Token
-message GenerateScopedTokenRequest {
-  ScopedAction scope = 1;
-  AuthType auth_type = 2;
-  common.v1.String auth = 3 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
-}
-
-message GenerateScopedTokenResponse {
-  common.v1.Token token = 1 [(buf.validate.field).required = true];
-}
-
-// Change Password
-message ChangePasswordRequest {
-  common.v1.String token = 1 [(buf.validate.field).required = true];
-  common.v1.Password new_password = 2 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
-}
-
-message ChangePasswordResponse {
-  bool success = 1;
-}
-
 // Get My Account
 message GetMyAccountRequest {
   common.v1.RequestMetadata metadata = 1 [(buf.validate.field).required = true];
