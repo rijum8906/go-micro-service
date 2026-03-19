@@ -202,8 +202,7 @@ function SignUpPage() {
 
           <p className="text-xs text-center mt-5 text-[#262526]/40">
             Already have an account?{' '}
-            <Link
-              to="/auth/signin" className="text-[#DD9569] hover:opacity-80 font-medium transition-opacity">
+            <Link to="/auth/signin" style={{ color: '#C97D4E' }} className="hover:opacity-80 font-medium transition-opacity">
               Sign in
             </Link>
           </p>
