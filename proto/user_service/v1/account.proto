@@ -46,7 +46,8 @@ message GenerateScopedTokenResponse {
 // Change Password
 message ChangePasswordRequest {
   common.v1.String token = 1 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
+  common.v1.Password new_password = 2 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
 }
 
 message ChangePasswordResponse {

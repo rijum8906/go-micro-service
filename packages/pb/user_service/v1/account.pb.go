@@ -291,7 +291,8 @@ func (x *GenerateScopedTokenResponse) GetToken() *v1.Token {
 type ChangePasswordRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Token         *v1.String             `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	Metadata      *v1.RequestMetadata    `protobuf:"bytes,4,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	NewPassword   *v1.Password           `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
+	Metadata      *v1.RequestMetadata    `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -329,6 +330,13 @@ func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
 func (x *ChangePasswordRequest) GetToken() *v1.String {
 	if x != nil {
 		return x.Token
+	}
+	return nil
+}
+
+func (x *ChangePasswordRequest) GetNewPassword() *v1.Password {
+	if x != nil {
+		return x.NewPassword
 	}
 	return nil
 }
@@ -681,10 +689,11 @@ const file_user_service_v1_account_proto_rawDesc = "" +
 	"\x04auth\x18\x03 \x01(\v2\x11.common.v1.StringB\x06\xbaH\x03\xc8\x01\x01R\x04auth\x12>\n" +
 	"\bmetadata\x18\x04 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"M\n" +
 	"\x1bGenerateScopedTokenResponse\x12.\n" +
-	"\x05token\x18\x01 \x01(\v2\x10.common.v1.TokenB\x06\xbaH\x03\xc8\x01\x01R\x05token\"\x88\x01\n" +
+	"\x05token\x18\x01 \x01(\v2\x10.common.v1.TokenB\x06\xbaH\x03\xc8\x01\x01R\x05token\"\xc8\x01\n" +
 	"\x15ChangePasswordRequest\x12/\n" +
 	"\x05token\x18\x01 \x01(\v2\x11.common.v1.StringB\x06\xbaH\x03\xc8\x01\x01R\x05token\x12>\n" +
-	"\bmetadata\x18\x04 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"2\n" +
+	"\fnew_password\x18\x02 \x01(\v2\x13.common.v1.PasswordB\x06\xbaH\x03\xc8\x01\x01R\vnewPassword\x12>\n" +
+	"\bmetadata\x18\x03 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"2\n" +
 	"\x16ChangePasswordResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"U\n" +
 	"\x13GetMyAccountRequest\x12>\n" +
@@ -751,9 +760,10 @@ var file_user_service_v1_account_proto_goTypes = []any{
 	(*v1.String)(nil),                    // 12: common.v1.String
 	(*v1.RequestMetadata)(nil),           // 13: common.v1.RequestMetadata
 	(*v1.Token)(nil),                     // 14: common.v1.Token
-	(*timestamppb.Timestamp)(nil),        // 15: google.protobuf.Timestamp
-	(*v1.UUID)(nil),                      // 16: common.v1.UUID
-	(*v1.Email)(nil),                     // 17: common.v1.Email
+	(*v1.Password)(nil),                  // 15: common.v1.Password
+	(*timestamppb.Timestamp)(nil),        // 16: google.protobuf.Timestamp
+	(*v1.UUID)(nil),                      // 17: common.v1.UUID
+	(*v1.Email)(nil),                     // 18: common.v1.Email
 }
 var file_user_service_v1_account_proto_depIdxs = []int32{
 	0,  // 0: user_service.v1.GenerateScopedTokenRequest.scope:type_name -> user_service.v1.ScopedAction
@@ -762,22 +772,23 @@ var file_user_service_v1_account_proto_depIdxs = []int32{
 	13, // 3: user_service.v1.GenerateScopedTokenRequest.metadata:type_name -> common.v1.RequestMetadata
 	14, // 4: user_service.v1.GenerateScopedTokenResponse.token:type_name -> common.v1.Token
 	12, // 5: user_service.v1.ChangePasswordRequest.token:type_name -> common.v1.String
-	13, // 6: user_service.v1.ChangePasswordRequest.metadata:type_name -> common.v1.RequestMetadata
-	13, // 7: user_service.v1.GetMyAccountRequest.metadata:type_name -> common.v1.RequestMetadata
-	15, // 8: user_service.v1.GetMyAccountSecurityResponse.email_verified_at:type_name -> google.protobuf.Timestamp
-	15, // 9: user_service.v1.GetMyAccountSecurityResponse.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
-	16, // 10: user_service.v1.GetMyAccountResponse.id:type_name -> common.v1.UUID
-	17, // 11: user_service.v1.GetMyAccountResponse.email:type_name -> common.v1.Email
-	8,  // 12: user_service.v1.GetMyAccountResponse.security:type_name -> user_service.v1.GetMyAccountSecurityResponse
-	15, // 13: user_service.v1.GetMyAccountResponse.created_at:type_name -> google.protobuf.Timestamp
-	15, // 14: user_service.v1.GetMyAccountResponse.updated_at:type_name -> google.protobuf.Timestamp
-	12, // 15: user_service.v1.DeleteAccountRequest.token:type_name -> common.v1.String
-	13, // 16: user_service.v1.DeleteAccountRequest.metadata:type_name -> common.v1.RequestMetadata
-	17, // [17:17] is the sub-list for method output_type
-	17, // [17:17] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	15, // 6: user_service.v1.ChangePasswordRequest.new_password:type_name -> common.v1.Password
+	13, // 7: user_service.v1.ChangePasswordRequest.metadata:type_name -> common.v1.RequestMetadata
+	13, // 8: user_service.v1.GetMyAccountRequest.metadata:type_name -> common.v1.RequestMetadata
+	16, // 9: user_service.v1.GetMyAccountSecurityResponse.email_verified_at:type_name -> google.protobuf.Timestamp
+	16, // 10: user_service.v1.GetMyAccountSecurityResponse.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
+	17, // 11: user_service.v1.GetMyAccountResponse.id:type_name -> common.v1.UUID
+	18, // 12: user_service.v1.GetMyAccountResponse.email:type_name -> common.v1.Email
+	8,  // 13: user_service.v1.GetMyAccountResponse.security:type_name -> user_service.v1.GetMyAccountSecurityResponse
+	16, // 14: user_service.v1.GetMyAccountResponse.created_at:type_name -> google.protobuf.Timestamp
+	16, // 15: user_service.v1.GetMyAccountResponse.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 16: user_service.v1.DeleteAccountRequest.token:type_name -> common.v1.String
+	13, // 17: user_service.v1.DeleteAccountRequest.metadata:type_name -> common.v1.RequestMetadata
+	18, // [18:18] is the sub-list for method output_type
+	18, // [18:18] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_user_service_v1_account_proto_init() }
