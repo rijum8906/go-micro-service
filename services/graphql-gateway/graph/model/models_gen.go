@@ -11,6 +11,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type AccountSecurity struct {
+	IsEmailVerified    bool    `json:"isEmailVerified"`
+	EmailVerifiedAt    *string `json:"emailVerifiedAt,omitempty"`
+	TwoFactorEnabled   bool    `json:"twoFactorEnabled"`
+	TwoFactorEnabledAt *string `json:"twoFactorEnabledAt,omitempty"`
+}
+
 type AuthAccount struct {
 	ID    uuid.UUID `json:"id"`
 	Email string    `json:"email"`
@@ -35,14 +42,36 @@ type AuthToken struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+type ChangePasswordInput struct {
+	Token       string         `json:"token"`
+	NewPassword string         `json:"newPassword"`
+	Metadata    *MetadataInput `json:"metadata"`
+}
+
 type DateRangeInput struct {
 	StartDate string `json:"startDate"`
 	EndDate   string `json:"endDate"`
 }
 
+type DeleteAccountInput struct {
+	Token    string         `json:"token"`
+	Metadata *MetadataInput `json:"metadata"`
+}
+
 type Error struct {
 	Message string  `json:"message"`
 	Field   *string `json:"field,omitempty"`
+}
+
+type GenerateScopedTokenInput struct {
+	Scope    ScopedAction   `json:"scope"`
+	AuthType AuthType       `json:"authType"`
+	Auth     string         `json:"auth"`
+	Metadata *MetadataInput `json:"metadata"`
+}
+
+type GetMyAccountInput struct {
+	Metadata *MetadataInput `json:"metadata"`
 }
 
 type Metadata struct {
@@ -58,6 +87,14 @@ type MetadataInput struct {
 }
 
 type Mutation struct {
+}
+
+type MyAccount struct {
+	ID        uuid.UUID        `json:"id"`
+	Email     string           `json:"email"`
+	Security  *AccountSecurity `json:"security,omitempty"`
+	CreatedAt string           `json:"createdAt"`
+	UpdatedAt string           `json:"updatedAt"`
 }
 
 type PageInfo struct {
@@ -125,6 +162,61 @@ type Token struct {
 type VerifyEmailInput struct {
 	Token    string         `json:"token"`
 	Metadata *MetadataInput `json:"metadata"`
+}
+
+type AuthType string
+
+const (
+	AuthTypeAuthTypeUnspecified AuthType = "AUTH_TYPE_UNSPECIFIED"
+	AuthTypeAuthTypePassword    AuthType = "AUTH_TYPE_PASSWORD"
+)
+
+var AllAuthType = []AuthType{
+	AuthTypeAuthTypeUnspecified,
+	AuthTypeAuthTypePassword,
+}
+
+func (e AuthType) IsValid() bool {
+	switch e {
+	case AuthTypeAuthTypeUnspecified, AuthTypeAuthTypePassword:
+		return true
+	}
+	return false
+}
+
+func (e AuthType) String() string {
+	return string(e)
+}
+
+func (e *AuthType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AuthType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AuthType", str)
+	}
+	return nil
+}
+
+func (e AuthType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AuthType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AuthType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type ContentType string
@@ -247,6 +339,67 @@ func (e DeviceType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type ScopedAction string
+
+const (
+	ScopedActionScopedActionUnspecified    ScopedAction = "SCOPED_ACTION_UNSPECIFIED"
+	ScopedActionScopedActionChangePassword ScopedAction = "SCOPED_ACTION_CHANGE_PASSWORD"
+	ScopedActionScopedActionChangeEmail    ScopedAction = "SCOPED_ACTION_CHANGE_EMAIL"
+	ScopedActionScopedActionDeleteAccount  ScopedAction = "SCOPED_ACTION_DELETE_ACCOUNT"
+	ScopedActionScopedActionDeleteProfile  ScopedAction = "SCOPED_ACTION_DELETE_PROFILE"
+)
+
+var AllScopedAction = []ScopedAction{
+	ScopedActionScopedActionUnspecified,
+	ScopedActionScopedActionChangePassword,
+	ScopedActionScopedActionChangeEmail,
+	ScopedActionScopedActionDeleteAccount,
+	ScopedActionScopedActionDeleteProfile,
+}
+
+func (e ScopedAction) IsValid() bool {
+	switch e {
+	case ScopedActionScopedActionUnspecified, ScopedActionScopedActionChangePassword, ScopedActionScopedActionChangeEmail, ScopedActionScopedActionDeleteAccount, ScopedActionScopedActionDeleteProfile:
+		return true
+	}
+	return false
+}
+
+func (e ScopedAction) String() string {
+	return string(e)
+}
+
+func (e *ScopedAction) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ScopedAction(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ScopedAction", str)
+	}
+	return nil
+}
+
+func (e ScopedAction) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ScopedAction) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ScopedAction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type SortOrder string
 
 const (
@@ -358,6 +511,61 @@ func (e *TimeRange) UnmarshalJSON(b []byte) error {
 }
 
 func (e TimeRange) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type XHeader string
+
+const (
+	XHeaderXHeaderUnspecified XHeader = "X_HEADER_UNSPECIFIED"
+	XHeaderXHeaderUserID      XHeader = "X_HEADER_USER_ID"
+)
+
+var AllXHeader = []XHeader{
+	XHeaderXHeaderUnspecified,
+	XHeaderXHeaderUserID,
+}
+
+func (e XHeader) IsValid() bool {
+	switch e {
+	case XHeaderXHeaderUnspecified, XHeaderXHeaderUserID:
+		return true
+	}
+	return false
+}
+
+func (e XHeader) String() string {
+	return string(e)
+}
+
+func (e *XHeader) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = XHeader(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid XHeader", str)
+	}
+	return nil
+}
+
+func (e XHeader) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *XHeader) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e XHeader) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -27,6 +27,50 @@ import (
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputChangePasswordInput(ctx context.Context, obj any) (model.ChangePasswordInput, error) {
+	var it model.ChangePasswordInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"token", "newPassword", "metadata"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "token":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Token = data
+		case "newPassword":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NewPassword = data
+		case "metadata":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("metadata"))
+			data, err := ec.unmarshalNMetadataInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMetadataInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Metadata = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputDateRangeInput(ctx context.Context, obj any) (model.DateRangeInput, error) {
 	var it model.DateRangeInput
 	if obj == nil {
@@ -59,6 +103,124 @@ func (ec *executionContext) unmarshalInputDateRangeInput(ctx context.Context, ob
 				return it, err
 			}
 			it.EndDate = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDeleteAccountInput(ctx context.Context, obj any) (model.DeleteAccountInput, error) {
+	var it model.DeleteAccountInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"token", "metadata"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "token":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Token = data
+		case "metadata":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("metadata"))
+			data, err := ec.unmarshalNMetadataInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMetadataInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Metadata = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.Context, obj any) (model.GenerateScopedTokenInput, error) {
+	var it model.GenerateScopedTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scope", "authType", "auth", "metadata"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scope":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalNScopedAction2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedAction(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		case "authType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authType"))
+			data, err := ec.unmarshalNAuthType2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthType = data
+		case "auth":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("auth"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Auth = data
+		case "metadata":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("metadata"))
+			data, err := ec.unmarshalNMetadataInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMetadataInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Metadata = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGetMyAccountInput(ctx context.Context, obj any) (model.GetMyAccountInput, error) {
+	var it model.GetMyAccountInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"metadata"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "metadata":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("metadata"))
+			data, err := ec.unmarshalNMetadataInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMetadataInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Metadata = data
 		}
 	}
 	return it, nil
@@ -464,6 +626,26 @@ func (ec *executionContext) unmarshalInputVerifyEmailInput(ctx context.Context, 
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) unmarshalNChangePasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐChangePasswordInput(ctx context.Context, v any) (model.ChangePasswordInput, error) {
+	res, err := ec.unmarshalInputChangePasswordInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNDeleteAccountInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐDeleteAccountInput(ctx context.Context, v any) (model.DeleteAccountInput, error) {
+	res, err := ec.unmarshalInputDeleteAccountInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNGenerateScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGenerateScopedTokenInput(ctx context.Context, v any) (model.GenerateScopedTokenInput, error) {
+	res, err := ec.unmarshalInputGenerateScopedTokenInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNGetMyAccountInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetMyAccountInput(ctx context.Context, v any) (model.GetMyAccountInput, error) {
+	res, err := ec.unmarshalInputGetMyAccountInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
 
 func (ec *executionContext) unmarshalNMetadataInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMetadataInput(ctx context.Context, v any) (*model.MetadataInput, error) {
 	res, err := ec.unmarshalInputMetadataInput(ctx, v)

@@ -1,0 +1,32 @@
+enum ScopedAction {
+  SCOPED_ACTION_UNSPECIFIED
+  SCOPED_ACTION_CHANGE_PASSWORD
+  SCOPED_ACTION_CHANGE_EMAIL
+  SCOPED_ACTION_DELETE_ACCOUNT
+  SCOPED_ACTION_DELETE_PROFILE
+}
+
+enum AuthType {
+  AUTH_TYPE_UNSPECIFIED
+  AUTH_TYPE_PASSWORD
+}
+
+enum XHeader {
+  X_HEADER_UNSPECIFIED
+  X_HEADER_USER_ID
+}
+
+type AccountSecurity {
+  isEmailVerified: Boolean!
+  emailVerifiedAt: DateTime
+  twoFactorEnabled: Boolean!
+  twoFactorEnabledAt: DateTime
+}
+
+type MyAccount {
+  id: UUID!
+  email: Email!
+  security: AccountSecurity
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}

@@ -1,0 +1,21 @@
+input GetMyAccountInput {
+  metadata: MetadataInput!
+}
+
+input GenerateScopedTokenInput {
+  scope: ScopedAction!
+  authType: AuthType!
+  auth: String!
+  metadata: MetadataInput!
+}
+
+input ChangePasswordInput {
+  token: String!
+  newPassword: String!
+  metadata: MetadataInput!
+}
+
+input DeleteAccountInput {
+  token: String!
+  metadata: MetadataInput!
+}

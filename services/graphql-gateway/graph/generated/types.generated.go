@@ -28,6 +28,122 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _AccountSecurity_isEmailVerified(ctx context.Context, field graphql.CollectedField, obj *model.AccountSecurity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AccountSecurity_isEmailVerified,
+		func(ctx context.Context) (any, error) {
+			return obj.IsEmailVerified, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AccountSecurity_isEmailVerified(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AccountSecurity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AccountSecurity_emailVerifiedAt(ctx context.Context, field graphql.CollectedField, obj *model.AccountSecurity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AccountSecurity_emailVerifiedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.EmailVerifiedAt, nil
+		},
+		nil,
+		ec.marshalODateTime2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_AccountSecurity_emailVerifiedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AccountSecurity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AccountSecurity_twoFactorEnabled(ctx context.Context, field graphql.CollectedField, obj *model.AccountSecurity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AccountSecurity_twoFactorEnabled,
+		func(ctx context.Context) (any, error) {
+			return obj.TwoFactorEnabled, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AccountSecurity_twoFactorEnabled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AccountSecurity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AccountSecurity_twoFactorEnabledAt(ctx context.Context, field graphql.CollectedField, obj *model.AccountSecurity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AccountSecurity_twoFactorEnabledAt,
+		func(ctx context.Context) (any, error) {
+			return obj.TwoFactorEnabledAt, nil
+		},
+		nil,
+		ec.marshalODateTime2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_AccountSecurity_twoFactorEnabledAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AccountSecurity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AuthAccount_id(ctx context.Context, field graphql.CollectedField, obj *model.AuthAccount) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -603,6 +719,161 @@ func (ec *executionContext) fieldContext_Metadata_timestamp(_ context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _MyAccount_id(ctx context.Context, field graphql.CollectedField, obj *model.MyAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyAccount_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNUUID2githubᚗcomᚋgoogleᚋuuidᚐUUID,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyAccount_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type UUID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MyAccount_email(ctx context.Context, field graphql.CollectedField, obj *model.MyAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyAccount_email,
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
+		nil,
+		ec.marshalNEmail2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyAccount_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Email does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MyAccount_security(ctx context.Context, field graphql.CollectedField, obj *model.MyAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyAccount_security,
+		func(ctx context.Context) (any, error) {
+			return obj.Security, nil
+		},
+		nil,
+		ec.marshalOAccountSecurity2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAccountSecurity,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyAccount_security(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "isEmailVerified":
+				return ec.fieldContext_AccountSecurity_isEmailVerified(ctx, field)
+			case "emailVerifiedAt":
+				return ec.fieldContext_AccountSecurity_emailVerifiedAt(ctx, field)
+			case "twoFactorEnabled":
+				return ec.fieldContext_AccountSecurity_twoFactorEnabled(ctx, field)
+			case "twoFactorEnabledAt":
+				return ec.fieldContext_AccountSecurity_twoFactorEnabledAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AccountSecurity", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MyAccount_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.MyAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyAccount_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNDateTime2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyAccount_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MyAccount_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.MyAccount) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MyAccount_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNDateTime2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MyAccount_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MyAccount",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type DateTime does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -817,6 +1088,54 @@ func (ec *executionContext) fieldContext_Token_expiresAt(_ context.Context, fiel
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var accountSecurityImplementors = []string{"AccountSecurity"}
+
+func (ec *executionContext) _AccountSecurity(ctx context.Context, sel ast.SelectionSet, obj *model.AccountSecurity) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, accountSecurityImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AccountSecurity")
+		case "isEmailVerified":
+			out.Values[i] = ec._AccountSecurity_isEmailVerified(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "emailVerifiedAt":
+			out.Values[i] = ec._AccountSecurity_emailVerifiedAt(ctx, field, obj)
+		case "twoFactorEnabled":
+			out.Values[i] = ec._AccountSecurity_twoFactorEnabled(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "twoFactorEnabledAt":
+			out.Values[i] = ec._AccountSecurity_twoFactorEnabledAt(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var authAccountImplementors = []string{"AuthAccount"}
 
@@ -1099,6 +1418,62 @@ func (ec *executionContext) _Metadata(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
+var myAccountImplementors = []string{"MyAccount"}
+
+func (ec *executionContext) _MyAccount(ctx context.Context, sel ast.SelectionSet, obj *model.MyAccount) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, myAccountImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MyAccount")
+		case "id":
+			out.Values[i] = ec._MyAccount_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "email":
+			out.Values[i] = ec._MyAccount_email(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "security":
+			out.Values[i] = ec._MyAccount_security(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._MyAccount_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._MyAccount_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var pageInfoImplementors = []string{"PageInfo"}
 
 func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
@@ -1294,6 +1669,30 @@ func (ec *executionContext) marshalNAuthToken2ᚖgithubᚗcomᚋrijum8906ᚋrela
 	return ec._AuthToken(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNAuthType2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthType(ctx context.Context, v any) (model.AuthType, error) {
+	var res model.AuthType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAuthType2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthType(ctx context.Context, sel ast.SelectionSet, v model.AuthType) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNMyAccount2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMyAccount(ctx context.Context, sel ast.SelectionSet, v model.MyAccount) graphql.Marshaler {
+	return ec._MyAccount(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMyAccount2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMyAccount(ctx context.Context, sel ast.SelectionSet, v *model.MyAccount) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MyAccount(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v model.Response) graphql.Marshaler {
 	return ec._Response(ctx, sel, &v)
 }
@@ -1306,6 +1705,37 @@ func (ec *executionContext) marshalNResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelay
 		return graphql.Null
 	}
 	return ec._Response(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNScopedAction2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedAction(ctx context.Context, v any) (model.ScopedAction, error) {
+	var res model.ScopedAction
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNScopedAction2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedAction(ctx context.Context, sel ast.SelectionSet, v model.ScopedAction) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNToken2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐToken(ctx context.Context, sel ast.SelectionSet, v model.Token) graphql.Marshaler {
+	return ec._Token(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐToken(ctx context.Context, sel ast.SelectionSet, v *model.Token) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Token(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAccountSecurity2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAccountSecurity(ctx context.Context, sel ast.SelectionSet, v *model.AccountSecurity) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AccountSecurity(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

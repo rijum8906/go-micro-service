@@ -8,12 +8,52 @@ package resolver
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/graphql"
-	commonv1 "github.com/rijum8906/relay/packages/pb/common/v1"
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 )
+
+// GenerateScopedToken is the resolver for the generateScopedToken field.
+func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input model.GenerateScopedTokenInput) (*model.Token, error) {
+	resp, err := r.UserClient.GenerateScopedToken(withAuthzMetadata(ctx), &user_servicev1.GenerateScopedTokenRequest{
+		Scope:    scopedActionToProto(input.Scope),
+		AuthType: authTypeToProto(input.AuthType),
+		Auth:     utils.NewString(input.Auth),
+		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.MapToken(resp.GetToken()), nil
+}
+
+// ChangePassword is the resolver for the changePassword field.
+func (r *mutationResolver) ChangePassword(ctx context.Context, input model.ChangePasswordInput) (*model.Response, error) {
+	resp, err := r.UserClient.ChangePassword(withAuthzMetadata(ctx), &user_servicev1.ChangePasswordRequest{
+		Token:       utils.NewString(input.Token),
+		NewPassword: utils.NewPassword(input.NewPassword),
+		Metadata:    requestMetadataFromContext(ctx, input.Metadata),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.MapResponse(resp.GetSuccess()), nil
+}
+
+// DeleteAccount is the resolver for the deleteAccount field.
+func (r *mutationResolver) DeleteAccount(ctx context.Context, input model.DeleteAccountInput) (*model.Response, error) {
+	resp, err := r.UserClient.DeleteAccount(withAuthzMetadata(ctx), &user_servicev1.DeleteAccountRequest{
+		Token:    utils.NewString(input.Token),
+		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.MapResponse(resp.GetSuccess()), nil
+}
 
 // Signup is the resolver for the signup field.
 func (r *mutationResolver) Signup(ctx context.Context, input model.SignupInput) (*model.AuthPayload, error) {
@@ -47,7 +87,7 @@ func (r *mutationResolver) Signin(ctx context.Context, input model.SigninInput) 
 
 // Signout is the resolver for the signout field.
 func (r *mutationResolver) Signout(ctx context.Context, input model.SignoutInput) (*model.Response, error) {
-	resp, err := r.UserClient.Signout(ctx, &user_servicev1.SignoutRequest{
+	resp, err := r.UserClient.Signout(withAuthzMetadata(ctx), &user_servicev1.SignoutRequest{
 		Metadata: requestMetadataFromContext(ctx, input.Metadata),
 	})
 	if err != nil {
@@ -86,7 +126,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetP
 
 // RequestEmailVerification is the resolver for the requestEmailVerification field.
 func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input model.RequestEmailVerificationInput) (*model.Response, error) {
-	resp, err := r.UserClient.RequestEmailVerfication(ctx, &user_servicev1.RequestEmailVerificationRequest{
+	resp, err := r.UserClient.RequestEmailVerfication(withAuthzMetadata(ctx), &user_servicev1.RequestEmailVerificationRequest{
 		Email:    utils.NewEmail(input.Email),
 		Metadata: requestMetadataFromContext(ctx, input.Metadata),
 	})
@@ -108,24 +148,4 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input model.VerifyEm
 	}
 
 	return utils.MapResponse(resp.GetSuccess()), nil
-}
-
-func requestMetadataFromContext(ctx context.Context, input *model.MetadataInput) *commonv1.RequestMetadata {
-	if input == nil {
-		return nil
-	}
-
-	metadata := &commonv1.RequestMetadata{
-		DeviceId: input.DeviceID,
-	}
-
-	opCtx := graphql.GetOperationContext(ctx)
-	if opCtx == nil {
-		return metadata
-	}
-
-	metadata.UserAgent = opCtx.Headers.Get("User-Agent")
-	metadata.IpAddress = opCtx.Headers.Get("X-Client-IP")
-
-	return metadata
 }

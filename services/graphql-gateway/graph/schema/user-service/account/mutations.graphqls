@@ -1,0 +1,5 @@
+extend type Mutation {
+  generateScopedToken(input: GenerateScopedTokenInput!): Token! @authenticated
+  changePassword(input: ChangePasswordInput!): Response! @authenticated
+  deleteAccount(input: DeleteAccountInput!): Response! @authenticated
+}

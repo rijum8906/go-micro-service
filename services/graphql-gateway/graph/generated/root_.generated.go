@@ -33,6 +33,13 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AccountSecurity struct {
+		EmailVerifiedAt    func(childComplexity int) int
+		IsEmailVerified    func(childComplexity int) int
+		TwoFactorEnabled   func(childComplexity int) int
+		TwoFactorEnabledAt func(childComplexity int) int
+	}
+
 	AuthAccount struct {
 		Email func(childComplexity int) int
 		ID    func(childComplexity int) int
@@ -71,7 +78,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		ChangePassword           func(childComplexity int, input model.ChangePasswordInput) int
+		DeleteAccount            func(childComplexity int, input model.DeleteAccountInput) int
 		Empty                    func(childComplexity int) int
+		GenerateScopedToken      func(childComplexity int, input model.GenerateScopedTokenInput) int
 		RequestEmailVerification func(childComplexity int, input model.RequestEmailVerificationInput) int
 		RequestPasswordReset     func(childComplexity int, input model.RequestPasswordResetInput) int
 		ResetPassword            func(childComplexity int, input model.ResetPasswordInput) int
@@ -81,6 +91,14 @@ type ComplexityRoot struct {
 		VerifyEmail              func(childComplexity int, input model.VerifyEmailInput) int
 	}
 
+	MyAccount struct {
+		CreatedAt func(childComplexity int) int
+		Email     func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Security  func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+	}
+
 	PageInfo struct {
 		HasNextPage     func(childComplexity int) int
 		HasPreviousPage func(childComplexity int) int
@@ -88,7 +106,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Empty func(childComplexity int) int
+		Empty        func(childComplexity int) int
+		GetMyAccount func(childComplexity int, input model.GetMyAccountInput) int
 	}
 
 	Response struct {
@@ -115,6 +134,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := newExecutionContext(nil, e, nil)
 	_ = ec
 	switch typeName + "." + field {
+
+	case "AccountSecurity.emailVerifiedAt":
+		if e.ComplexityRoot.AccountSecurity.EmailVerifiedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AccountSecurity.EmailVerifiedAt(childComplexity), true
+
+	case "AccountSecurity.isEmailVerified":
+		if e.ComplexityRoot.AccountSecurity.IsEmailVerified == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AccountSecurity.IsEmailVerified(childComplexity), true
+
+	case "AccountSecurity.twoFactorEnabled":
+		if e.ComplexityRoot.AccountSecurity.TwoFactorEnabled == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AccountSecurity.TwoFactorEnabled(childComplexity), true
+
+	case "AccountSecurity.twoFactorEnabledAt":
+		if e.ComplexityRoot.AccountSecurity.TwoFactorEnabledAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AccountSecurity.TwoFactorEnabledAt(childComplexity), true
 
 	case "AuthAccount.email":
 		if e.ComplexityRoot.AuthAccount.Email == nil {
@@ -249,12 +296,48 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Metadata.UserAgent(childComplexity), true
 
+	case "Mutation.changePassword":
+		if e.ComplexityRoot.Mutation.ChangePassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_changePassword_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.ChangePassword(childComplexity, args["input"].(model.ChangePasswordInput)), true
+
+	case "Mutation.deleteAccount":
+		if e.ComplexityRoot.Mutation.DeleteAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DeleteAccount(childComplexity, args["input"].(model.DeleteAccountInput)), true
+
 	case "Mutation._empty":
 		if e.ComplexityRoot.Mutation.Empty == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Mutation.Empty(childComplexity), true
+
+	case "Mutation.generateScopedToken":
+		if e.ComplexityRoot.Mutation.GenerateScopedToken == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateScopedToken_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.GenerateScopedToken(childComplexity, args["input"].(model.GenerateScopedTokenInput)), true
 
 	case "Mutation.requestEmailVerification":
 		if e.ComplexityRoot.Mutation.RequestEmailVerification == nil {
@@ -340,6 +423,41 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Mutation.VerifyEmail(childComplexity, args["input"].(model.VerifyEmailInput)), true
 
+	case "MyAccount.createdAt":
+		if e.ComplexityRoot.MyAccount.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyAccount.CreatedAt(childComplexity), true
+
+	case "MyAccount.email":
+		if e.ComplexityRoot.MyAccount.Email == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyAccount.Email(childComplexity), true
+
+	case "MyAccount.id":
+		if e.ComplexityRoot.MyAccount.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyAccount.ID(childComplexity), true
+
+	case "MyAccount.security":
+		if e.ComplexityRoot.MyAccount.Security == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyAccount.Security(childComplexity), true
+
+	case "MyAccount.updatedAt":
+		if e.ComplexityRoot.MyAccount.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MyAccount.UpdatedAt(childComplexity), true
+
 	case "PageInfo.hasNextPage":
 		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
@@ -367,6 +485,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Empty(childComplexity), true
+
+	case "Query.getMyAccount":
+		if e.ComplexityRoot.Query.GetMyAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getMyAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetMyAccount(childComplexity, args["input"].(model.GetMyAccountInput)), true
 
 	case "Response.message":
 		if e.ComplexityRoot.Response.Message == nil {
@@ -404,7 +534,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputChangePasswordInput,
 		ec.unmarshalInputDateRangeInput,
+		ec.unmarshalInputDeleteAccountInput,
+		ec.unmarshalInputGenerateScopedTokenInput,
+		ec.unmarshalInputGetMyAccountInput,
 		ec.unmarshalInputMetadataInput,
 		ec.unmarshalInputPaginationInput,
 		ec.unmarshalInputRequestEmailVerificationInput,
@@ -489,6 +623,34 @@ func newExecutionContext(
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/directives.graphqls", Input: `# graph/directives.graphqls
+
+directive @authenticated on FIELD_DEFINITION
+directive @public on FIELD_DEFINITION
+directive @rateLimit(limit: Int!, duration: Int!) on FIELD_DEFINITION
+directive @hasRole(role: String!) on FIELD_DEFINITION
+`, BuiltIn: false},
+	{Name: "../schema/scalars.graphqls", Input: `# graph/scalars.graphqls
+
+scalar UUID
+scalar DateTime
+scalar Upload
+scalar JSON
+scalar Email
+scalar URL
+`, BuiltIn: false},
+	{Name: "../schema/schema.graphqls", Input: `schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    _empty: String
+}
+type Mutation {
+    _empty: String
+}
+`, BuiltIn: false},
 	{Name: "../schema/common/enums.graphqls", Input: `enum DeviceType {
     MOBILE
     TABLET
@@ -563,32 +725,69 @@ type Metadata {
     timestamp: DateTime!
 }
 `, BuiltIn: false},
-	{Name: "../schema/directives.graphqls", Input: `# graph/directives.graphqls
-
-directive @authenticated on FIELD_DEFINITION
-directive @public on FIELD_DEFINITION
-directive @rateLimit(limit: Int!, duration: Int!) on FIELD_DEFINITION
-directive @hasRole(role: String!) on FIELD_DEFINITION
-`, BuiltIn: false},
-	{Name: "../schema/scalars.graphqls", Input: `# graph/scalars.graphqls
-
-scalar UUID
-scalar DateTime
-scalar Upload
-scalar JSON
-scalar Email
-scalar URL
-`, BuiltIn: false},
-	{Name: "../schema/schema.graphqls", Input: `schema {
-    query: Query
-    mutation: Mutation
+	{Name: "../schema/user-service/account/inputs.graphqls", Input: `input GetMyAccountInput {
+  metadata: MetadataInput!
 }
 
-type Query {
-    _empty: String
+input GenerateScopedTokenInput {
+  scope: ScopedAction!
+  authType: AuthType!
+  auth: String!
+  metadata: MetadataInput!
 }
-type Mutation {
-    _empty: String
+
+input ChangePasswordInput {
+  token: String!
+  newPassword: String!
+  metadata: MetadataInput!
+}
+
+input DeleteAccountInput {
+  token: String!
+  metadata: MetadataInput!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user-service/account/mutations.graphqls", Input: `extend type Mutation {
+  generateScopedToken(input: GenerateScopedTokenInput!): Token! @authenticated
+  changePassword(input: ChangePasswordInput!): Response! @authenticated
+  deleteAccount(input: DeleteAccountInput!): Response! @authenticated
+}
+`, BuiltIn: false},
+	{Name: "../schema/user-service/account/queries.graphqls", Input: `extend type Query {
+  getMyAccount(input: GetMyAccountInput!): MyAccount! @authenticated
+}
+`, BuiltIn: false},
+	{Name: "../schema/user-service/account/types.graphqls", Input: `enum ScopedAction {
+  SCOPED_ACTION_UNSPECIFIED
+  SCOPED_ACTION_CHANGE_PASSWORD
+  SCOPED_ACTION_CHANGE_EMAIL
+  SCOPED_ACTION_DELETE_ACCOUNT
+  SCOPED_ACTION_DELETE_PROFILE
+}
+
+enum AuthType {
+  AUTH_TYPE_UNSPECIFIED
+  AUTH_TYPE_PASSWORD
+}
+
+enum XHeader {
+  X_HEADER_UNSPECIFIED
+  X_HEADER_USER_ID
+}
+
+type AccountSecurity {
+  isEmailVerified: Boolean!
+  emailVerifiedAt: DateTime
+  twoFactorEnabled: Boolean!
+  twoFactorEnabledAt: DateTime
+}
+
+type MyAccount {
+  id: UUID!
+  email: Email!
+  security: AccountSecurity
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user-service/auth/inputs.graphqls", Input: `input SignupInput {

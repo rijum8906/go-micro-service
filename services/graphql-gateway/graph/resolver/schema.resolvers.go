@@ -7,20 +7,19 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 )
 
 // Empty is the resolver for the _empty field.
 func (r *mutationResolver) Empty(ctx context.Context) (*string, error) {
-	value := "ok"
-	return &value, nil
+	panic(fmt.Errorf("not implemented: Empty - _empty"))
 }
 
 // Empty is the resolver for the _empty field.
 func (r *queryResolver) Empty(ctx context.Context) (*string, error) {
-	value := "ok"
-	return &value, nil
+	panic(fmt.Errorf("not implemented: Empty - _empty"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

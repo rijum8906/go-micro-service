@@ -1,10 +1,13 @@
 package utils
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	commonv1 "github.com/rijum8906/relay/packages/pb/common/v1"
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func MapAuthPayload(resp *user_servicev1.AuthResponse) *model.AuthPayload {
@@ -68,6 +71,44 @@ func MapResponse(success bool) *model.Response {
 	return &model.Response{Success: success}
 }
 
+func MapToken(token *commonv1.Token) *model.Token {
+	if token == nil {
+		return &model.Token{}
+	}
+
+	return &model.Token{
+		Value:     token.GetValue(),
+		ExpiresAt: OptionalTimestamp(token.GetExpiresAt()),
+	}
+}
+
+func MapMyAccount(resp *user_servicev1.GetMyAccountResponse) *model.MyAccount {
+	if resp == nil {
+		return &model.MyAccount{}
+	}
+
+	return &model.MyAccount{
+		ID:        ParseUUID(resp.GetId()),
+		Email:     valueOfEmail(resp.GetEmail()),
+		Security:  MapAccountSecurity(resp.GetSecurity()),
+		CreatedAt: TimestampString(resp.GetCreatedAt()),
+		UpdatedAt: TimestampString(resp.GetUpdatedAt()),
+	}
+}
+
+func MapAccountSecurity(resp *user_servicev1.GetMyAccountSecurityResponse) *model.AccountSecurity {
+	if resp == nil {
+		return nil
+	}
+
+	return &model.AccountSecurity{
+		IsEmailVerified:    resp.GetIsEmailVerified(),
+		EmailVerifiedAt:    OptionalTimestamp(resp.GetEmailVerifiedAt()),
+		TwoFactorEnabled:   resp.GetTwoFactorEnabled(),
+		TwoFactorEnabledAt: OptionalTimestamp(resp.GetTwoFactorEnabledAt()),
+	}
+}
+
 func ParseUUID(id *commonv1.UUID) uuid.UUID {
 	parsed, err := uuid.Parse(ValueOfUUID(id))
 	if err != nil {
@@ -103,6 +144,23 @@ func ValueOfToken(token *commonv1.Token) string {
 		return ""
 	}
 	return token.GetValue()
+}
+
+func TimestampString(ts *timestamppb.Timestamp) string {
+	if ts == nil {
+		return ""
+	}
+
+	return ts.AsTime().UTC().Format(time.RFC3339Nano)
+}
+
+func OptionalTimestamp(ts *timestamppb.Timestamp) *string {
+	if ts == nil {
+		return nil
+	}
+
+	value := TimestampString(ts)
+	return &value
 }
 
 func OptionalName(name *commonv1.Name) *string {

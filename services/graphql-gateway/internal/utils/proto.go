@@ -41,6 +41,12 @@ func NewPassword(value string) *commonv1.Password {
 	}
 }
 
+func NewString(value string) *commonv1.String {
+	return &commonv1.String{
+		Value: value,
+	}
+}
+
 func NewName(value string) *commonv1.Name {
 	return &commonv1.Name{
 		Value: value,
