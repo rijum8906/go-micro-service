@@ -27,12 +27,22 @@ type AccountSecurity struct {
 	UpdatedAt          pgtype.Timestamptz `json:"updatedAt"`
 }
 
+type AuditLog struct {
+	ID        int32            `json:"id"`
+	AccountID int32            `json:"accountId"`
+	Action    string           `json:"action"`
+	IpAddress string           `json:"ipAddress"`
+	UserAgent string           `json:"userAgent"`
+	DeviceID  string           `json:"deviceId"`
+	Metadata  []byte           `json:"metadata"`
+	Timestamp pgtype.Timestamp `json:"timestamp"`
+}
+
 type Oauth struct {
 	ID        pgtype.UUID        `json:"id"`
 	AccountID pgtype.UUID        `json:"accountId"`
 	Provider  string             `json:"provider"`
 	Subject   string             `json:"subject"`
-	Token     string             `json:"token"`
 	CreatedAt pgtype.Timestamptz `json:"createdAt"`
 	UpdatedAt pgtype.Timestamptz `json:"updatedAt"`
 }

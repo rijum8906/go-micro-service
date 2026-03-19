@@ -4,10 +4,9 @@
 INSERT INTO oauths(
   account_id,
   provider,
-  subject,
-  token
+  subject
 )
-VALUES ($1, $2, $3, $4)
+VALUES ($1, $2, $3)
 RETURNING *;
 
 -- name: GetOAuthBySubject :one
@@ -30,7 +29,6 @@ UPDATE oauths
 SET 
   provider = COALESCE(sqlc.narg('provider'), provider),
   subject = COALESCE(sqlc.narg('subject'), subject),
-  token = COALESCE(sqlc.narg('token'), token),
   updated_at = NOW()
 WHERE id = $1
 RETURNING *;
@@ -38,7 +36,6 @@ RETURNING *;
 -- name: UpdateOAuthBySubject :one
 UPDATE oauths
 SET 
-  token = COALESCE(sqlc.narg('token'), token),
   updated_at = NOW()
 WHERE subject = $1
 RETURNING *;

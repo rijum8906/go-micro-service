@@ -16,35 +16,27 @@ const createOAuth = `-- name: CreateOAuth :one
 INSERT INTO oauths(
   account_id,
   provider,
-  subject,
-  token
+  subject
 )
-VALUES ($1, $2, $3, $4)
-RETURNING id, account_id, provider, subject, token, created_at, updated_at
+VALUES ($1, $2, $3)
+RETURNING id, account_id, provider, subject, created_at, updated_at
 `
 
 type CreateOAuthParams struct {
 	AccountID pgtype.UUID `json:"accountId"`
 	Provider  string      `json:"provider"`
 	Subject   string      `json:"subject"`
-	Token     string      `json:"token"`
 }
 
 // oauth.sql
 func (q *Queries) CreateOAuth(ctx context.Context, arg CreateOAuthParams) (Oauth, error) {
-	row := q.db.QueryRow(ctx, createOAuth,
-		arg.AccountID,
-		arg.Provider,
-		arg.Subject,
-		arg.Token,
-	)
+	row := q.db.QueryRow(ctx, createOAuth, arg.AccountID, arg.Provider, arg.Subject)
 	var i Oauth
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
 		&i.Provider,
 		&i.Subject,
-		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -61,7 +53,7 @@ func (q *Queries) DeleteOAuth(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getOAuth = `-- name: GetOAuth :one
-SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oauths WHERE id = $1
+SELECT id, account_id, provider, subject, created_at, updated_at FROM oauths WHERE id = $1
 `
 
 func (q *Queries) GetOAuth(ctx context.Context, id pgtype.UUID) (Oauth, error) {
@@ -72,7 +64,6 @@ func (q *Queries) GetOAuth(ctx context.Context, id pgtype.UUID) (Oauth, error) {
 		&i.AccountID,
 		&i.Provider,
 		&i.Subject,
-		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -80,7 +71,7 @@ func (q *Queries) GetOAuth(ctx context.Context, id pgtype.UUID) (Oauth, error) {
 }
 
 const getOAuthByAccountID = `-- name: GetOAuthByAccountID :one
-SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oauths WHERE account_id = $1
+SELECT id, account_id, provider, subject, created_at, updated_at FROM oauths WHERE account_id = $1
 `
 
 func (q *Queries) GetOAuthByAccountID(ctx context.Context, accountID pgtype.UUID) (Oauth, error) {
@@ -91,7 +82,6 @@ func (q *Queries) GetOAuthByAccountID(ctx context.Context, accountID pgtype.UUID
 		&i.AccountID,
 		&i.Provider,
 		&i.Subject,
-		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -99,7 +89,7 @@ func (q *Queries) GetOAuthByAccountID(ctx context.Context, accountID pgtype.UUID
 }
 
 const getOAuthBySubject = `-- name: GetOAuthBySubject :one
-SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oauths WHERE subject = $1
+SELECT id, account_id, provider, subject, created_at, updated_at FROM oauths WHERE subject = $1
 `
 
 func (q *Queries) GetOAuthBySubject(ctx context.Context, subject string) (Oauth, error) {
@@ -110,7 +100,6 @@ func (q *Queries) GetOAuthBySubject(ctx context.Context, subject string) (Oauth,
 		&i.AccountID,
 		&i.Provider,
 		&i.Subject,
-		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -118,7 +107,7 @@ func (q *Queries) GetOAuthBySubject(ctx context.Context, subject string) (Oauth,
 }
 
 const getOAuthBySubjectAndProvider = `-- name: GetOAuthBySubjectAndProvider :one
-SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oauths WHERE subject = $1 AND provider = $2
+SELECT id, account_id, provider, subject, created_at, updated_at FROM oauths WHERE subject = $1 AND provider = $2
 `
 
 type GetOAuthBySubjectAndProviderParams struct {
@@ -134,7 +123,6 @@ func (q *Queries) GetOAuthBySubjectAndProvider(ctx context.Context, arg GetOAuth
 		&i.AccountID,
 		&i.Provider,
 		&i.Subject,
-		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -142,7 +130,7 @@ func (q *Queries) GetOAuthBySubjectAndProvider(ctx context.Context, arg GetOAuth
 }
 
 const getOAuthsByAccountID = `-- name: GetOAuthsByAccountID :many
-SELECT id, account_id, provider, subject, token, created_at, updated_at FROM oauths WHERE account_id = $1
+SELECT id, account_id, provider, subject, created_at, updated_at FROM oauths WHERE account_id = $1
 `
 
 func (q *Queries) GetOAuthsByAccountID(ctx context.Context, accountID pgtype.UUID) ([]Oauth, error) {
@@ -159,7 +147,6 @@ func (q *Queries) GetOAuthsByAccountID(ctx context.Context, accountID pgtype.UUI
 			&i.AccountID,
 			&i.Provider,
 			&i.Subject,
-			&i.Token,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -178,33 +165,25 @@ UPDATE oauths
 SET 
   provider = COALESCE($2, provider),
   subject = COALESCE($3, subject),
-  token = COALESCE($4, token),
   updated_at = NOW()
 WHERE id = $1
-RETURNING id, account_id, provider, subject, token, created_at, updated_at
+RETURNING id, account_id, provider, subject, created_at, updated_at
 `
 
 type UpdateOAuthParams struct {
 	ID       pgtype.UUID `json:"id"`
 	Provider pgtype.Text `json:"provider"`
 	Subject  pgtype.Text `json:"subject"`
-	Token    pgtype.Text `json:"token"`
 }
 
 func (q *Queries) UpdateOAuth(ctx context.Context, arg UpdateOAuthParams) (Oauth, error) {
-	row := q.db.QueryRow(ctx, updateOAuth,
-		arg.ID,
-		arg.Provider,
-		arg.Subject,
-		arg.Token,
-	)
+	row := q.db.QueryRow(ctx, updateOAuth, arg.ID, arg.Provider, arg.Subject)
 	var i Oauth
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
 		&i.Provider,
 		&i.Subject,
-		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -214,26 +193,19 @@ func (q *Queries) UpdateOAuth(ctx context.Context, arg UpdateOAuthParams) (Oauth
 const updateOAuthBySubject = `-- name: UpdateOAuthBySubject :one
 UPDATE oauths
 SET 
-  token = COALESCE($2, token),
   updated_at = NOW()
 WHERE subject = $1
-RETURNING id, account_id, provider, subject, token, created_at, updated_at
+RETURNING id, account_id, provider, subject, created_at, updated_at
 `
 
-type UpdateOAuthBySubjectParams struct {
-	Subject string      `json:"subject"`
-	Token   pgtype.Text `json:"token"`
-}
-
-func (q *Queries) UpdateOAuthBySubject(ctx context.Context, arg UpdateOAuthBySubjectParams) (Oauth, error) {
-	row := q.db.QueryRow(ctx, updateOAuthBySubject, arg.Subject, arg.Token)
+func (q *Queries) UpdateOAuthBySubject(ctx context.Context, subject string) (Oauth, error) {
+	row := q.db.QueryRow(ctx, updateOAuthBySubject, subject)
 	var i Oauth
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
 		&i.Provider,
 		&i.Subject,
-		&i.Token,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
