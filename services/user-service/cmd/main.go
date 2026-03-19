@@ -15,7 +15,7 @@ import (
 	"github.com/rijum8906/relay/packages/common/env"
 	"github.com/rijum8906/relay/packages/common/hash"
 	"github.com/rijum8906/relay/packages/common/jwt"
-	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	handlers "github.com/rijum8906/relay/services/user-service/internal/api/handlers/grpc"
 	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 	dbRoot "github.com/rijum8906/relay/services/user-service/internal/db"
@@ -152,7 +152,7 @@ func bootstrapApplication(ctx context.Context, infra *infrastructure) *applicati
 	}
 
 	queries := db.New(infra.pgPool)
-	authService := auth.NewAuth(queries, utilsCfg, infra.env)
+	authService := auth.NewAuthService(queries, utilsCfg, infra.env)
 	accountService := account.NewAccountService(queries, utilsCfg, infra.env)
 	profileService := profile.NewProfileService(queries, utilsCfg, infra.env)
 
@@ -194,7 +194,7 @@ func serveGRPC(appEnv *env.Env, app *application) error {
 	grpc_health_v1.RegisterHealthServer(server, healthServer)
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 
-	user_servicev1.RegisterAuthServiceServer(server, app.authHandler)
+	authv1.RegisterAuthServiceServer(server, app.authHandler)
 	reflection.Register(server)
 
 	log.Printf("gRPC server listening at %v", lis.Addr())

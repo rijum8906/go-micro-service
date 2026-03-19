@@ -6,6 +6,7 @@ import (
 
 	"github.com/rijum8906/relay/packages/common/env"
 	"github.com/rijum8906/relay/packages/common/errors"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
@@ -14,24 +15,24 @@ import (
 
 type AuthService interface {
 	// Core
-	Signin(ctx context.Context, req *user_servicev1.SigninRequest) (*user_servicev1.AuthResponse, *errors.AppError)
-	Signup(ctx context.Context, req *user_servicev1.SignupRequest) (*user_servicev1.AuthResponse, *errors.AppError)
-	Logout(ctx context.Context, req *user_servicev1.SignoutRequest, auth request.AuthzMetadata) (*user_servicev1.SignoutResponse, *errors.AppError)
-	LogoutAllDevices(ctx context.Context, req *user_servicev1.SignoutAllRequest, auth request.AuthzMetadata) (*user_servicev1.SignoutAllResponse, *errors.AppError)
+	Signin(ctx context.Context, req *authv1.SigninRequest) (*user_servicev1.AuthenticationResult, *errors.AppError)
+	Signup(ctx context.Context, req *authv1.SignupRequest) (*user_servicev1.AuthenticationResult, *errors.AppError)
+	Logout(ctx context.Context, req *authv1.LogoutRequest, auth request.AuthzMetadata) (*authv1.LogoutResponse, *errors.AppError)
+	LogoutAllDevices(ctx context.Context, req *authv1.LogoutAllDeviceRequest, auth request.AuthzMetadata) (*authv1.LogoutAllDeviceResponse, *errors.AppError)
 
 	// Email Verification
-	RequestEmailVerification(ctx context.Context, req *user_servicev1.RequestEmailVerificationRequest) *errors.AppError
-	VerifyEmail(ctx context.Context, req *user_servicev1.VerifyEmailRequest) *errors.AppError
+	RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) *errors.AppError
+	VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) *errors.AppError
 
 	// Password Management
-	RequestPasswordReset(ctx context.Context, req *user_servicev1.RequestPasswordResetRequest) *errors.AppError
-	ResetPassword(ctx context.Context, req *user_servicev1.ResetPasswordRequest) *errors.AppError
-	ChangePassword(ctx context.Context, req *user_servicev1.ChangePasswordRequest, authzMetadata request.AuthzMetadata) *errors.AppError
+	RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) *errors.AppError
+	ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) *errors.AppError
+	ChangePassword(ctx context.Context, req *authv1.ChangePasswordRequest, authzMetadata request.AuthzMetadata) *errors.AppError
 
 	// Session Management
-	GetSessions(ctx context.Context, req *user_servicev1.GetSessionsRequest, authzMetadata request.AuthzMetadata) (*user_servicev1.GetSessionsResponse, *errors.AppError)
-	RevokeSession(ctx context.Context, req *user_servicev1.RevokeSessionRequest, authzMetadata request.AuthzMetadata) (*user_servicev1.RevokeSessionResponse, *errors.AppError)
-	RevokeAllSessions(ctx context.Context, req *user_servicev1.RevokeAllSessionsRequest, authzMetadata request.AuthzMetadata) (*user_servicev1.RevokeAllSessionsResponse, *errors.AppError)
+	GetSessions(ctx context.Context, req *authv1.GetSessionsRequest, authzMetadata request.AuthzMetadata) (*authv1.GetSessionsResponse, *errors.AppError)
+	RevokeSession(ctx context.Context, req *authv1.RevokeSessionRequest, authzMetadata request.AuthzMetadata) (*authv1.RevokeSessionResponse, *errors.AppError)
+	RevokeAllSessions(ctx context.Context, req *authv1.RevokeAllSessionsRequest, authzMetadata request.AuthzMetadata) (*authv1.RevokeAllSessionsResponse, *errors.AppError)
 }
 
 type authService struct {

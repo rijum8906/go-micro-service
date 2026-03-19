@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"buf.build/go/protovalidate"
-	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 	"github.com/rijum8906/relay/services/user-service/internal/services/account"
 	"github.com/rijum8906/relay/services/user-service/internal/services/auth"
@@ -16,7 +16,7 @@ type Services struct {
 }
 
 type AuthHandler struct {
-	user_servicev1.UnimplementedAuthServiceServer
+	authv1.UnimplementedAuthServiceServer
 	authService       auth.AuthService
 	accountService    account.AccountService
 	middlewareService middleware.Middleware
