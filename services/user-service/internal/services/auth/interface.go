@@ -4,6 +4,7 @@ package auth
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/common/env"
 	"github.com/rijum8906/relay/packages/common/errors"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
@@ -55,11 +56,10 @@ func NewAuthService(queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) A
 }
 
 type AuthRepository interface {
-	CreateSession()
-	GetSession()
-	RevokeSession()
-	RevokeAllSessions()
-	DeleteExpiredSessions()
+	CreateSession(ctx context.Context, metadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*db.Session, *errors.AppError)
+	GetSessionByRefreshToken(ctx context.Context, refreshToken string, authzMetadata request.AuthzMetadata) (*db.Session, *errors.AppError)
+	RevokeSession(ctx context.Context, id pgtype.UUID, authzMetadata request.AuthzMetadata) *errors.AppError
+	RevokeAllSessions(ctx context.Context, authzMetadata request.AuthzMetadata) *errors.AppError
 }
 
 type authRepository struct {

@@ -44,7 +44,7 @@ func (r *authRepository) GetSessionByRefreshToken(ctx context.Context, refreshTo
 }
 
 func (r *authRepository) RevokeSession(ctx context.Context, id pgtype.UUID, authzMetadata request.AuthzMetadata) *errors.AppError {
-	err := r.q.DeleteSession(ctx, id)
+	err := r.q.RevokeSession(ctx, id)
 	if err != nil {
 		return errors.ErrInternal.WithInternal(err)
 	}
@@ -52,7 +52,9 @@ func (r *authRepository) RevokeSession(ctx context.Context, id pgtype.UUID, auth
 }
 
 func (r *authRepository) RevokeAllSessions(ctx context.Context, authzMetadata request.AuthzMetadata) *errors.AppError {
+	err := r.q.RevokeAllAccountSessions(ctx, authzMetadata.UserID)
+	if err != nil {
+		return errors.ErrInternal.WithInternal(err)
+	}
 	return nil
 }
-
-func (r *authRepository) DeleteExpiredSessions() {}
