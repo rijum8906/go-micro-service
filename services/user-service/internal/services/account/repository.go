@@ -2,6 +2,8 @@ package account
 
 import (
 	"context"
+	"database/sql"
+	errorsstdlib "errors"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/common/errors"
@@ -9,6 +11,17 @@ import (
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
 )
+
+func (r *accountRepository) IsEmailExists(ctx context.Context, email string) (bool, *errors.AppError) {
+	_, err := r.q.GetAccountByEmail(ctx, email)
+	if err != nil {
+		if errorsstdlib.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, errors.ErrInternal.WithInternal(err)
+	}
+	return true, nil
+}
 
 func (r *accountRepository) CreateAccount(ctx context.Context, data *authv1.SignupRequest) (*db.Account, *errors.AppError) {
 	passwordHash, err := r.utilsConfig.HashService.HashPassword(data.Password.Value)

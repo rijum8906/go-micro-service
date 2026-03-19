@@ -38,15 +38,7 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 
 	parsedProfiles := []*user_servicev1.Profile{}
 	for _, profile := range *profiles {
-		parsedProfiles = append(parsedProfiles, &user_servicev1.Profile{
-			Id:          utils.NewID(profile.ID.String()),
-			FirstName:   utils.NewName(profile.FirstName),
-			LastName:    utils.NewName(profile.LastName),
-			DisplayName: utils.NewName(profile.DisplayName.String),
-			AvatarUrl:   utils.NewURL(profile.AvatarUrl.String),
-			CreatedAt:   utils.NewTimestamp(profile.CreatedAt.Time),
-			UpdatedAt:   utils.NewTimestamp(profile.UpdatedAt.Time),
-		})
+		parsedProfiles = append(parsedProfiles, utils.ParseProfile(&profile))
 	}
 
 	session, appErr := s.repo.authRepo.CreateSession(ctx, request.RequestMetadata{
@@ -64,16 +56,7 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 	}
 
 	return &user_servicev1.AuthenticationResult{
-		Account: &user_servicev1.Account{
-			Id:                 utils.NewID(account.ID.String()),
-			Email:              utils.NewEmail(account.Email),
-			IsEmailVerified:    account.IsEmailVerified,
-			EmailVerifiedAt:    utils.NewTimestamp(account.EmailVerifiedAt.Time),
-			TwoFactorEnabled:   account.TwoFactorEnabled,
-			TwoFactorEnabledAt: utils.NewTimestamp(account.TwoFactorEnabledAt.Time),
-			CreatedAt:          utils.NewTimestamp(account.CreatedAt.Time),
-			UpdatedAt:          utils.NewTimestamp(account.UpdatedAt.Time),
-		},
+		Account:  utils.ParseAccount(&account),
 		Profiles: parsedProfiles,
 		Tokens: &user_servicev1.AuthTokens{
 			RefreshToken: utils.NewToken(session.RefreshToken, int64(s.env.ScopedJwtExpiration.Seconds())),
@@ -83,7 +66,28 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 }
 
 func (s *authService) Signup(ctx context.Context, req *authv1.SignupRequest) (*user_servicev1.AuthenticationResult, *errors.AppError) {
-	return nil, nil
+	isEmailExists, appErr := s.repo.accountRepo.IsEmailExists(ctx, req.Email.Value)
+	if appErr != nil {
+		return nil, appErr
+	}
+	if isEmailExists {
+		return nil, errors.ErrConflict.WithField("email", "email already exists")
+	}
+
+	account, appErr := s.repo.accountRepo.CreateAccount(ctx, req)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_, appErr = s.repo.profileRepo.CreateProfile(ctx, account.ID, req)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return s.Signin(ctx, &authv1.SigninRequest{
+		Email:    req.Email,
+		Password: req.Password,
+	})
 }
 
 func (s *authService) Logout(ctx context.Context, req *authv1.LogoutRequest, auth request.AuthzMetadata) (*authv1.LogoutResponse, *errors.AppError) {

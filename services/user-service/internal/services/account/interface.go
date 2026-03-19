@@ -43,6 +43,7 @@ func NewAccountService(repo *accountRepository, queries *db.Queries, cfg *utils.
 }
 
 type AccountRepository interface {
+	IsEmailExists(ctx context.Context, email string) (bool, *errors.AppError)
 	CreateAccount(ctx context.Context, data *authv1.SignupRequest) (*db.Account, *errors.AppError)
 	GetAccount(ctx context.Context, id pgtype.UUID) (db.Account, *errors.AppError)
 	GetAccountByEmail(ctx context.Context, email string) (db.Account, *errors.AppError)
