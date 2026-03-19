@@ -61,7 +61,7 @@ function SignInPage() {
           Sign in
         </h1>
 
-        <div className="w-full max-w-sm rounded-2xl p-8 bg-white/40 backdrop-blur-sm">
+        <div className="w-full max-w-sm rounded-2xl p-8 bg-white/40 shadow-[inset_0_0_0_0.3px_#9A9A9A] backdrop-blur-sm">
           <form
             onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
             className="flex flex-col gap-5"
@@ -122,7 +122,7 @@ function SignInPage() {
 
           <p className="text-xs text-center mt-5 text-[#262526]/40">
             Don't have an account?{' '}
-            <Link to="/auth/signup" className="text-[#DD9569] hover:opacity-80 font-medium transition-opacity">
+            <Link to="/auth/signup" style={{ color: '#C97D4E' }} className="hover:opacity-80 font-medium transition-opacity">
               Sign up
             </Link>
           </p>
