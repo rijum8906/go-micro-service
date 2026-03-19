@@ -39,3 +39,6 @@ RETURNING *;
 
 -- name: DeleteSession :exec
 DELETE FROM sessions WHERE id = $1;
+
+-- name: DeleteAllSessions :exec
+DELETE FROM sessions WHERE account_id = $1;

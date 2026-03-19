@@ -54,6 +54,15 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 	return i, err
 }
 
+const deleteAllSessions = `-- name: DeleteAllSessions :exec
+DELETE FROM sessions WHERE account_id = $1
+`
+
+func (q *Queries) DeleteAllSessions(ctx context.Context, accountID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteAllSessions, accountID)
+	return err
+}
+
 const deleteSession = `-- name: DeleteSession :exec
 DELETE FROM sessions WHERE id = $1
 `
