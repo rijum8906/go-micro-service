@@ -22,13 +22,13 @@ type AccountService interface {
 }
 
 type accountService struct {
-	repo        *accountRepository
+	repo        AccountRepository
 	q           *db.Queries
 	utilsConfig *utils.UtilsConfig
 	env         *env.Env
 }
 
-func NewAccountService(repo *accountRepository, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AccountService {
+func NewAccountService(repo AccountRepository, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AccountService {
 	return &accountService{
 		repo: repo,
 		q:    queries,

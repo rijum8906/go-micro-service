@@ -26,13 +26,13 @@ type ProfileService interface {
 }
 
 type profileService struct {
-	repo        *profileRepository
+	repo        ProfileRepository
 	q           *db.Queries
 	utilsConfig *utils.UtilsConfig
 	env         *env.Env
 }
 
-func NewProfileService(repo *profileRepository, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) ProfileService {
+func NewProfileService(repo ProfileRepository, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) ProfileService {
 	return &profileService{
 		repo: repo,
 		q:    queries,

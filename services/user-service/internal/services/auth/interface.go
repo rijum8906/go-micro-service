@@ -38,20 +38,20 @@ type AuthService interface {
 	RevokeAllSessions(ctx context.Context, req *authv1.RevokeAllSessionsRequest, authzMetadata request.AuthzMetadata) (*authv1.RevokeAllSessionsResponse, *errors.AppError)
 }
 
-type repo struct {
-	authRepo    AuthRepository
-	accountRepo account.AccountRepository
-	profileRepo profile.ProfileRepository
+type Repo struct {
+	AuthRepo    AuthRepository
+	AccountRepo account.AccountRepository
+	ProfileRepo profile.ProfileRepository
 }
 
 type authService struct {
-	repo        *repo
+	repo        *Repo
 	q           *db.Queries
 	utilsConfig *utils.UtilsConfig
 	env         *env.Env
 }
 
-func NewAuthService(repo *repo, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AuthService {
+func NewAuthService(repo *Repo, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AuthService {
 	return &authService{
 		repo: repo,
 		q:    queries,

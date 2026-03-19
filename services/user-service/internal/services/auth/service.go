@@ -13,7 +13,7 @@ import (
 )
 
 func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*user_servicev1.AuthenticationResult, *errors.AppError) {
-	account, appErr := s.repo.accountRepo.GetAccountByEmail(ctx, req.Email.Value)
+	account, appErr := s.repo.AccountRepo.GetAccountByEmail(ctx, req.Email.Value)
 
 	if appErr != nil {
 		if errorsstdlib.Is(appErr.Internal, sql.ErrNoRows) {
@@ -31,7 +31,7 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 		UserID: account.ID,
 	}
 
-	profiles, appErr := s.repo.profileRepo.GetProfilesByAccountID(ctx, account.ID)
+	profiles, appErr := s.repo.ProfileRepo.GetProfilesByAccountID(ctx, account.ID)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -41,7 +41,7 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 		parsedProfiles = append(parsedProfiles, utils.ParseProfile(&profile))
 	}
 
-	session, appErr := s.repo.authRepo.CreateSession(ctx, request.RequestMetadata{
+	session, appErr := s.repo.AuthRepo.CreateSession(ctx, request.RequestMetadata{
 		UserAgent: req.Metadata.UserAgent,
 		DeviceID:  req.Metadata.DeviceId,
 		IPAddr:    req.Metadata.IpAddress,
@@ -66,7 +66,7 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 }
 
 func (s *authService) Signup(ctx context.Context, req *authv1.SignupRequest) (*user_servicev1.AuthenticationResult, *errors.AppError) {
-	isEmailExists, appErr := s.repo.accountRepo.IsEmailExists(ctx, req.Email.Value)
+	isEmailExists, appErr := s.repo.AccountRepo.IsEmailExists(ctx, req.Email.Value)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -74,12 +74,12 @@ func (s *authService) Signup(ctx context.Context, req *authv1.SignupRequest) (*u
 		return nil, errors.ErrConflict.WithField("email", "email already exists")
 	}
 
-	account, appErr := s.repo.accountRepo.CreateAccount(ctx, req)
+	account, appErr := s.repo.AccountRepo.CreateAccount(ctx, req)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	_, appErr = s.repo.profileRepo.CreateProfile(ctx, account.ID, req)
+	_, appErr = s.repo.ProfileRepo.CreateProfile(ctx, account.ID, req)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -91,11 +91,11 @@ func (s *authService) Signup(ctx context.Context, req *authv1.SignupRequest) (*u
 }
 
 func (s *authService) Logout(ctx context.Context, req *authv1.LogoutRequest, auth request.AuthzMetadata) (*authv1.LogoutResponse, *errors.AppError) {
-	session, appErr := s.repo.authRepo.GetSessionByRefreshToken(ctx, auth.RefreshToken, auth)
+	session, appErr := s.repo.AuthRepo.GetSessionByRefreshToken(ctx, auth.RefreshToken, auth)
 	if appErr != nil {
 		return nil, appErr
 	}
-	err := s.repo.authRepo.RevokeSession(ctx, session.ID, auth)
+	err := s.repo.AuthRepo.RevokeSession(ctx, session.ID, auth)
 	if err != nil {
 		return nil, errors.ErrInternal.WithInternal(err)
 	}

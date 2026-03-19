@@ -152,9 +152,16 @@ func bootstrapApplication(ctx context.Context, infra *infrastructure) *applicati
 	}
 
 	queries := db.New(infra.pgPool)
-	authService := auth.NewAuthService(queries, utilsCfg, infra.env)
-	accountService := account.NewAccountService(queries, utilsCfg, infra.env)
-	profileService := profile.NewProfileService(queries, utilsCfg, infra.env)
+	accountRepo := account.NewAccountRepository(queries, utilsCfg, infra.env)
+	accountService := account.NewAccountService(accountRepo, queries, utilsCfg, infra.env)
+	profileRepo := profile.NewProfileRepository(queries, utilsCfg, infra.env)
+	profileService := profile.NewProfileService(profileRepo, queries, utilsCfg, infra.env)
+	authRepo := auth.NewAuthRepository(queries, utilsCfg, infra.env)
+	authService := auth.NewAuthService(&auth.Repo{
+		AuthRepo:    authRepo,
+		AccountRepo: accountRepo,
+		ProfileRepo: profileRepo,
+	}, queries, utilsCfg, infra.env)
 
 	authHandler := handlers.NewAuthHandler(&handlers.Services{
 		AuthService:    authService,
