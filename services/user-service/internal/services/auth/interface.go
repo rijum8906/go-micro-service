@@ -11,6 +11,8 @@ import (
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
+	"github.com/rijum8906/relay/services/user-service/internal/services/account"
+	"github.com/rijum8906/relay/services/user-service/internal/services/profile"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
@@ -36,15 +38,23 @@ type AuthService interface {
 	RevokeAllSessions(ctx context.Context, req *authv1.RevokeAllSessionsRequest, authzMetadata request.AuthzMetadata) (*authv1.RevokeAllSessionsResponse, *errors.AppError)
 }
 
+type repo struct {
+	authRepo    AuthRepository
+	accountRepo account.AccountRepository
+	profileRepo profile.ProfileRepository
+}
+
 type authService struct {
+	repo        *repo
 	q           *db.Queries
 	utilsConfig *utils.UtilsConfig
 	env         *env.Env
 }
 
-func NewAuthService(queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AuthService {
+func NewAuthService(repo *repo, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AuthService {
 	return &authService{
-		q: queries,
+		repo: repo,
+		q:    queries,
 		utilsConfig: &utils.UtilsConfig{
 			HashService:      cfg.HashService,
 			JwtService:       cfg.JwtService,

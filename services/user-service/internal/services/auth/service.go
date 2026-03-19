@@ -2,15 +2,84 @@ package auth
 
 import (
 	"context"
+	"database/sql"
+	errorsstdlib "errors"
 
 	"github.com/rijum8906/relay/packages/common/errors"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
+	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*user_servicev1.AuthenticationResult, *errors.AppError) {
-	return nil, nil
+	account, appErr := s.repo.accountRepo.GetAccountByEmail(ctx, req.Email.Value)
+
+	if appErr != nil {
+		if errorsstdlib.Is(appErr.Internal, sql.ErrNoRows) {
+			return nil, errors.ErrInvalidCredentials
+		}
+		return nil, appErr
+	}
+
+	err := s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, req.Password.Value)
+	if err != nil {
+		return nil, errors.ErrInvalidCredentials
+	}
+
+	authzMetadata := request.AuthzMetadata{
+		UserID: account.ID,
+	}
+
+	profiles, appErr := s.repo.profileRepo.GetProfilesByAccountID(ctx, account.ID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	parsedProfiles := []*user_servicev1.Profile{}
+	for _, profile := range *profiles {
+		parsedProfiles = append(parsedProfiles, &user_servicev1.Profile{
+			Id:          utils.NewID(profile.ID.String()),
+			FirstName:   utils.NewName(profile.FirstName),
+			LastName:    utils.NewName(profile.LastName),
+			DisplayName: utils.NewName(profile.DisplayName.String),
+			AvatarUrl:   utils.NewURL(profile.AvatarUrl.String),
+			CreatedAt:   utils.NewTimestamp(profile.CreatedAt.Time),
+			UpdatedAt:   utils.NewTimestamp(profile.UpdatedAt.Time),
+		})
+	}
+
+	session, appErr := s.repo.authRepo.CreateSession(ctx, request.RequestMetadata{
+		UserAgent: req.Metadata.UserAgent,
+		DeviceID:  req.Metadata.DeviceId,
+		IPAddr:    req.Metadata.IpAddress,
+	}, authzMetadata)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	accessToken, appErr := s.utilsConfig.JwtService.IssueToken(ctx, account.ID.String())
+	if appErr != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
+
+	return &user_servicev1.AuthenticationResult{
+		Account: &user_servicev1.Account{
+			Id:                 utils.NewID(account.ID.String()),
+			Email:              utils.NewEmail(account.Email),
+			IsEmailVerified:    account.IsEmailVerified,
+			EmailVerifiedAt:    utils.NewTimestamp(account.EmailVerifiedAt.Time),
+			TwoFactorEnabled:   account.TwoFactorEnabled,
+			TwoFactorEnabledAt: utils.NewTimestamp(account.TwoFactorEnabledAt.Time),
+			CreatedAt:          utils.NewTimestamp(account.CreatedAt.Time),
+			UpdatedAt:          utils.NewTimestamp(account.UpdatedAt.Time),
+		},
+		Profiles: parsedProfiles,
+		Tokens: &user_servicev1.AuthTokens{
+			RefreshToken: utils.NewToken(session.RefreshToken, int64(s.env.ScopedJwtExpiration.Seconds())),
+			AccessToken:  utils.NewToken(accessToken, int64(s.env.JwtExpiration.Seconds())),
+		},
+	}, nil
 }
 
 func (s *authService) Signup(ctx context.Context, req *authv1.SignupRequest) (*user_servicev1.AuthenticationResult, *errors.AppError) {
