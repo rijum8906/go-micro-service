@@ -15,7 +15,7 @@ const createAccount = `-- name: CreateAccount :one
 
 INSERT INTO accounts (email, password_hash)
 VALUES ($1, $2)
-RETURNING id, email, password_hash, created_at, updated_at
+RETURNING id, email, password_hash, created_at, updated_at, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, two_factor_secret
 `
 
 type CreateAccountParams struct {
@@ -33,6 +33,11 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (A
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsEmailVerified,
+		&i.EmailVerifiedAt,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.TwoFactorSecret,
 	)
 	return i, err
 }
@@ -47,7 +52,7 @@ func (q *Queries) DeleteAccount(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getAccount = `-- name: GetAccount :one
-SELECT id, email, password_hash, created_at, updated_at FROM accounts WHERE id = $1
+SELECT id, email, password_hash, created_at, updated_at, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, two_factor_secret FROM accounts WHERE id = $1
 `
 
 func (q *Queries) GetAccount(ctx context.Context, id pgtype.UUID) (Account, error) {
@@ -59,12 +64,17 @@ func (q *Queries) GetAccount(ctx context.Context, id pgtype.UUID) (Account, erro
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsEmailVerified,
+		&i.EmailVerifiedAt,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.TwoFactorSecret,
 	)
 	return i, err
 }
 
 const getAccountByEmail = `-- name: GetAccountByEmail :one
-SELECT id, email, password_hash, created_at, updated_at FROM accounts WHERE email = $1
+SELECT id, email, password_hash, created_at, updated_at, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, two_factor_secret FROM accounts WHERE email = $1
 `
 
 func (q *Queries) GetAccountByEmail(ctx context.Context, email string) (Account, error) {
@@ -76,6 +86,11 @@ func (q *Queries) GetAccountByEmail(ctx context.Context, email string) (Account,
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsEmailVerified,
+		&i.EmailVerifiedAt,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.TwoFactorSecret,
 	)
 	return i, err
 }
@@ -87,7 +102,7 @@ SET
   password_hash = COALESCE($3, password_hash),
   updated_at = NOW()
 WHERE id = $1
-RETURNING id, email, password_hash, created_at, updated_at
+RETURNING id, email, password_hash, created_at, updated_at, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, two_factor_secret
 `
 
 type UpdateAccountParams struct {
@@ -105,6 +120,11 @@ func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (A
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsEmailVerified,
+		&i.EmailVerifiedAt,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.TwoFactorSecret,
 	)
 	return i, err
 }
@@ -116,7 +136,7 @@ SET
   password_hash = COALESCE($3, password_hash),
   updated_at = NOW()
 WHERE email = $1
-RETURNING id, email, password_hash, created_at, updated_at
+RETURNING id, email, password_hash, created_at, updated_at, is_email_verified, email_verified_at, two_factor_enabled, two_factor_enabled_at, two_factor_secret
 `
 
 type UpdateAccountByEmailParams struct {
@@ -134,6 +154,11 @@ func (q *Queries) UpdateAccountByEmail(ctx context.Context, arg UpdateAccountByE
 		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsEmailVerified,
+		&i.EmailVerifiedAt,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.TwoFactorSecret,
 	)
 	return i, err
 }

@@ -9,11 +9,16 @@ import (
 )
 
 type Account struct {
-	ID           pgtype.UUID        `json:"id"`
-	Email        string             `json:"email"`
-	PasswordHash string             `json:"passwordHash"`
-	CreatedAt    pgtype.Timestamptz `json:"createdAt"`
-	UpdatedAt    pgtype.Timestamptz `json:"updatedAt"`
+	ID                 pgtype.UUID        `json:"id"`
+	Email              string             `json:"email"`
+	PasswordHash       string             `json:"passwordHash"`
+	CreatedAt          pgtype.Timestamptz `json:"createdAt"`
+	UpdatedAt          pgtype.Timestamptz `json:"updatedAt"`
+	IsEmailVerified    bool               `json:"isEmailVerified"`
+	EmailVerifiedAt    pgtype.Timestamptz `json:"emailVerifiedAt"`
+	TwoFactorEnabled   bool               `json:"twoFactorEnabled"`
+	TwoFactorEnabledAt pgtype.Timestamptz `json:"twoFactorEnabledAt"`
+	TwoFactorSecret    pgtype.Text        `json:"twoFactorSecret"`
 }
 
 type AccountSecurity struct {
