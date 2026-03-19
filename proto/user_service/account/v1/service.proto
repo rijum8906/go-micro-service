@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package user_service.account.v1;
+
+import "user_service/account/v1/messages.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user_service/account/v1;userserviceaccountv1";
+
+service AccountService {
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+  rpc IsAccountExistsByEmail(IsAccountExistsByEmailRequest) returns (IsAccountExistsByEmailResponse);
+  rpc MyAccount(MyAccountRequest) returns (MyAccountResponse);
+  rpc UpdateEmail(UpdateEmailRequest) returns (UpdateEmailResponse);
+}

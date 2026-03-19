@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package user_service.auth.v1;
+
+import "buf/validate/validate.proto";
+import "common/v1/common.proto";
+import "user_service/v1/common.proto";
+import "user_service/v1/models.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user_service/auth/v1;userserviceauthv1";
+
+message SignupRequest {
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.Password password = 2 [(buf.validate.field).required = true];
+  common.v1.Name first_name = 3 [(buf.validate.field).required = true];
+  common.v1.Name last_name = 4 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 5 [(buf.validate.field).required = true];
+}
+
+message SignupResponse {
+  user_service.v1.AuthenticationResult result = 1 [(buf.validate.field).required = true];
+}
+
+message SigninRequest {
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.Password password = 2 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
+}
+
+message SigninResponse {
+  user_service.v1.AuthenticationResult result = 1 [(buf.validate.field).required = true];
+}
+
+message LogoutRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+message LogoutAllDeviceRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message LogoutAllDeviceResponse {
+  uint32 revoked_count = 1;
+}
+
+message RequestEmailVerificationRequest {
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message RequestEmailVerificationResponse {
+  bool success = 1;
+}
+
+message VerifyEmailRequest {
+  common.v1.Token scoped_token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message VerifyEmailResponse {
+  user_service.v1.Account account = 1 [(buf.validate.field).required = true];
+}
+
+message RequestPasswordResetRequest {
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message RequestPasswordResetResponse {
+  bool success = 1;
+}
+
+message ResetPasswordRequest {
+  common.v1.Token scoped_token = 1 [(buf.validate.field).required = true];
+  common.v1.Password new_password = 2 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+}
+
+message ChangePasswordRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.Password current_password = 2 [(buf.validate.field).required = true];
+  common.v1.Password new_password = 3 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
+}
+
+message ChangePasswordResponse {
+  bool success = 1;
+}
+
+message GetSessionsRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message GetSessionsResponse {
+  repeated user_service.v1.Session sessions = 1;
+}
+
+message RevokeSessionRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.UUID session_id = 2 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
+}
+
+message RevokeSessionResponse {
+  bool success = 1;
+}
+
+message RevokeAllSessionsRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message RevokeAllSessionsResponse {
+  uint32 revoked_count = 1;
+}
+
+message GenerateScopedTokenRequest {
+  user_service.v1.ScopedTokenScope scope = 1;
+  user_service.v1.ScopedTokenSubjectType subject_type = 2;
+  common.v1.String subject = 3 [(buf.validate.field).required = true];
+  optional common.v1.Password password = 4;
+  common.v1.RequestMetadata metadata = 5 [(buf.validate.field).required = true];
+}
+
+message GenerateScopedTokenResponse {
+  common.v1.Token token = 1 [(buf.validate.field).required = true];
+}

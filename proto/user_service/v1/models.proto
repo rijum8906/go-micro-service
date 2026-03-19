@@ -4,154 +4,49 @@ package user_service.v1;
 
 import "buf/validate/validate.proto";
 import "common/v1/common.proto";
-import "user_service/v1/account.proto";
-import "user_service/v1/common.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservice";
 
-message AccountResponse {
-  common.v1.UUID id = 1;
-  common.v1.Email email = 2;
+message AuthTokens {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.Token refresh_token = 2 [(buf.validate.field).required = true];
 }
 
-message ProfileResponse {
-  common.v1.UUID id = 1;
-  common.v1.Name first_name = 2;
-  common.v1.Name last_name = 3;
-  optional common.v1.Name display_name = 4;
-  optional common.v1.Url avatar_url = 5;
+// Account mirrors the safe public subset of the generated db.Account model.
+message Account {
+  common.v1.UUID id = 1 [(buf.validate.field).required = true];
+  common.v1.Email email = 2 [(buf.validate.field).required = true];
+  bool is_email_verified = 3;
+  optional google.protobuf.Timestamp email_verified_at = 4;
+  bool two_factor_enabled = 5;
+  optional google.protobuf.Timestamp two_factor_enabled_at = 6;
+  google.protobuf.Timestamp created_at = 7 [(buf.validate.field).required = true];
+  google.protobuf.Timestamp updated_at = 8 [(buf.validate.field).required = true];
 }
 
-// Token pair for authentication
-message AuthTokenResponse {
-  common.v1.Token access_token = 1;
-  common.v1.Token refresh_token = 2;
-}
-
-//  #####################################  Core Functions   #####################################
-message SignupRequest {
-  common.v1.Email email = 1 [(buf.validate.field).required = true];
-  common.v1.Password password = 2 [(buf.validate.field).required = true];
+// Profile mirrors the generated db.Profile model.
+message Profile {
+  common.v1.UUID id = 1 [(buf.validate.field).required = true];
+  common.v1.UUID account_id = 2 [(buf.validate.field).required = true];
   common.v1.Name first_name = 3 [(buf.validate.field).required = true];
   common.v1.Name last_name = 4 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 5 [(buf.validate.field).required = true];
+  optional common.v1.Name display_name = 5;
+  optional common.v1.Url avatar_url = 6;
+  google.protobuf.Timestamp created_at = 7 [(buf.validate.field).required = true];
+  google.protobuf.Timestamp updated_at = 8 [(buf.validate.field).required = true];
 }
 
-message SigninRequest {
-  common.v1.Email email = 1 [(buf.validate.field).required = true];
-  common.v1.Password password = 2 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
-}
-
-message AuthResponse {
-  AccountResponse account = 1 [(buf.validate.field).required = true];
-  repeated ProfileResponse profiles = 2;
-  AuthTokenResponse tokens = 3 [(buf.validate.field).required = true];
-}
-
-message SignoutRequest {
-  common.v1.RequestMetadata metadata = 1 [(buf.validate.field).required = true];
-}
-
-message SignoutResponse {
-  bool success = 1;
-}
-
-message SignoutAllRequest {
-  common.v1.Token token = 1 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
-}
-
-message SignoutAllResponse {
-  repeated LoginAccount login_accounts = 1 [(buf.validate.field).required = true];
-}
-
-//  #####################################  Email Verification   #####################################
-message RequestEmailVerificationRequest {
-  common.v1.Email email = 1 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
-}
-
-message RequestEmailVerificationResponse {
-  bool success = 1;
-}
-
-message VerifyEmailRequest {
-  common.v1.Token token = 1 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
-}
-
-message VerifyEmailResponse {
-  bool success = 1;
-}
-
-//  #####################################  Password Flows   #####################################
-message RequestPasswordResetRequest {
-  common.v1.Email email = 1 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
-}
-
-message RequestPasswordResetResponse {
-  bool success = 1;
-}
-
-message ResetPasswordRequest {
-  common.v1.Token token = 1 [(buf.validate.field).required = true];
-  common.v1.Password new_password = 2 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
-}
-
-message ResetPasswordResponse {
-  bool success = 1;
-}
-
-message ChangePasswordRequest {
-  common.v1.String token = 1 [(buf.validate.field).required = true];
-  common.v1.Password new_password = 2 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
-}
-
-message ChangePasswordResponse {
-  bool success = 1;
-}
-
-//  #####################################  Session Management   #####################################
-
-message GetSessionsRequest {
-  common.v1.RequestMetadata metadata = 1 [(buf.validate.field).required = true];
-}
-
-message GetSessionsResponse {
-  repeated Session sessions = 1 [(buf.validate.field).required = true];
-}
-
-message RevokeSessionRequest {
-  common.v1.Token token = 1 [(buf.validate.field).required = true];
-  common.v1.UUID session_id = 2 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
-}
-
-message RevokeSessionResponse {
-  bool success = 1;
-}
-
-message RevokeAllSessionsRequest {
-  common.v1.Token token = 1 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
-}
-
-message RevokeAllSessionsResponse {
-  bool success = 1;
-}
-
-//  #####################################  Scoped Tokens   #####################################
-message GenerateScopedTokenRequest {
-  ScopedAction scope = 1;
-  AuthType auth_type = 2;
-  common.v1.String auth = 3 [(buf.validate.field).required = true];
-  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
-}
-
-message GenerateScopedTokenResponse {
-  common.v1.Token token = 1 [(buf.validate.field).required = true];
+// Session mirrors the generated db.Session model.
+message Session {
+  common.v1.UUID id = 1 [(buf.validate.field).required = true];
+  common.v1.UUID account_id = 2 [(buf.validate.field).required = true];
+  common.v1.String device_id = 3 [(buf.validate.field).required = true];
+  common.v1.String ip_address = 4 [(buf.validate.field).required = true];
+  common.v1.String user_agent = 5 [(buf.validate.field).required = true];
+  google.protobuf.Timestamp last_login_at = 6 [(buf.validate.field).required = true];
+  bool is_revoked = 7;
+  google.protobuf.Timestamp expires_at = 8 [(buf.validate.field).required = true];
+  google.protobuf.Timestamp created_at = 9 [(buf.validate.field).required = true];
+  google.protobuf.Timestamp updated_at = 10 [(buf.validate.field).required = true];
 }

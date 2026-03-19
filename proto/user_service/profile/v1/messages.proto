@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package user_service.profile.v1;
+
+import "buf/validate/validate.proto";
+import "common/v1/common.proto";
+import "user_service/v1/models.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user_service/profile/v1;userserviceprofilev1";
+
+message GetProfileRequest {
+  common.v1.UUID profile_id = 1 [(buf.validate.field).required = true];
+}
+
+message GetProfileResponse {
+  user_service.v1.Profile profile = 1 [(buf.validate.field).required = true];
+}
+
+message GetMyProfilesRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message GetMyProfilesResponse {
+  repeated user_service.v1.Profile profiles = 1;
+}
+
+message UpdateProfileRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.UUID profile_id = 2 [(buf.validate.field).required = true];
+  common.v1.Name first_name = 3 [(buf.validate.field).required = true];
+  common.v1.Name last_name = 4 [(buf.validate.field).required = true];
+  optional common.v1.Name display_name = 5;
+  optional common.v1.Url avatar_url = 6;
+  common.v1.RequestMetadata metadata = 7 [(buf.validate.field).required = true];
+}
+
+message UpdateProfileResponse {
+  user_service.v1.Profile profile = 1 [(buf.validate.field).required = true];
+}
+
+message DeleteProfileRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.UUID profile_id = 2 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];
+}
+
+message DeleteProfileResponse {
+  bool success = 1;
+}
+
+message UpdateDisplayNameRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.UUID profile_id = 2 [(buf.validate.field).required = true];
+  common.v1.Name display_name = 3 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
+}
+
+message UpdateDisplayNameResponse {
+  user_service.v1.Profile profile = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateNameRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.UUID profile_id = 2 [(buf.validate.field).required = true];
+  common.v1.Name first_name = 3 [(buf.validate.field).required = true];
+  common.v1.Name last_name = 4 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 5 [(buf.validate.field).required = true];
+}
+
+message UpdateNameResponse {
+  user_service.v1.Profile profile = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateAvatarUrlRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.UUID profile_id = 2 [(buf.validate.field).required = true];
+  common.v1.Url avatar_url = 3 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
+}
+
+message UpdateAvatarUrlResponse {
+  user_service.v1.Profile profile = 1 [(buf.validate.field).required = true];
+}

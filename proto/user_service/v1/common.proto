@@ -3,47 +3,34 @@ syntax = "proto3";
 package user_service.v1;
 
 import "buf/validate/validate.proto";
-import "common/v1/common.proto";
-import "google/protobuf/timestamp.proto";
+import "user_service/v1/models.proto";
 
 option go_package = "github.com/rijum8906/relay/proto/user_service/v1;userservice";
 
-message Account {
-  common.v1.UUID id = 1;
-  common.v1.Email email = 2;
-  bool email_verified = 3;
-  bool two_factor_enabled = 4;
-  common.v1.String role = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
-  google.protobuf.Timestamp last_login_at = 8;
+enum ScopedTokenScope {
+  SCOPED_TOKEN_SCOPE_UNSPECIFIED = 0;
+  SCOPED_TOKEN_SCOPE_EMAIL_VERIFICATION = 1;
+  SCOPED_TOKEN_SCOPE_PASSWORD_RESET = 2;
+  SCOPED_TOKEN_SCOPE_CHANGE_PASSWORD = 3;
+  SCOPED_TOKEN_SCOPE_CHANGE_EMAIL = 4;
+  SCOPED_TOKEN_SCOPE_DELETE_ACCOUNT = 5;
+  SCOPED_TOKEN_SCOPE_DELETE_PROFILE = 6;
 }
 
-// Profile represents a user profile
-message Profile {
-  common.v1.UUID id = 1;
-  common.v1.UUID account_id = 2;
-  common.v1.Name first_name = 3;
-  common.v1.Name last_name = 4;
-  optional common.v1.Name display_name = 5;
-  optional common.v1.Url avatar_url = 6;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
+enum ScopedTokenSubjectType {
+  SCOPED_TOKEN_SUBJECT_TYPE_UNSPECIFIED = 0;
+  SCOPED_TOKEN_SUBJECT_TYPE_EMAIL = 1;
+  SCOPED_TOKEN_SUBJECT_TYPE_ACCOUNT_ID = 2;
+  SCOPED_TOKEN_SUBJECT_TYPE_PROFILE_ID = 3;
 }
 
-// Session represents a user session
-message Session {
-  common.v1.UUID id = 1;
-  common.v1.UUID device_id = 3;
-  common.v1.IPAddr ip_address = 4;
-  common.v1.String user_agent = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp expires_at = 7;
-  google.protobuf.Timestamp last_active_at = 8;
+// AuthenticationResult is shared by signup and signin flows.
+message AuthenticationResult {
+  Account account = 1 [(buf.validate.field).required = true];
+  repeated Profile profiles = 2;
+  AuthTokens tokens = 3 [(buf.validate.field).required = true];
 }
 
-message LoginAccount {
-  common.v1.UUID device_id = 1 [(buf.validate.field).required = true];
-  common.v1.String user_agent = 2 [(buf.validate.field).required = true];
-  common.v1.IPAddr ip_address = 3 [(buf.validate.field).required = true];
+message SuccessResponse {
+  bool success = 1;
 }

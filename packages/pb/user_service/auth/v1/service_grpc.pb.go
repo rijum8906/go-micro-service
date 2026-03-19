@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             (unknown)
-// source: user_service/v1/auth.proto
+// source: user_service/auth/v1/service.proto
 
-package user_servicev1
+package authv1
 
 import (
 	context "context"
@@ -19,53 +19,37 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_Signup_FullMethodName                  = "/user_service.v1.AuthService/Signup"
-	AuthService_Signin_FullMethodName                  = "/user_service.v1.AuthService/Signin"
-	AuthService_Signout_FullMethodName                 = "/user_service.v1.AuthService/Signout"
-	AuthService_RequestEmailVerfication_FullMethodName = "/user_service.v1.AuthService/RequestEmailVerfication"
-	AuthService_VerifyEmail_FullMethodName             = "/user_service.v1.AuthService/VerifyEmail"
-	AuthService_RequestPasswordReset_FullMethodName    = "/user_service.v1.AuthService/RequestPasswordReset"
-	AuthService_ResetPassword_FullMethodName           = "/user_service.v1.AuthService/ResetPassword"
-	AuthService_ChangePassword_FullMethodName          = "/user_service.v1.AuthService/ChangePassword"
-	AuthService_GetMyAccount_FullMethodName            = "/user_service.v1.AuthService/GetMyAccount"
-	AuthService_GetMyProfile_FullMethodName            = "/user_service.v1.AuthService/GetMyProfile"
-	AuthService_UpdateProfile_FullMethodName           = "/user_service.v1.AuthService/UpdateProfile"
-	AuthService_DeleteProfile_FullMethodName           = "/user_service.v1.AuthService/DeleteProfile"
-	AuthService_DeleteAccount_FullMethodName           = "/user_service.v1.AuthService/DeleteAccount"
-	AuthService_GenerateScopedToken_FullMethodName     = "/user_service.v1.AuthService/GenerateScopedToken"
+	AuthService_Signup_FullMethodName                   = "/user_service.auth.v1.AuthService/Signup"
+	AuthService_Signin_FullMethodName                   = "/user_service.auth.v1.AuthService/Signin"
+	AuthService_Logout_FullMethodName                   = "/user_service.auth.v1.AuthService/Logout"
+	AuthService_LogoutAllDevice_FullMethodName          = "/user_service.auth.v1.AuthService/LogoutAllDevice"
+	AuthService_RequestEmailVerification_FullMethodName = "/user_service.auth.v1.AuthService/RequestEmailVerification"
+	AuthService_VerifyEmail_FullMethodName              = "/user_service.auth.v1.AuthService/VerifyEmail"
+	AuthService_RequestPasswordReset_FullMethodName     = "/user_service.auth.v1.AuthService/RequestPasswordReset"
+	AuthService_ResetPassword_FullMethodName            = "/user_service.auth.v1.AuthService/ResetPassword"
+	AuthService_ChangePassword_FullMethodName           = "/user_service.auth.v1.AuthService/ChangePassword"
+	AuthService_GetSessions_FullMethodName              = "/user_service.auth.v1.AuthService/GetSessions"
+	AuthService_RevokeSession_FullMethodName            = "/user_service.auth.v1.AuthService/RevokeSession"
+	AuthService_RevokeAllSessions_FullMethodName        = "/user_service.auth.v1.AuthService/RevokeAllSessions"
+	AuthService_GenerateScopedToken_FullMethodName      = "/user_service.auth.v1.AuthService/GenerateScopedToken"
 )
 
 // AuthServiceClient is the client API for AuthService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// Authentication service
 type AuthServiceClient interface {
-	// Sign up new user
-	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
-	Signup(ctx context.Context, in *SignupRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	// Sign in existing user
-	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
-	Signin(ctx context.Context, in *SigninRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	// Sign out
-	Signout(ctx context.Context, in *SignoutRequest, opts ...grpc.CallOption) (*SignoutResponse, error)
-	// Request email verification
-	RequestEmailVerfication(ctx context.Context, in *RequestEmailVerificationRequest, opts ...grpc.CallOption) (*RequestEmailVerificationResponse, error)
-	// Verify email
+	Signup(ctx context.Context, in *SignupRequest, opts ...grpc.CallOption) (*SignupResponse, error)
+	Signin(ctx context.Context, in *SigninRequest, opts ...grpc.CallOption) (*SigninResponse, error)
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	LogoutAllDevice(ctx context.Context, in *LogoutAllDeviceRequest, opts ...grpc.CallOption) (*LogoutAllDeviceResponse, error)
+	RequestEmailVerification(ctx context.Context, in *RequestEmailVerificationRequest, opts ...grpc.CallOption) (*RequestEmailVerificationResponse, error)
 	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*VerifyEmailResponse, error)
-	// Request password reset
 	RequestPasswordReset(ctx context.Context, in *RequestPasswordResetRequest, opts ...grpc.CallOption) (*RequestPasswordResetResponse, error)
-	// Reset password
 	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*ResetPasswordResponse, error)
-	// Change Password
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
-	GetMyAccount(ctx context.Context, in *GetMyAccountRequest, opts ...grpc.CallOption) (*GetMyAccountResponse, error)
-	GetMyProfile(ctx context.Context, in *GetMyProfileRequest, opts ...grpc.CallOption) (*GetMyProfileResponse, error)
-	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileResponse, error)
-	DeleteProfile(ctx context.Context, in *DeleteProfileRequest, opts ...grpc.CallOption) (*DeleteProfileResponse, error)
-	DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*DeleteAccountResponse, error)
+	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
+	RevokeSession(ctx context.Context, in *RevokeSessionRequest, opts ...grpc.CallOption) (*RevokeSessionResponse, error)
+	RevokeAllSessions(ctx context.Context, in *RevokeAllSessionsRequest, opts ...grpc.CallOption) (*RevokeAllSessionsResponse, error)
 	GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenRequest, opts ...grpc.CallOption) (*GenerateScopedTokenResponse, error)
 }
 
@@ -77,9 +61,9 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
 }
 
-func (c *authServiceClient) Signup(ctx context.Context, in *SignupRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
+func (c *authServiceClient) Signup(ctx context.Context, in *SignupRequest, opts ...grpc.CallOption) (*SignupResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AuthResponse)
+	out := new(SignupResponse)
 	err := c.cc.Invoke(ctx, AuthService_Signup_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -87,9 +71,9 @@ func (c *authServiceClient) Signup(ctx context.Context, in *SignupRequest, opts 
 	return out, nil
 }
 
-func (c *authServiceClient) Signin(ctx context.Context, in *SigninRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
+func (c *authServiceClient) Signin(ctx context.Context, in *SigninRequest, opts ...grpc.CallOption) (*SigninResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AuthResponse)
+	out := new(SigninResponse)
 	err := c.cc.Invoke(ctx, AuthService_Signin_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -97,20 +81,30 @@ func (c *authServiceClient) Signin(ctx context.Context, in *SigninRequest, opts 
 	return out, nil
 }
 
-func (c *authServiceClient) Signout(ctx context.Context, in *SignoutRequest, opts ...grpc.CallOption) (*SignoutResponse, error) {
+func (c *authServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SignoutResponse)
-	err := c.cc.Invoke(ctx, AuthService_Signout_FullMethodName, in, out, cOpts...)
+	out := new(LogoutResponse)
+	err := c.cc.Invoke(ctx, AuthService_Logout_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authServiceClient) RequestEmailVerfication(ctx context.Context, in *RequestEmailVerificationRequest, opts ...grpc.CallOption) (*RequestEmailVerificationResponse, error) {
+func (c *authServiceClient) LogoutAllDevice(ctx context.Context, in *LogoutAllDeviceRequest, opts ...grpc.CallOption) (*LogoutAllDeviceResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LogoutAllDeviceResponse)
+	err := c.cc.Invoke(ctx, AuthService_LogoutAllDevice_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) RequestEmailVerification(ctx context.Context, in *RequestEmailVerificationRequest, opts ...grpc.CallOption) (*RequestEmailVerificationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RequestEmailVerificationResponse)
-	err := c.cc.Invoke(ctx, AuthService_RequestEmailVerfication_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AuthService_RequestEmailVerification_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -157,50 +151,30 @@ func (c *authServiceClient) ChangePassword(ctx context.Context, in *ChangePasswo
 	return out, nil
 }
 
-func (c *authServiceClient) GetMyAccount(ctx context.Context, in *GetMyAccountRequest, opts ...grpc.CallOption) (*GetMyAccountResponse, error) {
+func (c *authServiceClient) GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetMyAccountResponse)
-	err := c.cc.Invoke(ctx, AuthService_GetMyAccount_FullMethodName, in, out, cOpts...)
+	out := new(GetSessionsResponse)
+	err := c.cc.Invoke(ctx, AuthService_GetSessions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authServiceClient) GetMyProfile(ctx context.Context, in *GetMyProfileRequest, opts ...grpc.CallOption) (*GetMyProfileResponse, error) {
+func (c *authServiceClient) RevokeSession(ctx context.Context, in *RevokeSessionRequest, opts ...grpc.CallOption) (*RevokeSessionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetMyProfileResponse)
-	err := c.cc.Invoke(ctx, AuthService_GetMyProfile_FullMethodName, in, out, cOpts...)
+	out := new(RevokeSessionResponse)
+	err := c.cc.Invoke(ctx, AuthService_RevokeSession_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *authServiceClient) UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileResponse, error) {
+func (c *authServiceClient) RevokeAllSessions(ctx context.Context, in *RevokeAllSessionsRequest, opts ...grpc.CallOption) (*RevokeAllSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateProfileResponse)
-	err := c.cc.Invoke(ctx, AuthService_UpdateProfile_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authServiceClient) DeleteProfile(ctx context.Context, in *DeleteProfileRequest, opts ...grpc.CallOption) (*DeleteProfileResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteProfileResponse)
-	err := c.cc.Invoke(ctx, AuthService_DeleteProfile_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *authServiceClient) DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*DeleteAccountResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteAccountResponse)
-	err := c.cc.Invoke(ctx, AuthService_DeleteAccount_FullMethodName, in, out, cOpts...)
+	out := new(RevokeAllSessionsResponse)
+	err := c.cc.Invoke(ctx, AuthService_RevokeAllSessions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -220,34 +194,19 @@ func (c *authServiceClient) GenerateScopedToken(ctx context.Context, in *Generat
 // AuthServiceServer is the server API for AuthService service.
 // All implementations should embed UnimplementedAuthServiceServer
 // for forward compatibility.
-//
-// Authentication service
 type AuthServiceServer interface {
-	// Sign up new user
-	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
-	Signup(context.Context, *SignupRequest) (*AuthResponse, error)
-	// Sign in existing user
-	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
-	Signin(context.Context, *SigninRequest) (*AuthResponse, error)
-	// Sign out
-	Signout(context.Context, *SignoutRequest) (*SignoutResponse, error)
-	// Request email verification
-	RequestEmailVerfication(context.Context, *RequestEmailVerificationRequest) (*RequestEmailVerificationResponse, error)
-	// Verify email
+	Signup(context.Context, *SignupRequest) (*SignupResponse, error)
+	Signin(context.Context, *SigninRequest) (*SigninResponse, error)
+	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	LogoutAllDevice(context.Context, *LogoutAllDeviceRequest) (*LogoutAllDeviceResponse, error)
+	RequestEmailVerification(context.Context, *RequestEmailVerificationRequest) (*RequestEmailVerificationResponse, error)
 	VerifyEmail(context.Context, *VerifyEmailRequest) (*VerifyEmailResponse, error)
-	// Request password reset
 	RequestPasswordReset(context.Context, *RequestPasswordResetRequest) (*RequestPasswordResetResponse, error)
-	// Reset password
 	ResetPassword(context.Context, *ResetPasswordRequest) (*ResetPasswordResponse, error)
-	// Change Password
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
-	GetMyAccount(context.Context, *GetMyAccountRequest) (*GetMyAccountResponse, error)
-	GetMyProfile(context.Context, *GetMyProfileRequest) (*GetMyProfileResponse, error)
-	UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error)
-	DeleteProfile(context.Context, *DeleteProfileRequest) (*DeleteProfileResponse, error)
-	DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error)
+	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
+	RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error)
+	RevokeAllSessions(context.Context, *RevokeAllSessionsRequest) (*RevokeAllSessionsResponse, error)
 	GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error)
 }
 
@@ -258,17 +217,20 @@ type AuthServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthServiceServer struct{}
 
-func (UnimplementedAuthServiceServer) Signup(context.Context, *SignupRequest) (*AuthResponse, error) {
+func (UnimplementedAuthServiceServer) Signup(context.Context, *SignupRequest) (*SignupResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Signup not implemented")
 }
-func (UnimplementedAuthServiceServer) Signin(context.Context, *SigninRequest) (*AuthResponse, error) {
+func (UnimplementedAuthServiceServer) Signin(context.Context, *SigninRequest) (*SigninResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Signin not implemented")
 }
-func (UnimplementedAuthServiceServer) Signout(context.Context, *SignoutRequest) (*SignoutResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Signout not implemented")
+func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
 }
-func (UnimplementedAuthServiceServer) RequestEmailVerfication(context.Context, *RequestEmailVerificationRequest) (*RequestEmailVerificationResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method RequestEmailVerfication not implemented")
+func (UnimplementedAuthServiceServer) LogoutAllDevice(context.Context, *LogoutAllDeviceRequest) (*LogoutAllDeviceResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LogoutAllDevice not implemented")
+}
+func (UnimplementedAuthServiceServer) RequestEmailVerification(context.Context, *RequestEmailVerificationRequest) (*RequestEmailVerificationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RequestEmailVerification not implemented")
 }
 func (UnimplementedAuthServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*VerifyEmailResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method VerifyEmail not implemented")
@@ -282,20 +244,14 @@ func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *ResetPassw
 func (UnimplementedAuthServiceServer) ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangePassword not implemented")
 }
-func (UnimplementedAuthServiceServer) GetMyAccount(context.Context, *GetMyAccountRequest) (*GetMyAccountResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetMyAccount not implemented")
+func (UnimplementedAuthServiceServer) GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSessions not implemented")
 }
-func (UnimplementedAuthServiceServer) GetMyProfile(context.Context, *GetMyProfileRequest) (*GetMyProfileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetMyProfile not implemented")
+func (UnimplementedAuthServiceServer) RevokeSession(context.Context, *RevokeSessionRequest) (*RevokeSessionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeSession not implemented")
 }
-func (UnimplementedAuthServiceServer) UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateProfile not implemented")
-}
-func (UnimplementedAuthServiceServer) DeleteProfile(context.Context, *DeleteProfileRequest) (*DeleteProfileResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteProfile not implemented")
-}
-func (UnimplementedAuthServiceServer) DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteAccount not implemented")
+func (UnimplementedAuthServiceServer) RevokeAllSessions(context.Context, *RevokeAllSessionsRequest) (*RevokeAllSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeAllSessions not implemented")
 }
 func (UnimplementedAuthServiceServer) GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GenerateScopedToken not implemented")
@@ -356,38 +312,56 @@ func _AuthService_Signin_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_Signout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SignoutRequest)
+func _AuthService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogoutRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).Signout(ctx, in)
+		return srv.(AuthServiceServer).Logout(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_Signout_FullMethodName,
+		FullMethod: AuthService_Logout_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).Signout(ctx, req.(*SignoutRequest))
+		return srv.(AuthServiceServer).Logout(ctx, req.(*LogoutRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_RequestEmailVerfication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthService_LogoutAllDevice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogoutAllDeviceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).LogoutAllDevice(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_LogoutAllDevice_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).LogoutAllDevice(ctx, req.(*LogoutAllDeviceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_RequestEmailVerification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestEmailVerificationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).RequestEmailVerfication(ctx, in)
+		return srv.(AuthServiceServer).RequestEmailVerification(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_RequestEmailVerfication_FullMethodName,
+		FullMethod: AuthService_RequestEmailVerification_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).RequestEmailVerfication(ctx, req.(*RequestEmailVerificationRequest))
+		return srv.(AuthServiceServer).RequestEmailVerification(ctx, req.(*RequestEmailVerificationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -464,92 +438,56 @@ func _AuthService_ChangePassword_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_GetMyAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMyAccountRequest)
+func _AuthService_GetSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSessionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).GetMyAccount(ctx, in)
+		return srv.(AuthServiceServer).GetSessions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_GetMyAccount_FullMethodName,
+		FullMethod: AuthService_GetSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).GetMyAccount(ctx, req.(*GetMyAccountRequest))
+		return srv.(AuthServiceServer).GetSessions(ctx, req.(*GetSessionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_GetMyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMyProfileRequest)
+func _AuthService_RevokeSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeSessionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).GetMyProfile(ctx, in)
+		return srv.(AuthServiceServer).RevokeSession(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_GetMyProfile_FullMethodName,
+		FullMethod: AuthService_RevokeSession_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).GetMyProfile(ctx, req.(*GetMyProfileRequest))
+		return srv.(AuthServiceServer).RevokeSession(ctx, req.(*RevokeSessionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateProfileRequest)
+func _AuthService_RevokeAllSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeAllSessionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).UpdateProfile(ctx, in)
+		return srv.(AuthServiceServer).RevokeAllSessions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_UpdateProfile_FullMethodName,
+		FullMethod: AuthService_RevokeAllSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).UpdateProfile(ctx, req.(*UpdateProfileRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthService_DeleteProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteProfileRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).DeleteProfile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthService_DeleteProfile_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).DeleteProfile(ctx, req.(*DeleteProfileRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthService_DeleteAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteAccountRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).DeleteAccount(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthService_DeleteAccount_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).DeleteAccount(ctx, req.(*DeleteAccountRequest))
+		return srv.(AuthServiceServer).RevokeAllSessions(ctx, req.(*RevokeAllSessionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -576,7 +514,7 @@ func _AuthService_GenerateScopedToken_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "user_service.v1.AuthService",
+	ServiceName: "user_service.auth.v1.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -588,12 +526,16 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_Signin_Handler,
 		},
 		{
-			MethodName: "Signout",
-			Handler:    _AuthService_Signout_Handler,
+			MethodName: "Logout",
+			Handler:    _AuthService_Logout_Handler,
 		},
 		{
-			MethodName: "RequestEmailVerfication",
-			Handler:    _AuthService_RequestEmailVerfication_Handler,
+			MethodName: "LogoutAllDevice",
+			Handler:    _AuthService_LogoutAllDevice_Handler,
+		},
+		{
+			MethodName: "RequestEmailVerification",
+			Handler:    _AuthService_RequestEmailVerification_Handler,
 		},
 		{
 			MethodName: "VerifyEmail",
@@ -612,24 +554,16 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_ChangePassword_Handler,
 		},
 		{
-			MethodName: "GetMyAccount",
-			Handler:    _AuthService_GetMyAccount_Handler,
+			MethodName: "GetSessions",
+			Handler:    _AuthService_GetSessions_Handler,
 		},
 		{
-			MethodName: "GetMyProfile",
-			Handler:    _AuthService_GetMyProfile_Handler,
+			MethodName: "RevokeSession",
+			Handler:    _AuthService_RevokeSession_Handler,
 		},
 		{
-			MethodName: "UpdateProfile",
-			Handler:    _AuthService_UpdateProfile_Handler,
-		},
-		{
-			MethodName: "DeleteProfile",
-			Handler:    _AuthService_DeleteProfile_Handler,
-		},
-		{
-			MethodName: "DeleteAccount",
-			Handler:    _AuthService_DeleteAccount_Handler,
+			MethodName: "RevokeAllSessions",
+			Handler:    _AuthService_RevokeAllSessions_Handler,
 		},
 		{
 			MethodName: "GenerateScopedToken",
@@ -637,5 +571,5 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "user_service/v1/auth.proto",
+	Metadata: "user_service/auth/v1/service.proto",
 }

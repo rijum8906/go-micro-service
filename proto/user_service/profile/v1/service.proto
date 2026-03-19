@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package user_service.profile.v1;
+
+import "user_service/profile/v1/messages.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user_service/profile/v1;userserviceprofilev1";
+
+service ProfileService {
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc GetMyProfiles(GetMyProfilesRequest) returns (GetMyProfilesResponse);
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse);
+  rpc UpdateDisplayName(UpdateDisplayNameRequest) returns (UpdateDisplayNameResponse);
+  rpc UpdateName(UpdateNameRequest) returns (UpdateNameResponse);
+  rpc UpdateAvatarUrl(UpdateAvatarUrlRequest) returns (UpdateAvatarUrlResponse);
+}

@@ -8,10 +8,8 @@ package user_servicev1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	v1 "github.com/rijum8906/relay/packages/pb/common/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -24,236 +22,144 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Account struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Id               *v1.UUID               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Email            *v1.Email              `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	EmailVerified    bool                   `protobuf:"varint,3,opt,name=email_verified,json=emailVerified,proto3" json:"email_verified,omitempty"`
-	TwoFactorEnabled bool                   `protobuf:"varint,4,opt,name=two_factor_enabled,json=twoFactorEnabled,proto3" json:"two_factor_enabled,omitempty"`
-	Role             *v1.String             `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt        *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	LastLoginAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_login_at,json=lastLoginAt,proto3" json:"last_login_at,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
+type ScopedTokenScope int32
 
-func (x *Account) Reset() {
-	*x = Account{}
-	mi := &file_user_service_v1_common_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
+const (
+	ScopedTokenScope_SCOPED_TOKEN_SCOPE_UNSPECIFIED        ScopedTokenScope = 0
+	ScopedTokenScope_SCOPED_TOKEN_SCOPE_EMAIL_VERIFICATION ScopedTokenScope = 1
+	ScopedTokenScope_SCOPED_TOKEN_SCOPE_PASSWORD_RESET     ScopedTokenScope = 2
+	ScopedTokenScope_SCOPED_TOKEN_SCOPE_CHANGE_PASSWORD    ScopedTokenScope = 3
+	ScopedTokenScope_SCOPED_TOKEN_SCOPE_CHANGE_EMAIL       ScopedTokenScope = 4
+	ScopedTokenScope_SCOPED_TOKEN_SCOPE_DELETE_ACCOUNT     ScopedTokenScope = 5
+	ScopedTokenScope_SCOPED_TOKEN_SCOPE_DELETE_PROFILE     ScopedTokenScope = 6
+)
 
-func (x *Account) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Account) ProtoMessage() {}
-
-func (x *Account) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_v1_common_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+// Enum value maps for ScopedTokenScope.
+var (
+	ScopedTokenScope_name = map[int32]string{
+		0: "SCOPED_TOKEN_SCOPE_UNSPECIFIED",
+		1: "SCOPED_TOKEN_SCOPE_EMAIL_VERIFICATION",
+		2: "SCOPED_TOKEN_SCOPE_PASSWORD_RESET",
+		3: "SCOPED_TOKEN_SCOPE_CHANGE_PASSWORD",
+		4: "SCOPED_TOKEN_SCOPE_CHANGE_EMAIL",
+		5: "SCOPED_TOKEN_SCOPE_DELETE_ACCOUNT",
+		6: "SCOPED_TOKEN_SCOPE_DELETE_PROFILE",
 	}
-	return mi.MessageOf(x)
+	ScopedTokenScope_value = map[string]int32{
+		"SCOPED_TOKEN_SCOPE_UNSPECIFIED":        0,
+		"SCOPED_TOKEN_SCOPE_EMAIL_VERIFICATION": 1,
+		"SCOPED_TOKEN_SCOPE_PASSWORD_RESET":     2,
+		"SCOPED_TOKEN_SCOPE_CHANGE_PASSWORD":    3,
+		"SCOPED_TOKEN_SCOPE_CHANGE_EMAIL":       4,
+		"SCOPED_TOKEN_SCOPE_DELETE_ACCOUNT":     5,
+		"SCOPED_TOKEN_SCOPE_DELETE_PROFILE":     6,
+	}
+)
+
+func (x ScopedTokenScope) Enum() *ScopedTokenScope {
+	p := new(ScopedTokenScope)
+	*p = x
+	return p
 }
 
-// Deprecated: Use Account.ProtoReflect.Descriptor instead.
-func (*Account) Descriptor() ([]byte, []int) {
+func (x ScopedTokenScope) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ScopedTokenScope) Descriptor() protoreflect.EnumDescriptor {
+	return file_user_service_v1_common_proto_enumTypes[0].Descriptor()
+}
+
+func (ScopedTokenScope) Type() protoreflect.EnumType {
+	return &file_user_service_v1_common_proto_enumTypes[0]
+}
+
+func (x ScopedTokenScope) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ScopedTokenScope.Descriptor instead.
+func (ScopedTokenScope) EnumDescriptor() ([]byte, []int) {
 	return file_user_service_v1_common_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Account) GetId() *v1.UUID {
-	if x != nil {
-		return x.Id
+type ScopedTokenSubjectType int32
+
+const (
+	ScopedTokenSubjectType_SCOPED_TOKEN_SUBJECT_TYPE_UNSPECIFIED ScopedTokenSubjectType = 0
+	ScopedTokenSubjectType_SCOPED_TOKEN_SUBJECT_TYPE_EMAIL       ScopedTokenSubjectType = 1
+	ScopedTokenSubjectType_SCOPED_TOKEN_SUBJECT_TYPE_ACCOUNT_ID  ScopedTokenSubjectType = 2
+	ScopedTokenSubjectType_SCOPED_TOKEN_SUBJECT_TYPE_PROFILE_ID  ScopedTokenSubjectType = 3
+)
+
+// Enum value maps for ScopedTokenSubjectType.
+var (
+	ScopedTokenSubjectType_name = map[int32]string{
+		0: "SCOPED_TOKEN_SUBJECT_TYPE_UNSPECIFIED",
+		1: "SCOPED_TOKEN_SUBJECT_TYPE_EMAIL",
+		2: "SCOPED_TOKEN_SUBJECT_TYPE_ACCOUNT_ID",
+		3: "SCOPED_TOKEN_SUBJECT_TYPE_PROFILE_ID",
 	}
-	return nil
-}
-
-func (x *Account) GetEmail() *v1.Email {
-	if x != nil {
-		return x.Email
+	ScopedTokenSubjectType_value = map[string]int32{
+		"SCOPED_TOKEN_SUBJECT_TYPE_UNSPECIFIED": 0,
+		"SCOPED_TOKEN_SUBJECT_TYPE_EMAIL":       1,
+		"SCOPED_TOKEN_SUBJECT_TYPE_ACCOUNT_ID":  2,
+		"SCOPED_TOKEN_SUBJECT_TYPE_PROFILE_ID":  3,
 	}
-	return nil
+)
+
+func (x ScopedTokenSubjectType) Enum() *ScopedTokenSubjectType {
+	p := new(ScopedTokenSubjectType)
+	*p = x
+	return p
 }
 
-func (x *Account) GetEmailVerified() bool {
-	if x != nil {
-		return x.EmailVerified
-	}
-	return false
+func (x ScopedTokenSubjectType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (x *Account) GetTwoFactorEnabled() bool {
-	if x != nil {
-		return x.TwoFactorEnabled
-	}
-	return false
+func (ScopedTokenSubjectType) Descriptor() protoreflect.EnumDescriptor {
+	return file_user_service_v1_common_proto_enumTypes[1].Descriptor()
 }
 
-func (x *Account) GetRole() *v1.String {
-	if x != nil {
-		return x.Role
-	}
-	return nil
+func (ScopedTokenSubjectType) Type() protoreflect.EnumType {
+	return &file_user_service_v1_common_proto_enumTypes[1]
 }
 
-func (x *Account) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
+func (x ScopedTokenSubjectType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
 }
 
-func (x *Account) GetUpdatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return nil
-}
-
-func (x *Account) GetLastLoginAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.LastLoginAt
-	}
-	return nil
-}
-
-// Profile represents a user profile
-type Profile struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *v1.UUID               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	AccountId     *v1.UUID               `protobuf:"bytes,2,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
-	FirstName     *v1.Name               `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      *v1.Name               `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	DisplayName   *v1.Name               `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
-	AvatarUrl     *v1.Url                `protobuf:"bytes,6,opt,name=avatar_url,json=avatarUrl,proto3,oneof" json:"avatar_url,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Profile) Reset() {
-	*x = Profile{}
-	mi := &file_user_service_v1_common_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Profile) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Profile) ProtoMessage() {}
-
-func (x *Profile) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_v1_common_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Profile.ProtoReflect.Descriptor instead.
-func (*Profile) Descriptor() ([]byte, []int) {
+// Deprecated: Use ScopedTokenSubjectType.Descriptor instead.
+func (ScopedTokenSubjectType) EnumDescriptor() ([]byte, []int) {
 	return file_user_service_v1_common_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Profile) GetId() *v1.UUID {
-	if x != nil {
-		return x.Id
-	}
-	return nil
-}
-
-func (x *Profile) GetAccountId() *v1.UUID {
-	if x != nil {
-		return x.AccountId
-	}
-	return nil
-}
-
-func (x *Profile) GetFirstName() *v1.Name {
-	if x != nil {
-		return x.FirstName
-	}
-	return nil
-}
-
-func (x *Profile) GetLastName() *v1.Name {
-	if x != nil {
-		return x.LastName
-	}
-	return nil
-}
-
-func (x *Profile) GetDisplayName() *v1.Name {
-	if x != nil {
-		return x.DisplayName
-	}
-	return nil
-}
-
-func (x *Profile) GetAvatarUrl() *v1.Url {
-	if x != nil {
-		return x.AvatarUrl
-	}
-	return nil
-}
-
-func (x *Profile) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
-func (x *Profile) GetUpdatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return nil
-}
-
-// Session represents a user session
-type Session struct {
+// AuthenticationResult is shared by signup and signin flows.
+type AuthenticationResult struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *v1.UUID               `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	DeviceId      *v1.UUID               `protobuf:"bytes,3,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	IpAddress     *v1.IPAddr             `protobuf:"bytes,4,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
-	UserAgent     *v1.String             `protobuf:"bytes,5,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	LastActiveAt  *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
+	Account       *Account               `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	Profiles      []*Profile             `protobuf:"bytes,2,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	Tokens        *AuthTokens            `protobuf:"bytes,3,opt,name=tokens,proto3" json:"tokens,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Session) Reset() {
-	*x = Session{}
-	mi := &file_user_service_v1_common_proto_msgTypes[2]
+func (x *AuthenticationResult) Reset() {
+	*x = AuthenticationResult{}
+	mi := &file_user_service_v1_common_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Session) String() string {
+func (x *AuthenticationResult) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Session) ProtoMessage() {}
+func (*AuthenticationResult) ProtoMessage() {}
 
-func (x *Session) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_v1_common_proto_msgTypes[2]
+func (x *AuthenticationResult) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_v1_common_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -264,84 +170,54 @@ func (x *Session) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Session.ProtoReflect.Descriptor instead.
-func (*Session) Descriptor() ([]byte, []int) {
-	return file_user_service_v1_common_proto_rawDescGZIP(), []int{2}
+// Deprecated: Use AuthenticationResult.ProtoReflect.Descriptor instead.
+func (*AuthenticationResult) Descriptor() ([]byte, []int) {
+	return file_user_service_v1_common_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Session) GetId() *v1.UUID {
+func (x *AuthenticationResult) GetAccount() *Account {
 	if x != nil {
-		return x.Id
+		return x.Account
 	}
 	return nil
 }
 
-func (x *Session) GetDeviceId() *v1.UUID {
+func (x *AuthenticationResult) GetProfiles() []*Profile {
 	if x != nil {
-		return x.DeviceId
+		return x.Profiles
 	}
 	return nil
 }
 
-func (x *Session) GetIpAddress() *v1.IPAddr {
+func (x *AuthenticationResult) GetTokens() *AuthTokens {
 	if x != nil {
-		return x.IpAddress
+		return x.Tokens
 	}
 	return nil
 }
 
-func (x *Session) GetUserAgent() *v1.String {
-	if x != nil {
-		return x.UserAgent
-	}
-	return nil
-}
-
-func (x *Session) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
-func (x *Session) GetExpiresAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.ExpiresAt
-	}
-	return nil
-}
-
-func (x *Session) GetLastActiveAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.LastActiveAt
-	}
-	return nil
-}
-
-type LoginAccount struct {
+type SuccessResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DeviceId      *v1.UUID               `protobuf:"bytes,1,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
-	UserAgent     *v1.String             `protobuf:"bytes,2,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
-	IpAddress     *v1.IPAddr             `protobuf:"bytes,3,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *LoginAccount) Reset() {
-	*x = LoginAccount{}
-	mi := &file_user_service_v1_common_proto_msgTypes[3]
+func (x *SuccessResponse) Reset() {
+	*x = SuccessResponse{}
+	mi := &file_user_service_v1_common_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *LoginAccount) String() string {
+func (x *SuccessResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LoginAccount) ProtoMessage() {}
+func (*SuccessResponse) ProtoMessage() {}
 
-func (x *LoginAccount) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_v1_common_proto_msgTypes[3]
+func (x *SuccessResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_v1_common_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -352,82 +228,42 @@ func (x *LoginAccount) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LoginAccount.ProtoReflect.Descriptor instead.
-func (*LoginAccount) Descriptor() ([]byte, []int) {
-	return file_user_service_v1_common_proto_rawDescGZIP(), []int{3}
+// Deprecated: Use SuccessResponse.ProtoReflect.Descriptor instead.
+func (*SuccessResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_v1_common_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *LoginAccount) GetDeviceId() *v1.UUID {
+func (x *SuccessResponse) GetSuccess() bool {
 	if x != nil {
-		return x.DeviceId
+		return x.Success
 	}
-	return nil
-}
-
-func (x *LoginAccount) GetUserAgent() *v1.String {
-	if x != nil {
-		return x.UserAgent
-	}
-	return nil
-}
-
-func (x *LoginAccount) GetIpAddress() *v1.IPAddr {
-	if x != nil {
-		return x.IpAddress
-	}
-	return nil
+	return false
 }
 
 var File_user_service_v1_common_proto protoreflect.FileDescriptor
 
 const file_user_service_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x1cuser_service/v1/common.proto\x12\x0fuser_service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16common/v1/common.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x84\x03\n" +
-	"\aAccount\x12\x1f\n" +
-	"\x02id\x18\x01 \x01(\v2\x0f.common.v1.UUIDR\x02id\x12&\n" +
-	"\x05email\x18\x02 \x01(\v2\x10.common.v1.EmailR\x05email\x12%\n" +
-	"\x0eemail_verified\x18\x03 \x01(\bR\remailVerified\x12,\n" +
-	"\x12two_factor_enabled\x18\x04 \x01(\bR\x10twoFactorEnabled\x12%\n" +
-	"\x04role\x18\x05 \x01(\v2\x11.common.v1.StringR\x04role\x129\n" +
-	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
-	"\rlast_login_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\vlastLoginAt\"\xbb\x03\n" +
-	"\aProfile\x12\x1f\n" +
-	"\x02id\x18\x01 \x01(\v2\x0f.common.v1.UUIDR\x02id\x12.\n" +
-	"\n" +
-	"account_id\x18\x02 \x01(\v2\x0f.common.v1.UUIDR\taccountId\x12.\n" +
-	"\n" +
-	"first_name\x18\x03 \x01(\v2\x0f.common.v1.NameR\tfirstName\x12,\n" +
-	"\tlast_name\x18\x04 \x01(\v2\x0f.common.v1.NameR\blastName\x127\n" +
-	"\fdisplay_name\x18\x05 \x01(\v2\x0f.common.v1.NameH\x00R\vdisplayName\x88\x01\x01\x122\n" +
-	"\n" +
-	"avatar_url\x18\x06 \x01(\v2\x0e.common.v1.UrlH\x01R\tavatarUrl\x88\x01\x01\x129\n" +
-	"\n" +
-	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\x0f\n" +
-	"\r_display_nameB\r\n" +
-	"\v_avatar_url\"\xf4\x02\n" +
-	"\aSession\x12\x1f\n" +
-	"\x02id\x18\x01 \x01(\v2\x0f.common.v1.UUIDR\x02id\x12,\n" +
-	"\tdevice_id\x18\x03 \x01(\v2\x0f.common.v1.UUIDR\bdeviceId\x120\n" +
-	"\n" +
-	"ip_address\x18\x04 \x01(\v2\x11.common.v1.IPAddrR\tipAddress\x120\n" +
-	"\n" +
-	"user_agent\x18\x05 \x01(\v2\x11.common.v1.StringR\tuserAgent\x129\n" +
-	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"expires_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12@\n" +
-	"\x0elast_active_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\flastActiveAt\"\xb8\x01\n" +
-	"\fLoginAccount\x124\n" +
-	"\tdevice_id\x18\x01 \x01(\v2\x0f.common.v1.UUIDB\x06\xbaH\x03\xc8\x01\x01R\bdeviceId\x128\n" +
-	"\n" +
-	"user_agent\x18\x02 \x01(\v2\x11.common.v1.StringB\x06\xbaH\x03\xc8\x01\x01R\tuserAgent\x128\n" +
-	"\n" +
-	"ip_address\x18\x03 \x01(\v2\x11.common.v1.IPAddrB\x06\xbaH\x03\xc8\x01\x01R\tipAddressB\xc2\x01\n" +
+	"\x1cuser_service/v1/common.proto\x12\x0fuser_service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1cuser_service/v1/models.proto\"\xc5\x01\n" +
+	"\x14AuthenticationResult\x12:\n" +
+	"\aaccount\x18\x01 \x01(\v2\x18.user_service.v1.AccountB\x06\xbaH\x03\xc8\x01\x01R\aaccount\x124\n" +
+	"\bprofiles\x18\x02 \x03(\v2\x18.user_service.v1.ProfileR\bprofiles\x12;\n" +
+	"\x06tokens\x18\x03 \x01(\v2\x1b.user_service.v1.AuthTokensB\x06\xbaH\x03\xc8\x01\x01R\x06tokens\"+\n" +
+	"\x0fSuccessResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess*\xa3\x02\n" +
+	"\x10ScopedTokenScope\x12\"\n" +
+	"\x1eSCOPED_TOKEN_SCOPE_UNSPECIFIED\x10\x00\x12)\n" +
+	"%SCOPED_TOKEN_SCOPE_EMAIL_VERIFICATION\x10\x01\x12%\n" +
+	"!SCOPED_TOKEN_SCOPE_PASSWORD_RESET\x10\x02\x12&\n" +
+	"\"SCOPED_TOKEN_SCOPE_CHANGE_PASSWORD\x10\x03\x12#\n" +
+	"\x1fSCOPED_TOKEN_SCOPE_CHANGE_EMAIL\x10\x04\x12%\n" +
+	"!SCOPED_TOKEN_SCOPE_DELETE_ACCOUNT\x10\x05\x12%\n" +
+	"!SCOPED_TOKEN_SCOPE_DELETE_PROFILE\x10\x06*\xbc\x01\n" +
+	"\x16ScopedTokenSubjectType\x12)\n" +
+	"%SCOPED_TOKEN_SUBJECT_TYPE_UNSPECIFIED\x10\x00\x12#\n" +
+	"\x1fSCOPED_TOKEN_SUBJECT_TYPE_EMAIL\x10\x01\x12(\n" +
+	"$SCOPED_TOKEN_SUBJECT_TYPE_ACCOUNT_ID\x10\x02\x12(\n" +
+	"$SCOPED_TOKEN_SUBJECT_TYPE_PROFILE_ID\x10\x03B\xc2\x01\n" +
 	"\x13com.user_service.v1B\vCommonProtoP\x01ZEgithub.com/rijum8906/relay/packages/pb/user_service/v1;user_servicev1\xa2\x02\x03UXX\xaa\x02\x0eUserService.V1\xca\x02\x0eUserService\\V1\xe2\x02\x1aUserService\\V1\\GPBMetadata\xea\x02\x0fUserService::V1b\x06proto3"
 
 var (
@@ -442,50 +278,26 @@ func file_user_service_v1_common_proto_rawDescGZIP() []byte {
 	return file_user_service_v1_common_proto_rawDescData
 }
 
-var file_user_service_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_user_service_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_user_service_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_user_service_v1_common_proto_goTypes = []any{
-	(*Account)(nil),               // 0: user_service.v1.Account
-	(*Profile)(nil),               // 1: user_service.v1.Profile
-	(*Session)(nil),               // 2: user_service.v1.Session
-	(*LoginAccount)(nil),          // 3: user_service.v1.LoginAccount
-	(*v1.UUID)(nil),               // 4: common.v1.UUID
-	(*v1.Email)(nil),              // 5: common.v1.Email
-	(*v1.String)(nil),             // 6: common.v1.String
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
-	(*v1.Name)(nil),               // 8: common.v1.Name
-	(*v1.Url)(nil),                // 9: common.v1.Url
-	(*v1.IPAddr)(nil),             // 10: common.v1.IPAddr
+	(ScopedTokenScope)(0),        // 0: user_service.v1.ScopedTokenScope
+	(ScopedTokenSubjectType)(0),  // 1: user_service.v1.ScopedTokenSubjectType
+	(*AuthenticationResult)(nil), // 2: user_service.v1.AuthenticationResult
+	(*SuccessResponse)(nil),      // 3: user_service.v1.SuccessResponse
+	(*Account)(nil),              // 4: user_service.v1.Account
+	(*Profile)(nil),              // 5: user_service.v1.Profile
+	(*AuthTokens)(nil),           // 6: user_service.v1.AuthTokens
 }
 var file_user_service_v1_common_proto_depIdxs = []int32{
-	4,  // 0: user_service.v1.Account.id:type_name -> common.v1.UUID
-	5,  // 1: user_service.v1.Account.email:type_name -> common.v1.Email
-	6,  // 2: user_service.v1.Account.role:type_name -> common.v1.String
-	7,  // 3: user_service.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 4: user_service.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
-	7,  // 5: user_service.v1.Account.last_login_at:type_name -> google.protobuf.Timestamp
-	4,  // 6: user_service.v1.Profile.id:type_name -> common.v1.UUID
-	4,  // 7: user_service.v1.Profile.account_id:type_name -> common.v1.UUID
-	8,  // 8: user_service.v1.Profile.first_name:type_name -> common.v1.Name
-	8,  // 9: user_service.v1.Profile.last_name:type_name -> common.v1.Name
-	8,  // 10: user_service.v1.Profile.display_name:type_name -> common.v1.Name
-	9,  // 11: user_service.v1.Profile.avatar_url:type_name -> common.v1.Url
-	7,  // 12: user_service.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 13: user_service.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 14: user_service.v1.Session.id:type_name -> common.v1.UUID
-	4,  // 15: user_service.v1.Session.device_id:type_name -> common.v1.UUID
-	10, // 16: user_service.v1.Session.ip_address:type_name -> common.v1.IPAddr
-	6,  // 17: user_service.v1.Session.user_agent:type_name -> common.v1.String
-	7,  // 18: user_service.v1.Session.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 19: user_service.v1.Session.expires_at:type_name -> google.protobuf.Timestamp
-	7,  // 20: user_service.v1.Session.last_active_at:type_name -> google.protobuf.Timestamp
-	4,  // 21: user_service.v1.LoginAccount.device_id:type_name -> common.v1.UUID
-	6,  // 22: user_service.v1.LoginAccount.user_agent:type_name -> common.v1.String
-	10, // 23: user_service.v1.LoginAccount.ip_address:type_name -> common.v1.IPAddr
-	24, // [24:24] is the sub-list for method output_type
-	24, // [24:24] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	4, // 0: user_service.v1.AuthenticationResult.account:type_name -> user_service.v1.Account
+	5, // 1: user_service.v1.AuthenticationResult.profiles:type_name -> user_service.v1.Profile
+	6, // 2: user_service.v1.AuthenticationResult.tokens:type_name -> user_service.v1.AuthTokens
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_user_service_v1_common_proto_init() }
@@ -493,19 +305,20 @@ func file_user_service_v1_common_proto_init() {
 	if File_user_service_v1_common_proto != nil {
 		return
 	}
-	file_user_service_v1_common_proto_msgTypes[1].OneofWrappers = []any{}
+	file_user_service_v1_models_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_v1_common_proto_rawDesc), len(file_user_service_v1_common_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   4,
+			NumEnums:      2,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_user_service_v1_common_proto_goTypes,
 		DependencyIndexes: file_user_service_v1_common_proto_depIdxs,
+		EnumInfos:         file_user_service_v1_common_proto_enumTypes,
 		MessageInfos:      file_user_service_v1_common_proto_msgTypes,
 	}.Build()
 	File_user_service_v1_common_proto = out.File

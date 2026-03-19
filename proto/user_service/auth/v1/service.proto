@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package user_service.auth.v1;
+
+import "user_service/auth/v1/messages.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user_service/auth/v1;userserviceauthv1";
+
+service AuthService {
+  rpc Signup(SignupRequest) returns (SignupResponse);
+  rpc Signin(SigninRequest) returns (SigninResponse);
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc LogoutAllDevice(LogoutAllDeviceRequest) returns (LogoutAllDeviceResponse);
+  rpc RequestEmailVerification(RequestEmailVerificationRequest) returns (RequestEmailVerificationResponse);
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+  rpc RequestPasswordReset(RequestPasswordResetRequest) returns (RequestPasswordResetResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
+  rpc RevokeAllSessions(RevokeAllSessionsRequest) returns (RevokeAllSessionsResponse);
+  rpc GenerateScopedToken(GenerateScopedTokenRequest) returns (GenerateScopedTokenResponse);
+}

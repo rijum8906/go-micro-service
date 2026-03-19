@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package user_service.account.v1;
+
+import "buf/validate/validate.proto";
+import "common/v1/common.proto";
+import "user_service/v1/models.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user_service/account/v1;userserviceaccountv1";
+
+message GetAccountRequest {
+  common.v1.UUID account_id = 1 [(buf.validate.field).required = true];
+}
+
+message GetAccountResponse {
+  user_service.v1.Account account = 1 [(buf.validate.field).required = true];
+}
+
+message IsAccountExistsByEmailRequest {
+  common.v1.Email email = 1 [(buf.validate.field).required = true];
+}
+
+message IsAccountExistsByEmailResponse {
+  bool exists = 1;
+  optional common.v1.UUID account_id = 2;
+}
+
+message MyAccountRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 2 [(buf.validate.field).required = true];
+}
+
+message MyAccountResponse {
+  user_service.v1.Account account = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateEmailRequest {
+  common.v1.Token access_token = 1 [(buf.validate.field).required = true];
+  common.v1.Email new_email = 2 [(buf.validate.field).required = true];
+  common.v1.Password current_password = 3 [(buf.validate.field).required = true];
+  common.v1.RequestMetadata metadata = 4 [(buf.validate.field).required = true];
+}
+
+message UpdateEmailResponse {
+  user_service.v1.Account account = 1 [(buf.validate.field).required = true];
+}
