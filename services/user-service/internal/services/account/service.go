@@ -9,14 +9,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/common/errors"
 	"github.com/rijum8906/relay/packages/common/jwt"
+	commonv1 "github.com/rijum8906/relay/packages/pb/common/v1"
+	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
+	"github.com/rijum8906/relay/services/user-service/internal/utils"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *accountService) DeleteAccount(
 	ctx context.Context,
-	reqMetadata request.RequestMetadata,
+	req *user_servicev1.DeleteAccountRequest,
 	authzMetadata request.AuthzMetadata,
 ) *errors.AppError {
 	err := s.q.DeleteAccount(ctx, authzMetadata.UserID)
@@ -43,11 +47,10 @@ func (s *accountService) CheckAccountExist(
 
 func (s *accountService) ChangePassword(
 	ctx context.Context,
-	data request.ChangePasswordRequest,
-	reqMetadata request.RequestMetadata,
+	req *user_servicev1.ChangePasswordRequest,
 	authzMetadata request.AuthzMetadata,
 ) *errors.AppError {
-	claims, appErr := s.utilsConfig.SecureJWTService.ValidateToken(ctx, data.Token)
+	claims, appErr := s.utilsConfig.SecureJWTService.ValidateToken(ctx, req.Token.Value)
 	if appErr != nil {
 		return appErr
 	}
@@ -64,7 +67,7 @@ func (s *accountService) ChangePassword(
 		})
 	}
 
-	hashedPass, err := s.utilsConfig.HashService.HashPassword(data.NewPassword)
+	hashedPass, err := s.utilsConfig.HashService.HashPassword(req.NewPassword.Value)
 	if err != nil {
 		return errors.ErrInternal.WithInternal(err)
 	}
@@ -83,50 +86,11 @@ func (s *accountService) ChangePassword(
 	return nil
 }
 
-func (s *accountService) ChangeEmail(
-	ctx context.Context,
-	data request.ChangeEmailRequest,
-	reqMetadata request.RequestMetadata,
-	authzMetadata request.AuthzMetadata,
-) (*response.ChangeEmailResult, *errors.AppError) {
-	claims, appErr := s.utilsConfig.SecureJWTService.ValidateToken(ctx, data.Token)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	if claims.Subject != authzMetadata.UserID.String() {
-		return nil, errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
-			{Field: "auth", Message: "You do not have permission to perform this action."},
-		})
-	}
-
-	if claims.Scope != jwt.ActionChangeEmail {
-		return nil, errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
-			{Field: "auth", Message: "You do not have permission to perform this action."},
-		})
-	}
-
-	_, err := s.q.UpdateAccount(ctx, db.UpdateAccountParams{
-		ID: authzMetadata.UserID,
-		Email: pgtype.Text{
-			String: data.NewEmail,
-			Valid:  true,
-		},
-	})
-	if err != nil {
-		return nil, errors.ErrInternal.WithInternal(err)
-	}
-
-	return &response.ChangeEmailResult{
-		Email: data.NewEmail,
-	}, nil
-}
-
 func (s *accountService) MyAccount(
 	ctx context.Context,
-	reqMetadata request.RequestMetadata,
+	req *user_servicev1.GetMyAccountRequest,
 	authzMetadata request.AuthzMetadata,
-) (*response.MyAccountRespose, *errors.AppError) {
+) (*user_servicev1.GetMyAccountResponse, *errors.AppError) {
 	account, err := s.q.GetAccount(ctx, authzMetadata.UserID)
 	if err != nil {
 		return nil, errors.ErrDBError.WithInternal(err)
@@ -137,30 +101,28 @@ func (s *accountService) MyAccount(
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
 
-	return &response.MyAccountRespose{
-		ID:               account.ID,
-		Email:            account.Email,
-		IsEmailVerified:  accountSecuriry.IsEmailVerified,
-		TwoFactorEnabled: accountSecuriry.TwoFactorEnabled,
-		CreatedAt:        account.CreatedAt,
-		UpdatedAt:        account.UpdatedAt,
+	return &user_servicev1.GetMyAccountResponse{
+		Id:    utils.NewID(account.ID.String()),
+		Email: utils.NewEmail(account.Email),
+		Security: &user_servicev1.GetMyAccountSecurityResponse{
+			IsEmailVerified:    accountSecuriry.IsEmailVerified,
+			EmailVerifiedAt:    utils.NewTimestamp(accountSecuriry.EmailVerifiedAt.Time),
+			TwoFactorEnabled:   accountSecuriry.TwoFactorEnabled,
+			TwoFactorEnabledAt: utils.NewTimestamp(accountSecuriry.TwoFactorEnabledAt.Time),
+		},
+		CreatedAt: utils.NewTimestamp(account.CreatedAt.Time),
+		UpdatedAt: utils.NewTimestamp(account.UpdatedAt.Time),
 	}, nil
-}
-
-var ActionTokens = []string{
-	jwt.ActionChangeEmail,
-	jwt.ActionChangePassword,
 }
 
 func (s *accountService) GenerateScopedToken(
 	ctx context.Context,
-	data request.GenerateScopedTokenRequest,
-	reqMetadata request.RequestMetadata,
+	req *user_servicev1.GenerateScopedTokenRequest,
 	authzMetadata request.AuthzMetadata,
-) (*response.GenerateScopedTokenResult, *errors.AppError) {
+) (*user_servicev1.GenerateScopedTokenResponse, *errors.AppError) {
 	isAvailable := false
-	for _, action := range ActionTokens {
-		if action == data.Scope {
+	for _, action := range user_servicev1.ScopedAction_name {
+		if action == req.Scope.String() {
 			isAvailable = true
 		}
 	}
@@ -170,7 +132,7 @@ func (s *accountService) GenerateScopedToken(
 		})
 	}
 
-	if data.Authorization.Type != request.PassAuthzType {
+	if req.AuthType.String() != user_servicev1.AuthType_AUTH_TYPE_PASSWORD.String() {
 		return nil, errors.NewAppError(errors.ErrForbidden.Code, "forbidden", []errors.Error{
 			{Field: "auth", Message: "Other authorization types are not supported yet."},
 		})
@@ -181,19 +143,25 @@ func (s *accountService) GenerateScopedToken(
 		return nil, errors.ErrDBError.WithInternal(err)
 	}
 
-	err = s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, data.Authorization.Value)
+	err = s.utilsConfig.HashService.VerifyPassword(account.PasswordHash, req.Auth.Value)
 	if err != nil {
 		return nil, errors.ErrInvalidCredentials
 	}
 
 	token, appErr := s.utilsConfig.SecureJWTService.IssueToken(ctx, jwt.ScopedActionClaims{
 		Subject: authzMetadata.UserID.String(),
-		Scope:   data.Scope,
+		Scope:   req.Scope.String(),
 	})
 	if appErr != nil {
 		return nil, appErr
 	}
-	return &response.GenerateScopedTokenResult{
-		Token: token,
+
+	return &user_servicev1.GenerateScopedTokenResponse{
+		Token: &commonv1.Token{
+			Value: token,
+			ExpiresAt: &timestamppb.Timestamp{
+				Seconds: int64(s.env.ScopedJwtExpiration.Seconds()),
+			},
+		},
 	}, nil
 }

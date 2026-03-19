@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"time"
+
 	commonv1 "github.com/rijum8906/relay/packages/pb/common/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -53,5 +55,11 @@ func NewToken(value string, expiresInSec int64) *commonv1.Token {
 		ExpiresAt: &timestamppb.Timestamp{
 			Seconds: expiresInSec,
 		},
+	}
+}
+
+func NewTimestamp(time time.Time) *timestamppb.Timestamp {
+	return &timestamppb.Timestamp{
+		Seconds: int64(time.Unix()),
 	}
 }

@@ -3,22 +3,19 @@ package account
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/common/env"
 	"github.com/rijum8906/relay/packages/common/errors"
+	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/dto/request"
-	"github.com/rijum8906/relay/services/user-service/internal/api/dto/response"
 	db "github.com/rijum8906/relay/services/user-service/internal/db/generated"
 	"github.com/rijum8906/relay/services/user-service/internal/utils"
 )
 
 type AccountService interface {
-	CheckAccountExist(ctx context.Context, id pgtype.UUID) (*response.CheckAccountExistResult, *errors.AppError)
-	DeleteAccount(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
-	MyAccount(ctx context.Context, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.MyAccountRespose, *errors.AppError)
-	ChangeEmail(ctx context.Context, data request.ChangeEmailRequest, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.ChangeEmailResult, *errors.AppError)
-	ChangePassword(ctx context.Context, data request.ChangePasswordRequest, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) *errors.AppError
-	GenerateScopedToken(ctx context.Context, data request.GenerateScopedTokenRequest, reqMetadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*response.GenerateScopedTokenResult, *errors.AppError)
+	GenerateScopedToken(ctx context.Context, req *user_servicev1.GenerateScopedTokenRequest, authzMetadata request.AuthzMetadata) (*user_servicev1.GenerateScopedTokenResponse, *errors.AppError)
+	ChangePassword(ctx context.Context, req *user_servicev1.ChangePasswordRequest, authzMetadata request.AuthzMetadata) *errors.AppError
+	DeleteAccount(ctx context.Context, req *user_servicev1.DeleteAccountRequest, authzMetadata request.AuthzMetadata) *errors.AppError
+	MyAccount(ctx context.Context, req *user_servicev1.GetMyAccountRequest, authzMetadata request.AuthzMetadata) (*user_servicev1.GetMyAccountResponse, *errors.AppError)
 }
 
 type accountService struct {
