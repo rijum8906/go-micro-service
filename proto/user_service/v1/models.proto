@@ -125,7 +125,7 @@ message GetSessionsResponse {
   repeated Session sessions = 1 [(buf.validate.field).required = true];
 }
 
-message RevokeSession {
+message RevokeSessionRequest {
   common.v1.Token token = 1 [(buf.validate.field).required = true];
   common.v1.UUID session_id = 2 [(buf.validate.field).required = true];
   common.v1.RequestMetadata metadata = 3 [(buf.validate.field).required = true];

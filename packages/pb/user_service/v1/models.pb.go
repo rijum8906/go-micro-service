@@ -1171,7 +1171,7 @@ func (x *GetSessionsResponse) GetSessions() []*Session {
 	return nil
 }
 
-type RevokeSession struct {
+type RevokeSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Token         *v1.Token              `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	SessionId     *v1.UUID               `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
@@ -1180,20 +1180,20 @@ type RevokeSession struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RevokeSession) Reset() {
-	*x = RevokeSession{}
+func (x *RevokeSessionRequest) Reset() {
+	*x = RevokeSessionRequest{}
 	mi := &file_user_service_v1_models_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RevokeSession) String() string {
+func (x *RevokeSessionRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RevokeSession) ProtoMessage() {}
+func (*RevokeSessionRequest) ProtoMessage() {}
 
-func (x *RevokeSession) ProtoReflect() protoreflect.Message {
+func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_service_v1_models_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1205,26 +1205,26 @@ func (x *RevokeSession) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RevokeSession.ProtoReflect.Descriptor instead.
-func (*RevokeSession) Descriptor() ([]byte, []int) {
+// Deprecated: Use RevokeSessionRequest.ProtoReflect.Descriptor instead.
+func (*RevokeSessionRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_v1_models_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *RevokeSession) GetToken() *v1.Token {
+func (x *RevokeSessionRequest) GetToken() *v1.Token {
 	if x != nil {
 		return x.Token
 	}
 	return nil
 }
 
-func (x *RevokeSession) GetSessionId() *v1.UUID {
+func (x *RevokeSessionRequest) GetSessionId() *v1.UUID {
 	if x != nil {
 		return x.SessionId
 	}
 	return nil
 }
 
-func (x *RevokeSession) GetMetadata() *v1.RequestMetadata {
+func (x *RevokeSessionRequest) GetMetadata() *v1.RequestMetadata {
 	if x != nil {
 		return x.Metadata
 	}
@@ -1559,8 +1559,8 @@ const file_user_service_v1_models_proto_rawDesc = "" +
 	"\x12GetSessionsRequest\x12>\n" +
 	"\bmetadata\x18\x01 \x01(\v2\x1a.common.v1.RequestMetadataB\x06\xbaH\x03\xc8\x01\x01R\bmetadata\"S\n" +
 	"\x13GetSessionsResponse\x12<\n" +
-	"\bsessions\x18\x01 \x03(\v2\x18.user_service.v1.SessionB\x06\xbaH\x03\xc8\x01\x01R\bsessions\"\xb7\x01\n" +
-	"\rRevokeSession\x12.\n" +
+	"\bsessions\x18\x01 \x03(\v2\x18.user_service.v1.SessionB\x06\xbaH\x03\xc8\x01\x01R\bsessions\"\xbe\x01\n" +
+	"\x14RevokeSessionRequest\x12.\n" +
 	"\x05token\x18\x01 \x01(\v2\x10.common.v1.TokenB\x06\xbaH\x03\xc8\x01\x01R\x05token\x126\n" +
 	"\n" +
 	"session_id\x18\x02 \x01(\v2\x0f.common.v1.UUIDB\x06\xbaH\x03\xc8\x01\x01R\tsessionId\x12>\n" +
@@ -1617,7 +1617,7 @@ var file_user_service_v1_models_proto_goTypes = []any{
 	(*ChangePasswordResponse)(nil),           // 19: user_service.v1.ChangePasswordResponse
 	(*GetSessionsRequest)(nil),               // 20: user_service.v1.GetSessionsRequest
 	(*GetSessionsResponse)(nil),              // 21: user_service.v1.GetSessionsResponse
-	(*RevokeSession)(nil),                    // 22: user_service.v1.RevokeSession
+	(*RevokeSessionRequest)(nil),             // 22: user_service.v1.RevokeSessionRequest
 	(*RevokeSessionResponse)(nil),            // 23: user_service.v1.RevokeSessionResponse
 	(*RevokeAllSessionsRequest)(nil),         // 24: user_service.v1.RevokeAllSessionsRequest
 	(*RevokeAllSessionsResponse)(nil),        // 25: user_service.v1.RevokeAllSessionsResponse
@@ -1675,9 +1675,9 @@ var file_user_service_v1_models_proto_depIdxs = []int32{
 	34, // 35: user_service.v1.ChangePasswordRequest.metadata:type_name -> common.v1.RequestMetadata
 	34, // 36: user_service.v1.GetSessionsRequest.metadata:type_name -> common.v1.RequestMetadata
 	37, // 37: user_service.v1.GetSessionsResponse.sessions:type_name -> user_service.v1.Session
-	32, // 38: user_service.v1.RevokeSession.token:type_name -> common.v1.Token
-	28, // 39: user_service.v1.RevokeSession.session_id:type_name -> common.v1.UUID
-	34, // 40: user_service.v1.RevokeSession.metadata:type_name -> common.v1.RequestMetadata
+	32, // 38: user_service.v1.RevokeSessionRequest.token:type_name -> common.v1.Token
+	28, // 39: user_service.v1.RevokeSessionRequest.session_id:type_name -> common.v1.UUID
+	34, // 40: user_service.v1.RevokeSessionRequest.metadata:type_name -> common.v1.RequestMetadata
 	32, // 41: user_service.v1.RevokeAllSessionsRequest.token:type_name -> common.v1.Token
 	34, // 42: user_service.v1.RevokeAllSessionsRequest.metadata:type_name -> common.v1.RequestMetadata
 	38, // 43: user_service.v1.GenerateScopedTokenRequest.scope:type_name -> user_service.v1.ScopedAction
