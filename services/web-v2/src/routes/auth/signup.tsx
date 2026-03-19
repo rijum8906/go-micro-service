@@ -68,7 +68,7 @@ function SignUpPage() {
       </header>
 
       <div className="flex-1 flex flex-col items-center justify-center px-4 gap-8 -mt-40">
-        <h1 style={{ fontFamily: 'Junicode, Georgia, serif' }} className="text-6xl text-[#C97D4E]">
+        <h1 className="text-6xl text-[#C97D4E]">
           Sign up
         </h1>
 
