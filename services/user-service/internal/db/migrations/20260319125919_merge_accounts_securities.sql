@@ -1,5 +1,5 @@
 -- +goose Up
-DROP TABLE IF EXISTS accounts_securities;
+DROP TABLE IF EXISTS account_securities;
 
 ALTER TABLE accounts 
   ADD COLUMN is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,

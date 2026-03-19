@@ -21,17 +21,6 @@ type Account struct {
 	TwoFactorSecret    pgtype.Text        `json:"twoFactorSecret"`
 }
 
-type AccountSecurity struct {
-	ID                 pgtype.UUID        `json:"id"`
-	AccountID          pgtype.UUID        `json:"accountId"`
-	IsEmailVerified    bool               `json:"isEmailVerified"`
-	EmailVerifiedAt    pgtype.Timestamptz `json:"emailVerifiedAt"`
-	TwoFactorEnabled   bool               `json:"twoFactorEnabled"`
-	TwoFactorEnabledAt pgtype.Timestamptz `json:"twoFactorEnabledAt"`
-	CreatedAt          pgtype.Timestamptz `json:"createdAt"`
-	UpdatedAt          pgtype.Timestamptz `json:"updatedAt"`
-}
-
 type AuditLog struct {
 	ID        int32            `json:"id"`
 	AccountID int32            `json:"accountId"`
