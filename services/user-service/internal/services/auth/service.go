@@ -41,7 +41,11 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 		parsedProfiles = append(parsedProfiles, utils.ParseProfile(&profile))
 	}
 
-	session, appErr := s.repo.AuthRepo.CreateSession(ctx, request.RequestMetadata{
+	refreshToken, err := s.utilsConfig.HashService.GenerateRefreshToken()
+	if err != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
+	session, appErr := s.repo.AuthRepo.CreateSession(ctx, refreshToken, request.RequestMetadata{
 		UserAgent: req.Metadata.UserAgent,
 		DeviceID:  req.Metadata.DeviceId,
 		IPAddr:    req.Metadata.IpAddress,

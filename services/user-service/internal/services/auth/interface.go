@@ -66,16 +66,15 @@ func NewAuthService(repo *Repo, queries *db.Queries, cfg *utils.UtilsConfig, env
 }
 
 type AuthRepository interface {
-	CreateSession(ctx context.Context, metadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*db.Session, *errors.AppError)
+	CreateSession(ctx context.Context, refreshToken string, metadata request.RequestMetadata, authzMetadata request.AuthzMetadata) (*db.Session, *errors.AppError)
 	GetSessionByRefreshToken(ctx context.Context, refreshToken string, authzMetadata request.AuthzMetadata) (*db.Session, *errors.AppError)
 	RevokeSession(ctx context.Context, id pgtype.UUID, authzMetadata request.AuthzMetadata) *errors.AppError
 	RevokeAllSessions(ctx context.Context, authzMetadata request.AuthzMetadata) *errors.AppError
 }
 
 type authRepository struct {
-	q           *db.Queries
-	utilsConfig *utils.UtilsConfig
-	env         *env.Env
+	q   *db.Queries
+	env *env.Env
 }
 
 func NewAuthRepository(queries *db.Queries, env *env.Env) AuthRepository {
