@@ -8,144 +8,204 @@ package resolver
 import (
 	"context"
 
-	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	userservicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 )
 
 // GenerateScopedToken is the resolver for the generateScopedToken field.
 func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input model.GenerateScopedTokenInput) (*model.Token, error) {
-	resp, err := r.UserClient.GenerateScopedToken(withAuthzMetadata(ctx), &user_servicev1.GenerateScopedTokenRequest{
-		Scope:    scopedActionToProto(input.Scope),
-		AuthType: authTypeToProto(input.AuthType),
-		Auth:     utils.NewString(input.Auth),
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
-	})
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapToken(resp.GetToken()), nil
+	userID, err := authenticatedUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &authv1.GenerateScopedTokenRequest{
+		Scope:       scopedActionToProto(input.Scope),
+		SubjectType: userservicev1.ScopedTokenSubjectType_SCOPED_TOKEN_SUBJECT_TYPE_ACCOUNT_ID,
+		Subject:     utils.NewString(userID),
+		Metadata:    metadata,
+	}
+	if input.AuthType == model.AuthTypeAuthTypePassword {
+		req.Password = utils.NewPassword(input.Auth)
+	}
+
+	resp, err := r.AuthClient.GenerateScopedToken(withAuthzMetadata(ctx), req)
+	if err != nil {
+		return nil, err
+	}
+
+	return gqlToken(resp.GetToken()), nil
 }
 
 // ChangePassword is the resolver for the changePassword field.
 func (r *mutationResolver) ChangePassword(ctx context.Context, input model.ChangePasswordInput) (*model.Response, error) {
-	resp, err := r.UserClient.ChangePassword(withAuthzMetadata(ctx), &user_servicev1.ChangePasswordRequest{
-		Token:       utils.NewString(input.Token),
-		NewPassword: utils.NewPassword(input.NewPassword),
-		Metadata:    requestMetadataFromContext(ctx, input.Metadata),
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	accessToken, err := requireAuthorizationToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AuthClient.ChangePassword(withAuthzMetadata(ctx), &authv1.ChangePasswordRequest{
+		AccessToken:     utils.NewToken(accessToken, 0),
+		CurrentPassword: utils.NewPassword(input.Token),
+		NewPassword:     utils.NewPassword(input.NewPassword),
+		Metadata:        metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapResponse(resp.GetSuccess()), nil
+	return gqlResponse(resp.GetSuccess(), ""), nil
 }
 
 // DeleteAccount is the resolver for the deleteAccount field.
 func (r *mutationResolver) DeleteAccount(ctx context.Context, input model.DeleteAccountInput) (*model.Response, error) {
-	resp, err := r.UserClient.DeleteAccount(withAuthzMetadata(ctx), &user_servicev1.DeleteAccountRequest{
-		Token:    utils.NewString(input.Token),
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return utils.MapResponse(resp.GetSuccess()), nil
+	return nil, utils.NewAppError("deleteAccount is not implemented by user service proto", utils.CodeNotImplemented)
 }
 
 // Signup is the resolver for the signup field.
 func (r *mutationResolver) Signup(ctx context.Context, input model.SignupInput) (*model.AuthPayload, error) {
-	resp, err := r.UserClient.Signup(ctx, &user_servicev1.SignupRequest{
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AuthClient.Signup(ctx, &authv1.SignupRequest{
 		Email:     utils.NewEmail(input.Email),
 		Password:  utils.NewPassword(input.Password),
 		FirstName: utils.NewName(input.FirstName),
 		LastName:  utils.NewName(input.LastName),
-		Metadata:  requestMetadataFromContext(ctx, input.Metadata),
+		Metadata:  metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapAuthPayload(resp), nil
+	return gqlAuthPayload(resp.GetResult())
 }
 
 // Signin is the resolver for the signin field.
 func (r *mutationResolver) Signin(ctx context.Context, input model.SigninInput) (*model.AuthPayload, error) {
-	resp, err := r.UserClient.Signin(ctx, &user_servicev1.SigninRequest{
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AuthClient.Signin(ctx, &authv1.SigninRequest{
 		Email:    utils.NewEmail(input.Email),
 		Password: utils.NewPassword(input.Password),
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+		Metadata: metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapAuthPayload(resp), nil
+	return gqlAuthPayload(resp.GetResult())
 }
 
 // Signout is the resolver for the signout field.
 func (r *mutationResolver) Signout(ctx context.Context, input model.SignoutInput) (*model.Response, error) {
-	resp, err := r.UserClient.Signout(withAuthzMetadata(ctx), &user_servicev1.SignoutRequest{
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	accessToken, err := requireAuthorizationToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AuthClient.Logout(withAuthzMetadata(ctx), &authv1.LogoutRequest{
+		AccessToken: utils.NewToken(accessToken, 0),
+		Metadata:    metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapResponse(resp.GetSuccess()), nil
+	return gqlResponse(resp.GetSuccess(), ""), nil
 }
 
 // RequestPasswordReset is the resolver for the requestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input model.RequestPasswordResetInput) (*model.Response, error) {
-	resp, err := r.UserClient.RequestPasswordReset(ctx, &user_servicev1.RequestPasswordResetRequest{
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AuthClient.RequestPasswordReset(ctx, &authv1.RequestPasswordResetRequest{
 		Email:    utils.NewEmail(input.Email),
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+		Metadata: metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapResponse(resp.GetSuccess()), nil
+	return gqlResponse(resp.GetSuccess(), ""), nil
 }
 
 // ResetPassword is the resolver for the resetPassword field.
 func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.Response, error) {
-	resp, err := r.UserClient.ResetPassword(ctx, &user_servicev1.ResetPasswordRequest{
-		Token:       utils.NewToken(input.Token, 0),
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AuthClient.ResetPassword(ctx, &authv1.ResetPasswordRequest{
+		ScopedToken: utils.NewToken(input.Token, 0),
 		NewPassword: utils.NewPassword(input.NewPassword),
-		Metadata:    requestMetadataFromContext(ctx, input.Metadata),
+		Metadata:    metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapResponse(resp.GetSuccess()), nil
+	return gqlResponse(resp.GetSuccess(), ""), nil
 }
 
 // RequestEmailVerification is the resolver for the requestEmailVerification field.
 func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input model.RequestEmailVerificationInput) (*model.Response, error) {
-	resp, err := r.UserClient.RequestEmailVerfication(withAuthzMetadata(ctx), &user_servicev1.RequestEmailVerificationRequest{
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AuthClient.RequestEmailVerification(withAuthzMetadata(ctx), &authv1.RequestEmailVerificationRequest{
 		Email:    utils.NewEmail(input.Email),
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+		Metadata: metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapResponse(resp.GetSuccess()), nil
+	return gqlResponse(resp.GetSuccess(), ""), nil
 }
 
 // VerifyEmail is the resolver for the verifyEmail field.
 func (r *mutationResolver) VerifyEmail(ctx context.Context, input model.VerifyEmailInput) (*model.Response, error) {
-	resp, err := r.UserClient.VerifyEmail(ctx, &user_servicev1.VerifyEmailRequest{
-		Token:    utils.NewToken(input.Token, 0),
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.AuthClient.VerifyEmail(ctx, &authv1.VerifyEmailRequest{
+		ScopedToken: utils.NewToken(input.Token, 0),
+		Metadata:    metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapResponse(resp.GetSuccess()), nil
+	return gqlResponse(true, ""), nil
 }

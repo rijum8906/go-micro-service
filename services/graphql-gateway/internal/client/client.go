@@ -6,10 +6,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 )
 
-func NewUserClient() user_servicev1.AuthServiceClient {
+func NewUserClient() authv1.AuthServiceClient {
 	addr := os.Getenv("USER_SERVICE_GRPC_ADDR")
 	if addr == "" {
 		addr = "user-service:8906"
@@ -20,5 +20,5 @@ func NewUserClient() user_servicev1.AuthServiceClient {
 		panic(err)
 	}
 
-	return user_servicev1.NewAuthServiceClient(conn)
+	return authv1.NewAuthServiceClient(conn)
 }

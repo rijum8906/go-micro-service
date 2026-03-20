@@ -8,19 +8,30 @@ package resolver
 import (
 	"context"
 
-	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
+	commonv1 "github.com/rijum8906/relay/packages/pb/common/v1"
+	accountv1 "github.com/rijum8906/relay/packages/pb/user_service/account/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
-	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 )
 
 // GetMyAccount is the resolver for the getMyAccount field.
 func (r *queryResolver) GetMyAccount(ctx context.Context, input model.GetMyAccountInput) (*model.MyAccount, error) {
-	resp, err := r.UserClient.GetMyAccount(withAuthzMetadata(ctx), &user_servicev1.GetMyAccountRequest{
-		Metadata: requestMetadataFromContext(ctx, input.Metadata),
+	metadata, err := authRequestMetadata(ctx, input.Metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	accessToken, err := requireAuthorizationToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := r.AccountClient.MyAccount(withAuthzMetadata(ctx), &accountv1.MyAccountRequest{
+		AccessToken: &commonv1.Token{Value: accessToken},
+		Metadata:    metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return utils.MapMyAccount(resp), nil
+	return gqlMyAccount(resp)
 }

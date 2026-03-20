@@ -5,7 +5,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	commonv1 "github.com/rijum8906/relay/packages/pb/common/v1"
-	user_servicev1 "github.com/rijum8906/relay/packages/pb/user_service/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	"google.golang.org/grpc/metadata"
 )
@@ -41,5 +40,5 @@ func withAuthzMetadata(ctx context.Context) context.Context {
 		return ctx
 	}
 
-	return metadata.AppendToOutgoingContext(ctx, user_servicev1.XHeader_X_HEADER_USER_ID.String(), userID)
+	return metadata.AppendToOutgoingContext(ctx, "x-user-id", userID)
 }
