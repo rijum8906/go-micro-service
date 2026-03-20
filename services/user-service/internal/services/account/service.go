@@ -10,11 +10,11 @@ import (
 )
 
 func (s *accountService) MyAccount(ctx context.Context, authzMetadata *request.AuthzMetadata) (*db.Account, *errors.AppError) {
-	account, err := s.q.GetAccount(ctx, authzMetadata.UserID)
+	account, err := s.repo.GetAccount(ctx, authzMetadata.UserID)
 	if err != nil {
 		return nil, errors.ErrInternal.WithInternal(err)
 	}
-	return &account, nil
+	return account, nil
 }
 
 func (s *accountService) UpdateEmail(ctx context.Context, req *accountv1.UpdateEmailRequest, authzMetadata *request.AuthzMetadata, email string) *errors.AppError {

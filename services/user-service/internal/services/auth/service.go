@@ -56,7 +56,7 @@ func (s *authService) Signin(ctx context.Context, req *authv1.SigninRequest) (*u
 	}
 
 	return &user_servicev1.AuthenticationResult{
-		Account:  utils.ParseAccount(&account),
+		Account:  utils.ParseAccount(account),
 		Profiles: parsedProfiles,
 		Tokens: &user_servicev1.AuthTokens{
 			RefreshToken: utils.NewToken(session.RefreshToken, int64(s.env.ScopedJwtExpiration.Seconds())),

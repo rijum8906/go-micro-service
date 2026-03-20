@@ -35,20 +35,20 @@ func (r *accountRepository) CreateAccount(ctx context.Context, data *authv1.Sign
 	return &account, nil
 }
 
-func (r *accountRepository) GetAccount(ctx context.Context, id pgtype.UUID) (db.Account, *errors.AppError) {
+func (r *accountRepository) GetAccount(ctx context.Context, id pgtype.UUID) (*db.Account, *errors.AppError) {
 	account, err := r.q.GetAccount(ctx, id)
 	if err != nil {
-		return db.Account{}, errors.ErrInternal.WithInternal(err)
+		return &db.Account{}, errors.ErrInternal.WithInternal(err)
 	}
-	return account, nil
+	return &account, nil
 }
 
-func (r *accountRepository) GetAccountByEmail(ctx context.Context, email string) (db.Account, *errors.AppError) {
+func (r *accountRepository) GetAccountByEmail(ctx context.Context, email string) (*db.Account, *errors.AppError) {
 	account, err := r.q.GetAccountByEmail(ctx, email)
 	if err != nil {
-		return db.Account{}, errors.ErrInternal.WithInternal(err)
+		return &db.Account{}, errors.ErrInternal.WithInternal(err)
 	}
-	return account, nil
+	return &account, nil
 }
 
 func (r *accountRepository) UpdatePassword(ctx context.Context, newPasswordHash string, authzMetadata *request.AuthzMetadata) *errors.AppError {

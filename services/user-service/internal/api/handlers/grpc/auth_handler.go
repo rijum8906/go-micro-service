@@ -14,9 +14,9 @@ func (h *AuthHandler) Signin(ctx context.Context, req *authv1.SigninRequest) (*a
 		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
 	}
 
-	result, err := h.authService.Signin(ctx, req)
-	if err != nil {
-		return nil, appErrorToGRPC(err)
+	result, appErr := h.authService.Signin(ctx, req)
+	if appErr != nil {
+		return nil, appErrorToGRPC(appErr)
 	}
 
 	return &authv1.SigninResponse{

@@ -45,8 +45,8 @@ func NewAccountService(repo AccountRepository, queries *db.Queries, cfg *utils.U
 type AccountRepository interface {
 	IsEmailExists(ctx context.Context, email string) (bool, *errors.AppError)
 	CreateAccount(ctx context.Context, data *authv1.SignupRequest) (*db.Account, *errors.AppError)
-	GetAccount(ctx context.Context, id pgtype.UUID) (db.Account, *errors.AppError)
-	GetAccountByEmail(ctx context.Context, email string) (db.Account, *errors.AppError)
+	GetAccount(ctx context.Context, id pgtype.UUID) (*db.Account, *errors.AppError)
+	GetAccountByEmail(ctx context.Context, email string) (*db.Account, *errors.AppError)
 	UpdatePassword(ctx context.Context, newPassword string, authzMetadata *request.AuthzMetadata) *errors.AppError
 	UpdateEmail(ctx context.Context, newEmail string, authzMetadata *request.AuthzMetadata) *errors.AppError
 	DeleteAccount(ctx context.Context, authzMetadata *request.AuthzMetadata) *errors.AppError
