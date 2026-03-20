@@ -3,7 +3,6 @@ package handlers
 
 import (
 	"context"
-	"errors"
 
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"google.golang.org/grpc/codes"
@@ -77,37 +76,97 @@ func (h *AuthHandler) LogoutAllDevice(ctx context.Context, req *authv1.LogoutAll
 }
 
 func (h *AuthHandler) RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) (*authv1.RequestEmailVerificationResponse, error) {
-	return nil, errors.New("fucking error")
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
+	}
+
+	if appErr := h.authService.RequestEmailVerification(ctx, req); appErr != nil {
+		return nil, appErrorToGRPC(appErr)
+	}
+
+	return &authv1.RequestEmailVerificationResponse{Success: true}, nil
 }
 
 func (h *AuthHandler) VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) (*authv1.VerifyEmailResponse, error) {
-	return nil, errors.New("fucking error")
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
+	}
+
+	if appErr := h.authService.VerifyEmail(ctx, req); appErr != nil {
+		return nil, appErrorToGRPC(appErr)
+	}
+
+	return &authv1.VerifyEmailResponse{}, nil
 }
 
 func (h *AuthHandler) RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) (*authv1.RequestPasswordResetResponse, error) {
-	return nil, errors.New("fucking error")
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
+	}
+
+	if appErr := h.authService.RequestPasswordReset(ctx, req); appErr != nil {
+		return nil, appErrorToGRPC(appErr)
+	}
+
+	return &authv1.RequestPasswordResetResponse{Success: true}, nil
 }
 
 func (h *AuthHandler) ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*authv1.ResetPasswordResponse, error) {
-	return nil, errors.New("fucking error")
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
+	}
+
+	if appErr := h.authService.ResetPassword(ctx, req); appErr != nil {
+		return nil, appErrorToGRPC(appErr)
+	}
+
+	return &authv1.ResetPasswordResponse{Success: true}, nil
 }
 
 func (h *AuthHandler) ChangePassword(ctx context.Context, req *authv1.ChangePasswordRequest) (*authv1.ChangePasswordResponse, error) {
-	return nil, errors.New("fucking error")
+	return nil, status.Error(codes.Unimplemented, "method ChangePassword not implemented")
 }
 
 func (h *AuthHandler) GetSessions(ctx context.Context, req *authv1.GetSessionsRequest) (*authv1.GetSessionsResponse, error) {
-	return nil, errors.New("fucking error")
+	return nil, status.Error(codes.Unimplemented, "method GetSessions not implemented")
 }
 
 func (h *AuthHandler) RevokeSession(ctx context.Context, req *authv1.RevokeSessionRequest) (*authv1.RevokeSessionResponse, error) {
-	return nil, errors.New("fucking error")
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
+	}
+
+	authzMetadata, err := extractAuthzMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result, appErr := h.authService.RevokeSession(ctx, req, authzMetadata)
+	if appErr != nil {
+		return nil, appErrorToGRPC(appErr)
+	}
+
+	return result, nil
 }
 
 func (h *AuthHandler) RevokeAllSessions(ctx context.Context, req *authv1.RevokeAllSessionsRequest) (*authv1.RevokeAllSessionsResponse, error) {
-	return nil, errors.New("fucking error")
+	if err := h.validator.Validate(req); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "%s", err.Error())
+	}
+
+	authzMetadata, err := extractAuthzMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result, appErr := h.authService.RevokeAllSessions(ctx, req, authzMetadata)
+	if appErr != nil {
+		return nil, appErrorToGRPC(appErr)
+	}
+
+	return result, nil
 }
 
 func (h *AuthHandler) GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenRequest) (*authv1.GenerateScopedTokenResponse, error) {
-	return nil, errors.New("fucking error")
+	return nil, status.Error(codes.Unimplemented, "method GenerateScopedToken not implemented")
 }

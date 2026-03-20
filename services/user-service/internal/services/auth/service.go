@@ -74,6 +74,12 @@ func (s *authService) Signup(ctx context.Context, req *authv1.SignupRequest) (*u
 		return nil, errors.ErrConflict.WithField("email", "email already exists")
 	}
 
+	hashPassword, err := s.utilsConfig.HashService.HashPassword(req.Password.Value)
+	if err != nil {
+		return nil, errors.ErrInternal.WithInternal(err)
+	}
+	req.Password.Value = hashPassword
+
 	account, appErr := s.repo.AccountRepo.CreateAccount(ctx, req)
 	if appErr != nil {
 		return nil, appErr

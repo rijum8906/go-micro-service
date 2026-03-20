@@ -53,20 +53,13 @@ type AccountRepository interface {
 }
 
 type accountRepository struct {
-	q           *db.Queries
-	utilsConfig *utils.UtilsConfig
-	env         *env.Env
+	q   *db.Queries
+	env *env.Env
 }
 
-func NewAccountRepository(queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AccountRepository {
+func NewAccountRepository(queries *db.Queries, env *env.Env) AccountRepository {
 	return &accountRepository{
-		q: queries,
-		utilsConfig: &utils.UtilsConfig{
-			HashService:      cfg.HashService,
-			JwtService:       cfg.JwtService,
-			SecureJWTService: cfg.SecureJWTService,
-			Storage:          cfg.Storage,
-		},
+		q:   queries,
 		env: env,
 	}
 }

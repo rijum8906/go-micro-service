@@ -78,15 +78,9 @@ type authRepository struct {
 	env         *env.Env
 }
 
-func NewAuthRepository(queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) AuthRepository {
+func NewAuthRepository(queries *db.Queries, env *env.Env) AuthRepository {
 	return &authRepository{
-		q: queries,
-		utilsConfig: &utils.UtilsConfig{
-			HashService:      cfg.HashService,
-			JwtService:       cfg.JwtService,
-			SecureJWTService: cfg.SecureJWTService,
-			Storage:          cfg.Storage,
-		},
+		q:   queries,
 		env: env,
 	}
 }

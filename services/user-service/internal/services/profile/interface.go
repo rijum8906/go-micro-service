@@ -32,17 +32,11 @@ type profileService struct {
 	env         *env.Env
 }
 
-func NewProfileService(repo ProfileRepository, queries *db.Queries, cfg *utils.UtilsConfig, env *env.Env) ProfileService {
+func NewProfileService(repo ProfileRepository, queries *db.Queries, env *env.Env) ProfileService {
 	return &profileService{
 		repo: repo,
 		q:    queries,
-		utilsConfig: &utils.UtilsConfig{
-			HashService:      cfg.HashService,
-			JwtService:       cfg.JwtService,
-			SecureJWTService: cfg.SecureJWTService,
-			Storage:          cfg.Storage,
-		},
-		env: env,
+		env:  env,
 	}
 }
 

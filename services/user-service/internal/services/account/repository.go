@@ -24,14 +24,9 @@ func (r *accountRepository) IsEmailExists(ctx context.Context, email string) (bo
 }
 
 func (r *accountRepository) CreateAccount(ctx context.Context, data *authv1.SignupRequest) (*db.Account, *errors.AppError) {
-	passwordHash, err := r.utilsConfig.HashService.HashPassword(data.Password.Value)
-	if err != nil {
-		return nil, errors.ErrInternal.WithInternal(err)
-	}
-
 	account, err := r.q.CreateAccount(ctx, db.CreateAccountParams{
 		Email:        data.Email.Value,
-		PasswordHash: passwordHash,
+		PasswordHash: data.Password.Value,
 	})
 	if err != nil {
 		return nil, errors.ErrInternal.WithInternal(err)
@@ -56,16 +51,11 @@ func (r *accountRepository) GetAccountByEmail(ctx context.Context, email string)
 	return account, nil
 }
 
-func (r *accountRepository) UpdatePassword(ctx context.Context, newPassword string, authzMetadata *request.AuthzMetadata) *errors.AppError {
-	passwordHash, err := r.utilsConfig.HashService.HashPassword(newPassword)
-	if err != nil {
-		return errors.ErrInternal.WithInternal(err)
-	}
-
-	_, err = r.q.UpdateAccount(ctx, db.UpdateAccountParams{
+func (r *accountRepository) UpdatePassword(ctx context.Context, newPasswordHash string, authzMetadata *request.AuthzMetadata) *errors.AppError {
+	_, err := r.q.UpdateAccount(ctx, db.UpdateAccountParams{
 		PasswordHash: pgtype.Text{
 			Valid:  true,
-			String: passwordHash,
+			String: newPasswordHash,
 		},
 	})
 	if err != nil {

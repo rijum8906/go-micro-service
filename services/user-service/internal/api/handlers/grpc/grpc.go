@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"buf.build/go/protovalidate"
+	accountv1 "github.com/rijum8906/relay/packages/pb/user_service/account/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
 	"github.com/rijum8906/relay/services/user-service/internal/services/account"
@@ -34,5 +35,23 @@ func NewAuthHandler(services *Services, middlewareService middleware.Middleware)
 		accountService:    services.AccountService,
 		middlewareService: middlewareService,
 		validator:         validator,
+	}
+}
+
+type AccountHandler struct {
+	accountv1.UnimplementedAccountServiceServer
+	accountService account.AccountService
+	validator      protovalidate.Validator
+}
+
+func NewAccountHandler(services *Services) *AccountHandler {
+	validator, err := protovalidate.New()
+	if err != nil {
+		panic(err)
+	}
+
+	return &AccountHandler{
+		accountService: services.AccountService,
+		validator:      validator,
 	}
 }

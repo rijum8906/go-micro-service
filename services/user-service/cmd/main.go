@@ -15,6 +15,7 @@ import (
 	"github.com/rijum8906/relay/packages/common/env"
 	"github.com/rijum8906/relay/packages/common/hash"
 	"github.com/rijum8906/relay/packages/common/jwt"
+	accountv1 "github.com/rijum8906/relay/packages/pb/user_service/account/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	handlers "github.com/rijum8906/relay/services/user-service/internal/api/handlers/grpc"
 	"github.com/rijum8906/relay/services/user-service/internal/api/middleware"
@@ -44,7 +45,8 @@ type infrastructure struct {
 }
 
 type application struct {
-	authHandler *handlers.AuthHandler
+	authHandler    *handlers.AuthHandler
+	accountHandler *handlers.AccountHandler
 }
 
 func run() error {
@@ -152,11 +154,11 @@ func bootstrapApplication(ctx context.Context, infra *infrastructure) *applicati
 	}
 
 	queries := db.New(infra.pgPool)
-	accountRepo := account.NewAccountRepository(queries, utilsCfg, infra.env)
+	accountRepo := account.NewAccountRepository(queries, infra.env)
 	accountService := account.NewAccountService(accountRepo, queries, utilsCfg, infra.env)
 	profileRepo := profile.NewProfileRepository(queries, utilsCfg, infra.env)
-	profileService := profile.NewProfileService(profileRepo, queries, utilsCfg, infra.env)
-	authRepo := auth.NewAuthRepository(queries, utilsCfg, infra.env)
+	profileService := profile.NewProfileService(profileRepo, queries, infra.env)
+	authRepo := auth.NewAuthRepository(queries, infra.env)
 	authService := auth.NewAuthService(&auth.Repo{
 		AuthRepo:    authRepo,
 		AccountRepo: accountRepo,
@@ -168,9 +170,15 @@ func bootstrapApplication(ctx context.Context, infra *infrastructure) *applicati
 		AccountService: accountService,
 		Profileservice: profileService,
 	}, middlewareService)
+	accountHandler := handlers.NewAccountHandler(&handlers.Services{
+		AuthService:    authService,
+		AccountService: accountService,
+		Profileservice: profileService,
+	})
 
 	return &application{
-		authHandler: authHandler,
+		authHandler:    authHandler,
+		accountHandler: accountHandler,
 	}
 }
 
@@ -205,9 +213,10 @@ func serveGRPC(appEnv *env.Env, app *application) error {
 	// Set serving status for all services
 	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 	healthServer.SetServingStatus("user_service.auth.v1.AuthService", grpc_health_v1.HealthCheckResponse_SERVING)
+	healthServer.SetServingStatus("user_service.account.v1.AccountService", grpc_health_v1.HealthCheckResponse_SERVING)
 
-	// Register your auth service
 	authv1.RegisterAuthServiceServer(server, app.authHandler)
+	accountv1.RegisterAccountServiceServer(server, app.accountHandler)
 
 	// Enable reflection
 	reflection.Register(server)
@@ -231,8 +240,7 @@ func serveGRPC(appEnv *env.Env, app *application) error {
 }
 
 func toError(err interface{ Error() string }) error {
-	var target error
-	if errors.As(err, &target) {
+	if target, ok := err.(error); ok {
 		return target
 	}
 
