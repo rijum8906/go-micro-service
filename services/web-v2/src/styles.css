@@ -16,12 +16,25 @@
   --font-serif: 'Junicode', Georgia, serif;
 }
 
+:root {
+  --color-background: #F2EDE4;
+  --color-foreground: #262526;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-background: #262624;
+  --color-foreground: #F2EDE4;
+  color-scheme: dark;
+}
+
 body {
   font-family: ui-sans-serif, system-ui, sans-serif;
-  background-color: #F2EDE4;
-  color: #262526;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background-color 300ms ease, color 300ms ease;
 }
 
 a {

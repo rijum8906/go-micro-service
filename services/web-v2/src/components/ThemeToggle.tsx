@@ -1,8 +1,9 @@
-import { useThemeStore } from '../store/theme'
+import { useResolvedTheme, useThemeStore } from '#/store/theme'
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const { toggleTheme } = useThemeStore()
+  const { resolvedTheme } = useResolvedTheme()
+  const isDark = resolvedTheme === 'dark'
 
   return (
     <button
