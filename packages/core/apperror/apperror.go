@@ -36,6 +36,11 @@ func New(errType ErrorType, code, message string) *AppError {
 	}
 }
 
+func (e *AppError) WithMessage(message string) *AppError {
+	e.Message = message
+	return e
+}
+
 func (e *AppError) AddDetail(filed, message string) {
 	e.Details = append(e.Details, Detail{
 		Field:   filed,
