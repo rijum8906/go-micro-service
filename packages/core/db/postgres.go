@@ -1,12 +1,12 @@
-// Package db defines the database connection for the application
+// Package db provides database connection logic with PostgreSQL
 package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
@@ -20,23 +20,30 @@ type Config struct {
 	RetryCounts int
 }
 
-// Connect creates a connection pool
-func Connect(ctx context.Context, cfg Config) (*sql.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
+// Connect creates a connection pool and returns pgxpool.Pool
+func Connect(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.SSLMode)
 
-	db, err := sql.Open("pgx", dsn)
+	// 1. Parse config to set pool limits
+	poolConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		return nil, apperror.ErrInternal.WithMessage("Could not open database connection")
+		return nil, apperror.ErrInternal.WithMessage("Failed to parse database DSN")
 	}
 
-	// DB connection configs
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(5 * time.Minute)
-	db.SetConnMaxIdleTime(2 * time.Minute)
+	// Pool configurations
+	poolConfig.MaxConns = 25
+	poolConfig.MinConns = 5
+	poolConfig.MaxConnLifetime = 5 * time.Minute
+	poolConfig.MaxConnIdleTime = 2 * time.Minute
 
-	// Retry Logic
+	// 2. Initialize the pool
+	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to initialize database pool")
+	}
+
+	// 3. Retry Logic with Ping
 	retryCounts := 5
 	if cfg.RetryCounts > 0 {
 		retryCounts = cfg.RetryCounts
@@ -44,18 +51,18 @@ func Connect(ctx context.Context, cfg Config) (*sql.DB, error) {
 
 	var lastErr error
 	for i := 0; i < retryCounts; i++ {
-		// Check if the parent context (e.g., system shutdown) is already done
 		select {
 		case <-ctx.Done():
+			pool.Close()
 			return nil, apperror.ErrInternal.WithMessage("Database connection cancelled by context")
 		default:
-			// Fresh timeout for this specific ping attempt
+			// Ping to ensure connection is actually alive
 			pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
-			err := db.PingContext(pingCtx)
+			err := pool.Ping(pingCtx)
 			cancel()
 
 			if err == nil {
-				return db, nil
+				return pool, nil // Success!
 			}
 
 			lastErr = err
@@ -63,5 +70,7 @@ func Connect(ctx context.Context, cfg Config) (*sql.DB, error) {
 		}
 	}
 
+	// connection failed. Close the pool and return error
+	pool.Close()
 	return nil, apperror.ErrInternal.WithMessage(fmt.Sprintf("Database unreachable: %v", lastErr))
 }
