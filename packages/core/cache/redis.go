@@ -19,7 +19,7 @@ type Config struct {
 }
 
 // Connect initializes a Redis client with a health check
-func Connect(ctx context.Context, cfg Config) (*redis.Client, error) {
+func Connect(ctx context.Context, cfg Config) (*redis.Client, *apperror.AppError) {
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
 	client := redis.NewClient(&redis.Options{
