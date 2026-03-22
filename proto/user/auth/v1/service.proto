@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package user.auth.v1;
+
+import "user/auth/v1/messages.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user/auth/v1;proto_auth";
+
+service AuthService {
+  rpc Signin(SigninRequest) returns (SigninResponse);
+}

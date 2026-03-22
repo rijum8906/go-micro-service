@@ -1,0 +1,25 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/rijum8906/relay/packages/pb
+
+  # 2. Prevent buf from trying to rename official Google packages
+  disable:
+    - module: buf.build/googleapis/googleapis
+    - module: buf.build/protocolbuffers/well-known-types
+    - module: buf.build/bufbuild/protovalidate
+
+plugins:
+  - local: protoc-gen-go
+    out: ../packages/pb
+    opt:
+      - paths=source_relative # 4. Maintains your folder hierarchy (v1/auth.pb.go)
+
+  # Generate gRPC service definitions
+  - local: protoc-gen-go-grpc
+    out: ../packages/pb
+    opt:
+      - paths=source_relative
+      - require_unimplemented_servers=false # 5. Cleaner server implementation for Go
