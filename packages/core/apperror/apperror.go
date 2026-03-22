@@ -41,11 +41,12 @@ func (e *AppError) WithMessage(message string) *AppError {
 	return e
 }
 
-func (e *AppError) AddDetail(filed, message string) {
+func (e *AppError) WithDetail(field, message string) *AppError {
 	e.Details = append(e.Details, Detail{
-		Field:   filed,
+		Field:   field,
 		Message: message,
 	})
+	return e
 }
 
 func (e *AppError) WithRequestID(requestID string) *AppError {
