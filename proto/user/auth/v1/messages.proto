@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package user.auth.v1;
+
+import "core/v1/common.proto";
+import "user/models/v1/model.proto";
+
+option go_package = "github.com/rijum8906/relay/proto/user/v1/auth;proto_auth";
+
+message SigninRequest {
+  string email = 1;
+  string password = 2;
+  core.v1.RequestMetadata metadata = 3;
+}
+
+message AuthResponse {
+  user.models.v1.Account account = 1;
+  repeated user.models.v1.Profile profiles = 2;
+  user.models.v1.AuthToken tokens = 3;
+}
+
+message SigninResponse {
+  string token = 1;
+}
