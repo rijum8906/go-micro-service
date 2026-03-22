@@ -8,6 +8,7 @@ import (
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
+	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
 type Config struct {
@@ -39,7 +40,7 @@ type Config struct {
 }
 
 // Load reads .env files (for local dev) and parses environment variables
-func Load() (*Config, error) {
+func Load() (*Config, *apperror.AppError) {
 	// 1. Load .env file if it exists
 	_ = godotenv.Load()
 
@@ -47,7 +48,7 @@ func Load() (*Config, error) {
 
 	// 2. Parse variables into the struct
 	if err := env.Parse(cfg); err != nil {
-		return nil, fmt.Errorf("config parse error: %w", err)
+		return nil, apperror.ErrInternal.WithMessage(fmt.Sprintf("Failed to parse environment variables: %v", err))
 	}
 
 	return cfg, nil
