@@ -17,7 +17,7 @@ var (
 		Code:    CodeInternal,
 		Message: "Internal Server Error",
 	}
-	ErrorForbidden = &AppError{
+	ErrForbidden = &AppError{
 		Type:    TypeForbidden,
 		Code:    CodeForbidden,
 		Message: "Forbidden",
