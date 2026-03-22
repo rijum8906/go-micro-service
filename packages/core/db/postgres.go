@@ -21,7 +21,7 @@ type Config struct {
 }
 
 // Connect creates a connection pool and returns pgxpool.Pool
-func Connect(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
+func Connect(ctx context.Context, cfg Config) (*pgxpool.Pool, *apperror.AppError) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.SSLMode)
 
