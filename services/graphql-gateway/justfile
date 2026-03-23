@@ -1,7 +1,0 @@
-set shell := ["zsh", "-c"]
-
-default:
-    @just --list
-
-setup:
-
