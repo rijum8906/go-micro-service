@@ -1,0 +1,43 @@
+schema:
+  - ./graph/schema/core/**/*.graphqls
+  - ./graph/schema/user/**/*.graphqls
+
+exec:
+  package: generated
+  layout: follow-schema
+  dir: ./graph/generated
+  filename_template: "{name}.generated.go"
+
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+resolver:
+  package: resolver
+  layout: follow-schema
+  dir: ./graph/resolver
+  filename_template: "{name}.resolvers.go"
+
+call_argument_directives_with_null: true
+
+autobind:
+  # - "github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
+
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64

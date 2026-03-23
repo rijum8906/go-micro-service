@@ -1,0 +1,4 @@
+input SigninInput {
+  username: String!
+  password: String!
+}
