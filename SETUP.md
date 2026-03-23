@@ -11,7 +11,8 @@ go work init
 ### Step 2: Add packages
 
 ```bash
-go work use ./services/user 
+go work use ./services/user
+go work use ./services/graphql-gateway
 go work use ./packages/core
 go work use ./packages/pb
 ```
