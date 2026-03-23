@@ -1,34 +1,49 @@
 # Relay
 
-a microservice
+Relay is a platform for managing personal and team tasks with a focus on clear
+ownership, collaboration, and cross-team coordination.
 
-## Initialize Project
+## Overview
 
-### Sync go work
+Managing tasks across individuals and teams often leads to:
 
-#### Step 1: Create go work
+- Lack of visibility into ownership
+- Poor coordination between teams
+- Difficulty tracking progress in real time
 
-```bash
-go work init
-```
+Relay addresses these challenges by providing a unified system for task
+management and collaboration.
 
-#### Step 2: Add packages
+## Features
 
-```bash
-go work use ./services/*
-go work use ./packages/common
-go work use ./packages/pb
-```
+- **Task Management**  
+  Create, update, and track tasks with clear ownership and status.
 
-#### Step 3: Sync go work
+- **Team Collaboration**  
+  Assign tasks to team members and collaborate efficiently within teams.
 
-```bash
-go work sync
+- **Cross-Team Coordination**  
+  Assign and manage tasks across multiple teams with shared visibility.
 
-```
+- **Personal Task Tracking**  
+  Manage individual tasks alongside team responsibilities in one place.
 
-#### Step 4: Install go dependencies
+- **Progress Tracking**  
+  Monitor task status and ensure accountability across workflows.
 
-```bash
-go mod download
-```
+## Use Cases
+
+- Managing team-based projects  
+- Coordinating work across multiple teams  
+- Tracking personal and shared tasks in a single system  
+
+## Future Improvements
+
+- Real-time updates and notifications  
+- Task dependencies and workflow automation  
+- Role-based access control (RBAC)  
+- Analytics and reporting  
+
+## License
+
+This project is licensed under the MIT License.
