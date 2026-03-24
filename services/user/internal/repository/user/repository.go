@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/services/user/internal/db"
-	dto "github.com/rijum8906/relay/services/user/internal/dto/auth"
+	"github.com/rijum8906/relay/services/user/internal/dto"
 )
 
 func (r *userRepository) CreateUser(ctx context.Context, data *dto.Register) (*db.User, *apperror.AppError) {
