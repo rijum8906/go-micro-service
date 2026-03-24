@@ -81,14 +81,14 @@ func (q *Queries) GetProfile(ctx context.Context, userID uuid.UUID) (Profile, er
 	return i, err
 }
 
-const GetProfileUserID = `-- name: GetProfileUserID :one
+const GetProfileByUserID = `-- name: GetProfileByUserID :one
 SELECT id, user_id, first_name, last_name, avatar_url, created_at, updated_at
 FROM profiles
 WHERE user_id = $1 LIMIT 1
 `
 
-func (q *Queries) GetProfileUserID(ctx context.Context, userID uuid.UUID) (Profile, error) {
-	row := q.db.QueryRow(ctx, GetProfileUserID, userID)
+func (q *Queries) GetProfileByUserID(ctx context.Context, userID uuid.UUID) (Profile, error) {
+	row := q.db.QueryRow(ctx, GetProfileByUserID, userID)
 	var i Profile
 	err := row.Scan(
 		&i.ID,

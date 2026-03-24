@@ -3,10 +3,10 @@ SELECT *
 FROM sessions
 WHERE id = $1 LIMIT 1;
 
--- name: GetSessionUserID :one
+-- name: GetSessionsByUserID :many
 SELECT *
 FROM sessions
-WHERE user_id = $1 LIMIT 1;
+WHERE user_id = $1 ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
 
 -- name: GetSessionByRefreshTokenHash :one
 SELECT *
@@ -25,6 +25,16 @@ expires_at = $8,
 is_revoked = $9
 WHERE id = $1
 RETURNING *;
+
+-- name: RevokeSession :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE id = $1;
+
+-- name: RevokeActiveSessions :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE user_id = $1 AND is_revoked = false;
 
 -- name: CreateSession :one
 INSERT INTO sessions (
