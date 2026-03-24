@@ -3,7 +3,7 @@ SELECT *
 FROM profiles
 WHERE user_id = $1 LIMIT 1;
 
--- name: GetProfileUserID :one
+-- name: GetProfileByUserID :one
 SELECT *
 FROM profiles
 WHERE user_id = $1 LIMIT 1;
