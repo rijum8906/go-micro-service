@@ -1,0 +1,37 @@
+package session
+
+import (
+	"context"
+
+	"github.com/google/uuid"
+	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/services/user/internal/db"
+)
+
+func (r *sessionRepository) GetSession(ctx context.Context, id uuid.UUID) (*db.Session, *apperror.AppError) {
+	session, err := r.q.GetSession(ctx, id)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to get session").WithDetail("error", err.Error())
+	}
+	return &session, nil
+}
+
+func (r *sessionRepository) GetActiveSessions(ctx context.Context, userID uuid.UUID, limit, offfset int32) (*[]db.Session, *apperror.AppError) {
+	sessions, err := r.q.GetSessionsByUserID(ctx, db.GetSessionsByUserIDParams{
+		UserID: userID,
+		Limit:  limit,
+		Offset: offfset,
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to get active sessions").WithDetail("error", err.Error())
+	}
+	return &sessions, nil
+}
+
+func (r *sessionRepository) RevokeSession(ctx context.Context, id uuid.UUID) *apperror.AppError {
+	err := r.q.RevokeSession(ctx, id)
+	if err != nil {
+		return apperror.ErrInternal.WithMessage("Failed to revoke session").WithDetail("error", err.Error())
+	}
+	return nil
+}
