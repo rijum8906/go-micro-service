@@ -14,6 +14,16 @@ Managing tasks across individuals and teams often leads to:
 Relay addresses these challenges by providing a unified system for task
 management and collaboration.
 
+## Development
+
+Use `make` for repository and service tasks.
+
+```bash
+make
+make setup SERVICE=user
+make -C services/web dev
+```
+
 ## Features
 
 - **Task Management**  
