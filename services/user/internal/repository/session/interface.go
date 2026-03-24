@@ -10,6 +10,7 @@ import (
 )
 
 type SessionRepository interface {
+	CreateSession(ctx context.Context, data db.CreateSessionParams) (*db.Session, *apperror.AppError)
 	GetSession(ctx context.Context, id uuid.UUID) (*db.Session, *apperror.AppError)
 	GetActiveSessions(ctx context.Context, userID uuid.UUID, limit, offfset int32) (*[]db.Session, *apperror.AppError)
 	RevokeSession(ctx context.Context, id uuid.UUID) *apperror.AppError
