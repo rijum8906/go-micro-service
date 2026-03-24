@@ -19,12 +19,14 @@ type Querier interface {
 	DeleteSessionsByUserID(ctx context.Context, userID uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetProfile(ctx context.Context, userID uuid.UUID) (Profile, error)
-	GetProfileUserID(ctx context.Context, userID uuid.UUID) (Profile, error)
+	GetProfileByUserID(ctx context.Context, userID uuid.UUID) (Profile, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetSessionByRefreshTokenHash(ctx context.Context, refreshTokenHash string) (Session, error)
-	GetSessionUserID(ctx context.Context, userID uuid.UUID) (Session, error)
+	GetSessionsByUserID(ctx context.Context, arg GetSessionsByUserIDParams) ([]Session, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
+	RevokeActiveSessions(ctx context.Context, userID uuid.UUID) error
+	RevokeSession(ctx context.Context, id uuid.UUID) error
 	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) (Session, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

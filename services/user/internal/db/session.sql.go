@@ -134,29 +134,70 @@ func (q *Queries) GetSessionByRefreshTokenHash(ctx context.Context, refreshToken
 	return i, err
 }
 
-const GetSessionUserID = `-- name: GetSessionUserID :one
+const GetSessionsByUserID = `-- name: GetSessionsByUserID :many
 SELECT id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
 FROM sessions
-WHERE user_id = $1 LIMIT 1
+WHERE user_id = $1 ORDER BY last_login_at DESC LIMIT $2 OFFSET $3
 `
 
-func (q *Queries) GetSessionUserID(ctx context.Context, userID uuid.UUID) (Session, error) {
-	row := q.db.QueryRow(ctx, GetSessionUserID, userID)
-	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.RefreshTokenHash,
-		&i.UserAgent,
-		&i.IpAddr,
-		&i.DeviceID,
-		&i.LastLoginAt,
-		&i.ExpiresAt,
-		&i.IsRevoked,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+type GetSessionsByUserIDParams struct {
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) GetSessionsByUserID(ctx context.Context, arg GetSessionsByUserIDParams) ([]Session, error) {
+	rows, err := q.db.Query(ctx, GetSessionsByUserID, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Session{}
+	for rows.Next() {
+		var i Session
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.RefreshTokenHash,
+			&i.UserAgent,
+			&i.IpAddr,
+			&i.DeviceID,
+			&i.LastLoginAt,
+			&i.ExpiresAt,
+			&i.IsRevoked,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const RevokeActiveSessions = `-- name: RevokeActiveSessions :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE user_id = $1 AND is_revoked = false
+`
+
+func (q *Queries) RevokeActiveSessions(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, RevokeActiveSessions, userID)
+	return err
+}
+
+const RevokeSession = `-- name: RevokeSession :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE id = $1
+`
+
+func (q *Queries) RevokeSession(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, RevokeSession, id)
+	return err
 }
 
 const UpdateSession = `-- name: UpdateSession :one
