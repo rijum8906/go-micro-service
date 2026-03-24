@@ -29,3 +29,10 @@ go work sync
 ```bash
 go mod download
 ```
+
+### Step 5: Run setup targets
+
+```bash
+make setup SERVICE=user
+make setup SERVICE=graphql-gateway
+```

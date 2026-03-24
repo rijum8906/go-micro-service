@@ -1,8 +1,0 @@
-set shell := ["zsh", "-c"]
-
-default:
-    @just --list
-
-setup:
-    go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-

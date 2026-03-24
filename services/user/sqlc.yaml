@@ -1,0 +1,53 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "db/queries"
+    schema: "db/schema.sql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/db"
+        sql_package: "pgx/v5"
+        emit_interface: true
+        emit_json_tags: false # NOTE: this won't be sent to user directly, graphql-gateway will handle it
+        emit_prepared_queries: false
+        emit_empty_slices: true
+        emit_exact_table_names: false
+        emit_exported_queries: true
+        overrides:
+          - go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+            db_type: "uuid"
+            nullable: false
+          - go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+            db_type: "uuid"
+            nullable: true
+          - go_type:
+              import: "time"
+              type: "Time"
+            db_type: "timestamptz"
+            nullable: true
+          - go_type:
+              import: "time"
+              type: "Time"
+            db_type: "timestamptz"
+            nullable: false
+          - go_type:
+              type: "string"
+            db_type: "varchar"
+            nullable: true
+          - go_type:
+              type: "string"
+            db_type: "varchar"
+            nullable: false
+          - go_type:
+              type: "string"
+            db_type: "text"
+            nullable: false
+          - go_type:
+              type: "string"
+            db_type: "text"
+            nullable: true
