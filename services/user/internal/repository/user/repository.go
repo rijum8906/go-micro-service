@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,6 +29,9 @@ func (r *userRepository) CreateUser(ctx context.Context, data *dto.Register) (*d
 func (r *userRepository) GetUser(ctx context.Context, id uuid.UUID) (*db.User, *apperror.AppError) {
 	user, err := r.q.GetUser(ctx, id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("User not found")
+		}
 		return nil, apperror.ErrInternal.WithMessage("Failed to get user").WithDetail("error", err.Error())
 	}
 	return &user, nil
@@ -35,6 +40,9 @@ func (r *userRepository) GetUser(ctx context.Context, id uuid.UUID) (*db.User, *
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*db.User, *apperror.AppError) {
 	user, err := r.q.GetUserByEmail(ctx, email)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("User not found")
+		}
 		return nil, apperror.ErrInternal.WithMessage("Failed to get user").WithDetail("error", err.Error())
 	}
 	return &user, nil
