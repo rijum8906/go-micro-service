@@ -24,18 +24,18 @@ var File_user_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x1buser/auth/v1/messages.proto2R\n" +
-	"\vAuthService\x12C\n" +
-	"\x06Signin\x12\x1b.user.auth.v1.SigninRequest\x1a\x1c.user.auth.v1.SigninResponseB\xae\x01\n" +
+	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x1buser/auth/v1/messages.proto2N\n" +
+	"\vAuthService\x12?\n" +
+	"\x05Login\x12\x1a.user.auth.v1.LoginRequest\x1a\x1a.user.auth.v1.AuthResponseB\xae\x01\n" +
 	"\x10com.user.auth.v1B\fServiceProtoP\x01Z:github.com/rijum8906/relay/packages/pb/user/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\fUser.Auth.V1\xca\x02\fUser\\Auth\\V1\xe2\x02\x18User\\Auth\\V1\\GPBMetadata\xea\x02\x0eUser::Auth::V1b\x06proto3"
 
 var file_user_auth_v1_service_proto_goTypes = []any{
-	(*SigninRequest)(nil),  // 0: user.auth.v1.SigninRequest
-	(*SigninResponse)(nil), // 1: user.auth.v1.SigninResponse
+	(*LoginRequest)(nil), // 0: user.auth.v1.LoginRequest
+	(*AuthResponse)(nil), // 1: user.auth.v1.AuthResponse
 }
 var file_user_auth_v1_service_proto_depIdxs = []int32{
-	0, // 0: user.auth.v1.AuthService.Signin:input_type -> user.auth.v1.SigninRequest
-	1, // 1: user.auth.v1.AuthService.Signin:output_type -> user.auth.v1.SigninResponse
+	0, // 0: user.auth.v1.AuthService.Login:input_type -> user.auth.v1.LoginRequest
+	1, // 1: user.auth.v1.AuthService.Login:output_type -> user.auth.v1.AuthResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

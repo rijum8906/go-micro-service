@@ -23,7 +23,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type SigninRequest struct {
+type LoginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
@@ -32,20 +32,20 @@ type SigninRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SigninRequest) Reset() {
-	*x = SigninRequest{}
+func (x *LoginRequest) Reset() {
+	*x = LoginRequest{}
 	mi := &file_user_auth_v1_messages_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SigninRequest) String() string {
+func (x *LoginRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SigninRequest) ProtoMessage() {}
+func (*LoginRequest) ProtoMessage() {}
 
-func (x *SigninRequest) ProtoReflect() protoreflect.Message {
+func (x *LoginRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_auth_v1_messages_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -57,26 +57,26 @@ func (x *SigninRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SigninRequest.ProtoReflect.Descriptor instead.
-func (*SigninRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoginRequest.ProtoReflect.Descriptor instead.
+func (*LoginRequest) Descriptor() ([]byte, []int) {
 	return file_user_auth_v1_messages_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *SigninRequest) GetEmail() string {
+func (x *LoginRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *SigninRequest) GetPassword() string {
+func (x *LoginRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
 }
 
-func (x *SigninRequest) GetMetadata() *v1.RequestMetadata {
+func (x *LoginRequest) GetMetadata() *v1.RequestMetadata {
 	if x != nil {
 		return x.Metadata
 	}
@@ -143,65 +143,19 @@ func (x *AuthResponse) GetTokens() *v11.AuthToken {
 	return nil
 }
 
-type SigninResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SigninResponse) Reset() {
-	*x = SigninResponse{}
-	mi := &file_user_auth_v1_messages_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SigninResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SigninResponse) ProtoMessage() {}
-
-func (x *SigninResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_auth_v1_messages_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SigninResponse.ProtoReflect.Descriptor instead.
-func (*SigninResponse) Descriptor() ([]byte, []int) {
-	return file_user_auth_v1_messages_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *SigninResponse) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
 var File_user_auth_v1_messages_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_messages_proto_rawDesc = "" +
 	"\n" +
-	"\x1buser/auth/v1/messages.proto\x12\fuser.auth.v1\x1a\x14core/v1/common.proto\x1a\x1auser/models/v1/model.proto\"w\n" +
-	"\rSigninRequest\x12\x14\n" +
+	"\x1buser/auth/v1/messages.proto\x12\fuser.auth.v1\x1a\x14core/v1/common.proto\x1a\x1auser/models/v1/model.proto\"v\n" +
+	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x124\n" +
 	"\bmetadata\x18\x03 \x01(\v2\x18.core.v1.RequestMetadataR\bmetadata\"\xa9\x01\n" +
 	"\fAuthResponse\x121\n" +
 	"\aaccount\x18\x01 \x01(\v2\x17.user.models.v1.AccountR\aaccount\x123\n" +
 	"\bprofiles\x18\x02 \x03(\v2\x17.user.models.v1.ProfileR\bprofiles\x121\n" +
-	"\x06tokens\x18\x03 \x01(\v2\x19.user.models.v1.AuthTokenR\x06tokens\"&\n" +
-	"\x0eSigninResponse\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05tokenB\xaf\x01\n" +
+	"\x06tokens\x18\x03 \x01(\v2\x19.user.models.v1.AuthTokenR\x06tokensB\xaf\x01\n" +
 	"\x10com.user.auth.v1B\rMessagesProtoP\x01Z:github.com/rijum8906/relay/packages/pb/user/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\fUser.Auth.V1\xca\x02\fUser\\Auth\\V1\xe2\x02\x18User\\Auth\\V1\\GPBMetadata\xea\x02\x0eUser::Auth::V1b\x06proto3"
 
 var (
@@ -216,21 +170,20 @@ func file_user_auth_v1_messages_proto_rawDescGZIP() []byte {
 	return file_user_auth_v1_messages_proto_rawDescData
 }
 
-var file_user_auth_v1_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_user_auth_v1_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_user_auth_v1_messages_proto_goTypes = []any{
-	(*SigninRequest)(nil),      // 0: user.auth.v1.SigninRequest
+	(*LoginRequest)(nil),       // 0: user.auth.v1.LoginRequest
 	(*AuthResponse)(nil),       // 1: user.auth.v1.AuthResponse
-	(*SigninResponse)(nil),     // 2: user.auth.v1.SigninResponse
-	(*v1.RequestMetadata)(nil), // 3: core.v1.RequestMetadata
-	(*v11.Account)(nil),        // 4: user.models.v1.Account
-	(*v11.Profile)(nil),        // 5: user.models.v1.Profile
-	(*v11.AuthToken)(nil),      // 6: user.models.v1.AuthToken
+	(*v1.RequestMetadata)(nil), // 2: core.v1.RequestMetadata
+	(*v11.Account)(nil),        // 3: user.models.v1.Account
+	(*v11.Profile)(nil),        // 4: user.models.v1.Profile
+	(*v11.AuthToken)(nil),      // 5: user.models.v1.AuthToken
 }
 var file_user_auth_v1_messages_proto_depIdxs = []int32{
-	3, // 0: user.auth.v1.SigninRequest.metadata:type_name -> core.v1.RequestMetadata
-	4, // 1: user.auth.v1.AuthResponse.account:type_name -> user.models.v1.Account
-	5, // 2: user.auth.v1.AuthResponse.profiles:type_name -> user.models.v1.Profile
-	6, // 3: user.auth.v1.AuthResponse.tokens:type_name -> user.models.v1.AuthToken
+	2, // 0: user.auth.v1.LoginRequest.metadata:type_name -> core.v1.RequestMetadata
+	3, // 1: user.auth.v1.AuthResponse.account:type_name -> user.models.v1.Account
+	4, // 2: user.auth.v1.AuthResponse.profiles:type_name -> user.models.v1.Profile
+	5, // 3: user.auth.v1.AuthResponse.tokens:type_name -> user.models.v1.AuthToken
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -249,7 +202,7 @@ func file_user_auth_v1_messages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_auth_v1_messages_proto_rawDesc), len(file_user_auth_v1_messages_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
