@@ -36,7 +36,7 @@ type Config struct {
 	// TTL
 	SessionTTL      time.Duration `env:"SESSION_TTL" envDefault:"15m"`
 	ScopedTokenTTL  time.Duration `env:"SCOPED_TOKEN_TTL" envDefault:"10m"`
-	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL" envDefault:"30d"`
+	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL" envDefault:"600h"`
 }
 
 // Load reads .env files (for local dev) and parses environment variables
