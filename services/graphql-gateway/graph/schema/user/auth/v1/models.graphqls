@@ -1,0 +1,30 @@
+type User {
+  id: ID!
+  email: String!
+  isEmailVerified: Boolean!
+  emailVerifiedAt: DateTime
+  twoFactorEnabled: Boolean!
+  twoFactorEnabledAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Profile {
+  id: ID!
+  userId: ID!
+  firstName: String!
+  lastName: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  avatarUrl: String
+}
+
+type Session {
+  id: ID!
+  userId: ID!
+  refreshToken: String!
+  deviceId: String!
+  ipAddr: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}

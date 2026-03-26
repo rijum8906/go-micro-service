@@ -1,4 +1,11 @@
-input SigninInput {
-  username: String!
+input LoginInput{
+  email: String!
   password: String!
+}
+
+input RegisterInput{
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
 }
