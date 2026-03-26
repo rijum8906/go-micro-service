@@ -8,6 +8,14 @@ import (
 	"github.com/rijum8906/relay/services/user/internal/db"
 )
 
+func (r *profileRepository) CreateProfile(ctx context.Context, params db.CreateProfileParams) (*db.Profile, *apperror.AppError) {
+	profile, err := r.q.CreateProfile(ctx, params)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to create profile").WithDetail("error", err.Error())
+	}
+	return &profile, nil
+}
+
 func (r *profileRepository) GetProfile(ctx context.Context, id uuid.UUID) (*db.Profile, *apperror.AppError) {
 	profile, err := r.q.GetProfile(ctx, id)
 	if err != nil {
