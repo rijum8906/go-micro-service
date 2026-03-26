@@ -16,6 +16,10 @@ type Config struct {
 	AppName string `env:"APP_NAME,required"`
 	Port    int    `env:"PORT" envDefault:"8080"`
 
+	// Services' Address
+	UserServiceAddr    string `env:"USER_SERVICE_ADDR" envDefault:"user-service:8081"`
+	GraphQLGatewayAddr string `env:"GRAPHQL_GATEWAY_ADDR" envDefault:"graphql-gateway:8080"`
+
 	// Postgres
 	DBHost     string `env:"DB_HOST,required"`
 	DBPort     int    `env:"DB_PORT" envDefault:"5432"`
