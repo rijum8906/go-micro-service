@@ -1,4 +1,4 @@
-FROM golang:trixie AS builder
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY packages/core/go.mod packages/core/go.sum ./
 COPY services/graphql-gateway/go.mod services/graphql-gateway/go.sum ./
 COPY packages/pb/go.mod packages/pb/go.sum ./
 
-RUN go mod download
+CMD [ "go", "mod", "download" ]
 
 COPY . .
 
@@ -18,6 +18,8 @@ FROM alpine:3.10
 WORKDIR /app
 
 COPY --from=builder /app/graphql-gateway .
+
+COPY services/graphql-gateway/.env .
 
 EXPOSE 8080
 

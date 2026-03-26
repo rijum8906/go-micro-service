@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -20,14 +19,8 @@ func main() {
 	// Load configuration
 	config := env.MustLoad()
 
-	// Get User Service address from environment
-	userServiceAddr := os.Getenv("USER_SERVICE_ADDR")
-	if userServiceAddr == "" {
-		userServiceAddr = "localhost:8906"
-	}
-
 	// Dial User Service
-	conn, err := grpc.NewClient(userServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(config.UserServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to user service: %v", err)
 	}
@@ -47,6 +40,6 @@ func main() {
 	http.Handle("/query", srv)
 
 	log.Printf("GraphQL gateway started on :%d", config.Port)
-	log.Printf("Connecting to user service at %s", userServiceAddr)
+	log.Printf("Connecting to user service at %s", config.UserServiceAddr)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), nil))
 }
