@@ -8,5 +8,9 @@ option go_package = "github.com/rijum8906/relay/proto/user/auth/v1;proto_auth";
 
 service AuthService {
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
   rpc Login(LoginRequest) returns (AuthResponse);
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc Register(RegisterRequest) returns (AuthResponse);
 }

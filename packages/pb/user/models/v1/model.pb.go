@@ -9,6 +9,7 @@ package modelsv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -21,17 +22,69 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Token struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
+	ExpiresIn     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Token) Reset() {
+	*x = Token{}
+	mi := &file_user_models_v1_model_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Token) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Token) ProtoMessage() {}
+
+func (x *Token) ProtoReflect() protoreflect.Message {
+	mi := &file_user_models_v1_model_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Token.ProtoReflect.Descriptor instead.
+func (*Token) Descriptor() ([]byte, []int) {
+	return file_user_models_v1_model_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Token) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+func (x *Token) GetExpiresIn() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return nil
+}
+
 type AuthToken struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
-	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	AccessToken   *Token                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  *Token                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AuthToken) Reset() {
 	*x = AuthToken{}
-	mi := &file_user_models_v1_model_proto_msgTypes[0]
+	mi := &file_user_models_v1_model_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +96,7 @@ func (x *AuthToken) String() string {
 func (*AuthToken) ProtoMessage() {}
 
 func (x *AuthToken) ProtoReflect() protoreflect.Message {
-	mi := &file_user_models_v1_model_proto_msgTypes[0]
+	mi := &file_user_models_v1_model_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,46 +109,50 @@ func (x *AuthToken) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthToken.ProtoReflect.Descriptor instead.
 func (*AuthToken) Descriptor() ([]byte, []int) {
-	return file_user_models_v1_model_proto_rawDescGZIP(), []int{0}
+	return file_user_models_v1_model_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AuthToken) GetAccessToken() string {
+func (x *AuthToken) GetAccessToken() *Token {
 	if x != nil {
 		return x.AccessToken
 	}
-	return ""
+	return nil
 }
 
-func (x *AuthToken) GetRefreshToken() string {
+func (x *AuthToken) GetRefreshToken() *Token {
 	if x != nil {
 		return x.RefreshToken
 	}
-	return ""
+	return nil
 }
 
-type Account struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+type User struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Email              string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	IsEmailVerified    bool                   `protobuf:"varint,3,opt,name=is_email_verified,json=isEmailVerified,proto3" json:"is_email_verified,omitempty"`
+	EmialVerifiedAt    *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=emial_verified_at,json=emialVerifiedAt,proto3" json:"emial_verified_at,omitempty"`
+	TwoFactorEnabled   bool                   `protobuf:"varint,5,opt,name=two_factor_enabled,json=twoFactorEnabled,proto3" json:"two_factor_enabled,omitempty"`
+	TwoFactorEnabledAt *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=two_factor_enabled_at,json=twoFactorEnabledAt,proto3" json:"two_factor_enabled_at,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
-func (x *Account) Reset() {
-	*x = Account{}
-	mi := &file_user_models_v1_model_proto_msgTypes[1]
+func (x *User) Reset() {
+	*x = User{}
+	mi := &file_user_models_v1_model_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Account) String() string {
+func (x *User) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Account) ProtoMessage() {}
+func (*User) ProtoMessage() {}
 
-func (x *Account) ProtoReflect() protoreflect.Message {
-	mi := &file_user_models_v1_model_proto_msgTypes[1]
+func (x *User) ProtoReflect() protoreflect.Message {
+	mi := &file_user_models_v1_model_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -106,37 +163,67 @@ func (x *Account) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Account.ProtoReflect.Descriptor instead.
-func (*Account) Descriptor() ([]byte, []int) {
-	return file_user_models_v1_model_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) {
+	return file_user_models_v1_model_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Account) GetId() string {
+func (x *User) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *Account) GetEmail() string {
+func (x *User) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
+func (x *User) GetIsEmailVerified() bool {
+	if x != nil {
+		return x.IsEmailVerified
+	}
+	return false
+}
+
+func (x *User) GetEmialVerifiedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EmialVerifiedAt
+	}
+	return nil
+}
+
+func (x *User) GetTwoFactorEnabled() bool {
+	if x != nil {
+		return x.TwoFactorEnabled
+	}
+	return false
+}
+
+func (x *User) GetTwoFactorEnabledAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.TwoFactorEnabledAt
+	}
+	return nil
+}
+
 type Profile struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FirstName     string                 `protobuf:"bytes,1,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName      string                 `protobuf:"bytes,2,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Bio           string                 `protobuf:"bytes,3,opt,name=bio,proto3" json:"bio,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	FirstName     string                 `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	AvatarUrl     string                 `protobuf:"bytes,5,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Profile) Reset() {
 	*x = Profile{}
-	mi := &file_user_models_v1_model_proto_msgTypes[2]
+	mi := &file_user_models_v1_model_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -148,7 +235,7 @@ func (x *Profile) String() string {
 func (*Profile) ProtoMessage() {}
 
 func (x *Profile) ProtoReflect() protoreflect.Message {
-	mi := &file_user_models_v1_model_proto_msgTypes[2]
+	mi := &file_user_models_v1_model_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -161,7 +248,21 @@ func (x *Profile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Profile.ProtoReflect.Descriptor instead.
 func (*Profile) Descriptor() ([]byte, []int) {
-	return file_user_models_v1_model_proto_rawDescGZIP(), []int{2}
+	return file_user_models_v1_model_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Profile) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Profile) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 func (x *Profile) GetFirstName() string {
@@ -178,9 +279,9 @@ func (x *Profile) GetLastName() string {
 	return ""
 }
 
-func (x *Profile) GetBio() string {
+func (x *Profile) GetAvatarUrl() string {
 	if x != nil {
-		return x.Bio
+		return x.AvatarUrl
 	}
 	return ""
 }
@@ -189,18 +290,29 @@ var File_user_models_v1_model_proto protoreflect.FileDescriptor
 
 const file_user_models_v1_model_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser/models/v1/model.proto\x12\x0euser.models.v1\"S\n" +
-	"\tAuthToken\x12!\n" +
-	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
-	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"/\n" +
-	"\aAccount\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"W\n" +
-	"\aProfile\x12\x1d\n" +
+	"\x1auser/models/v1/model.proto\x12\x0euser.models.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"X\n" +
+	"\x05Token\x12\x14\n" +
+	"\x05value\x18\x01 \x01(\tR\x05value\x129\n" +
 	"\n" +
-	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x02 \x01(\tR\blastName\x12\x10\n" +
-	"\x03bio\x18\x03 \x01(\tR\x03bioB\xba\x01\n" +
+	"expires_in\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresIn\"\x81\x01\n" +
+	"\tAuthToken\x128\n" +
+	"\faccess_token\x18\x01 \x01(\v2\x15.user.models.v1.TokenR\vaccessToken\x12:\n" +
+	"\rrefresh_token\x18\x02 \x01(\v2\x15.user.models.v1.TokenR\frefreshToken\"\x9d\x02\n" +
+	"\x04User\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12*\n" +
+	"\x11is_email_verified\x18\x03 \x01(\bR\x0fisEmailVerified\x12F\n" +
+	"\x11emial_verified_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x0femialVerifiedAt\x12,\n" +
+	"\x12two_factor_enabled\x18\x05 \x01(\bR\x10twoFactorEnabled\x12M\n" +
+	"\x15two_factor_enabled_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x12twoFactorEnabledAt\"\x8d\x01\n" +
+	"\aProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1d\n" +
+	"\n" +
+	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x04 \x01(\tR\blastName\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\x05 \x01(\tR\tavatarUrlB\xba\x01\n" +
 	"\x12com.user.models.v1B\n" +
 	"ModelProtoP\x01Z>github.com/rijum8906/relay/packages/pb/user/models/v1;modelsv1\xa2\x02\x03UMX\xaa\x02\x0eUser.Models.V1\xca\x02\x0eUser\\Models\\V1\xe2\x02\x1aUser\\Models\\V1\\GPBMetadata\xea\x02\x10User::Models::V1b\x06proto3"
 
@@ -216,18 +328,25 @@ func file_user_models_v1_model_proto_rawDescGZIP() []byte {
 	return file_user_models_v1_model_proto_rawDescData
 }
 
-var file_user_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_user_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_user_models_v1_model_proto_goTypes = []any{
-	(*AuthToken)(nil), // 0: user.models.v1.AuthToken
-	(*Account)(nil),   // 1: user.models.v1.Account
-	(*Profile)(nil),   // 2: user.models.v1.Profile
+	(*Token)(nil),                 // 0: user.models.v1.Token
+	(*AuthToken)(nil),             // 1: user.models.v1.AuthToken
+	(*User)(nil),                  // 2: user.models.v1.User
+	(*Profile)(nil),               // 3: user.models.v1.Profile
+	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_user_models_v1_model_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: user.models.v1.Token.expires_in:type_name -> google.protobuf.Timestamp
+	0, // 1: user.models.v1.AuthToken.access_token:type_name -> user.models.v1.Token
+	0, // 2: user.models.v1.AuthToken.refresh_token:type_name -> user.models.v1.Token
+	4, // 3: user.models.v1.User.emial_verified_at:type_name -> google.protobuf.Timestamp
+	4, // 4: user.models.v1.User.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_user_models_v1_model_proto_init() }
@@ -241,7 +360,7 @@ func file_user_models_v1_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_models_v1_model_proto_rawDesc), len(file_user_models_v1_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
