@@ -10,6 +10,7 @@ import (
 )
 
 type ProfileRepository interface {
+	CreateProfile(ctx context.Context, params db.CreateProfileParams) (*db.Profile, *apperror.AppError)
 	GetProfile(ctx context.Context, id uuid.UUID) (*db.Profile, *apperror.AppError)
 	GetProfileByUserID(ctx context.Context, id uuid.UUID) (*db.Profile, *apperror.AppError)
 	UpdateProfileNames(ctx context.Context, id uuid.UUID, firstName, lastName string) (*db.Profile, *apperror.AppError)

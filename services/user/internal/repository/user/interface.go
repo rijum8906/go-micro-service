@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/services/user/internal/db"
-	dto "github.com/rijum8906/relay/services/user/internal/dto/auth"
+	"github.com/rijum8906/relay/services/user/internal/dto"
 )
 
 type UserRepository interface {
