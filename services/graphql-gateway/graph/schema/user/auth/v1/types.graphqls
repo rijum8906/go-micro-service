@@ -1,3 +1,15 @@
-type AuthRespose {
-  token: String!
+type Token {
+  value: String!
+  expiresIn: DateTime!
+}
+
+type AuthTokens {
+  accessToken: Token!
+  refreshToken: Token!
+}
+
+type AuthResponse {
+  tokens: AuthTokens!
+  user: User!
+  profile: Profile!
 }

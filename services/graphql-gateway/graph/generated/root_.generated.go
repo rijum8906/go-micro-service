@@ -29,17 +29,61 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	AuthRespose struct {
-		Token func(childComplexity int) int
+	AuthResponse struct {
+		Profile func(childComplexity int) int
+		Tokens  func(childComplexity int) int
+		User    func(childComplexity int) int
+	}
+
+	AuthTokens struct {
+		AccessToken  func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
 	}
 
 	Mutation struct {
-		Empty  func(childComplexity int) int
-		Signin func(childComplexity int, input model.SigninInput) int
+		Empty    func(childComplexity int) int
+		Login    func(childComplexity int, input model.LoginInput) int
+		Register func(childComplexity int, input model.RegisterInput) int
+	}
+
+	Profile struct {
+		AvatarURL func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		FirstName func(childComplexity int) int
+		ID        func(childComplexity int) int
+		LastName  func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	Query struct {
 		Empty func(childComplexity int) int
+	}
+
+	Session struct {
+		CreatedAt    func(childComplexity int) int
+		DeviceID     func(childComplexity int) int
+		ID           func(childComplexity int) int
+		IPAddr       func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+		UserID       func(childComplexity int) int
+	}
+
+	Token struct {
+		ExpiresIn func(childComplexity int) int
+		Value     func(childComplexity int) int
+	}
+
+	User struct {
+		CreatedAt          func(childComplexity int) int
+		Email              func(childComplexity int) int
+		EmailVerifiedAt    func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		IsEmailVerified    func(childComplexity int) int
+		TwoFactorEnabled   func(childComplexity int) int
+		TwoFactorEnabledAt func(childComplexity int) int
+		UpdatedAt          func(childComplexity int) int
 	}
 }
 
@@ -57,12 +101,40 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
-	case "AuthRespose.token":
-		if e.ComplexityRoot.AuthRespose.Token == nil {
+	case "AuthResponse.profile":
+		if e.ComplexityRoot.AuthResponse.Profile == nil {
 			break
 		}
 
-		return e.ComplexityRoot.AuthRespose.Token(childComplexity), true
+		return e.ComplexityRoot.AuthResponse.Profile(childComplexity), true
+
+	case "AuthResponse.tokens":
+		if e.ComplexityRoot.AuthResponse.Tokens == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthResponse.Tokens(childComplexity), true
+
+	case "AuthResponse.user":
+		if e.ComplexityRoot.AuthResponse.User == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthResponse.User(childComplexity), true
+
+	case "AuthTokens.accessToken":
+		if e.ComplexityRoot.AuthTokens.AccessToken == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthTokens.AccessToken(childComplexity), true
+
+	case "AuthTokens.refreshToken":
+		if e.ComplexityRoot.AuthTokens.RefreshToken == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthTokens.RefreshToken(childComplexity), true
 
 	case "Mutation._empty":
 		if e.ComplexityRoot.Mutation.Empty == nil {
@@ -71,17 +143,78 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Mutation.Empty(childComplexity), true
 
-	case "Mutation.Signin":
-		if e.ComplexityRoot.Mutation.Signin == nil {
+	case "Mutation.Login":
+		if e.ComplexityRoot.Mutation.Login == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_Signin_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_Login_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.Signin(childComplexity, args["input"].(model.SigninInput)), true
+		return e.ComplexityRoot.Mutation.Login(childComplexity, args["input"].(model.LoginInput)), true
+
+	case "Mutation.Register":
+		if e.ComplexityRoot.Mutation.Register == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_Register_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.Register(childComplexity, args["input"].(model.RegisterInput)), true
+
+	case "Profile.avatarUrl":
+		if e.ComplexityRoot.Profile.AvatarURL == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.AvatarURL(childComplexity), true
+
+	case "Profile.createdAt":
+		if e.ComplexityRoot.Profile.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.CreatedAt(childComplexity), true
+
+	case "Profile.firstName":
+		if e.ComplexityRoot.Profile.FirstName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.FirstName(childComplexity), true
+
+	case "Profile.id":
+		if e.ComplexityRoot.Profile.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.ID(childComplexity), true
+
+	case "Profile.lastName":
+		if e.ComplexityRoot.Profile.LastName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.LastName(childComplexity), true
+
+	case "Profile.updatedAt":
+		if e.ComplexityRoot.Profile.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.UpdatedAt(childComplexity), true
+
+	case "Profile.userId":
+		if e.ComplexityRoot.Profile.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.UserID(childComplexity), true
 
 	case "Query._empty":
 		if e.ComplexityRoot.Query.Empty == nil {
@@ -89,6 +222,125 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Empty(childComplexity), true
+
+	case "Session.createdAt":
+		if e.ComplexityRoot.Session.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Session.CreatedAt(childComplexity), true
+
+	case "Session.deviceId":
+		if e.ComplexityRoot.Session.DeviceID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Session.DeviceID(childComplexity), true
+
+	case "Session.id":
+		if e.ComplexityRoot.Session.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Session.ID(childComplexity), true
+
+	case "Session.ipAddr":
+		if e.ComplexityRoot.Session.IPAddr == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Session.IPAddr(childComplexity), true
+
+	case "Session.refreshToken":
+		if e.ComplexityRoot.Session.RefreshToken == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Session.RefreshToken(childComplexity), true
+
+	case "Session.updatedAt":
+		if e.ComplexityRoot.Session.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Session.UpdatedAt(childComplexity), true
+
+	case "Session.userId":
+		if e.ComplexityRoot.Session.UserID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Session.UserID(childComplexity), true
+
+	case "Token.expiresIn":
+		if e.ComplexityRoot.Token.ExpiresIn == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Token.ExpiresIn(childComplexity), true
+
+	case "Token.value":
+		if e.ComplexityRoot.Token.Value == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Token.Value(childComplexity), true
+
+	case "User.createdAt":
+		if e.ComplexityRoot.User.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.CreatedAt(childComplexity), true
+
+	case "User.email":
+		if e.ComplexityRoot.User.Email == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.Email(childComplexity), true
+
+	case "User.emailVerifiedAt":
+		if e.ComplexityRoot.User.EmailVerifiedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.EmailVerifiedAt(childComplexity), true
+
+	case "User.id":
+		if e.ComplexityRoot.User.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ID(childComplexity), true
+
+	case "User.isEmailVerified":
+		if e.ComplexityRoot.User.IsEmailVerified == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.IsEmailVerified(childComplexity), true
+
+	case "User.twoFactorEnabled":
+		if e.ComplexityRoot.User.TwoFactorEnabled == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.TwoFactorEnabled(childComplexity), true
+
+	case "User.twoFactorEnabledAt":
+		if e.ComplexityRoot.User.TwoFactorEnabledAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.TwoFactorEnabledAt(childComplexity), true
+
+	case "User.updatedAt":
+		if e.ComplexityRoot.User.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.UpdatedAt(childComplexity), true
 
 	}
 	return 0, false
@@ -98,7 +350,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputSigninInput,
+		ec.unmarshalInputLoginInput,
+		ec.unmarshalInputRegisterInput,
 	)
 	first := true
 
@@ -174,6 +427,8 @@ func newExecutionContext(
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/core/v1/scalars.graphqls", Input: `scalar DateTime
+`, BuiltIn: false},
 	{Name: "../schema/core/v1/schema.graphqls", Input: `type Mutation {
   _empty: String
 }
@@ -182,18 +437,69 @@ type Query {
   _empty: String
 }
 `, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input SigninInput {
-  username: String!
+	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input LoginInput{
+  email: String!
   password: String!
+}
+
+input RegisterInput{
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/auth/v1/models.graphqls", Input: `type User {
+  id: ID!
+  email: String!
+  isEmailVerified: Boolean!
+  emailVerifiedAt: DateTime
+  twoFactorEnabled: Boolean!
+  twoFactorEnabledAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Profile {
+  id: ID!
+  userId: ID!
+  firstName: String!
+  lastName: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  avatarUrl: String
+}
+
+type Session {
+  id: ID!
+  userId: ID!
+  refreshToken: String!
+  deviceId: String!
+  ipAddr: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/mutations.graphqls", Input: `extend type Mutation {
-  Signin(input : SigninInput!): AuthRespose!
+  Login(input: LoginInput!): AuthResponse!
+  Register(input: RegisterInput!): AuthResponse!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/queries.graphqls", Input: ``, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/types.graphqls", Input: `type AuthRespose {
-  token: String!
+	{Name: "../schema/user/auth/v1/types.graphqls", Input: `type Token {
+  value: String!
+  expiresIn: DateTime!
+}
+
+type AuthTokens {
+  accessToken: Token!
+  refreshToken: Token!
+}
+
+type AuthResponse {
+  tokens: AuthTokens!
+  user: User!
+  profile: Profile!
 }
 `, BuiltIn: false},
 }

@@ -8,6 +8,14 @@ import (
 	"github.com/rijum8906/relay/services/user/internal/db"
 )
 
+func (r *sessionRepository) CreateSession(ctx context.Context, params db.CreateSessionParams) (*db.Session, *apperror.AppError) {
+	session, err := r.q.CreateSession(ctx, params)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to create session").WithDetail("error", err.Error())
+	}
+	return &session, nil
+}
+
 func (r *sessionRepository) GetSession(ctx context.Context, id uuid.UUID) (*db.Session, *apperror.AppError) {
 	session, err := r.q.GetSession(ctx, id)
 	if err != nil {
