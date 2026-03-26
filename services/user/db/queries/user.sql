@@ -23,9 +23,10 @@ RETURNING *;
 -- name: CreateUser :one
 INSERT INTO users (
     email,
-    password_hash
+    password_hash,
+    two_factor_enabled_at
 ) VALUES (
-    $1, $2
+    $1, $2, $3
 )
 RETURNING *;
 
