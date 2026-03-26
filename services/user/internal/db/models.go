@@ -5,8 +5,6 @@
 package db
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -16,8 +14,8 @@ type Oauth struct {
 	Provider   string
 	ProviderID string
 	UserID     uuid.UUID
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
 }
 
 type Profile struct {
@@ -26,8 +24,8 @@ type Profile struct {
 	FirstName string
 	LastName  string
 	AvatarUrl string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
 
 type Session struct {
@@ -37,11 +35,11 @@ type Session struct {
 	UserAgent        string
 	IpAddr           string
 	DeviceID         string
-	LastLoginAt      time.Time
-	ExpiresAt        time.Time
+	LastLoginAt      pgtype.Timestamptz
+	ExpiresAt        pgtype.Timestamptz
 	IsRevoked        bool
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
 }
 
 type User struct {
@@ -50,8 +48,8 @@ type User struct {
 	PasswordHash       pgtype.Text
 	IsEmailVerified    bool
 	TwoFactorEnabled   bool
-	TwoFactorEnabledAt time.Time
-	EmailVerifiedAt    time.Time
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
+	TwoFactorEnabledAt pgtype.Timestamptz
+	EmailVerifiedAt    pgtype.Timestamptz
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
 }

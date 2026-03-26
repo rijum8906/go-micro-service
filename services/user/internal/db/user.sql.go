@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -16,20 +15,22 @@ import (
 const CreateUser = `-- name: CreateUser :one
 INSERT INTO users (
     email,
-    password_hash
+    password_hash,
+    two_factor_enabled_at
 ) VALUES (
-    $1, $2
+    $1, $2, $3
 )
 RETURNING id, email, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Email        string
-	PasswordHash pgtype.Text
+	Email              string
+	PasswordHash       pgtype.Text
+	TwoFactorEnabledAt pgtype.Timestamptz
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, CreateUser, arg.Email, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, CreateUser, arg.Email, arg.PasswordHash, arg.TwoFactorEnabledAt)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -118,9 +119,9 @@ type UpdateUserParams struct {
 	Email              string
 	PasswordHash       pgtype.Text
 	IsEmailVerified    bool
-	EmailVerifiedAt    time.Time
+	EmailVerifiedAt    pgtype.Timestamptz
 	TwoFactorEnabled   bool
-	TwoFactorEnabledAt time.Time
+	TwoFactorEnabledAt pgtype.Timestamptz
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
