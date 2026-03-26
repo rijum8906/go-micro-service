@@ -19,6 +19,7 @@ func (r *userRepository) CreateUser(ctx context.Context, data *dto.Register) (*d
 			Valid:  true,
 			String: data.Password,
 		},
+		TwoFactorEnabledAt: pgtype.Timestamptz{},
 	})
 	if err != nil {
 		return nil, apperror.ErrInternal.WithMessage("Failed to create user").WithDetail("error", err.Error())

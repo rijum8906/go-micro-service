@@ -43,10 +43,9 @@ INSERT INTO sessions (
     user_agent,
     ip_addr,
     device_id,
-    last_login_at,
     expires_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 

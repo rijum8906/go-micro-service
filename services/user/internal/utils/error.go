@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -9,6 +11,11 @@ import (
 func MapAppError(appErr *apperror.AppError) error {
 	if appErr == nil {
 		return nil
+	}
+
+	if appErr.Type == apperror.TypeInternal {
+		fmt.Println("error: ", appErr.Error()) // TODO: log.Error()
+		fmt.Println("error details: ", appErr.Details)
 	}
 
 	switch appErr.Type {
