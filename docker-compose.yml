@@ -27,7 +27,7 @@ services:
     environment:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
     ports:
-      - "8906:8906"
+      - "8081:8081"
     depends_on:
       - "postgres"
       - "redis"
