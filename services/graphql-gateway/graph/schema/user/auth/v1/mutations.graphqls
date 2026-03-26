@@ -1,3 +1,4 @@
 extend type Mutation {
-  Signin(input : SigninInput!): AuthRespose!
+  Login(input: LoginInput!): AuthResponse!
+  Register(input: RegisterInput!): AuthResponse!
 }
