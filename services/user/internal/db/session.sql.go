@@ -7,9 +7,9 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const CreateSession = `-- name: CreateSession :one
@@ -19,10 +19,9 @@ INSERT INTO sessions (
     user_agent,
     ip_addr,
     device_id,
-    last_login_at,
     expires_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6
 )
 RETURNING id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
 `
@@ -33,8 +32,7 @@ type CreateSessionParams struct {
 	UserAgent        string
 	IpAddr           string
 	DeviceID         string
-	LastLoginAt      time.Time
-	ExpiresAt        time.Time
+	ExpiresAt        pgtype.Timestamptz
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
@@ -44,7 +42,6 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		arg.UserAgent,
 		arg.IpAddr,
 		arg.DeviceID,
-		arg.LastLoginAt,
 		arg.ExpiresAt,
 	)
 	var i Session
@@ -221,8 +218,8 @@ type UpdateSessionParams struct {
 	UserAgent        string
 	IpAddr           string
 	DeviceID         string
-	LastLoginAt      time.Time
-	ExpiresAt        time.Time
+	LastLoginAt      pgtype.Timestamptz
+	ExpiresAt        pgtype.Timestamptz
 	IsRevoked        bool
 }
 

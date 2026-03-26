@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/env"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	"github.com/rijum8906/relay/services/user/internal/dto"
 	"github.com/rijum8906/relay/services/user/internal/utils"
@@ -16,12 +17,14 @@ type AuthService interface {
 }
 
 type authService struct {
+	env   *env.Config
 	repos *utils.Repos
 	utils *utils.Utils
 }
 
-func NewAuthService(repo *utils.Repos, utils *utils.Utils) AuthService {
+func NewAuthService(repo *utils.Repos, utils *utils.Utils, env *env.Config) AuthService {
 	return &authService{
+		env:   env,
 		repos: repo,
 		utils: utils,
 	}

@@ -2,7 +2,9 @@ package auth
 
 import (
 	"context"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
@@ -32,11 +34,16 @@ func (s *authService) Login(ctx context.Context, data dto.Login, meta *dto.Reque
 		return nil, appErr
 	}
 
+	timeStamp := pgtype.Timestamptz{
+		Time:  time.Now().Add(s.env.SessionTTL),
+		Valid: true,
+	}
 	session, appErr := s.repos.Session.CreateSession(ctx, db.CreateSessionParams{
 		UserID:           user.ID,
 		UserAgent:        meta.UserAgent,
 		IpAddr:           meta.IPAddr,
 		DeviceID:         meta.DeviceID,
+		ExpiresAt:        timeStamp,
 		RefreshTokenHash: refreshTokenHash,
 	})
 	if appErr != nil {
@@ -87,11 +94,16 @@ func (s *authService) Register(ctx context.Context, data dto.Register, meta *dto
 		return nil, appErr
 	}
 
+	timeStamp := pgtype.Timestamptz{
+		Time:  time.Now().Add(s.env.SessionTTL),
+		Valid: true,
+	}
 	session, appErr := s.repos.Session.CreateSession(ctx, db.CreateSessionParams{
 		UserID:           user.ID,
 		UserAgent:        meta.UserAgent,
 		IpAddr:           meta.IPAddr,
 		DeviceID:         meta.DeviceID,
+		ExpiresAt:        timeStamp,
 		RefreshTokenHash: refreshTokenHash,
 	})
 	if appErr != nil {

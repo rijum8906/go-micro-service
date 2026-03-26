@@ -107,7 +107,7 @@ func main() {
 		Session: session.NewSessionRepository(dbQueries),
 	}
 	authHandler := handlergrpc.NewAuthHandler(
-		authservice.NewAuthService(&repos, utils.NewUtils(tokenManager, hashService)),
+		authservice.NewAuthService(&repos, utils.NewUtils(tokenManager, hashService), env),
 	)
 
 	server, listener, appErr := initGRPCServer(env, authHandler)
