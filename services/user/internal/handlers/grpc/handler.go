@@ -4,13 +4,10 @@ package grpc
 import (
 	"context"
 
-	"github.com/rijum8906/relay/packages/core/apperror"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
-	modelsv1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
 	"github.com/rijum8906/relay/services/user/internal/dto"
 	authservice "github.com/rijum8906/relay/services/user/internal/services/auth"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
 type AuthHandler struct {
@@ -32,44 +29,24 @@ func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		DeviceID: req.GetMetadata().GetDeviceId(),
 	})
 	if appErr != nil {
-		return nil, mapAppError(appErr)
+		return nil, utils.MapAppError(appErr)
 	}
 
-	return &authv1.AuthResponse{
-		Account: &modelsv1.Account{
-			Id:    result.User.ID.String(),
-			Email: result.User.Email,
-		},
-		Profiles: []*modelsv1.Profile{
-			{
-				FirstName: result.Profile.FirstName,
-				LastName:  result.Profile.LastName,
-			},
-		},
-		Tokens: &modelsv1.AuthToken{
-			AccessToken:  result.Tokens.AccessToken.Value,
-			RefreshToken: result.Tokens.RefreshToken.Value,
-		},
-	}, nil
+	return result, nil
 }
 
-func mapAppError(appErr *apperror.AppError) error {
-	if appErr == nil {
-		return nil
+func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest) (*authv1.AuthResponse, error) {
+	result, appErr := h.service.Register(ctx, dto.Register{
+		Email:     req.GetEmail(),
+		Password:  req.GetPassword(),
+		FirstName: req.GetFirstName(),
+		LastName:  req.GetLastName(),
+	}, &dto.RequestMeta{
+		DeviceID: req.GetMetadata().GetDeviceId(),
+	})
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
 	}
 
-	switch appErr.Type {
-	case apperror.TypeValidation:
-		return status.Error(codes.InvalidArgument, appErr.Message)
-	case apperror.TypeUnAuthenticated:
-		return status.Error(codes.Unauthenticated, appErr.Message)
-	case apperror.TypeForbidden:
-		return status.Error(codes.PermissionDenied, appErr.Message)
-	case apperror.TypeNotFound:
-		return status.Error(codes.NotFound, appErr.Message)
-	case apperror.TypeThirdParty:
-		return status.Error(codes.Unavailable, appErr.Message)
-	default:
-		return status.Error(codes.Internal, appErr.Message)
-	}
+	return result, nil
 }
