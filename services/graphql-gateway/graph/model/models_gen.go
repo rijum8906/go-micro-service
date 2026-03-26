@@ -2,17 +2,67 @@
 
 package model
 
-type AuthRespose struct {
-	Token string `json:"token"`
+type AuthResponse struct {
+	Tokens  *AuthTokens `json:"tokens"`
+	User    *User       `json:"user"`
+	Profile *Profile    `json:"profile"`
+}
+
+type AuthTokens struct {
+	AccessToken  *Token `json:"accessToken"`
+	RefreshToken *Token `json:"refreshToken"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type Mutation struct {
 }
 
+type Profile struct {
+	ID        string  `json:"id"`
+	UserID    string  `json:"userId"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	CreatedAt string  `json:"createdAt"`
+	UpdatedAt string  `json:"updatedAt"`
+	AvatarURL *string `json:"avatarUrl,omitempty"`
+}
+
 type Query struct {
 }
 
-type SigninInput struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+type RegisterInput struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+type Session struct {
+	ID           string `json:"id"`
+	UserID       string `json:"userId"`
+	RefreshToken string `json:"refreshToken"`
+	DeviceID     string `json:"deviceId"`
+	IPAddr       string `json:"ipAddr"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
+}
+
+type Token struct {
+	Value     string `json:"value"`
+	ExpiresIn string `json:"expiresIn"`
+}
+
+type User struct {
+	ID                 string  `json:"id"`
+	Email              string  `json:"email"`
+	IsEmailVerified    bool    `json:"isEmailVerified"`
+	EmailVerifiedAt    *string `json:"emailVerifiedAt,omitempty"`
+	TwoFactorEnabled   bool    `json:"twoFactorEnabled"`
+	TwoFactorEnabledAt *string `json:"twoFactorEnabledAt,omitempty"`
+	CreatedAt          string  `json:"createdAt"`
+	UpdatedAt          string  `json:"updatedAt"`
 }
