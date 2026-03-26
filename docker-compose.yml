@@ -19,32 +19,18 @@ services:
     volumes:
       - redis:/var/lib/redis/data
 
-  # minio
-  minio:
-    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: ${STORAGE_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${STORAGE_SECRET_KEY}
-    volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-
   # user-service
   user-service:
     build:
       context: .
-      dockerfile: ./services/user-service/Dockerfile
+      dockerfile: ./services/user/Dockerfile
     environment:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
     ports:
       - "8906:8906"
     depends_on:
-      - postgres
-      - redis
-      - minio
+      - "postgres"
+      - "redis"
 
   # graphql-gateway
   graphql-gateway:
@@ -55,6 +41,8 @@ services:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
     ports:
       - "8080:8080"
+    depends_on:
+      - "user-service"
 
   # web-v2
   web-v2:
@@ -71,4 +59,3 @@ services:
 volumes:
   pg_data:
   redis:
-  minio_data:
