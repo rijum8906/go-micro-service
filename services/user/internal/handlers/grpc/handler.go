@@ -1,5 +1,5 @@
-// Package grpc exposes the auth gRPC server implementation.
-package grpc
+// Package handler exposes the auth gRPC server implementation.
+package handler
 
 import (
 	"context"
