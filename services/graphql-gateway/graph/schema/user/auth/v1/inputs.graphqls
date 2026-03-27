@@ -9,3 +9,44 @@ input RegisterInput{
   firstName: String!
   lastName: String!
 }
+
+input Logout {
+
+}
+
+input GenerateScopedTokenInput {
+  scope: String!
+}
+
+input UpdateProfileAvatarUrlInput {
+  profileId: ID!
+  avatarUrl String!
+}
+
+input UpdateProfileNameInput {
+  profileId: ID!
+  firstName: String!
+  lastName: String!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input RequestPasswordResetInput {
+  email: String!
+}
+
+input ResetPasswordInput {
+  token: String!
+  newPassword: String!
+}
+
+input RequestEmailVerification {
+
+}
+
+input  VerifyEmail {
+    token: String!
+}
