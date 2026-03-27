@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/metadata"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
@@ -13,7 +14,7 @@ import (
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
-func (s *authService) Login(ctx context.Context, data dto.Login, meta *dto.RequestMeta) (*authv1.AuthResponse, *apperror.AppError) {
+func (s *authService) Login(ctx context.Context, data dto.Login, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	user, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
 	if appErr != nil {
 		return nil, appErr
@@ -40,9 +41,9 @@ func (s *authService) Login(ctx context.Context, data dto.Login, meta *dto.Reque
 	}
 	session, appErr := s.repos.Session.CreateSession(ctx, db.CreateSessionParams{
 		UserID:           user.ID,
-		UserAgent:        meta.UserAgent,
-		IpAddr:           meta.IPAddr,
-		DeviceID:         meta.DeviceID,
+		UserAgent:        client.UserAgent,
+		IpAddr:           client.IPAddress,
+		DeviceID:         client.DeviceID,
 		ExpiresAt:        timeStamp,
 		RefreshTokenHash: refreshTokenHash,
 	})
@@ -50,7 +51,7 @@ func (s *authService) Login(ctx context.Context, data dto.Login, meta *dto.Reque
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), meta.DeviceID, token.ScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.ScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -58,7 +59,7 @@ func (s *authService) Login(ctx context.Context, data dto.Login, meta *dto.Reque
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
 
-func (s *authService) Register(ctx context.Context, data dto.Register, meta *dto.RequestMeta) (*authv1.AuthResponse, *apperror.AppError) {
+func (s *authService) Register(ctx context.Context, data dto.Register, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
 	if appErr != nil && appErr.Type != apperror.TypeNotFound {
 		return nil, appErr
@@ -100,9 +101,9 @@ func (s *authService) Register(ctx context.Context, data dto.Register, meta *dto
 	}
 	session, appErr := s.repos.Session.CreateSession(ctx, db.CreateSessionParams{
 		UserID:           user.ID,
-		UserAgent:        meta.UserAgent,
-		IpAddr:           meta.IPAddr,
-		DeviceID:         meta.DeviceID,
+		UserAgent:        client.UserAgent,
+		IpAddr:           client.IPAddress,
+		DeviceID:         client.DeviceID,
 		ExpiresAt:        timeStamp,
 		RefreshTokenHash: refreshTokenHash,
 	})
@@ -110,7 +111,7 @@ func (s *authService) Register(ctx context.Context, data dto.Register, meta *dto
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), meta.DeviceID, token.ScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.ScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
