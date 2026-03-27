@@ -11,7 +11,11 @@ import (
 	"github.com/rijum8906/relay/packages/core/hash"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	userdb "github.com/rijum8906/relay/services/user/internal/db"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
+	profilerepo "github.com/rijum8906/relay/services/user/internal/repository/profile"
+	sessionrepo "github.com/rijum8906/relay/services/user/internal/repository/session"
+	userrepo "github.com/rijum8906/relay/services/user/internal/repository/user"
 	"github.com/rijum8906/relay/services/user/internal/services/auth"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 	"google.golang.org/grpc"
@@ -66,9 +70,19 @@ func (a *Application) initUtils() *apperror.AppError {
 }
 
 func (a *Application) initHandler() *apperror.AppError {
-	authHandler := handler.NewAuthHandler(
-		auth.NewAuthService(&utils.Repos{}, utils.NewUtils(a.utils.token, a.utils.hash), a.config),
-	)
+	queries := userdb.New(a.infra.database)
+	repos := &utils.Repos{
+		User:    userrepo.NewAuthRepository(queries),
+		Profile: profilerepo.NewProfileRepository(queries),
+		Session: sessionrepo.NewSessionRepository(queries),
+	}
+
+	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config)
+	if appErr != nil {
+		return appErr
+	}
+
+	authHandler := handler.NewAuthHandler(authService)
 
 	a.services.auth = authHandler
 
