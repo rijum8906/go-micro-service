@@ -19,6 +19,10 @@ import (
 
 // Login is the resolver for the Login field.
 func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) (*model.AuthResponse, error) {
+	if err := r.Validator.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
 	browserInfo := utils.GetBrowserInfo(ctx)
 
 	ctx = metadata.Send(ctx, metadata.ClientInfo{
@@ -40,6 +44,10 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 
 // Register is the resolver for the Register field.
 func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterInput) (*model.AuthResponse, error) {
+	if err := r.Validator.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
 	browserInfo := utils.GetBrowserInfo(ctx)
 
 	ctx = metadata.Send(ctx, metadata.ClientInfo{
