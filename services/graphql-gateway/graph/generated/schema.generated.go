@@ -21,15 +21,15 @@ type MutationResolver interface {
 	Empty(ctx context.Context) (*string, error)
 	Login(ctx context.Context, input userdto.LoginInput) (*model.AuthResponse, error)
 	Register(ctx context.Context, input userdto.RegisterInput) (*model.AuthResponse, error)
-	Logout(ctx context.Context, input model.LogoutInput) (*model.MutationResponse, error)
-	GenerateScopedToken(ctx context.Context, input model.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error)
-	UpdateProfileAvatarURL(ctx context.Context, input model.UpdateProfileAvatarURLInput) (*model.Profile, error)
-	UpdateProfileName(ctx context.Context, input model.UpdateProfileNameInput) (*model.Profile, error)
-	ChangePassword(ctx context.Context, input model.ChangePasswordInput) (*model.MutationResponse, error)
-	RequestPasswordReset(ctx context.Context, input model.RequestPasswordResetInput) (*model.MutationResponse, error)
-	ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.MutationResponse, error)
-	RequestEmailVerification(ctx context.Context, input model.RequestEmailVerificationInput) (*model.MutationResponse, error)
-	VerifyEmail(ctx context.Context, input model.VerifyEmailInput) (*model.MutationResponse, error)
+	Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error)
+	GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error)
+	UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error)
+	UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error)
+	ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error)
+	RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error)
+	ResetPassword(ctx context.Context, input userdto.ResetPasswordInput) (*model.MutationResponse, error)
+	RequestEmailVerification(ctx context.Context, input userdto.RequestEmailVerificationInput) (*model.MutationResponse, error)
+	VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error)
 }
 type QueryResolver interface {
 	Empty(ctx context.Context) (*string, error)
@@ -42,7 +42,7 @@ type QueryResolver interface {
 func (ec *executionContext) field_Mutation_ChangePassword_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNChangePasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐChangePasswordInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNChangePasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐChangePasswordInput)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (ec *executionContext) field_Mutation_ChangePassword_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_GenerateScopedToken_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGenerateScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGenerateScopedTokenInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGenerateScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐGenerateScopedTokenInput)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (ec *executionContext) field_Mutation_Login_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Mutation_Logout_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLogoutInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐLogoutInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLogoutInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐLogoutInput)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (ec *executionContext) field_Mutation_Register_args(ctx context.Context, ra
 func (ec *executionContext) field_Mutation_RequestEmailVerification_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestEmailVerificationInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestEmailVerificationInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestEmailVerificationInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐRequestEmailVerificationInput)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (ec *executionContext) field_Mutation_RequestEmailVerification_args(ctx con
 func (ec *executionContext) field_Mutation_RequestPasswordReset_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestPasswordResetInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestPasswordResetInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRequestPasswordResetInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐRequestPasswordResetInput)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (ec *executionContext) field_Mutation_RequestPasswordReset_args(ctx context
 func (ec *executionContext) field_Mutation_ResetPassword_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNResetPasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResetPasswordInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNResetPasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐResetPasswordInput)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (ec *executionContext) field_Mutation_ResetPassword_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_UpdateProfileAvatarUrl_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateProfileAvatarUrlInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUpdateProfileAvatarURLInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateProfileAvatarUrlInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐUpdateProfileAvatarUrlInput)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (ec *executionContext) field_Mutation_UpdateProfileAvatarUrl_args(ctx conte
 func (ec *executionContext) field_Mutation_UpdateProfileName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateProfileNameInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUpdateProfileNameInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateProfileNameInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐUpdateProfileNameInput)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (ec *executionContext) field_Mutation_UpdateProfileName_args(ctx context.Co
 func (ec *executionContext) field_Mutation_VerifyEmail_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNVerifyEmailInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐVerifyEmailInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNVerifyEmailInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐVerifyEmailInput)
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +314,7 @@ func (ec *executionContext) _Mutation_Logout(ctx context.Context, field graphql.
 		ec.fieldContext_Mutation_Logout,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().Logout(ctx, fc.Args["input"].(model.LogoutInput))
+			return ec.Resolvers.Mutation().Logout(ctx, fc.Args["input"].(userdto.LogoutInput))
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
@@ -361,7 +361,7 @@ func (ec *executionContext) _Mutation_GenerateScopedToken(ctx context.Context, f
 		ec.fieldContext_Mutation_GenerateScopedToken,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().GenerateScopedToken(ctx, fc.Args["input"].(model.GenerateScopedTokenInput))
+			return ec.Resolvers.Mutation().GenerateScopedToken(ctx, fc.Args["input"].(userdto.GenerateScopedTokenInput))
 		},
 		nil,
 		ec.marshalNScopedTokenResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenResponse,
@@ -406,7 +406,7 @@ func (ec *executionContext) _Mutation_UpdateProfileAvatarUrl(ctx context.Context
 		ec.fieldContext_Mutation_UpdateProfileAvatarUrl,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateProfileAvatarURL(ctx, fc.Args["input"].(model.UpdateProfileAvatarURLInput))
+			return ec.Resolvers.Mutation().UpdateProfileAvatarURL(ctx, fc.Args["input"].(userdto.UpdateProfileAvatarUrlInput))
 		},
 		nil,
 		ec.marshalNProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
@@ -463,7 +463,7 @@ func (ec *executionContext) _Mutation_UpdateProfileName(ctx context.Context, fie
 		ec.fieldContext_Mutation_UpdateProfileName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateProfileName(ctx, fc.Args["input"].(model.UpdateProfileNameInput))
+			return ec.Resolvers.Mutation().UpdateProfileName(ctx, fc.Args["input"].(userdto.UpdateProfileNameInput))
 		},
 		nil,
 		ec.marshalNProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
@@ -520,7 +520,7 @@ func (ec *executionContext) _Mutation_ChangePassword(ctx context.Context, field 
 		ec.fieldContext_Mutation_ChangePassword,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().ChangePassword(ctx, fc.Args["input"].(model.ChangePasswordInput))
+			return ec.Resolvers.Mutation().ChangePassword(ctx, fc.Args["input"].(userdto.ChangePasswordInput))
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
@@ -567,7 +567,7 @@ func (ec *executionContext) _Mutation_RequestPasswordReset(ctx context.Context, 
 		ec.fieldContext_Mutation_RequestPasswordReset,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().RequestPasswordReset(ctx, fc.Args["input"].(model.RequestPasswordResetInput))
+			return ec.Resolvers.Mutation().RequestPasswordReset(ctx, fc.Args["input"].(userdto.RequestPasswordResetInput))
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
@@ -614,7 +614,7 @@ func (ec *executionContext) _Mutation_ResetPassword(ctx context.Context, field g
 		ec.fieldContext_Mutation_ResetPassword,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().ResetPassword(ctx, fc.Args["input"].(model.ResetPasswordInput))
+			return ec.Resolvers.Mutation().ResetPassword(ctx, fc.Args["input"].(userdto.ResetPasswordInput))
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
@@ -661,7 +661,7 @@ func (ec *executionContext) _Mutation_RequestEmailVerification(ctx context.Conte
 		ec.fieldContext_Mutation_RequestEmailVerification,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().RequestEmailVerification(ctx, fc.Args["input"].(model.RequestEmailVerificationInput))
+			return ec.Resolvers.Mutation().RequestEmailVerification(ctx, fc.Args["input"].(userdto.RequestEmailVerificationInput))
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
@@ -708,7 +708,7 @@ func (ec *executionContext) _Mutation_VerifyEmail(ctx context.Context, field gra
 		ec.fieldContext_Mutation_VerifyEmail,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().VerifyEmail(ctx, fc.Args["input"].(model.VerifyEmailInput))
+			return ec.Resolvers.Mutation().VerifyEmail(ctx, fc.Args["input"].(userdto.VerifyEmailInput))
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
