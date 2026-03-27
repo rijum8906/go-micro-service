@@ -1,6 +1,11 @@
+input RequestMetaInput {
+    deviceId: String!
+  }
+
 input LoginInput{
   email: String!
   password: String!
+  meta: RequestMetaInput!
 }
 
 input RegisterInput{
@@ -8,6 +13,7 @@ input RegisterInput{
   password: String!
   firstName: String!
   lastName: String!
+  meta: RequestMetaInput!
 }
 
 input LogoutInput {
@@ -32,6 +38,7 @@ input UpdateProfileNameInput {
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
+  meta: RequestMetaInput!
 }
 
 input RequestPasswordResetInput {

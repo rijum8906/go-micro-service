@@ -11,6 +11,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -380,8 +381,8 @@ func (ec *executionContext) fieldContext_Token_expiresIn(_ context.Context, fiel
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputRequestMeta(ctx context.Context, obj any) (model.RequestMeta, error) {
-	var it model.RequestMeta
+func (ec *executionContext) unmarshalInputRequestMeta(ctx context.Context, obj any) (coredto.RequestMeta, error) {
+	var it coredto.RequestMeta
 	if obj == nil {
 		return it, nil
 	}
@@ -404,7 +405,7 @@ func (ec *executionContext) unmarshalInputRequestMeta(ctx context.Context, obj a
 			if err != nil {
 				return it, err
 			}
-			it.DeviceID = data
+			it.DeviceId = data
 		}
 	}
 	return it, nil
