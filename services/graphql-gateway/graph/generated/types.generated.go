@@ -225,6 +225,99 @@ func (ec *executionContext) fieldContext_AuthTokens_refreshToken(_ context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _MutationResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.MutationResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MutationResponse_success,
+		func(ctx context.Context) (any, error) {
+			return obj.Success, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MutationResponse_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MutationResponse_message(ctx context.Context, field graphql.CollectedField, obj *model.MutationResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MutationResponse_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MutationResponse_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MutationResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ScopedTokenResponse_token(ctx context.Context, field graphql.CollectedField, obj *model.ScopedTokenResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ScopedTokenResponse_token,
+		func(ctx context.Context) (any, error) {
+			return obj.Token, nil
+		},
+		nil,
+		ec.marshalNToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐToken,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ScopedTokenResponse_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ScopedTokenResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "value":
+				return ec.fieldContext_Token_value(ctx, field)
+			case "expiresIn":
+				return ec.fieldContext_Token_expiresIn(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Token_value(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -286,6 +379,36 @@ func (ec *executionContext) fieldContext_Token_expiresIn(_ context.Context, fiel
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
+
+func (ec *executionContext) unmarshalInputRequestMeta(ctx context.Context, obj any) (model.RequestMeta, error) {
+	var it model.RequestMeta
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"deviceId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "deviceId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deviceId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeviceID = data
+		}
+	}
+	return it, nil
+}
 
 // endregion **************************** input.gotpl *****************************
 
@@ -388,6 +511,89 @@ func (ec *executionContext) _AuthTokens(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var mutationResponseImplementors = []string{"MutationResponse"}
+
+func (ec *executionContext) _MutationResponse(ctx context.Context, sel ast.SelectionSet, obj *model.MutationResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MutationResponse")
+		case "success":
+			out.Values[i] = ec._MutationResponse_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._MutationResponse_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var scopedTokenResponseImplementors = []string{"ScopedTokenResponse"}
+
+func (ec *executionContext) _ScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, obj *model.ScopedTokenResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, scopedTokenResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ScopedTokenResponse")
+		case "token":
+			out.Values[i] = ec._ScopedTokenResponse_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var tokenImplementors = []string{"Token"}
 
 func (ec *executionContext) _Token(ctx context.Context, sel ast.SelectionSet, obj *model.Token) graphql.Marshaler {
@@ -458,6 +664,34 @@ func (ec *executionContext) marshalNAuthTokens2ᚖgithubᚗcomᚋrijum8906ᚋrel
 		return graphql.Null
 	}
 	return ec._AuthTokens(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNMutationResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse(ctx context.Context, sel ast.SelectionSet, v model.MutationResponse) graphql.Marshaler {
+	return ec._MutationResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse(ctx context.Context, sel ast.SelectionSet, v *model.MutationResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MutationResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNScopedTokenResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, v model.ScopedTokenResponse) graphql.Marshaler {
+	return ec._ScopedTokenResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNScopedTokenResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, v *model.ScopedTokenResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ScopedTokenResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐToken(ctx context.Context, sel ast.SelectionSet, v *model.Token) graphql.Marshaler {

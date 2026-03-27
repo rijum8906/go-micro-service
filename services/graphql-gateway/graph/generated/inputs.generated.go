@@ -7,6 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -27,8 +28,75 @@ import (
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj any) (model.LoginInput, error) {
-	var it model.LoginInput
+func (ec *executionContext) unmarshalInputChangePasswordInput(ctx context.Context, obj any) (model.ChangePasswordInput, error) {
+	var it model.ChangePasswordInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"currentPassword", "newPassword"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "currentPassword":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPassword"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CurrentPassword = data
+		case "newPassword":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NewPassword = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.Context, obj any) (model.GenerateScopedTokenInput, error) {
+	var it model.GenerateScopedTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scope"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scope":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj any) (userdto.LoginInput, error) {
+	var it userdto.LoginInput
 	if obj == nil {
 		return it, nil
 	}
@@ -64,8 +132,38 @@ func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj an
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj any) (model.RegisterInput, error) {
-	var it model.RegisterInput
+func (ec *executionContext) unmarshalInputLogoutInput(ctx context.Context, obj any) (model.LogoutInput, error) {
+	var it model.LogoutInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"_empty"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "_empty":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("_empty"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Empty = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj any) (userdto.RegisterInput, error) {
+	var it userdto.RegisterInput
 	if obj == nil {
 		return it, nil
 	}
@@ -115,6 +213,214 @@ func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRequestEmailVerificationInput(ctx context.Context, obj any) (model.RequestEmailVerificationInput, error) {
+	var it model.RequestEmailVerificationInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRequestPasswordResetInput(ctx context.Context, obj any) (model.RequestPasswordResetInput, error) {
+	var it model.RequestPasswordResetInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context, obj any) (model.ResetPasswordInput, error) {
+	var it model.ResetPasswordInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"token", "newPassword"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "token":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Token = data
+		case "newPassword":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NewPassword = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateProfileAvatarUrlInput(ctx context.Context, obj any) (model.UpdateProfileAvatarURLInput, error) {
+	var it model.UpdateProfileAvatarURLInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"profileId", "avatarUrl"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "profileId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProfileID = data
+		case "avatarUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatarUrl"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AvatarURL = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdateProfileNameInput(ctx context.Context, obj any) (model.UpdateProfileNameInput, error) {
+	var it model.UpdateProfileNameInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"profileId", "firstName", "lastName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "profileId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ProfileID = data
+		case "firstName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FirstName = data
+		case "lastName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LastName = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputVerifyEmailInput(ctx context.Context, obj any) (model.VerifyEmailInput, error) {
+	var it model.VerifyEmailInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"token"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "token":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Token = data
+		}
+	}
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -127,13 +433,58 @@ func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐLoginInput(ctx context.Context, v any) (model.LoginInput, error) {
+func (ec *executionContext) unmarshalNChangePasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐChangePasswordInput(ctx context.Context, v any) (model.ChangePasswordInput, error) {
+	res, err := ec.unmarshalInputChangePasswordInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNGenerateScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGenerateScopedTokenInput(ctx context.Context, v any) (model.GenerateScopedTokenInput, error) {
+	res, err := ec.unmarshalInputGenerateScopedTokenInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐLoginInput(ctx context.Context, v any) (userdto.LoginInput, error) {
 	res, err := ec.unmarshalInputLoginInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRegisterInput(ctx context.Context, v any) (model.RegisterInput, error) {
+func (ec *executionContext) unmarshalNLogoutInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐLogoutInput(ctx context.Context, v any) (model.LogoutInput, error) {
+	res, err := ec.unmarshalInputLogoutInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐRegisterInput(ctx context.Context, v any) (userdto.RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNRequestEmailVerificationInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestEmailVerificationInput(ctx context.Context, v any) (model.RequestEmailVerificationInput, error) {
+	res, err := ec.unmarshalInputRequestEmailVerificationInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNRequestPasswordResetInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestPasswordResetInput(ctx context.Context, v any) (model.RequestPasswordResetInput, error) {
+	res, err := ec.unmarshalInputRequestPasswordResetInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNResetPasswordInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐResetPasswordInput(ctx context.Context, v any) (model.ResetPasswordInput, error) {
+	res, err := ec.unmarshalInputResetPasswordInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateProfileAvatarUrlInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUpdateProfileAvatarURLInput(ctx context.Context, v any) (model.UpdateProfileAvatarURLInput, error) {
+	res, err := ec.unmarshalInputUpdateProfileAvatarUrlInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateProfileNameInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUpdateProfileNameInput(ctx context.Context, v any) (model.UpdateProfileNameInput, error) {
+	res, err := ec.unmarshalInputUpdateProfileNameInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNVerifyEmailInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐVerifyEmailInput(ctx context.Context, v any) (model.VerifyEmailInput, error) {
+	res, err := ec.unmarshalInputVerifyEmailInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

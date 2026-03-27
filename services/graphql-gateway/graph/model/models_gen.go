@@ -13,12 +13,25 @@ type AuthTokens struct {
 	RefreshToken *Token `json:"refreshToken"`
 }
 
-type LoginInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type ChangePasswordInput struct {
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword     string `json:"newPassword"`
+}
+
+type GenerateScopedTokenInput struct {
+	Scope string `json:"scope"`
+}
+
+type LogoutInput struct {
+	Empty *string `json:"_empty,omitempty"`
 }
 
 type Mutation struct {
+}
+
+type MutationResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 type Profile struct {
@@ -34,11 +47,25 @@ type Profile struct {
 type Query struct {
 }
 
-type RegisterInput struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
+type RequestEmailVerificationInput struct {
+	Email string `json:"email"`
+}
+
+type RequestMeta struct {
+	DeviceID string `json:"deviceId"`
+}
+
+type RequestPasswordResetInput struct {
+	Email string `json:"email"`
+}
+
+type ResetPasswordInput struct {
+	Token       string `json:"token"`
+	NewPassword string `json:"newPassword"`
+}
+
+type ScopedTokenResponse struct {
+	Token *Token `json:"token"`
 }
 
 type Session struct {
@@ -56,6 +83,17 @@ type Token struct {
 	ExpiresIn string `json:"expiresIn"`
 }
 
+type UpdateProfileAvatarURLInput struct {
+	ProfileID string `json:"profileId"`
+	AvatarURL string `json:"avatarUrl"`
+}
+
+type UpdateProfileNameInput struct {
+	ProfileID string `json:"profileId"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
 type User struct {
 	ID                 string  `json:"id"`
 	Email              string  `json:"email"`
@@ -65,4 +103,8 @@ type User struct {
 	TwoFactorEnabledAt *string `json:"twoFactorEnabledAt,omitempty"`
 	CreatedAt          string  `json:"createdAt"`
 	UpdatedAt          string  `json:"updatedAt"`
+}
+
+type VerifyEmailInput struct {
+	Token string `json:"token"`
 }
