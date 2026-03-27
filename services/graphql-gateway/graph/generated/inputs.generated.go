@@ -6,26 +6,17 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 )
 
 // region    ************************** generated!.gotpl **************************
 
-type ChangePasswordInputResolver interface {
-	Meta(ctx context.Context, obj *userdto.ChangePasswordInput, data *model.RequestMetaInput) error
-}
 type GenerateScopedTokenInputResolver interface {
 	Scope(ctx context.Context, obj *userdto.GenerateScopedTokenInput, data string) error
 }
-type LoginInputResolver interface {
-	Meta(ctx context.Context, obj *userdto.LoginInput, data *model.RequestMetaInput) error
-}
 type LogoutInputResolver interface {
 	Empty(ctx context.Context, obj *userdto.LogoutInput, data *string) error
-}
-type RegisterInputResolver interface {
-	Meta(ctx context.Context, obj *userdto.RegisterInput, data *model.RequestMetaInput) error
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -78,13 +69,11 @@ func (ec *executionContext) unmarshalInputChangePasswordInput(ctx context.Contex
 			it.NewPassword = data
 		case "meta":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
-			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestMetaInput(ctx, v)
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.ChangePasswordInput().Meta(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -156,13 +145,11 @@ func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj an
 			it.Password = data
 		case "meta":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
-			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestMetaInput(ctx, v)
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.LoginInput().Meta(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -248,13 +235,11 @@ func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj
 			it.LastName = data
 		case "meta":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
-			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestMetaInput(ctx, v)
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.RegisterInput().Meta(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -290,8 +275,8 @@ func (ec *executionContext) unmarshalInputRequestEmailVerificationInput(ctx cont
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRequestMetaInput(ctx context.Context, obj any) (model.RequestMetaInput, error) {
-	var it model.RequestMetaInput
+func (ec *executionContext) unmarshalInputRequestMetaInput(ctx context.Context, obj any) (coredto.RequestMeta, error) {
+	var it coredto.RequestMeta
 	if obj == nil {
 		return it, nil
 	}
@@ -314,7 +299,7 @@ func (ec *executionContext) unmarshalInputRequestMetaInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-			it.DeviceID = data
+			it.DeviceId = data
 		}
 	}
 	return it, nil
@@ -540,14 +525,9 @@ func (ec *executionContext) unmarshalNRequestEmailVerificationInput2githubᚗcom
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestMetaInput(ctx context.Context, v any) (model.RequestMetaInput, error) {
+func (ec *executionContext) unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx context.Context, v any) (coredto.RequestMeta, error) {
 	res, err := ec.unmarshalInputRequestMetaInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRequestMetaInput(ctx context.Context, v any) (*model.RequestMetaInput, error) {
-	res, err := ec.unmarshalInputRequestMetaInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNRequestPasswordResetInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐRequestPasswordResetInput(ctx context.Context, v any) (userdto.RequestPasswordResetInput, error) {
