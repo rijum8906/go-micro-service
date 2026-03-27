@@ -13,3 +13,12 @@ type AuthResponse {
   user: User!
   profile: Profile!
 }
+
+type MutationResponse {
+   success: Boolean!
+   message: String!
+ }
+
+ type ScopedTokenResponse {
+   token: Token!
+ }
