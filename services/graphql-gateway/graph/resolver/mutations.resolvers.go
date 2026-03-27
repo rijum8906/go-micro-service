@@ -11,11 +11,12 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 )
 
 // Login is the resolver for the Login field.
-func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.AuthResponse, error) {
+func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) (*model.AuthResponse, error) {
 	resp, err := r.AuthClient.Login(ctx, &authv1.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
@@ -28,7 +29,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*
 }
 
 // Register is the resolver for the Register field.
-func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthResponse, error) {
+func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterInput) (*model.AuthResponse, error) {
 	res, err := r.AuthClient.Register(ctx, &authv1.RegisterRequest{
 		Email:     input.Email,
 		Password:  input.Password,
