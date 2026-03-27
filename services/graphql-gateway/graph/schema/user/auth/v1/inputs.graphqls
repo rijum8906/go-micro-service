@@ -1,7 +1,3 @@
-input RequestMetaInput {
-    deviceId: String!
-  }
-
 input LoginInput{
   email: String!
   password: String!
@@ -17,11 +13,12 @@ input RegisterInput{
 }
 
 input LogoutInput {
-  _empty: String
+  meta: RequestMetaInput!
 }
 
 input GenerateScopedTokenInput {
   scope: String!
+  meta: RequestMetaInput!
 }
 
 input UpdateProfileAvatarUrlInput {
@@ -43,17 +40,21 @@ input ChangePasswordInput {
 
 input RequestPasswordResetInput {
   email: String!
+  meta: RequestMetaInput!
 }
 
 input ResetPasswordInput {
   token: String!
   newPassword: String!
+  meta: RequestMetaInput!
 }
 
 input RequestEmailVerificationInput {
   email: String!
+  meta: RequestMetaInput!
 }
 
 input  VerifyEmailInput {
-    token: String!
+  token: String!
+  meta: RequestMetaInput!
 }

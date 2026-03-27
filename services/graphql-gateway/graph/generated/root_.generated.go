@@ -24,7 +24,6 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
 	GenerateScopedTokenInput() GenerateScopedTokenInputResolver
-	LogoutInput() LogoutInputResolver
 }
 
 type DirectiveRoot struct {
@@ -505,7 +504,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputLogoutInput,
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputRequestEmailVerificationInput,
-		ec.unmarshalInputRequestMeta,
 		ec.unmarshalInputRequestMetaInput,
 		ec.unmarshalInputRequestPasswordResetInput,
 		ec.unmarshalInputResetPasswordInput,
@@ -597,15 +595,11 @@ type Query {
   _empty: String
 }
 `, BuiltIn: false},
-	{Name: "../schema/core/v1/types.graphqls", Input: `input RequestMeta {
+	{Name: "../schema/core/v1/types.graphqls", Input: `input RequestMetaInput {
   deviceId: String!
 }
 `, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input RequestMetaInput {
-    deviceId: String!
-  }
-
-input LoginInput{
+	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input LoginInput{
   email: String!
   password: String!
   meta: RequestMetaInput!
@@ -620,11 +614,12 @@ input RegisterInput{
 }
 
 input LogoutInput {
-  _empty: String
+  meta: RequestMetaInput!
 }
 
 input GenerateScopedTokenInput {
   scope: String!
+  meta: RequestMetaInput!
 }
 
 input UpdateProfileAvatarUrlInput {
@@ -646,19 +641,23 @@ input ChangePasswordInput {
 
 input RequestPasswordResetInput {
   email: String!
+  meta: RequestMetaInput!
 }
 
 input ResetPasswordInput {
   token: String!
   newPassword: String!
+  meta: RequestMetaInput!
 }
 
 input RequestEmailVerificationInput {
   email: String!
+  meta: RequestMetaInput!
 }
 
 input  VerifyEmailInput {
-    token: String!
+  token: String!
+  meta: RequestMetaInput!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/models.graphqls", Input: `type User {
