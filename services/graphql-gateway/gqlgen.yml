@@ -21,7 +21,7 @@ resolver:
 call_argument_directives_with_null: true
 
 autobind:
-  # - "github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+  - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 
 models:
   ID:
