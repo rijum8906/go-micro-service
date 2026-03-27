@@ -10,8 +10,8 @@ input RegisterInput{
   lastName: String!
 }
 
-input Logout {
-
+input LogoutInput {
+  _empty: String
 }
 
 input GenerateScopedTokenInput {
@@ -20,7 +20,7 @@ input GenerateScopedTokenInput {
 
 input UpdateProfileAvatarUrlInput {
   profileId: ID!
-  avatarUrl String!
+  avatarUrl: String!
 }
 
 input UpdateProfileNameInput {
@@ -43,10 +43,10 @@ input ResetPasswordInput {
   newPassword: String!
 }
 
-input RequestEmailVerification {
-
+input RequestEmailVerificationInput {
+  email: String!
 }
 
-input  VerifyEmail {
+input  VerifyEmailInput {
     token: String!
 }
