@@ -23,11 +23,8 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
-	ChangePasswordInput() ChangePasswordInputResolver
 	GenerateScopedTokenInput() GenerateScopedTokenInputResolver
-	LoginInput() LoginInputResolver
 	LogoutInput() LogoutInputResolver
-	RegisterInput() RegisterInputResolver
 }
 
 type DirectiveRoot struct {
