@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/metadata"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
@@ -18,6 +19,14 @@ import (
 
 // Login is the resolver for the Login field.
 func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) (*model.AuthResponse, error) {
+	browserInfo := utils.GetBrowserInfo(ctx)
+
+	ctx = metadata.Send(ctx, metadata.ClientInfo{
+		UserAgent: browserInfo.UserAgent,
+		IPAddress: browserInfo.IPAddr,
+		DeviceID:  input.Meta.DeviceId,
+	})
+
 	resp, err := r.AuthClient.Login(ctx, &authv1.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
@@ -31,6 +40,14 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 
 // Register is the resolver for the Register field.
 func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterInput) (*model.AuthResponse, error) {
+	browserInfo := utils.GetBrowserInfo(ctx)
+
+	ctx = metadata.Send(ctx, metadata.ClientInfo{
+		UserAgent: browserInfo.UserAgent,
+		IPAddress: browserInfo.IPAddr,
+		DeviceID:  input.Meta.DeviceId,
+	})
+
 	res, err := r.AuthClient.Register(ctx, &authv1.RegisterRequest{
 		Email:     input.Email,
 		Password:  input.Password,
@@ -45,46 +62,46 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 }
 
 // Logout is the resolver for the Logout field.
-func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) Logout(ctx context.Context, input model.LogoutInput) (*model.MutationResponse, error) {
 	panic(fmt.Errorf("not implemented: Logout - Logout"))
 }
 
 // GenerateScopedToken is the resolver for the GenerateScopedToken field.
-func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error) {
+func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input model.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error) {
 	panic(fmt.Errorf("not implemented: GenerateScopedToken - GenerateScopedToken"))
 }
 
 // UpdateProfileAvatarURL is the resolver for the UpdateProfileAvatarUrl field.
-func (r *mutationResolver) UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error) {
+func (r *mutationResolver) UpdateProfileAvatarURL(ctx context.Context, input model.UpdateProfileAvatarURLInput) (*model.Profile, error) {
 	panic(fmt.Errorf("not implemented: UpdateProfileAvatarURL - UpdateProfileAvatarUrl"))
 }
 
 // UpdateProfileName is the resolver for the UpdateProfileName field.
-func (r *mutationResolver) UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error) {
+func (r *mutationResolver) UpdateProfileName(ctx context.Context, input model.UpdateProfileNameInput) (*model.Profile, error) {
 	panic(fmt.Errorf("not implemented: UpdateProfileName - UpdateProfileName"))
 }
 
 // ChangePassword is the resolver for the ChangePassword field.
-func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) ChangePassword(ctx context.Context, input model.ChangePasswordInput) (*model.MutationResponse, error) {
 	panic(fmt.Errorf("not implemented: ChangePassword - ChangePassword"))
 }
 
 // RequestPasswordReset is the resolver for the RequestPasswordReset field.
-func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input model.RequestPasswordResetInput) (*model.MutationResponse, error) {
 	panic(fmt.Errorf("not implemented: RequestPasswordReset - RequestPasswordReset"))
 }
 
 // ResetPassword is the resolver for the ResetPassword field.
-func (r *mutationResolver) ResetPassword(ctx context.Context, input userdto.ResetPasswordInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) ResetPassword(ctx context.Context, input model.ResetPasswordInput) (*model.MutationResponse, error) {
 	panic(fmt.Errorf("not implemented: ResetPassword - ResetPassword"))
 }
 
 // RequestEmailVerification is the resolver for the RequestEmailVerification field.
-func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input userdto.RequestEmailVerificationInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input model.RequestEmailVerificationInput) (*model.MutationResponse, error) {
 	panic(fmt.Errorf("not implemented: RequestEmailVerification - RequestEmailVerification"))
 }
 
 // VerifyEmail is the resolver for the VerifyEmail field.
-func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) VerifyEmail(ctx context.Context, input model.VerifyEmailInput) (*model.MutationResponse, error) {
 	panic(fmt.Errorf("not implemented: VerifyEmail - VerifyEmail"))
 }
