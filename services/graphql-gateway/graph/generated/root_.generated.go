@@ -8,7 +8,6 @@ import (
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -24,6 +23,11 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	ChangePasswordInput() ChangePasswordInputResolver
+	GenerateScopedTokenInput() GenerateScopedTokenInputResolver
+	LoginInput() LoginInputResolver
+	LogoutInput() LogoutInputResolver
+	RegisterInput() RegisterInputResolver
 }
 
 type DirectiveRoot struct {
@@ -42,18 +46,18 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ChangePassword           func(childComplexity int, input model.ChangePasswordInput) int
+		ChangePassword           func(childComplexity int, input userdto.ChangePasswordInput) int
 		Empty                    func(childComplexity int) int
-		GenerateScopedToken      func(childComplexity int, input model.GenerateScopedTokenInput) int
+		GenerateScopedToken      func(childComplexity int, input userdto.GenerateScopedTokenInput) int
 		Login                    func(childComplexity int, input userdto.LoginInput) int
-		Logout                   func(childComplexity int, input model.LogoutInput) int
+		Logout                   func(childComplexity int, input userdto.LogoutInput) int
 		Register                 func(childComplexity int, input userdto.RegisterInput) int
-		RequestEmailVerification func(childComplexity int, input model.RequestEmailVerificationInput) int
-		RequestPasswordReset     func(childComplexity int, input model.RequestPasswordResetInput) int
-		ResetPassword            func(childComplexity int, input model.ResetPasswordInput) int
-		UpdateProfileAvatarURL   func(childComplexity int, input model.UpdateProfileAvatarURLInput) int
-		UpdateProfileName        func(childComplexity int, input model.UpdateProfileNameInput) int
-		VerifyEmail              func(childComplexity int, input model.VerifyEmailInput) int
+		RequestEmailVerification func(childComplexity int, input userdto.RequestEmailVerificationInput) int
+		RequestPasswordReset     func(childComplexity int, input userdto.RequestPasswordResetInput) int
+		ResetPassword            func(childComplexity int, input userdto.ResetPasswordInput) int
+		UpdateProfileAvatarURL   func(childComplexity int, input userdto.UpdateProfileAvatarUrlInput) int
+		UpdateProfileName        func(childComplexity int, input userdto.UpdateProfileNameInput) int
+		VerifyEmail              func(childComplexity int, input userdto.VerifyEmailInput) int
 	}
 
 	MutationResponse struct {
@@ -165,7 +169,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.ChangePassword(childComplexity, args["input"].(model.ChangePasswordInput)), true
+		return e.ComplexityRoot.Mutation.ChangePassword(childComplexity, args["input"].(userdto.ChangePasswordInput)), true
 
 	case "Mutation._empty":
 		if e.ComplexityRoot.Mutation.Empty == nil {
@@ -184,7 +188,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.GenerateScopedToken(childComplexity, args["input"].(model.GenerateScopedTokenInput)), true
+		return e.ComplexityRoot.Mutation.GenerateScopedToken(childComplexity, args["input"].(userdto.GenerateScopedTokenInput)), true
 
 	case "Mutation.Login":
 		if e.ComplexityRoot.Mutation.Login == nil {
@@ -208,7 +212,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.Logout(childComplexity, args["input"].(model.LogoutInput)), true
+		return e.ComplexityRoot.Mutation.Logout(childComplexity, args["input"].(userdto.LogoutInput)), true
 
 	case "Mutation.Register":
 		if e.ComplexityRoot.Mutation.Register == nil {
@@ -232,7 +236,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.RequestEmailVerification(childComplexity, args["input"].(model.RequestEmailVerificationInput)), true
+		return e.ComplexityRoot.Mutation.RequestEmailVerification(childComplexity, args["input"].(userdto.RequestEmailVerificationInput)), true
 
 	case "Mutation.RequestPasswordReset":
 		if e.ComplexityRoot.Mutation.RequestPasswordReset == nil {
@@ -244,7 +248,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.RequestPasswordReset(childComplexity, args["input"].(model.RequestPasswordResetInput)), true
+		return e.ComplexityRoot.Mutation.RequestPasswordReset(childComplexity, args["input"].(userdto.RequestPasswordResetInput)), true
 
 	case "Mutation.ResetPassword":
 		if e.ComplexityRoot.Mutation.ResetPassword == nil {
@@ -256,7 +260,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.ResetPassword(childComplexity, args["input"].(model.ResetPasswordInput)), true
+		return e.ComplexityRoot.Mutation.ResetPassword(childComplexity, args["input"].(userdto.ResetPasswordInput)), true
 
 	case "Mutation.UpdateProfileAvatarUrl":
 		if e.ComplexityRoot.Mutation.UpdateProfileAvatarURL == nil {
@@ -268,7 +272,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateProfileAvatarURL(childComplexity, args["input"].(model.UpdateProfileAvatarURLInput)), true
+		return e.ComplexityRoot.Mutation.UpdateProfileAvatarURL(childComplexity, args["input"].(userdto.UpdateProfileAvatarUrlInput)), true
 
 	case "Mutation.UpdateProfileName":
 		if e.ComplexityRoot.Mutation.UpdateProfileName == nil {
@@ -280,7 +284,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateProfileName(childComplexity, args["input"].(model.UpdateProfileNameInput)), true
+		return e.ComplexityRoot.Mutation.UpdateProfileName(childComplexity, args["input"].(userdto.UpdateProfileNameInput)), true
 
 	case "Mutation.VerifyEmail":
 		if e.ComplexityRoot.Mutation.VerifyEmail == nil {
@@ -292,7 +296,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.VerifyEmail(childComplexity, args["input"].(model.VerifyEmailInput)), true
+		return e.ComplexityRoot.Mutation.VerifyEmail(childComplexity, args["input"].(userdto.VerifyEmailInput)), true
 
 	case "MutationResponse.message":
 		if e.ComplexityRoot.MutationResponse.Message == nil {
@@ -505,6 +509,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputRequestEmailVerificationInput,
 		ec.unmarshalInputRequestMeta,
+		ec.unmarshalInputRequestMetaInput,
 		ec.unmarshalInputRequestPasswordResetInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputUpdateProfileAvatarUrlInput,
@@ -599,9 +604,14 @@ type Query {
   deviceId: String!
 }
 `, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input LoginInput{
+	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input RequestMetaInput {
+    deviceId: String!
+  }
+
+input LoginInput{
   email: String!
   password: String!
+  meta: RequestMetaInput!
 }
 
 input RegisterInput{
@@ -609,6 +619,7 @@ input RegisterInput{
   password: String!
   firstName: String!
   lastName: String!
+  meta: RequestMetaInput!
 }
 
 input LogoutInput {
@@ -633,6 +644,7 @@ input UpdateProfileNameInput {
 input ChangePasswordInput {
   currentPassword: String!
   newPassword: String!
+  meta: RequestMetaInput!
 }
 
 input RequestPasswordResetInput {
