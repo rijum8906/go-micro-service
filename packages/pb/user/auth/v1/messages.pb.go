@@ -7,8 +7,7 @@
 package authv1
 
 import (
-	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
-	v11 "github.com/rijum8906/relay/packages/pb/user/models/v1"
+	v1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -27,7 +26,6 @@ type LoginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	Metadata      *v1.RequestMetadata    `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -76,20 +74,12 @@ func (x *LoginRequest) GetPassword() string {
 	return ""
 }
 
-func (x *LoginRequest) GetMetadata() *v1.RequestMetadata {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
 type RegisterRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	FirstName     string                 `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	LastName      string                 `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Metadata      *v1.RequestMetadata    `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -152,18 +142,11 @@ func (x *RegisterRequest) GetLastName() string {
 	return ""
 }
 
-func (x *RegisterRequest) GetMetadata() *v1.RequestMetadata {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
 type AuthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *v11.User              `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	Profile       *v11.Profile           `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`
-	Tokens        *v11.AuthToken         `protobuf:"bytes,3,opt,name=tokens,proto3" json:"tokens,omitempty"`
+	User          *v1.User               `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Profile       *v1.Profile            `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`
+	Tokens        *v1.AuthToken          `protobuf:"bytes,3,opt,name=tokens,proto3" json:"tokens,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -198,21 +181,21 @@ func (*AuthResponse) Descriptor() ([]byte, []int) {
 	return file_user_auth_v1_messages_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *AuthResponse) GetUser() *v11.User {
+func (x *AuthResponse) GetUser() *v1.User {
 	if x != nil {
 		return x.User
 	}
 	return nil
 }
 
-func (x *AuthResponse) GetProfile() *v11.Profile {
+func (x *AuthResponse) GetProfile() *v1.Profile {
 	if x != nil {
 		return x.Profile
 	}
 	return nil
 }
 
-func (x *AuthResponse) GetTokens() *v11.AuthToken {
+func (x *AuthResponse) GetTokens() *v1.AuthToken {
 	if x != nil {
 		return x.Tokens
 	}
@@ -223,18 +206,16 @@ var File_user_auth_v1_messages_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_messages_proto_rawDesc = "" +
 	"\n" +
-	"\x1buser/auth/v1/messages.proto\x12\fuser.auth.v1\x1a\x14core/v1/common.proto\x1a\x1auser/models/v1/model.proto\"v\n" +
+	"\x1buser/auth/v1/messages.proto\x12\fuser.auth.v1\x1a\x1auser/models/v1/model.proto\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\x124\n" +
-	"\bmetadata\x18\x03 \x01(\v2\x18.core.v1.RequestMetadataR\bmetadata\"\xb5\x01\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x7f\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x04 \x01(\tR\blastName\x124\n" +
-	"\bmetadata\x18\x05 \x01(\v2\x18.core.v1.RequestMetadataR\bmetadata\"\x9e\x01\n" +
+	"\tlast_name\x18\x04 \x01(\tR\blastName\"\x9e\x01\n" +
 	"\fAuthResponse\x12(\n" +
 	"\x04user\x18\x01 \x01(\v2\x14.user.models.v1.UserR\x04user\x121\n" +
 	"\aprofile\x18\x02 \x01(\v2\x17.user.models.v1.ProfileR\aprofile\x121\n" +
@@ -255,25 +236,22 @@ func file_user_auth_v1_messages_proto_rawDescGZIP() []byte {
 
 var file_user_auth_v1_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_user_auth_v1_messages_proto_goTypes = []any{
-	(*LoginRequest)(nil),       // 0: user.auth.v1.LoginRequest
-	(*RegisterRequest)(nil),    // 1: user.auth.v1.RegisterRequest
-	(*AuthResponse)(nil),       // 2: user.auth.v1.AuthResponse
-	(*v1.RequestMetadata)(nil), // 3: core.v1.RequestMetadata
-	(*v11.User)(nil),           // 4: user.models.v1.User
-	(*v11.Profile)(nil),        // 5: user.models.v1.Profile
-	(*v11.AuthToken)(nil),      // 6: user.models.v1.AuthToken
+	(*LoginRequest)(nil),    // 0: user.auth.v1.LoginRequest
+	(*RegisterRequest)(nil), // 1: user.auth.v1.RegisterRequest
+	(*AuthResponse)(nil),    // 2: user.auth.v1.AuthResponse
+	(*v1.User)(nil),         // 3: user.models.v1.User
+	(*v1.Profile)(nil),      // 4: user.models.v1.Profile
+	(*v1.AuthToken)(nil),    // 5: user.models.v1.AuthToken
 }
 var file_user_auth_v1_messages_proto_depIdxs = []int32{
-	3, // 0: user.auth.v1.LoginRequest.metadata:type_name -> core.v1.RequestMetadata
-	3, // 1: user.auth.v1.RegisterRequest.metadata:type_name -> core.v1.RequestMetadata
-	4, // 2: user.auth.v1.AuthResponse.user:type_name -> user.models.v1.User
-	5, // 3: user.auth.v1.AuthResponse.profile:type_name -> user.models.v1.Profile
-	6, // 4: user.auth.v1.AuthResponse.tokens:type_name -> user.models.v1.AuthToken
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	3, // 0: user.auth.v1.AuthResponse.user:type_name -> user.models.v1.User
+	4, // 1: user.auth.v1.AuthResponse.profile:type_name -> user.models.v1.Profile
+	5, // 2: user.auth.v1.AuthResponse.tokens:type_name -> user.models.v1.AuthToken
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_user_auth_v1_messages_proto_init() }
