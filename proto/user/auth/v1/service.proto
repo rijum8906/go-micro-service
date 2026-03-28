@@ -2,15 +2,16 @@ syntax = "proto3";
 
 package user.auth.v1;
 
-import "user/auth/v1/messages.proto";
-
-option go_package = "github.com/rijum8906/relay/proto/user/auth/v1;proto_auth";
+import "user/auth/v1/requst.proto";
+import "user/auth/v1/response.proto";
 
 service AuthService {
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
-  rpc Login(LoginRequest) returns (AuthResponse);
+  rpc Login(LoginInput) returns (AuthResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
-  rpc Register(RegisterRequest) returns (AuthResponse);
+  rpc Register(RegisterInput) returns (AuthResponse);
 }
