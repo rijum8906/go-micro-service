@@ -18,9 +18,11 @@ message User {
   string id = 1;
   string email = 2;
   bool is_email_verified = 3;
-  google.protobuf.Timestamp emial_verified_at = 4;
+  google.protobuf.Timestamp email_verified_at = 4;
   bool two_factor_enabled = 5;
   google.protobuf.Timestamp two_factor_enabled_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
 }
 
 message Profile {
@@ -29,4 +31,6 @@ message Profile {
   string first_name = 3;
   string last_name = 4;
   string avatar_url = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
 }
