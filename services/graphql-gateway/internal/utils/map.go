@@ -7,7 +7,7 @@ import (
 )
 
 func MapUser(user *modelsv1.User) *model.User {
-	emailVerfiedAt := user.EmialVerifiedAt.String()
+	emailVerifiedAt := user.EmailVerifiedAt.String()
 	twoFactorEnabledAt := user.TwoFactorEnabledAt.String()
 
 	return &model.User{
@@ -15,7 +15,7 @@ func MapUser(user *modelsv1.User) *model.User {
 		Email:              user.Email,
 		TwoFactorEnabled:   user.TwoFactorEnabled,
 		IsEmailVerified:    user.IsEmailVerified,
-		EmailVerifiedAt:    &emailVerfiedAt,
+		EmailVerifiedAt:    &emailVerifiedAt,
 		TwoFactorEnabledAt: &twoFactorEnabledAt,
 	}
 }

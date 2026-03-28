@@ -7,16 +7,20 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/rijum8906/relay/packages/core/token"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 )
 
 // Scope is the resolver for the scope field.
 func (r *generateScopedTokenInputResolver) Scope(ctx context.Context, obj *userdto.GenerateScopedTokenInput, data string) error {
-	obj.Scope = token.TokenScope(data)
-	return nil
+	panic(fmt.Errorf("not implemented: Scope - scope"))
+}
+
+// Empty is the resolver for the _empty field.
+func (r *logoutInputResolver) Empty(ctx context.Context, obj *userdto.LogoutInput, data *string) error {
+	panic(fmt.Errorf("not implemented: Empty - _empty"))
 }
 
 // GenerateScopedTokenInput returns generated.GenerateScopedTokenInputResolver implementation.
@@ -24,4 +28,34 @@ func (r *Resolver) GenerateScopedTokenInput() generated.GenerateScopedTokenInput
 	return &generateScopedTokenInputResolver{r}
 }
 
+// LogoutInput returns generated.LogoutInputResolver implementation.
+func (r *Resolver) LogoutInput() generated.LogoutInputResolver { return &logoutInputResolver{r} }
+
 type generateScopedTokenInputResolver struct{ *Resolver }
+type logoutInputResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *changePasswordInputResolver) Meta(ctx context.Context, obj *userdto.ChangePasswordInput, data *model.RequestMetaInput) error {
+	panic(fmt.Errorf("not implemented: Meta - meta"))
+}
+func (r *loginInputResolver) Meta(ctx context.Context, obj *userdto.LoginInput, data *model.RequestMetaInput) error {
+	panic(fmt.Errorf("not implemented: Meta - meta"))
+}
+func (r *registerInputResolver) Meta(ctx context.Context, obj *userdto.RegisterInput, data *model.RequestMetaInput) error {
+	panic(fmt.Errorf("not implemented: Meta - meta"))
+}
+func (r *Resolver) ChangePasswordInput() generated.ChangePasswordInputResolver {
+	return &changePasswordInputResolver{r}
+}
+func (r *Resolver) LoginInput() generated.LoginInputResolver { return &loginInputResolver{r} }
+func (r *Resolver) RegisterInput() generated.RegisterInputResolver { return &registerInputResolver{r} }
+type changePasswordInputResolver struct{ *Resolver }
+type loginInputResolver struct{ *Resolver }
+type registerInputResolver struct{ *Resolver }
+*/

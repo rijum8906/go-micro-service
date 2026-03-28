@@ -381,7 +381,7 @@ func (ec *executionContext) fieldContext_Token_expiresIn(_ context.Context, fiel
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputRequestMetaInput(ctx context.Context, obj any) (coredto.RequestMeta, error) {
+func (ec *executionContext) unmarshalInputRequestMeta(ctx context.Context, obj any) (coredto.RequestMeta, error) {
 	var it coredto.RequestMeta
 	if obj == nil {
 		return it, nil
@@ -679,11 +679,6 @@ func (ec *executionContext) marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906
 		return graphql.Null
 	}
 	return ec._MutationResponse(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx context.Context, v any) (coredto.RequestMeta, error) {
-	res, err := ec.unmarshalInputRequestMetaInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNScopedTokenResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, v model.ScopedTokenResponse) graphql.Marshaler {

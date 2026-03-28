@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package user.auth.v1;
+
+import "user/models/v1/model.proto";
+
+message AuthResponse {
+  user.models.v1.User user = 1;
+  user.models.v1.Profile profile = 2;
+  user.models.v1.AuthToken tokens = 3;
+}
+
+message MutationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ScopedTokenResponse {
+  user.models.v1.Token token = 1;
+}

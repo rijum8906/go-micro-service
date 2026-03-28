@@ -1,3 +1,3 @@
-input RequestMetaInput {
+input RequestMeta {
   deviceId: String!
 }

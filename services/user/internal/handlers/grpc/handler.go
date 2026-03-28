@@ -24,13 +24,13 @@ func NewAuthHandler(service authservice.AuthService) *AuthHandler {
 	}
 }
 
-func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.AuthResponse, error) {
+func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginInput) (*authv1.AuthResponse, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request is required"))
 	}
 
-	metadata, appErr := metadata.ReceiveClientInfo(ctx)
-	if appErr != nil {
+	metadata, ok := metadata.Receive(ctx)
+	if !ok {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request metadata is required"))
 	}
 
@@ -47,13 +47,13 @@ func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 	return result, nil
 }
 
-func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest) (*authv1.AuthResponse, error) {
+func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterInput) (*authv1.AuthResponse, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("register request is required"))
 	}
 
-	metadata, appErr := metadata.ReceiveClientInfo(ctx)
-	if appErr != nil {
+	metadata, ok := metadata.Receive(ctx)
+	if !ok {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request metadata is required"))
 	}
 

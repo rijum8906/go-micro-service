@@ -1,10 +1,8 @@
 FROM golang:1.26-alpine AS builder
 
-RUN apk add --no-cache git ca-certificates tzdata build-base
-
 WORKDIR /app
 
-COPY go.mod ./
+COPY go.mod go.sum ./
 COPY packages/core/go.mod packages/core/go.sum ./
 COPY services/user/go.mod services/user/go.sum ./
 COPY packages/pb/go.mod packages/pb/go.sum ./
