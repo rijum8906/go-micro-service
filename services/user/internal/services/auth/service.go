@@ -118,3 +118,17 @@ func (s *authService) Register(ctx context.Context, data dto.Register, client *m
 
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
+
+func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError) {
+	session, appErr := s.repos.Session.GetSessionByRefreshToken(ctx, client.RefreshToken)
+	if appErr != nil {
+		return false, appErr
+	}
+
+	err := s.repos.Session.RevokeSession(ctx, session.ID)
+	if err != nil {
+		return false, apperror.ErrInternal.WithMessage("Failed to logout").WithDetail("error", err.Error())
+	}
+
+	return false, nil
+}
