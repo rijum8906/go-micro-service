@@ -25,7 +25,7 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.Send(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClientInfo(ctx, metadata.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,
@@ -50,7 +50,7 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.Send(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClientInfo(ctx, metadata.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,
