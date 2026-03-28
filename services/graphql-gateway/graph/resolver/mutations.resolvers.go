@@ -19,6 +19,10 @@ import (
 
 // Login is the resolver for the Login field.
 func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) (*model.AuthResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
 	browserInfo := utils.GetBrowserInfo(ctx)
 
 	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
@@ -40,6 +44,10 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 
 // Register is the resolver for the Register field.
 func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterInput) (*model.AuthResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
 	browserInfo := utils.GetBrowserInfo(ctx)
 
 	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
@@ -63,6 +71,20 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 
 // Logout is the resolver for the Logout field.
 func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error) {
+	// if err := r.Validate.Struct(input); err != nil {
+	// 	return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	// }
+	//
+	// accessToken, appErr := utils.GetAccessTokenFromHeader(ctx)
+	// if appErr != nil {
+	// 	return nil, appErr
+	// }
+	//
+	// claims, appErr := r.Token.ValidateAuthToken(ctx, accessToken)
+	// if appErr != nil {
+	// 	return nil, appErr
+	// }
+
 	panic(fmt.Errorf("not implemented: Logout - Logout"))
 }
 

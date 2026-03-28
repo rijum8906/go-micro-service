@@ -79,7 +79,7 @@ func (a *Application) initHTTPServer() *apperror.AppError {
 		return apperror.ErrInternal.WithMessage("failed to listen for HTTP server").WithDetail("error", err.Error())
 	}
 
-	res := resolver.NewResolver(a.clients.AuthClient)
+	res := resolver.NewResolver(a.clients.AuthClient, a.utils.token)
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: res}))
 
 	mux := http.NewServeMux()
