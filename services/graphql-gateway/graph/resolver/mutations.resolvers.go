@@ -31,7 +31,7 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 		DeviceID:  input.Meta.DeviceId,
 	})
 
-	resp, err := r.AuthClient.Login(ctx, &authv1.LoginInput{
+	resp, err := r.AuthClient.Login(ctx, &authv1.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	})
@@ -56,7 +56,7 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		DeviceID:  input.Meta.DeviceId,
 	})
 
-	res, err := r.AuthClient.Register(ctx, &authv1.RegisterInput{
+	res, err := r.AuthClient.Register(ctx, &authv1.RegisterRequest{
 		Email:     input.Email,
 		Password:  input.Password,
 		FirstName: input.FirstName,
