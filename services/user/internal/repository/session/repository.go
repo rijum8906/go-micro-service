@@ -24,6 +24,14 @@ func (r *sessionRepository) GetSession(ctx context.Context, id uuid.UUID) (*db.S
 	return &session, nil
 }
 
+func (r *sessionRepository) GetSessionByRefreshToken(ctx context.Context, token string) (*db.Session, *apperror.AppError) {
+	session, err := r.q.GetSessionByRefreshTokenHash(ctx, token)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to get session").WithDetail("error", err.Error())
+	}
+	return &session, nil
+}
+
 func (r *sessionRepository) GetActiveSessions(ctx context.Context, userID uuid.UUID, limit, offfset int32) (*[]db.Session, *apperror.AppError) {
 	sessions, err := r.q.GetSessionsByUserID(ctx, db.GetSessionsByUserIDParams{
 		UserID: userID,

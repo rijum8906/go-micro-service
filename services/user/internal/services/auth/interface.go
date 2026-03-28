@@ -15,6 +15,7 @@ import (
 type AuthService interface {
 	Login(ctx context.Context, data dto.Login, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
 	Register(ctx context.Context, data dto.Register, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
+	Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError)
 }
 
 type authService struct {

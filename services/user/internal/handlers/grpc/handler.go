@@ -69,3 +69,22 @@ func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterInput) (
 
 	return result, nil
 }
+
+func (h *AuthHandler) Logout(ctx context.Context, req *authv1.LogoutInput) (bool, error) {
+	if req == nil {
+		return false, utils.MapAppError(apperror.ErrValidation.WithMessage("logout request is required"))
+	}
+
+	metadata, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		// NOTE: if not ok then it's the gateway's bug
+		return false, utils.MapAppError(apperror.ErrInternal.WithMessage("logout user metadata is required"))
+	}
+
+	result, appErr := h.service.Logout(ctx, &metadata)
+	if appErr != nil {
+		return false, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
