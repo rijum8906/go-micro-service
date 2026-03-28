@@ -23,6 +23,7 @@ call_argument_directives_with_null: true
 autobind:
   - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
   - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
+  - "github.com/rijum8906/relay/packages/core/token"
 
 models:
   RequestMetaInput:

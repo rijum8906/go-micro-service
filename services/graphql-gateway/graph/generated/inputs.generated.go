@@ -6,18 +6,10 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 )
 
 // region    ************************** generated!.gotpl **************************
-
-type GenerateScopedTokenInputResolver interface {
-	Scope(ctx context.Context, obj *userdto.GenerateScopedTokenInput, data string) error
-}
-type LogoutInputResolver interface {
-	Empty(ctx context.Context, obj *userdto.LogoutInput, data *string) error
-}
 
 // endregion ************************** generated!.gotpl **************************
 
@@ -46,20 +38,20 @@ func (ec *executionContext) unmarshalInputChangePasswordInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"currentPassword", "newPassword", "meta"}
+	fieldsInOrder := [...]string{"token", "newPassword", "meta"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "currentPassword":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currentPassword"))
+		case "token":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.CurrentPassword = data
+			it.Token = data
 		case "newPassword":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -90,7 +82,7 @@ func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"scope"}
+	fieldsInOrder := [...]string{"scope", "authMethod", "authValue", "meta"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -99,13 +91,32 @@ func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.C
 		switch k {
 		case "scope":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐTokenScope(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		case "authMethod":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authMethod"))
+			data, err := ec.unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐAuthMethod(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthMethod = data
+		case "authValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authValue"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.GenerateScopedTokenInput().Scope(ctx, &it, data); err != nil {
+			it.AuthValue = data
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
+			if err != nil {
 				return it, err
 			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -166,22 +177,20 @@ func (ec *executionContext) unmarshalInputLogoutInput(ctx context.Context, obj a
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"_empty"}
+	fieldsInOrder := [...]string{"meta"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "_empty":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("_empty"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.LogoutInput().Empty(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -256,7 +265,7 @@ func (ec *executionContext) unmarshalInputRequestEmailVerificationInput(ctx cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email"}
+	fieldsInOrder := [...]string{"email", "meta"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -270,36 +279,13 @@ func (ec *executionContext) unmarshalInputRequestEmailVerificationInput(ctx cont
 				return it, err
 			}
 			it.Email = data
-		}
-	}
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputRequestMetaInput(ctx context.Context, obj any) (coredto.RequestMeta, error) {
-	var it coredto.RequestMeta
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"deviceId"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "deviceId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deviceId"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.DeviceId = data
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -316,7 +302,7 @@ func (ec *executionContext) unmarshalInputRequestPasswordResetInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email"}
+	fieldsInOrder := [...]string{"email", "meta"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -330,6 +316,13 @@ func (ec *executionContext) unmarshalInputRequestPasswordResetInput(ctx context.
 				return it, err
 			}
 			it.Email = data
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -464,7 +457,7 @@ func (ec *executionContext) unmarshalInputVerifyEmailInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"token"}
+	fieldsInOrder := [...]string{"token", "meta"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -478,6 +471,13 @@ func (ec *executionContext) unmarshalInputVerifyEmailInput(ctx context.Context, 
 				return it, err
 			}
 			it.Token = data
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -522,11 +522,6 @@ func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋrijum8906ᚋr
 
 func (ec *executionContext) unmarshalNRequestEmailVerificationInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐRequestEmailVerificationInput(ctx context.Context, v any) (userdto.RequestEmailVerificationInput, error) {
 	res, err := ec.unmarshalInputRequestEmailVerificationInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx context.Context, v any) (coredto.RequestMeta, error) {
-	res, err := ec.unmarshalInputRequestMetaInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

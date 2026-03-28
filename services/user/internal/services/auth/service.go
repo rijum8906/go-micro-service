@@ -51,7 +51,7 @@ func (s *authService) Login(ctx context.Context, data dto.Login, client *metadat
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.ScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -111,7 +111,7 @@ func (s *authService) Register(ctx context.Context, data dto.Register, client *m
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.ScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
