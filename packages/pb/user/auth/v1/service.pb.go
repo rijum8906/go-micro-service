@@ -7,6 +7,7 @@
 package authv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,24 +25,44 @@ var File_user_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x19user/auth/v1/requst.proto\x1a\x1buser/auth/v1/response.proto2\x91\x01\n" +
-	"\vAuthService\x12=\n" +
-	"\x05Login\x12\x18.user.auth.v1.LoginInput\x1a\x1a.user.auth.v1.AuthResponse\x12C\n" +
-	"\bRegister\x12\x1b.user.auth.v1.RegisterInput\x1a\x1a.user.auth.v1.AuthResponseB\xae\x01\n" +
+	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x14core/v1/common.proto\x1a\x19user/auth/v1/requst.proto\x1a\x1buser/auth/v1/response.proto2\xfc\x03\n" +
+	"\vAuthService\x12?\n" +
+	"\x05Login\x12\x1a.user.auth.v1.LoginRequest\x1a\x1a.user.auth.v1.AuthResponse\x12E\n" +
+	"\bRegister\x12\x1d.user.auth.v1.RegisterRequest\x1a\x1a.user.auth.v1.AuthResponse\x129\n" +
+	"\x06Logout\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponse\x12I\n" +
+	"\x18RequestEmailVerification\x12\x13.core.v1.EmailInput\x1a\x18.core.v1.SuccessResponse\x12E\n" +
+	"\x14RequestPasswordReset\x12\x13.core.v1.EmailInput\x1a\x18.core.v1.SuccessResponse\x12I\n" +
+	"\vVerifyEmail\x12 .user.auth.v1.VerifyEmailRequest\x1a\x18.core.v1.SuccessResponse\x12M\n" +
+	"\rResetPassword\x12\".user.auth.v1.ResetPasswordRequest\x1a\x18.core.v1.SuccessResponseB\xae\x01\n" +
 	"\x10com.user.auth.v1B\fServiceProtoP\x01Z:github.com/rijum8906/relay/packages/pb/user/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\fUser.Auth.V1\xca\x02\fUser\\Auth\\V1\xe2\x02\x18User\\Auth\\V1\\GPBMetadata\xea\x02\x0eUser::Auth::V1b\x06proto3"
 
 var file_user_auth_v1_service_proto_goTypes = []any{
-	(*LoginInput)(nil),    // 0: user.auth.v1.LoginInput
-	(*RegisterInput)(nil), // 1: user.auth.v1.RegisterInput
-	(*AuthResponse)(nil),  // 2: user.auth.v1.AuthResponse
+	(*LoginRequest)(nil),         // 0: user.auth.v1.LoginRequest
+	(*RegisterRequest)(nil),      // 1: user.auth.v1.RegisterRequest
+	(*v1.EmptyRequest)(nil),      // 2: core.v1.EmptyRequest
+	(*v1.EmailInput)(nil),        // 3: core.v1.EmailInput
+	(*VerifyEmailRequest)(nil),   // 4: user.auth.v1.VerifyEmailRequest
+	(*ResetPasswordRequest)(nil), // 5: user.auth.v1.ResetPasswordRequest
+	(*AuthResponse)(nil),         // 6: user.auth.v1.AuthResponse
+	(*v1.SuccessResponse)(nil),   // 7: core.v1.SuccessResponse
 }
 var file_user_auth_v1_service_proto_depIdxs = []int32{
-	0, // 0: user.auth.v1.AuthService.Login:input_type -> user.auth.v1.LoginInput
-	1, // 1: user.auth.v1.AuthService.Register:input_type -> user.auth.v1.RegisterInput
-	2, // 2: user.auth.v1.AuthService.Login:output_type -> user.auth.v1.AuthResponse
-	2, // 3: user.auth.v1.AuthService.Register:output_type -> user.auth.v1.AuthResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
+	0, // 0: user.auth.v1.AuthService.Login:input_type -> user.auth.v1.LoginRequest
+	1, // 1: user.auth.v1.AuthService.Register:input_type -> user.auth.v1.RegisterRequest
+	2, // 2: user.auth.v1.AuthService.Logout:input_type -> core.v1.EmptyRequest
+	3, // 3: user.auth.v1.AuthService.RequestEmailVerification:input_type -> core.v1.EmailInput
+	3, // 4: user.auth.v1.AuthService.RequestPasswordReset:input_type -> core.v1.EmailInput
+	4, // 5: user.auth.v1.AuthService.VerifyEmail:input_type -> user.auth.v1.VerifyEmailRequest
+	5, // 6: user.auth.v1.AuthService.ResetPassword:input_type -> user.auth.v1.ResetPasswordRequest
+	6, // 7: user.auth.v1.AuthService.Login:output_type -> user.auth.v1.AuthResponse
+	6, // 8: user.auth.v1.AuthService.Register:output_type -> user.auth.v1.AuthResponse
+	7, // 9: user.auth.v1.AuthService.Logout:output_type -> core.v1.SuccessResponse
+	7, // 10: user.auth.v1.AuthService.RequestEmailVerification:output_type -> core.v1.SuccessResponse
+	7, // 11: user.auth.v1.AuthService.RequestPasswordReset:output_type -> core.v1.SuccessResponse
+	7, // 12: user.auth.v1.AuthService.VerifyEmail:output_type -> core.v1.SuccessResponse
+	7, // 13: user.auth.v1.AuthService.ResetPassword:output_type -> core.v1.SuccessResponse
+	7, // [7:14] is the sub-list for method output_type
+	0, // [0:7] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
