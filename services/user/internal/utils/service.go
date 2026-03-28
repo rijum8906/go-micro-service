@@ -2,6 +2,8 @@
 package utils
 
 import (
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/hash"
 	"github.com/rijum8906/relay/packages/core/token"
 	"github.com/rijum8906/relay/services/user/internal/repository/profile"
@@ -25,4 +27,16 @@ func NewUtils(tokenManager *token.TokenManager, hashService hash.HashService) *U
 		TokenManager: tokenManager,
 		HashService:  hashService,
 	}
+}
+
+func NewUUID(id string) (pgtype.UUID, error) {
+	u, err := uuid.Parse(id)
+	if err != nil {
+		return pgtype.UUID{}, err
+	}
+
+	return pgtype.UUID{
+		Bytes: u,
+		Valid: true,
+	}, nil
 }
