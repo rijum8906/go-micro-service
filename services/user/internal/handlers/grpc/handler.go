@@ -29,8 +29,8 @@ func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request is required"))
 	}
 
-	metadata, ok := metadata.Receive(ctx)
-	if !ok {
+	metadata, appErr := metadata.ReceiveClientInfo(ctx)
+	if appErr != nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request metadata is required"))
 	}
 
@@ -52,8 +52,8 @@ func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest)
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("register request is required"))
 	}
 
-	metadata, ok := metadata.Receive(ctx)
-	if !ok {
+	metadata, appErr := metadata.ReceiveClientInfo(ctx)
+	if appErr != nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request metadata is required"))
 	}
 
