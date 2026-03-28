@@ -5,3 +5,13 @@ package core.v1;
 message RequestMetadata {
   string device_id = 1;
 }
+
+message EmptyRequest {}
+
+message SuccessResponse {
+  bool success = 1;
+}
+
+message EmailInput {
+  string email = 1;
+}

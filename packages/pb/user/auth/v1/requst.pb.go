@@ -7,6 +7,7 @@
 package authv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -21,7 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type LoginInput struct {
+type LoginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
@@ -29,20 +30,20 @@ type LoginInput struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *LoginInput) Reset() {
-	*x = LoginInput{}
+func (x *LoginRequest) Reset() {
+	*x = LoginRequest{}
 	mi := &file_user_auth_v1_requst_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *LoginInput) String() string {
+func (x *LoginRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LoginInput) ProtoMessage() {}
+func (*LoginRequest) ProtoMessage() {}
 
-func (x *LoginInput) ProtoReflect() protoreflect.Message {
+func (x *LoginRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_auth_v1_requst_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,26 +55,26 @@ func (x *LoginInput) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LoginInput.ProtoReflect.Descriptor instead.
-func (*LoginInput) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoginRequest.ProtoReflect.Descriptor instead.
+func (*LoginRequest) Descriptor() ([]byte, []int) {
 	return file_user_auth_v1_requst_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *LoginInput) GetEmail() string {
+func (x *LoginRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *LoginInput) GetPassword() string {
+func (x *LoginRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
 }
 
-type RegisterInput struct {
+type RegisterRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
@@ -83,20 +84,20 @@ type RegisterInput struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RegisterInput) Reset() {
-	*x = RegisterInput{}
+func (x *RegisterRequest) Reset() {
+	*x = RegisterRequest{}
 	mi := &file_user_auth_v1_requst_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RegisterInput) String() string {
+func (x *RegisterRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RegisterInput) ProtoMessage() {}
+func (*RegisterRequest) ProtoMessage() {}
 
-func (x *RegisterInput) ProtoReflect() protoreflect.Message {
+func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_auth_v1_requst_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -108,35 +109,131 @@ func (x *RegisterInput) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RegisterInput.ProtoReflect.Descriptor instead.
-func (*RegisterInput) Descriptor() ([]byte, []int) {
+// Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
+func (*RegisterRequest) Descriptor() ([]byte, []int) {
 	return file_user_auth_v1_requst_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *RegisterInput) GetEmail() string {
+func (x *RegisterRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
 	return ""
 }
 
-func (x *RegisterInput) GetPassword() string {
+func (x *RegisterRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
 }
 
-func (x *RegisterInput) GetFirstName() string {
+func (x *RegisterRequest) GetFirstName() string {
 	if x != nil {
 		return x.FirstName
 	}
 	return ""
 }
 
-func (x *RegisterInput) GetLastName() string {
+func (x *RegisterRequest) GetLastName() string {
 	if x != nil {
 		return x.LastName
+	}
+	return ""
+}
+
+type VerifyEmailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ScopedToken   *v1.Token              `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyEmailRequest) Reset() {
+	*x = VerifyEmailRequest{}
+	mi := &file_user_auth_v1_requst_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyEmailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyEmailRequest) ProtoMessage() {}
+
+func (x *VerifyEmailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_auth_v1_requst_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyEmailRequest.ProtoReflect.Descriptor instead.
+func (*VerifyEmailRequest) Descriptor() ([]byte, []int) {
+	return file_user_auth_v1_requst_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *VerifyEmailRequest) GetScopedToken() *v1.Token {
+	if x != nil {
+		return x.ScopedToken
+	}
+	return nil
+}
+
+type ResetPasswordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ScopedToken   *v1.Token              `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	NewPassword   string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResetPasswordRequest) Reset() {
+	*x = ResetPasswordRequest{}
+	mi := &file_user_auth_v1_requst_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResetPasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPasswordRequest) ProtoMessage() {}
+
+func (x *ResetPasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_auth_v1_requst_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPasswordRequest.ProtoReflect.Descriptor instead.
+func (*ResetPasswordRequest) Descriptor() ([]byte, []int) {
+	return file_user_auth_v1_requst_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ResetPasswordRequest) GetScopedToken() *v1.Token {
+	if x != nil {
+		return x.ScopedToken
+	}
+	return nil
+}
+
+func (x *ResetPasswordRequest) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
 	}
 	return ""
 }
@@ -145,17 +242,21 @@ var File_user_auth_v1_requst_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_requst_proto_rawDesc = "" +
 	"\n" +
-	"\x19user/auth/v1/requst.proto\x12\fuser.auth.v1\">\n" +
-	"\n" +
-	"LoginInput\x12\x14\n" +
+	"\x19user/auth/v1/requst.proto\x12\fuser.auth.v1\x1a\x1auser/models/v1/model.proto\"@\n" +
+	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"}\n" +
-	"\rRegisterInput\x12\x14\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x7f\n" +
+	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x03 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x04 \x01(\tR\blastNameB\xad\x01\n" +
+	"\tlast_name\x18\x04 \x01(\tR\blastName\"N\n" +
+	"\x12VerifyEmailRequest\x128\n" +
+	"\fscoped_token\x18\x01 \x01(\v2\x15.user.models.v1.TokenR\vscopedToken\"s\n" +
+	"\x14ResetPasswordRequest\x128\n" +
+	"\fscoped_token\x18\x01 \x01(\v2\x15.user.models.v1.TokenR\vscopedToken\x12!\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPasswordB\xad\x01\n" +
 	"\x10com.user.auth.v1B\vRequstProtoP\x01Z:github.com/rijum8906/relay/packages/pb/user/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\fUser.Auth.V1\xca\x02\fUser\\Auth\\V1\xe2\x02\x18User\\Auth\\V1\\GPBMetadata\xea\x02\x0eUser::Auth::V1b\x06proto3"
 
 var (
@@ -170,17 +271,22 @@ func file_user_auth_v1_requst_proto_rawDescGZIP() []byte {
 	return file_user_auth_v1_requst_proto_rawDescData
 }
 
-var file_user_auth_v1_requst_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_user_auth_v1_requst_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_user_auth_v1_requst_proto_goTypes = []any{
-	(*LoginInput)(nil),    // 0: user.auth.v1.LoginInput
-	(*RegisterInput)(nil), // 1: user.auth.v1.RegisterInput
+	(*LoginRequest)(nil),         // 0: user.auth.v1.LoginRequest
+	(*RegisterRequest)(nil),      // 1: user.auth.v1.RegisterRequest
+	(*VerifyEmailRequest)(nil),   // 2: user.auth.v1.VerifyEmailRequest
+	(*ResetPasswordRequest)(nil), // 3: user.auth.v1.ResetPasswordRequest
+	(*v1.Token)(nil),             // 4: user.models.v1.Token
 }
 var file_user_auth_v1_requst_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: user.auth.v1.VerifyEmailRequest.scoped_token:type_name -> user.models.v1.Token
+	4, // 1: user.auth.v1.ResetPasswordRequest.scoped_token:type_name -> user.models.v1.Token
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_auth_v1_requst_proto_init() }
@@ -194,7 +300,7 @@ func file_user_auth_v1_requst_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_auth_v1_requst_proto_rawDesc), len(file_user_auth_v1_requst_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
