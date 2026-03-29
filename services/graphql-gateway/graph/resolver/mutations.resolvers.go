@@ -89,6 +89,7 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 	ctx = metadata.SendUserInfo(ctx, metadata.UserInfo{
 		UserID:      claims.Subject,
 		AccessToken: accessToken,
+		SessionID:   claims.ID,
 	})
 
 	res, err := r.AuthClient.Logout(ctx, &corev1.EmptyRequest{})
@@ -99,7 +100,9 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 		return nil, apperror.ErrInternal.WithMessage("failed to logout")
 	}
 
-	return &model.MutationResponse{}, nil
+	return &model.MutationResponse{
+		Success: res.Success,
+	}, nil
 }
 
 // GenerateScopedToken is the resolver for the GenerateScopedToken field.

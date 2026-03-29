@@ -3,6 +3,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 
@@ -75,6 +76,9 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 }
 
 func (a *Application) initHTTPServer() *apperror.AppError {
+	fmt.Println("origins:", a.config.CorsAllowedOrigins)
+	fmt.Println("methods:", a.config.CorsAllowedMethods)
+	fmt.Println("headers:", a.config.CorsAllowedHeaders)
 	listener, err := net.Listen("tcp", net.JoinHostPort("", a.port()))
 	if err != nil {
 		return apperror.ErrInternal.WithMessage("failed to listen for HTTP server").WithDetail("error", err.Error())
@@ -93,7 +97,7 @@ func (a *Application) initHTTPServer() *apperror.AppError {
 	a.listener = listener
 	a.server = &http.Server{
 		Addr:    net.JoinHostPort("", a.port()),
-		Handler: middleware.CORS(mux, a.config),
+		Handler: middleware.CORS(middleware.WithRequestHeaders(mux), a.config),
 	}
 
 	return nil

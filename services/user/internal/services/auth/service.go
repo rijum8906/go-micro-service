@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
@@ -120,15 +121,15 @@ func (s *authService) Register(ctx context.Context, data dto.Register, client *m
 }
 
 func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError) {
-	session, appErr := s.repos.Session.GetSessionByRefreshToken(ctx, client.RefreshToken)
+	sessionID, err := uuid.Parse(client.SessionID)
+	if err != nil {
+		return false, apperror.ErrInternal.WithMessage("Failed to parse session ID").WithDetail("error", err.Error())
+	}
+
+	appErr := s.repos.Session.RevokeSession(ctx, sessionID)
 	if appErr != nil {
 		return false, appErr
 	}
 
-	err := s.repos.Session.RevokeSession(ctx, session.ID)
-	if err != nil {
-		return false, apperror.ErrInternal.WithMessage("Failed to logout").WithDetail("error", err.Error())
-	}
-
-	return false, nil
+	return true, nil
 }
