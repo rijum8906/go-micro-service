@@ -27,6 +27,7 @@ type UserInfo struct {
 	UserID       string
 	AccessToken  string
 	RefreshToken string
+	SessionID    string
 }
 
 type ClientInfo struct {
@@ -100,6 +101,7 @@ func SendUserInfo(ctx context.Context, info UserInfo) context.Context {
 		MetaUserIDKey, info.UserID,
 		MetaAccessTokenKey, info.AccessToken,
 		MetaRefreshTokenKey, info.RefreshToken,
+		MetaSessionIDKey, info.SessionID,
 	)
 }
 
@@ -114,6 +116,7 @@ func ReceiveUserInfo(ctx context.Context) (UserInfo, bool) {
 		UserID:       first(md, MetaUserIDKey),
 		AccessToken:  first(md, MetaAccessTokenKey),
 		RefreshToken: first(md, MetaRefreshTokenKey),
+		SessionID:    first(md, MetaSessionIDKey),
 	}, true
 }
 
