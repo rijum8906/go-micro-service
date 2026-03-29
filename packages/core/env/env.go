@@ -41,6 +41,11 @@ type Config struct {
 	SessionTTL      time.Duration `env:"SESSION_TTL" envDefault:"15m"`
 	ScopedTokenTTL  time.Duration `env:"SCOPED_TOKEN_TTL" envDefault:"10m"`
 	RefreshTokenTTL time.Duration `env:"REFRESH_TOKEN_TTL" envDefault:"600h"`
+
+	// CORS Policies
+	CorsAllowedOrigins []string `env:"CORS_ALLOWED_ORIGINS" envDefault:"http://localhost:3000"`
+	CorsAllowedMethods []string `env:"CORS_ALLOWED_METHODS" envDefault:"GET,POST,PUT,PATCH,DELETE,OPTIONS"`
+	CorsAllowedHeaders []string `env:"CORS_ALLOWED_HEADERS" envDefault:"Content-Type, Authorization"`
 }
 
 // Load reads .env files (for local dev) and parses environment variables
