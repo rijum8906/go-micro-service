@@ -8,16 +8,20 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type redisStore struct {
+	client *redis.Client
+}
+
 type Config struct {
-	jwtSecret      []byte
+	JwtSecret      []byte
 	SessionTTL     time.Duration
-	scopedSecret   []byte
+	ScopedSecret   []byte
 	ScopedTokenTTL time.Duration
 }
 
 type TokenManager struct {
-	config Config
-	redis  *redis.Client
+	Config Config
+	Store  TokenStore
 }
 
 type Claims struct {
@@ -25,12 +29,20 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+const (
+	defaultSessionTTL    = 15 * time.Minute
+	defaultScopedTokenTTL = 10 * time.Minute
+)
+
 func NewTokenManager(jwtSec, scopedSec string, redisClient *redis.Client) *TokenManager {
+	store := NewRedisStore(redisClient)
 	return &TokenManager{
-		config: Config{
-			jwtSecret:    []byte(jwtSec),
-			scopedSecret: []byte(scopedSec),
+		Config: Config{
+			JwtSecret:      []byte(jwtSec),
+			ScopedSecret:   []byte(scopedSec),
+			SessionTTL:     defaultSessionTTL,
+			ScopedTokenTTL: defaultScopedTokenTTL,
 		},
-		redis: redisClient,
+		Store: store,
 	}
 }

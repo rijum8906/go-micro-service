@@ -11,16 +11,16 @@ import (
 
 func (m *TokenManager) IssueAuthToken(ctx context.Context, subject, sessionID, deviceID string, scope TokenScope) (string, *apperror.AppError) {
 	// NOTE: use this same key for jti and redis key
-	key := generateAuthTokenKey(subject, sessionID, deviceID)
+	key := generateAuthTokenKey(subject, sessionID)
 
-	tokenClaims := generateTokenClaims(subject, key, scope, m.config.SessionTTL)
+	tokenClaims := generateTokenClaims(subject, sessionID, scope, m.Config.SessionTTL)
 
-	token, err := tokenClaims.SignedString(m.config.jwtSecret)
+	token, err := tokenClaims.SignedString(m.Config.JwtSecret)
 	if err != nil {
 		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to generate token").WithDetail("error", err.Error())
 	}
 
-	_, err = m.redis.Set(ctx, key, subject, m.config.ScopedTokenTTL).Result()
+	err = m.Store.Set(ctx, key, subject, m.Config.SessionTTL)
 	if err != nil {
 		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to set token").WithDetail("error", err.Error())
 	}
@@ -30,14 +30,14 @@ func (m *TokenManager) IssueAuthToken(ctx context.Context, subject, sessionID, d
 
 func (m *TokenManager) IssueScopedToken(ctx context.Context, subject string, scope TokenScope) (string, *apperror.AppError) {
 	// NOTE: for scoped token, the jti will be random and the redis key will be the token
-	tokenClaims := generateTokenClaims(subject, uuid.UUIDv4(), scope, m.config.ScopedTokenTTL)
+	tokenClaims := generateTokenClaims(subject, uuid.UUIDv4(), scope, m.Config.ScopedTokenTTL)
 
-	token, err := tokenClaims.SignedString(m.config.jwtSecret)
+	token, err := tokenClaims.SignedString(m.Config.JwtSecret)
 	if err != nil {
 		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to generate token").WithDetail("error", err.Error())
 	}
 
-	_, err = m.redis.Set(ctx, token, subject, m.config.ScopedTokenTTL).Result()
+	err = m.Store.Set(ctx, token, subject, m.Config.ScopedTokenTTL)
 	if err != nil {
 		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to set token").WithDetail("error", err.Error())
 	}
@@ -49,7 +49,7 @@ func (m *TokenManager) ValidateAuthToken(ctx context.Context, tokenStr string) (
 	// 1. Parse & Verify JWT Signature/Expiration
 	// This prevents hitting Redis for junk/malformed tokens.
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		return m.config.jwtSecret, nil
+		return m.Config.JwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
@@ -65,9 +65,11 @@ func (m *TokenManager) ValidateAuthToken(ctx context.Context, tokenStr string) (
 	// NOTE: IssueAuthToken stored generateAuthTokenKey inside the ID
 	sessionKey := claims.ID
 
+	key := generateAuthTokenKey(claims.Subject, sessionKey)
+
 	// 3. Check Redis
 	// If the key is gone, the session was revoked or naturally expired in Redis
-	_, err = m.redis.Get(ctx, sessionKey).Result()
+	_, err = m.Store.Get(ctx, key)
 	if err != nil {
 		return nil, mapRedisError(err) // Uses your new mapper to return 401 if missing
 	}
@@ -78,7 +80,7 @@ func (m *TokenManager) ValidateAuthToken(ctx context.Context, tokenStr string) (
 func (m *TokenManager) ValidateScopedToken(ctx context.Context, tokenStr string) (*Claims, *apperror.AppError) {
 	// 1. Parse & Verify JWT Signature/Expiration first
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		return m.config.jwtSecret, nil
+		return m.Config.JwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
@@ -92,7 +94,7 @@ func (m *TokenManager) ValidateScopedToken(ctx context.Context, tokenStr string)
 
 	// 2. Check Redis
 	// If the key is gone, the session was revoked or naturally expired in Redis
-	_, err = m.redis.Get(ctx, tokenStr).Result()
+	_, err = m.Store.Get(ctx, tokenStr)
 	if err != nil {
 		return nil, mapRedisError(err) // Uses your new mapper to return 401 if missing
 	}
@@ -101,9 +103,9 @@ func (m *TokenManager) ValidateScopedToken(ctx context.Context, tokenStr string)
 }
 
 func (m *TokenManager) RevokeAuthToken(ctx context.Context, subject, sessionID, deviceID string) *apperror.AppError {
-	key := generateAuthTokenKey(subject, sessionID, deviceID)
+	key := generateAuthTokenKey(subject, sessionID)
 
-	_, err := m.redis.Del(ctx, key).Result()
+	err := m.Store.Del(ctx, key)
 	if err != nil {
 		return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to revoke token").WithDetail("error", err.Error())
 	}
@@ -111,7 +113,7 @@ func (m *TokenManager) RevokeAuthToken(ctx context.Context, subject, sessionID, 
 }
 
 func (m *TokenManager) RevokeScopedToken(ctx context.Context, token string) *apperror.AppError {
-	if err := m.redis.Del(ctx, token).Err(); err != nil {
+	if err := m.Store.Del(ctx, token); err != nil {
 		return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to revoke token").WithDetail("error", err.Error())
 	}
 
@@ -125,13 +127,13 @@ func (m *TokenManager) RevokeAllUserTokens(ctx context.Context, subject string) 
 	// Scan and delete all matching session keys
 	var cursor uint64
 	for {
-		keys, nextCursor, err := m.redis.Scan(ctx, cursor, pattern, 10).Result()
+		keys, nextCursor, err := m.Store.Scan(ctx, cursor, pattern, 10)
 		if err != nil {
 			return apperror.ErrInternal.WithMessage("failed to find sessions")
 		}
 
 		if len(keys) > 0 {
-			m.redis.Del(ctx, keys...)
+			m.Store.Del(ctx, keys...)
 		}
 
 		cursor = nextCursor

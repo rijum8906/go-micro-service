@@ -10,8 +10,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
-func generateAuthTokenKey(subject, sessionID, deviceID string) string {
-	return fmt.Sprintf("%s:%s:%s", subject, sessionID, deviceID)
+func generateAuthTokenKey(subject, sessionID string) string {
+	return fmt.Sprintf("%s:%s", subject, sessionID)
 }
 
 func generateTokenClaims(subject, id string, scope TokenScope, ttl time.Duration) *jwt.Token {
