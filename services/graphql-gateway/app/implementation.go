@@ -33,7 +33,12 @@ func (a *Application) initCache(ctx context.Context) *apperror.AppError {
 }
 
 func (a *Application) initUtils() *apperror.AppError {
-	tokenManager := token.NewTokenManager(a.config.JWTSecret, a.config.ScopedSecret, a.infra.cache)
+	tokenManager := token.NewTokenManager(token.Config{
+		JwtSecret:      []byte(a.config.JWTSecret),
+		ScopedSecret:   []byte(a.config.ScopedSecret),
+		SessionTTL:     a.config.SessionTTL,
+		ScopedTokenTTL: a.config.ScopedTokenTTL,
+	}, a.infra.cache)
 	a.utils.token = tokenManager
 
 	return nil
