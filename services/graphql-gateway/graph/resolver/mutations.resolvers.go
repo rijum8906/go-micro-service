@@ -11,6 +11,7 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
+	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
@@ -71,21 +72,34 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 
 // Logout is the resolver for the Logout field.
 func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error) {
-	// if err := r.Validate.Struct(input); err != nil {
-	// 	return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	// }
-	//
-	// accessToken, appErr := utils.GetAccessTokenFromHeader(ctx)
-	// if appErr != nil {
-	// 	return nil, appErr
-	// }
-	//
-	// claims, appErr := r.Token.ValidateAuthToken(ctx, accessToken)
-	// if appErr != nil {
-	// 	return nil, appErr
-	// }
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
 
-	panic(fmt.Errorf("not implemented: Logout - Logout"))
+	accessToken, appErr := utils.GetAccessTokenFromHeader(ctx)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	claims, appErr := r.Token.ValidateAuthToken(ctx, accessToken)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	ctx = metadata.SendUserInfo(ctx, metadata.UserInfo{
+		UserID:      claims.Subject,
+		AccessToken: accessToken,
+	})
+
+	res, err := r.AuthClient.Logout(ctx, &corev1.EmptyRequest{})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+	if !res.Success {
+		return nil, apperror.ErrInternal.WithMessage("failed to logout")
+	}
+
+	return &model.MutationResponse{}, nil
 }
 
 // GenerateScopedToken is the resolver for the GenerateScopedToken field.

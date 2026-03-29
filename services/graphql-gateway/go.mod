@@ -8,6 +8,7 @@ require (
 	github.com/99designs/gqlgen v0.17.88
 	github.com/rijum8906/relay/packages/core v0.0.0-20260324082703-6286eea9b4f5
 	github.com/rijum8906/relay/packages/pb v0.0.0-00010101000000-000000000000
+	github.com/rs/cors v1.11.1
 	github.com/vektah/gqlparser/v2 v2.5.32
 	google.golang.org/grpc v1.79.3
 )

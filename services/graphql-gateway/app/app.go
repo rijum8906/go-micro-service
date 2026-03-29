@@ -15,6 +15,7 @@ import (
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
 	"google.golang.org/grpc"
 )
 
@@ -92,7 +93,7 @@ func (a *Application) initHTTPServer() *apperror.AppError {
 	a.listener = listener
 	a.server = &http.Server{
 		Addr:    net.JoinHostPort("", a.port()),
-		Handler: mux,
+		Handler: middleware.CORS(mux, a.config),
 	}
 
 	return nil
