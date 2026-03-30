@@ -2,8 +2,12 @@ syntax = "proto3";
 
 package user.auth.v1;
 
+import "user/auth/v1/profile.proto";
 import "user/auth/v1/requst.proto";
 import "user/auth/v1/response.proto";
+import "user/auth/v1/session.proto";
+import "user/auth/v1/token.proto";
+import "user/models/v1/model.proto";
 
 service AuthService {
   // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
@@ -14,4 +18,40 @@ service AuthService {
   // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
   // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
   rpc Register(RegisterInput) returns (AuthResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc UpdateProfileAvatarUrl(UpdateProfileAvatarUrlInput) returns (user.models.v1.Profile);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc UpdateProfileName(UpdateProfileNameInput) returns (user.models.v1.Profile);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc Logout(LogoutInput) returns (MutationResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc GenerateScopedToken(GenerateScopedTokenInput) returns (ScopedTokenResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc ChangePassword(ChangePasswordInput) returns (MutationResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc RequestPasswordReset(RequestPasswordResetInput) returns (MutationResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc ResetPassword(ResetPasswordInput) returns (MutationResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc RequestEmailVerification(RequestEmailVerificationInput) returns (MutationResponse);
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc VerifyEmail(VerifyEmailInput) returns (MutationResponse);
 }

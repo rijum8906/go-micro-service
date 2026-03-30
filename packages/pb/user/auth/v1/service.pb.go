@@ -7,6 +7,7 @@
 package authv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,27 +25,66 @@ var File_user_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x19user/auth/v1/requst.proto\x1a\x1buser/auth/v1/response.proto2\x91\x01\n" +
+	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x1auser/auth/v1/profile.proto\x1a\x19user/auth/v1/requst.proto\x1a\x1buser/auth/v1/response.proto\x1a\x1auser/auth/v1/session.proto\x1a\x18user/auth/v1/token.proto\x1a\x1auser/models/v1/model.proto2\xab\a\n" +
 	"\vAuthService\x12=\n" +
 	"\x05Login\x12\x18.user.auth.v1.LoginInput\x1a\x1a.user.auth.v1.AuthResponse\x12C\n" +
-	"\bRegister\x12\x1b.user.auth.v1.RegisterInput\x1a\x1a.user.auth.v1.AuthResponseB\xae\x01\n" +
+	"\bRegister\x12\x1b.user.auth.v1.RegisterInput\x1a\x1a.user.auth.v1.AuthResponse\x12\\\n" +
+	"\x16UpdateProfileAvatarUrl\x12).user.auth.v1.UpdateProfileAvatarUrlInput\x1a\x17.user.models.v1.Profile\x12R\n" +
+	"\x11UpdateProfileName\x12$.user.auth.v1.UpdateProfileNameInput\x1a\x17.user.models.v1.Profile\x12C\n" +
+	"\x06Logout\x12\x19.user.auth.v1.LogoutInput\x1a\x1e.user.auth.v1.MutationResponse\x12`\n" +
+	"\x13GenerateScopedToken\x12&.user.auth.v1.GenerateScopedTokenInput\x1a!.user.auth.v1.ScopedTokenResponse\x12S\n" +
+	"\x0eChangePassword\x12!.user.auth.v1.ChangePasswordInput\x1a\x1e.user.auth.v1.MutationResponse\x12_\n" +
+	"\x14RequestPasswordReset\x12'.user.auth.v1.RequestPasswordResetInput\x1a\x1e.user.auth.v1.MutationResponse\x12Q\n" +
+	"\rResetPassword\x12 .user.auth.v1.ResetPasswordInput\x1a\x1e.user.auth.v1.MutationResponse\x12g\n" +
+	"\x18RequestEmailVerification\x12+.user.auth.v1.RequestEmailVerificationInput\x1a\x1e.user.auth.v1.MutationResponse\x12M\n" +
+	"\vVerifyEmail\x12\x1e.user.auth.v1.VerifyEmailInput\x1a\x1e.user.auth.v1.MutationResponseB\xae\x01\n" +
 	"\x10com.user.auth.v1B\fServiceProtoP\x01Z:github.com/rijum8906/relay/packages/pb/user/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\fUser.Auth.V1\xca\x02\fUser\\Auth\\V1\xe2\x02\x18User\\Auth\\V1\\GPBMetadata\xea\x02\x0eUser::Auth::V1b\x06proto3"
 
 var file_user_auth_v1_service_proto_goTypes = []any{
-	(*LoginInput)(nil),    // 0: user.auth.v1.LoginInput
-	(*RegisterInput)(nil), // 1: user.auth.v1.RegisterInput
-	(*AuthResponse)(nil),  // 2: user.auth.v1.AuthResponse
+	(*LoginInput)(nil),                    // 0: user.auth.v1.LoginInput
+	(*RegisterInput)(nil),                 // 1: user.auth.v1.RegisterInput
+	(*UpdateProfileAvatarUrlInput)(nil),   // 2: user.auth.v1.UpdateProfileAvatarUrlInput
+	(*UpdateProfileNameInput)(nil),        // 3: user.auth.v1.UpdateProfileNameInput
+	(*LogoutInput)(nil),                   // 4: user.auth.v1.LogoutInput
+	(*GenerateScopedTokenInput)(nil),      // 5: user.auth.v1.GenerateScopedTokenInput
+	(*ChangePasswordInput)(nil),           // 6: user.auth.v1.ChangePasswordInput
+	(*RequestPasswordResetInput)(nil),     // 7: user.auth.v1.RequestPasswordResetInput
+	(*ResetPasswordInput)(nil),            // 8: user.auth.v1.ResetPasswordInput
+	(*RequestEmailVerificationInput)(nil), // 9: user.auth.v1.RequestEmailVerificationInput
+	(*VerifyEmailInput)(nil),              // 10: user.auth.v1.VerifyEmailInput
+	(*AuthResponse)(nil),                  // 11: user.auth.v1.AuthResponse
+	(*v1.Profile)(nil),                    // 12: user.models.v1.Profile
+	(*MutationResponse)(nil),              // 13: user.auth.v1.MutationResponse
+	(*ScopedTokenResponse)(nil),           // 14: user.auth.v1.ScopedTokenResponse
 }
 var file_user_auth_v1_service_proto_depIdxs = []int32{
-	0, // 0: user.auth.v1.AuthService.Login:input_type -> user.auth.v1.LoginInput
-	1, // 1: user.auth.v1.AuthService.Register:input_type -> user.auth.v1.RegisterInput
-	2, // 2: user.auth.v1.AuthService.Login:output_type -> user.auth.v1.AuthResponse
-	2, // 3: user.auth.v1.AuthService.Register:output_type -> user.auth.v1.AuthResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: user.auth.v1.AuthService.Login:input_type -> user.auth.v1.LoginInput
+	1,  // 1: user.auth.v1.AuthService.Register:input_type -> user.auth.v1.RegisterInput
+	2,  // 2: user.auth.v1.AuthService.UpdateProfileAvatarUrl:input_type -> user.auth.v1.UpdateProfileAvatarUrlInput
+	3,  // 3: user.auth.v1.AuthService.UpdateProfileName:input_type -> user.auth.v1.UpdateProfileNameInput
+	4,  // 4: user.auth.v1.AuthService.Logout:input_type -> user.auth.v1.LogoutInput
+	5,  // 5: user.auth.v1.AuthService.GenerateScopedToken:input_type -> user.auth.v1.GenerateScopedTokenInput
+	6,  // 6: user.auth.v1.AuthService.ChangePassword:input_type -> user.auth.v1.ChangePasswordInput
+	7,  // 7: user.auth.v1.AuthService.RequestPasswordReset:input_type -> user.auth.v1.RequestPasswordResetInput
+	8,  // 8: user.auth.v1.AuthService.ResetPassword:input_type -> user.auth.v1.ResetPasswordInput
+	9,  // 9: user.auth.v1.AuthService.RequestEmailVerification:input_type -> user.auth.v1.RequestEmailVerificationInput
+	10, // 10: user.auth.v1.AuthService.VerifyEmail:input_type -> user.auth.v1.VerifyEmailInput
+	11, // 11: user.auth.v1.AuthService.Login:output_type -> user.auth.v1.AuthResponse
+	11, // 12: user.auth.v1.AuthService.Register:output_type -> user.auth.v1.AuthResponse
+	12, // 13: user.auth.v1.AuthService.UpdateProfileAvatarUrl:output_type -> user.models.v1.Profile
+	12, // 14: user.auth.v1.AuthService.UpdateProfileName:output_type -> user.models.v1.Profile
+	13, // 15: user.auth.v1.AuthService.Logout:output_type -> user.auth.v1.MutationResponse
+	14, // 16: user.auth.v1.AuthService.GenerateScopedToken:output_type -> user.auth.v1.ScopedTokenResponse
+	13, // 17: user.auth.v1.AuthService.ChangePassword:output_type -> user.auth.v1.MutationResponse
+	13, // 18: user.auth.v1.AuthService.RequestPasswordReset:output_type -> user.auth.v1.MutationResponse
+	13, // 19: user.auth.v1.AuthService.ResetPassword:output_type -> user.auth.v1.MutationResponse
+	13, // 20: user.auth.v1.AuthService.RequestEmailVerification:output_type -> user.auth.v1.MutationResponse
+	13, // 21: user.auth.v1.AuthService.VerifyEmail:output_type -> user.auth.v1.MutationResponse
+	11, // [11:22] is the sub-list for method output_type
+	0,  // [0:11] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_user_auth_v1_service_proto_init() }
@@ -52,8 +92,11 @@ func file_user_auth_v1_service_proto_init() {
 	if File_user_auth_v1_service_proto != nil {
 		return
 	}
+	file_user_auth_v1_profile_proto_init()
 	file_user_auth_v1_requst_proto_init()
 	file_user_auth_v1_response_proto_init()
+	file_user_auth_v1_session_proto_init()
+	file_user_auth_v1_token_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
