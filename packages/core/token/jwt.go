@@ -29,20 +29,10 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-const (
-	defaultSessionTTL    = 15 * time.Minute
-	defaultScopedTokenTTL = 10 * time.Minute
-)
-
-func NewTokenManager(jwtSec, scopedSec string, redisClient *redis.Client) *TokenManager {
+func NewTokenManager(config Config, redisClient *redis.Client) *TokenManager {
 	store := NewRedisStore(redisClient)
 	return &TokenManager{
-		Config: Config{
-			JwtSecret:      []byte(jwtSec),
-			ScopedSecret:   []byte(scopedSec),
-			SessionTTL:     defaultSessionTTL,
-			ScopedTokenTTL: defaultScopedTokenTTL,
-		},
-		Store: store,
+		Config: config,
+		Store:  store,
 	}
 }
