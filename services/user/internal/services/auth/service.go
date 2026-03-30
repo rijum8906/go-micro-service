@@ -17,13 +17,17 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *authService) Login(ctx context.Context, data dto.Login, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
-	user, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
+func (s *authService) Login(ctx context.Context, req *authv1.LoginRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("login request is required")
+	}
+
+	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	appErr = s.utils.HashService.Verify(user.PasswordHash.String, data.Password)
+	appErr = s.utils.HashService.Verify(user.PasswordHash.String, req.GetPassword())
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -62,31 +66,34 @@ func (s *authService) Login(ctx context.Context, data dto.Login, client *metadat
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
 
-func (s *authService) Register(ctx context.Context, data dto.Register, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
-	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
+func (s *authService) Register(ctx context.Context, req *authv1.RegisterRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("register request is required")
+	}
+
+	_, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil && appErr.Type != apperror.TypeNotFound {
 		return nil, appErr
 	}
 
-	hashedPass, appErr := s.utils.HashService.Hash(data.Password)
+	hashedPass, appErr := s.utils.HashService.Hash(req.GetPassword())
 	if appErr != nil {
 		return nil, appErr
 	}
-	data.Password = hashedPass
 
 	user, appErr := s.repos.User.CreateUser(ctx, &dto.Register{
-		Email:     data.Email,
-		Password:  data.Password,
-		FirstName: data.FirstName,
-		LastName:  data.LastName,
+		Email:     req.GetEmail(),
+		Password:  hashedPass,
+		FirstName: req.GetFirstName(),
+		LastName:  req.GetLastName(),
 	})
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	profile, appErr := s.repos.Profile.CreateProfile(ctx, db.CreateProfileParams{
-		FirstName: data.FirstName,
-		LastName:  data.LastName,
+		FirstName: req.GetFirstName(),
+		LastName:  req.GetLastName(),
 		UserID:    user.ID,
 	})
 	if appErr != nil {
@@ -136,12 +143,16 @@ func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bo
 	return true, nil
 }
 
-func (s *authService) GenerateScopedToken(ctx context.Context, data dto.GenerateScopedToken, user *metadata.UserInfo) (*authv1.ScopedTokenResponse, *apperror.AppError) {
+func (s *authService) GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenInput, user *metadata.UserInfo) (*authv1.ScopedTokenResponse, *apperror.AppError) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("generate scoped token request is required")
+	}
+
 	if user == nil || user.UserID == "" {
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}
 
-	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, token.TokenScope(data.Scope))
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, token.TokenScope(req.GetScope()))
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -154,7 +165,11 @@ func (s *authService) GenerateScopedToken(ctx context.Context, data dto.Generate
 	}, nil
 }
 
-func (s *authService) ChangePassword(ctx context.Context, data dto.ChangePassword, user *metadata.UserInfo) (*authv1.MutationResponse, *apperror.AppError) {
+func (s *authService) ChangePassword(ctx context.Context, req *authv1.ChangePasswordInput, user *metadata.UserInfo) (*authv1.MutationResponse, *apperror.AppError) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("change password request is required")
+	}
+
 	if user == nil || user.UserID == "" {
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}
@@ -169,12 +184,12 @@ func (s *authService) ChangePassword(ctx context.Context, data dto.ChangePasswor
 		return nil, appErr
 	}
 
-	appErr = s.utils.HashService.Verify(dbUser.PasswordHash.String, data.CurrentPassword)
+	appErr = s.utils.HashService.Verify(dbUser.PasswordHash.String, req.GetCurrentPassword())
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	newPasswordHash, appErr := s.utils.HashService.Hash(data.NewPassword)
+	newPasswordHash, appErr := s.utils.HashService.Hash(req.GetNewPassword())
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -190,13 +205,17 @@ func (s *authService) ChangePassword(ctx context.Context, data dto.ChangePasswor
 	}, nil
 }
 
-func (s *authService) UpdateProfileName(ctx context.Context, data dto.UpdateProfileName) (*modelsv1.Profile, *apperror.AppError) {
-	profileID, err := uuid.Parse(data.ProfileID)
+func (s *authService) UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameInput) (*modelsv1.Profile, *apperror.AppError) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("update profile name request is required")
+	}
+
+	profileID, err := uuid.Parse(req.GetProfileId())
 	if err != nil {
 		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
 	}
 
-	profile, appErr := s.repos.Profile.UpdateProfileNames(ctx, profileID, data.FirstName, data.LastName)
+	profile, appErr := s.repos.Profile.UpdateProfileNames(ctx, profileID, req.GetFirstName(), req.GetLastName())
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -204,13 +223,17 @@ func (s *authService) UpdateProfileName(ctx context.Context, data dto.UpdateProf
 	return utils.MapProfile(profile), nil
 }
 
-func (s *authService) UpdateProfileAvatarUrl(ctx context.Context, data dto.UpdateProfileAvatarUrl) (*modelsv1.Profile, *apperror.AppError) {
-	profileID, err := uuid.Parse(data.ProfileID)
+func (s *authService) UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlInput) (*modelsv1.Profile, *apperror.AppError) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("update profile avatar request is required")
+	}
+
+	profileID, err := uuid.Parse(req.GetProfileId())
 	if err != nil {
 		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
 	}
 
-	profile, appErr := s.repos.Profile.UpdateProfileAvatar(ctx, profileID, data.AvatarURL)
+	profile, appErr := s.repos.Profile.UpdateProfileAvatar(ctx, profileID, req.GetAvatarUrl())
 	if appErr != nil {
 		return nil, appErr
 	}

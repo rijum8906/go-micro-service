@@ -3,7 +3,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
@@ -36,12 +35,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request metadata is required"))
 	}
 
-	fmt.Println("metadata: ", metadata)
-
-	result, appErr := h.service.Login(ctx, dto.Login{
-		Email:    req.GetEmail(),
-		Password: req.GetPassword(),
-	}, &metadata)
+	result, appErr := h.service.Login(ctx, req, &metadata)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -59,12 +53,7 @@ func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest)
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("login request metadata is required"))
 	}
 
-	result, appErr := h.service.Register(ctx, dto.Register{
-		Email:     req.GetEmail(),
-		Password:  req.GetPassword(),
-		FirstName: req.GetFirstName(),
-		LastName:  req.GetLastName(),
-	}, &metadata)
+	result, appErr := h.service.Register(ctx, req, &metadata)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -103,9 +92,7 @@ func (h *AuthHandler) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("generate scoped token user metadata is required"))
 	}
 
-	result, appErr := h.service.GenerateScopedToken(ctx, dto.GenerateScopedToken{
-		Scope: req.GetScope(),
-	}, &userInfo)
+	result, appErr := h.service.GenerateScopedToken(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -123,10 +110,7 @@ func (h *AuthHandler) ChangePassword(ctx context.Context, req *authv1.ChangePass
 		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("change password user metadata is required"))
 	}
 
-	result, appErr := h.service.ChangePassword(ctx, dto.ChangePassword{
-		CurrentPassword: req.GetCurrentPassword(),
-		NewPassword:     req.GetNewPassword(),
-	}, &userInfo)
+	result, appErr := h.service.ChangePassword(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -139,11 +123,7 @@ func (h *AuthHandler) UpdateProfileName(ctx context.Context, req *authv1.UpdateP
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("update profile name request is required"))
 	}
 
-	result, appErr := h.service.UpdateProfileName(ctx, dto.UpdateProfileName{
-		ProfileID: req.GetProfileId(),
-		FirstName: req.GetFirstName(),
-		LastName:  req.GetLastName(),
-	})
+	result, appErr := h.service.UpdateProfileName(ctx, req)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -156,10 +136,7 @@ func (h *AuthHandler) UpdateProfileAvatarUrl(ctx context.Context, req *authv1.Up
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("update profile avatar request is required"))
 	}
 
-	result, appErr := h.service.UpdateProfileAvatarUrl(ctx, dto.UpdateProfileAvatarUrl{
-		ProfileID: req.GetProfileId(),
-		AvatarURL: req.GetAvatarUrl(),
-	})
+	result, appErr := h.service.UpdateProfileAvatarUrl(ctx, req)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
