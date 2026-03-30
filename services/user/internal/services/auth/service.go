@@ -15,7 +15,7 @@ import (
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
-func (s *authService) Login(ctx context.Context, data dto.Login, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
+func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	user, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
 	if appErr != nil {
 		return nil, appErr
@@ -60,7 +60,7 @@ func (s *authService) Login(ctx context.Context, data dto.Login, client *metadat
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
 
-func (s *authService) Register(ctx context.Context, data dto.Register, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
+func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
 	if appErr != nil && appErr.Type != apperror.TypeNotFound {
 		return nil, appErr
