@@ -8,6 +8,7 @@ require (
 	github.com/99designs/gqlgen v0.17.88
 	github.com/rijum8906/relay/packages/core v0.0.0-20260324082703-6286eea9b4f5
 	github.com/rijum8906/relay/packages/pb v0.0.0-00010101000000-000000000000
+	github.com/rs/cors v1.11.1
 	github.com/vektah/gqlparser/v2 v2.5.32
 	google.golang.org/grpc v1.79.3
 )
@@ -16,13 +17,19 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dgryski/trifles v0.0.0-20240922021506-5ecb8eeff266 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
+	github.com/leodido/go-urn v1.4.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
+	golang.org/x/crypto v0.49.0 // indirect
 )
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/caarlos0/env/v11 v11.4.0 // indirect
+	github.com/go-playground/validator/v10 v10.30.1
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect

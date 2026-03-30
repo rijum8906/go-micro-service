@@ -3,19 +3,31 @@ package token
 type TokenScope string
 
 const (
-	ScopeAuth           TokenScope = "auth"
-	ScopeResetPassword  TokenScope = "reset_password" // For password resets, etc.
-	ScopeChangeEmail    TokenScope = "change_email"
-	ScopeChangePassword TokenScope = "change_password"
-	ScopeDeleteAccount  TokenScope = "delete_account"
-	ScopeDeleteProfile  TokenScope = "delete_profile"
+	TokenScopeAuth           TokenScope = "AUTH"
+	TokenScopeRefresh        TokenScope = "REFRESH"
+	TokenScopeChangeEmail    TokenScope = "CHANGE_EMAIL"
+	TokenScopeChangePassword TokenScope = "CHANGE_PASSWORD"
+	TokenScopeDeleteAccount  TokenScope = "DELETE_ACCOUNT"
+	TokenScopeResetPassword  TokenScope = "RESET_PASSWORD"
+	TokenScopeVerifyEmail    TokenScope = "VERIFY_EMAIL"
+	TokenScopeEnable2fa      TokenScope = "ENABLE_2FA"
+	TokenScopeDisable2fa     TokenScope = "DISABLE_2FA"
+	TokenScopeAdmin          TokenScope = "ADMIN"
+	TokenScopeImpersonate    TokenScope = "IMPERSONATE"
+	TokenScopeRecovery       TokenScope = "RECOVERY"
 )
 
 type AuthMethod string
 
 const (
-	AuthPassword  AuthMethod = "password"
-	AuthBiometric AuthMethod = "biometric"
-	AuthOTP       AuthMethod = "otp"
-	AuthRecovery  AuthMethod = "recovery"
+	AuthMethodPassword       AuthMethod = "PASSWORD"
+	AuthMethodBiometric      AuthMethod = "BIOMETRIC"
+	AuthMethodOtp            AuthMethod = "OTP"
+	AuthMethodTotp           AuthMethod = "TOTP"
+	AuthMethodRecovery       AuthMethod = "RECOVERY"
+	AuthMethodMagicLink      AuthMethod = "MAGIC_LINK"
+	AuthMethodSocialGoogle   AuthMethod = "SOCIAL_GOOGLE"
+	AuthMethodSocialGithub   AuthMethod = "SOCIAL_GITHUB"
+	AuthMethodAPIKey         AuthMethod = "API_KEY"
+	AuthMethodServiceAccount AuthMethod = "SERVICE_ACCOUNT"
 )

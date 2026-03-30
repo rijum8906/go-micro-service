@@ -23,8 +23,6 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
-	GenerateScopedTokenInput() GenerateScopedTokenInputResolver
-	LogoutInput() LogoutInputResolver
 }
 
 type DirectiveRoot struct {
@@ -505,7 +503,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputLogoutInput,
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputRequestEmailVerificationInput,
-		ec.unmarshalInputRequestMeta,
 		ec.unmarshalInputRequestMetaInput,
 		ec.unmarshalInputRequestPasswordResetInput,
 		ec.unmarshalInputResetPasswordInput,
@@ -587,6 +584,36 @@ func newExecutionContext(
 }
 
 var sources = []*ast.Source{
+	{Name: "../schema/core/v1/enums.graphqls", Input: `# TokenScope defines what actions a token can perform
+enum TokenScope {
+  AUTH              # Standard authentication
+  REFRESH           # Token refresh
+  CHANGE_EMAIL      # Change email address
+  CHANGE_PASSWORD   # Change password
+  DELETE_ACCOUNT    # Delete account
+  RESET_PASSWORD    # Password reset flow
+  VERIFY_EMAIL      # Email verification
+  ENABLE_2FA        # Enable two-factor authentication
+  DISABLE_2FA       # Disable two-factor authentication
+  ADMIN             # Administrative actions
+  IMPERSONATE       # Impersonate another user
+  RECOVERY          # Account recovery
+}
+
+# AuthMethod defines how the user authenticated
+enum AuthMethod {
+  PASSWORD          # Password authentication
+  BIOMETRIC         # Biometric (fingerprint, face ID)
+  OTP               # One-time password (SMS/email)
+  TOTP              # Time-based one-time password (authenticator app)
+  RECOVERY          # Recovery code
+  MAGIC_LINK        # Magic link email
+  SOCIAL_GOOGLE     # Google OAuth
+  SOCIAL_GITHUB     # GitHub OAuth
+  API_KEY           # API key authentication
+  SERVICE_ACCOUNT   # Service-to-service authentication
+}
+`, BuiltIn: false},
 	{Name: "../schema/core/v1/scalars.graphqls", Input: `scalar DateTime
 `, BuiltIn: false},
 	{Name: "../schema/core/v1/schema.graphqls", Input: `type Mutation {
@@ -597,21 +624,17 @@ type Query {
   _empty: String
 }
 `, BuiltIn: false},
-	{Name: "../schema/core/v1/types.graphqls", Input: `input RequestMeta {
+	{Name: "../schema/core/v1/types.graphqls", Input: `input RequestMetaInput {
   deviceId: String!
 }
 `, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input RequestMetaInput {
-    deviceId: String!
-  }
-
-input LoginInput{
+	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input LoginInput {
   email: String!
   password: String!
   meta: RequestMetaInput!
 }
 
-input RegisterInput{
+input RegisterInput {
   email: String!
   password: String!
   firstName: String!
@@ -620,11 +643,14 @@ input RegisterInput{
 }
 
 input LogoutInput {
-  _empty: String
+  meta: RequestMetaInput!
 }
 
 input GenerateScopedTokenInput {
-  scope: String!
+  scope: TokenScope!
+  authMethod: AuthMethod!
+  authValue: String!
+  meta: RequestMetaInput!
 }
 
 input UpdateProfileAvatarUrlInput {
@@ -639,13 +665,14 @@ input UpdateProfileNameInput {
 }
 
 input ChangePasswordInput {
-  currentPassword: String!
+  token: String!
   newPassword: String!
   meta: RequestMetaInput!
 }
 
 input RequestPasswordResetInput {
   email: String!
+  meta: RequestMetaInput!
 }
 
 input ResetPasswordInput {
@@ -655,10 +682,12 @@ input ResetPasswordInput {
 
 input RequestEmailVerificationInput {
   email: String!
+  meta: RequestMetaInput!
 }
 
 input  VerifyEmailInput {
-    token: String!
+  token: String!
+  meta: RequestMetaInput!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/models.graphqls", Input: `type User {

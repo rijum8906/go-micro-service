@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
@@ -51,7 +52,7 @@ func (s *authService) Login(ctx context.Context, data dto.Login, client *metadat
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.ScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -111,10 +112,24 @@ func (s *authService) Register(ctx context.Context, data dto.Register, client *m
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.ScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
+}
+
+func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError) {
+	sessionID, err := uuid.Parse(client.SessionID)
+	if err != nil {
+		return false, apperror.ErrInternal.WithMessage("Failed to parse session ID").WithDetail("error", err.Error())
+	}
+
+	appErr := s.repos.Session.RevokeSession(ctx, sessionID)
+	if appErr != nil {
+		return false, appErr
+	}
+
+	return true, nil
 }

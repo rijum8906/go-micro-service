@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -41,7 +40,7 @@ func (a *Application) initUtils() *apperror.AppError {
 }
 
 func (a *Application) initGRPCClients() *apperror.AppError {
-	conn, err := grpc.NewClient(a.userServiceAddr(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(a.config.UserServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return apperror.ErrThirdParty.WithMessage("failed to connect to user service").WithDetail("error", err.Error())
 	}
@@ -81,14 +80,6 @@ func (a *Application) Shutdown(ctx context.Context) {
 	}
 }
 
-func (a *Application) userServiceAddr() string {
-	if value := os.Getenv("USER_SERVICE_ADDR"); value != "" {
-		return value
-	}
-
-	return "user-service:8081"
-}
-
 func (a *Application) port() string {
 	return strconv.Itoa(a.config.Port)
 }
@@ -98,5 +89,5 @@ func (a *Application) Addr() string {
 }
 
 func (a *Application) UserServiceAddr() string {
-	return a.userServiceAddr()
+	return fmt.Sprintf("%s", a.config.UserServiceAddr)
 }
