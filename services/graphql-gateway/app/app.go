@@ -14,6 +14,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
@@ -29,8 +30,9 @@ type ApplicationUtils struct {
 }
 
 type GrpcClients struct {
-	AuthConn   *grpc.ClientConn
-	AuthClient authv1.AuthServiceClient
+	AuthConn      *grpc.ClientConn
+	AuthClient    authv1.AuthServiceClient
+	SessionClient sessionv1.SessionServiceClient
 }
 
 type Application struct {
@@ -84,7 +86,7 @@ func (a *Application) initHTTPServer() *apperror.AppError {
 		return apperror.ErrInternal.WithMessage("failed to listen for HTTP server").WithDetail("error", err.Error())
 	}
 
-	res := resolver.NewResolver(a.clients.AuthClient, a.utils.token)
+	res := resolver.NewResolver(a.clients.AuthClient, a.clients.SessionClient, a.utils.token)
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: res}))
 
 	mux := http.NewServeMux()

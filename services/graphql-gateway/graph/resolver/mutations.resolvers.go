@@ -11,8 +11,8 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
-	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
@@ -92,7 +92,7 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 		SessionID:   claims.ID,
 	})
 
-	res, err := r.AuthClient.Logout(ctx, &corev1.EmptyRequest{})
+	res, err := r.SessionClient.Logout(ctx, &sessionv1.LogoutRequest{})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}

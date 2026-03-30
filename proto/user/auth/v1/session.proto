@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-package user.auth.v1;
-
-message LogoutInput {
-  string empty = 1;
-}

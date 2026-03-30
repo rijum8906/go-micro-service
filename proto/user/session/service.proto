@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package user.auth.v1.session;
+
+import "user/session/request.proto";
+import "user/session/response.proto";
+
+service SessionService {
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+}

@@ -26,11 +26,10 @@ var File_user_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x14core/v1/common.proto\x1a\x1auser/auth/v1/profile.proto\x1a\x19user/auth/v1/requst.proto\x1a\x1buser/auth/v1/response.proto\x1a\x18user/auth/v1/token.proto\x1a\x1auser/models/v1/model.proto2\xe5\x06\n" +
+	"\x1auser/auth/v1/service.proto\x12\fuser.auth.v1\x1a\x14core/v1/common.proto\x1a\x1auser/auth/v1/profile.proto\x1a\x1auser/auth/v1/request.proto\x1a\x1buser/auth/v1/response.proto\x1a\x18user/auth/v1/token.proto\x1a\x1auser/models/v1/model.proto2\xaa\x06\n" +
 	"\vAuthService\x12?\n" +
 	"\x05Login\x12\x1a.user.auth.v1.LoginRequest\x1a\x1a.user.auth.v1.AuthResponse\x12E\n" +
-	"\bRegister\x12\x1d.user.auth.v1.RegisterRequest\x1a\x1a.user.auth.v1.AuthResponse\x129\n" +
-	"\x06Logout\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponse\x12`\n" +
+	"\bRegister\x12\x1d.user.auth.v1.RegisterRequest\x1a\x1a.user.auth.v1.AuthResponse\x12`\n" +
 	"\x13GenerateScopedToken\x12&.user.auth.v1.GenerateScopedTokenInput\x1a!.user.auth.v1.ScopedTokenResponse\x12\\\n" +
 	"\x16UpdateProfileAvatarUrl\x12).user.auth.v1.UpdateProfileAvatarUrlInput\x1a\x17.user.models.v1.Profile\x12R\n" +
 	"\x11UpdateProfileName\x12$.user.auth.v1.UpdateProfileNameInput\x1a\x17.user.models.v1.Profile\x12S\n" +
@@ -44,45 +43,42 @@ const file_user_auth_v1_service_proto_rawDesc = "" +
 var file_user_auth_v1_service_proto_goTypes = []any{
 	(*LoginRequest)(nil),                // 0: user.auth.v1.LoginRequest
 	(*RegisterRequest)(nil),             // 1: user.auth.v1.RegisterRequest
-	(*v1.EmptyRequest)(nil),             // 2: core.v1.EmptyRequest
-	(*GenerateScopedTokenInput)(nil),    // 3: user.auth.v1.GenerateScopedTokenInput
-	(*UpdateProfileAvatarUrlInput)(nil), // 4: user.auth.v1.UpdateProfileAvatarUrlInput
-	(*UpdateProfileNameInput)(nil),      // 5: user.auth.v1.UpdateProfileNameInput
-	(*ChangePasswordInput)(nil),         // 6: user.auth.v1.ChangePasswordInput
-	(*v1.EmailInput)(nil),               // 7: core.v1.EmailInput
-	(*VerifyEmailRequest)(nil),          // 8: user.auth.v1.VerifyEmailRequest
-	(*ResetPasswordRequest)(nil),        // 9: user.auth.v1.ResetPasswordRequest
-	(*AuthResponse)(nil),                // 10: user.auth.v1.AuthResponse
-	(*v1.SuccessResponse)(nil),          // 11: core.v1.SuccessResponse
-	(*ScopedTokenResponse)(nil),         // 12: user.auth.v1.ScopedTokenResponse
-	(*v11.Profile)(nil),                 // 13: user.models.v1.Profile
-	(*MutationResponse)(nil),            // 14: user.auth.v1.MutationResponse
+	(*GenerateScopedTokenInput)(nil),    // 2: user.auth.v1.GenerateScopedTokenInput
+	(*UpdateProfileAvatarUrlInput)(nil), // 3: user.auth.v1.UpdateProfileAvatarUrlInput
+	(*UpdateProfileNameInput)(nil),      // 4: user.auth.v1.UpdateProfileNameInput
+	(*ChangePasswordInput)(nil),         // 5: user.auth.v1.ChangePasswordInput
+	(*v1.EmailInput)(nil),               // 6: core.v1.EmailInput
+	(*VerifyEmailRequest)(nil),          // 7: user.auth.v1.VerifyEmailRequest
+	(*ResetPasswordRequest)(nil),        // 8: user.auth.v1.ResetPasswordRequest
+	(*AuthResponse)(nil),                // 9: user.auth.v1.AuthResponse
+	(*ScopedTokenResponse)(nil),         // 10: user.auth.v1.ScopedTokenResponse
+	(*v11.Profile)(nil),                 // 11: user.models.v1.Profile
+	(*MutationResponse)(nil),            // 12: user.auth.v1.MutationResponse
+	(*v1.SuccessResponse)(nil),          // 13: core.v1.SuccessResponse
 }
 var file_user_auth_v1_service_proto_depIdxs = []int32{
 	0,  // 0: user.auth.v1.AuthService.Login:input_type -> user.auth.v1.LoginRequest
 	1,  // 1: user.auth.v1.AuthService.Register:input_type -> user.auth.v1.RegisterRequest
-	2,  // 2: user.auth.v1.AuthService.Logout:input_type -> core.v1.EmptyRequest
-	3,  // 3: user.auth.v1.AuthService.GenerateScopedToken:input_type -> user.auth.v1.GenerateScopedTokenInput
-	4,  // 4: user.auth.v1.AuthService.UpdateProfileAvatarUrl:input_type -> user.auth.v1.UpdateProfileAvatarUrlInput
-	5,  // 5: user.auth.v1.AuthService.UpdateProfileName:input_type -> user.auth.v1.UpdateProfileNameInput
-	6,  // 6: user.auth.v1.AuthService.ChangePassword:input_type -> user.auth.v1.ChangePasswordInput
-	7,  // 7: user.auth.v1.AuthService.RequestEmailVerification:input_type -> core.v1.EmailInput
-	7,  // 8: user.auth.v1.AuthService.RequestPasswordReset:input_type -> core.v1.EmailInput
-	8,  // 9: user.auth.v1.AuthService.VerifyEmail:input_type -> user.auth.v1.VerifyEmailRequest
-	9,  // 10: user.auth.v1.AuthService.ResetPassword:input_type -> user.auth.v1.ResetPasswordRequest
-	10, // 11: user.auth.v1.AuthService.Login:output_type -> user.auth.v1.AuthResponse
-	10, // 12: user.auth.v1.AuthService.Register:output_type -> user.auth.v1.AuthResponse
-	11, // 13: user.auth.v1.AuthService.Logout:output_type -> core.v1.SuccessResponse
-	12, // 14: user.auth.v1.AuthService.GenerateScopedToken:output_type -> user.auth.v1.ScopedTokenResponse
-	13, // 15: user.auth.v1.AuthService.UpdateProfileAvatarUrl:output_type -> user.models.v1.Profile
-	13, // 16: user.auth.v1.AuthService.UpdateProfileName:output_type -> user.models.v1.Profile
-	14, // 17: user.auth.v1.AuthService.ChangePassword:output_type -> user.auth.v1.MutationResponse
-	11, // 18: user.auth.v1.AuthService.RequestEmailVerification:output_type -> core.v1.SuccessResponse
-	11, // 19: user.auth.v1.AuthService.RequestPasswordReset:output_type -> core.v1.SuccessResponse
-	11, // 20: user.auth.v1.AuthService.VerifyEmail:output_type -> core.v1.SuccessResponse
-	11, // 21: user.auth.v1.AuthService.ResetPassword:output_type -> core.v1.SuccessResponse
-	11, // [11:22] is the sub-list for method output_type
-	0,  // [0:11] is the sub-list for method input_type
+	2,  // 2: user.auth.v1.AuthService.GenerateScopedToken:input_type -> user.auth.v1.GenerateScopedTokenInput
+	3,  // 3: user.auth.v1.AuthService.UpdateProfileAvatarUrl:input_type -> user.auth.v1.UpdateProfileAvatarUrlInput
+	4,  // 4: user.auth.v1.AuthService.UpdateProfileName:input_type -> user.auth.v1.UpdateProfileNameInput
+	5,  // 5: user.auth.v1.AuthService.ChangePassword:input_type -> user.auth.v1.ChangePasswordInput
+	6,  // 6: user.auth.v1.AuthService.RequestEmailVerification:input_type -> core.v1.EmailInput
+	6,  // 7: user.auth.v1.AuthService.RequestPasswordReset:input_type -> core.v1.EmailInput
+	7,  // 8: user.auth.v1.AuthService.VerifyEmail:input_type -> user.auth.v1.VerifyEmailRequest
+	8,  // 9: user.auth.v1.AuthService.ResetPassword:input_type -> user.auth.v1.ResetPasswordRequest
+	9,  // 10: user.auth.v1.AuthService.Login:output_type -> user.auth.v1.AuthResponse
+	9,  // 11: user.auth.v1.AuthService.Register:output_type -> user.auth.v1.AuthResponse
+	10, // 12: user.auth.v1.AuthService.GenerateScopedToken:output_type -> user.auth.v1.ScopedTokenResponse
+	11, // 13: user.auth.v1.AuthService.UpdateProfileAvatarUrl:output_type -> user.models.v1.Profile
+	11, // 14: user.auth.v1.AuthService.UpdateProfileName:output_type -> user.models.v1.Profile
+	12, // 15: user.auth.v1.AuthService.ChangePassword:output_type -> user.auth.v1.MutationResponse
+	13, // 16: user.auth.v1.AuthService.RequestEmailVerification:output_type -> core.v1.SuccessResponse
+	13, // 17: user.auth.v1.AuthService.RequestPasswordReset:output_type -> core.v1.SuccessResponse
+	13, // 18: user.auth.v1.AuthService.VerifyEmail:output_type -> core.v1.SuccessResponse
+	13, // 19: user.auth.v1.AuthService.ResetPassword:output_type -> core.v1.SuccessResponse
+	10, // [10:20] is the sub-list for method output_type
+	0,  // [0:10] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
@@ -94,7 +90,7 @@ func file_user_auth_v1_service_proto_init() {
 		return
 	}
 	file_user_auth_v1_profile_proto_init()
-	file_user_auth_v1_requst_proto_init()
+	file_user_auth_v1_request_proto_init()
 	file_user_auth_v1_response_proto_init()
 	file_user_auth_v1_token_proto_init()
 	type x struct{}

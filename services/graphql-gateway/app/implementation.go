@@ -11,6 +11,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -47,9 +48,11 @@ func (a *Application) initGRPCClients() *apperror.AppError {
 
 	// Initialize gRPC clients
 	authClient := authv1.NewAuthServiceClient(conn)
+	sessionClient := sessionv1.NewSessionServiceClient(conn)
 	a.clients = &GrpcClients{
-		AuthConn:   conn,
-		AuthClient: authClient,
+		AuthConn:      conn,
+		AuthClient:    authClient,
+		SessionClient: sessionClient,
 	}
 
 	return nil

@@ -8,8 +8,8 @@ package authv1
 
 import (
 	context "context"
-	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
-	v11 "github.com/rijum8906/relay/packages/pb/user/models/v1"
+	v11 "github.com/rijum8906/relay/packages/pb/core/v1"
+	v1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -23,7 +23,6 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	AuthService_Login_FullMethodName                    = "/user.auth.v1.AuthService/Login"
 	AuthService_Register_FullMethodName                 = "/user.auth.v1.AuthService/Register"
-	AuthService_Logout_FullMethodName                   = "/user.auth.v1.AuthService/Logout"
 	AuthService_GenerateScopedToken_FullMethodName      = "/user.auth.v1.AuthService/GenerateScopedToken"
 	AuthService_UpdateProfileAvatarUrl_FullMethodName   = "/user.auth.v1.AuthService/UpdateProfileAvatarUrl"
 	AuthService_UpdateProfileName_FullMethodName        = "/user.auth.v1.AuthService/UpdateProfileName"
@@ -40,15 +39,14 @@ const (
 type AuthServiceClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenInput, opts ...grpc.CallOption) (*ScopedTokenResponse, error)
-	UpdateProfileAvatarUrl(ctx context.Context, in *UpdateProfileAvatarUrlInput, opts ...grpc.CallOption) (*v11.Profile, error)
-	UpdateProfileName(ctx context.Context, in *UpdateProfileNameInput, opts ...grpc.CallOption) (*v11.Profile, error)
+	UpdateProfileAvatarUrl(ctx context.Context, in *UpdateProfileAvatarUrlInput, opts ...grpc.CallOption) (*v1.Profile, error)
+	UpdateProfileName(ctx context.Context, in *UpdateProfileNameInput, opts ...grpc.CallOption) (*v1.Profile, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordInput, opts ...grpc.CallOption) (*MutationResponse, error)
-	RequestEmailVerification(ctx context.Context, in *v1.EmailInput, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	RequestPasswordReset(ctx context.Context, in *v1.EmailInput, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	RequestEmailVerification(ctx context.Context, in *v11.EmailInput, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	RequestPasswordReset(ctx context.Context, in *v11.EmailInput, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
 }
 
 type authServiceClient struct {
@@ -79,16 +77,6 @@ func (c *authServiceClient) Register(ctx context.Context, in *RegisterRequest, o
 	return out, nil
 }
 
-func (c *authServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SuccessResponse)
-	err := c.cc.Invoke(ctx, AuthService_Logout_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *authServiceClient) GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenInput, opts ...grpc.CallOption) (*ScopedTokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ScopedTokenResponse)
@@ -99,9 +87,9 @@ func (c *authServiceClient) GenerateScopedToken(ctx context.Context, in *Generat
 	return out, nil
 }
 
-func (c *authServiceClient) UpdateProfileAvatarUrl(ctx context.Context, in *UpdateProfileAvatarUrlInput, opts ...grpc.CallOption) (*v11.Profile, error) {
+func (c *authServiceClient) UpdateProfileAvatarUrl(ctx context.Context, in *UpdateProfileAvatarUrlInput, opts ...grpc.CallOption) (*v1.Profile, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.Profile)
+	out := new(v1.Profile)
 	err := c.cc.Invoke(ctx, AuthService_UpdateProfileAvatarUrl_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -109,9 +97,9 @@ func (c *authServiceClient) UpdateProfileAvatarUrl(ctx context.Context, in *Upda
 	return out, nil
 }
 
-func (c *authServiceClient) UpdateProfileName(ctx context.Context, in *UpdateProfileNameInput, opts ...grpc.CallOption) (*v11.Profile, error) {
+func (c *authServiceClient) UpdateProfileName(ctx context.Context, in *UpdateProfileNameInput, opts ...grpc.CallOption) (*v1.Profile, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.Profile)
+	out := new(v1.Profile)
 	err := c.cc.Invoke(ctx, AuthService_UpdateProfileName_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -129,9 +117,9 @@ func (c *authServiceClient) ChangePassword(ctx context.Context, in *ChangePasswo
 	return out, nil
 }
 
-func (c *authServiceClient) RequestEmailVerification(ctx context.Context, in *v1.EmailInput, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *authServiceClient) RequestEmailVerification(ctx context.Context, in *v11.EmailInput, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SuccessResponse)
+	out := new(v11.SuccessResponse)
 	err := c.cc.Invoke(ctx, AuthService_RequestEmailVerification_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -139,9 +127,9 @@ func (c *authServiceClient) RequestEmailVerification(ctx context.Context, in *v1
 	return out, nil
 }
 
-func (c *authServiceClient) RequestPasswordReset(ctx context.Context, in *v1.EmailInput, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *authServiceClient) RequestPasswordReset(ctx context.Context, in *v11.EmailInput, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SuccessResponse)
+	out := new(v11.SuccessResponse)
 	err := c.cc.Invoke(ctx, AuthService_RequestPasswordReset_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -149,9 +137,9 @@ func (c *authServiceClient) RequestPasswordReset(ctx context.Context, in *v1.Ema
 	return out, nil
 }
 
-func (c *authServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *authServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SuccessResponse)
+	out := new(v11.SuccessResponse)
 	err := c.cc.Invoke(ctx, AuthService_VerifyEmail_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -159,9 +147,9 @@ func (c *authServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequ
 	return out, nil
 }
 
-func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SuccessResponse)
+	out := new(v11.SuccessResponse)
 	err := c.cc.Invoke(ctx, AuthService_ResetPassword_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -175,15 +163,14 @@ func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPassword
 type AuthServiceServer interface {
 	Login(context.Context, *LoginRequest) (*AuthResponse, error)
 	Register(context.Context, *RegisterRequest) (*AuthResponse, error)
-	Logout(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
 	GenerateScopedToken(context.Context, *GenerateScopedTokenInput) (*ScopedTokenResponse, error)
-	UpdateProfileAvatarUrl(context.Context, *UpdateProfileAvatarUrlInput) (*v11.Profile, error)
-	UpdateProfileName(context.Context, *UpdateProfileNameInput) (*v11.Profile, error)
+	UpdateProfileAvatarUrl(context.Context, *UpdateProfileAvatarUrlInput) (*v1.Profile, error)
+	UpdateProfileName(context.Context, *UpdateProfileNameInput) (*v1.Profile, error)
 	ChangePassword(context.Context, *ChangePasswordInput) (*MutationResponse, error)
-	RequestEmailVerification(context.Context, *v1.EmailInput) (*v1.SuccessResponse, error)
-	RequestPasswordReset(context.Context, *v1.EmailInput) (*v1.SuccessResponse, error)
-	VerifyEmail(context.Context, *VerifyEmailRequest) (*v1.SuccessResponse, error)
-	ResetPassword(context.Context, *ResetPasswordRequest) (*v1.SuccessResponse, error)
+	RequestEmailVerification(context.Context, *v11.EmailInput) (*v11.SuccessResponse, error)
+	RequestPasswordReset(context.Context, *v11.EmailInput) (*v11.SuccessResponse, error)
+	VerifyEmail(context.Context, *VerifyEmailRequest) (*v11.SuccessResponse, error)
+	ResetPassword(context.Context, *ResetPasswordRequest) (*v11.SuccessResponse, error)
 }
 
 // UnimplementedAuthServiceServer should be embedded to have
@@ -199,31 +186,28 @@ func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*Au
 func (UnimplementedAuthServiceServer) Register(context.Context, *RegisterRequest) (*AuthResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedAuthServiceServer) Logout(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
-}
 func (UnimplementedAuthServiceServer) GenerateScopedToken(context.Context, *GenerateScopedTokenInput) (*ScopedTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GenerateScopedToken not implemented")
 }
-func (UnimplementedAuthServiceServer) UpdateProfileAvatarUrl(context.Context, *UpdateProfileAvatarUrlInput) (*v11.Profile, error) {
+func (UnimplementedAuthServiceServer) UpdateProfileAvatarUrl(context.Context, *UpdateProfileAvatarUrlInput) (*v1.Profile, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateProfileAvatarUrl not implemented")
 }
-func (UnimplementedAuthServiceServer) UpdateProfileName(context.Context, *UpdateProfileNameInput) (*v11.Profile, error) {
+func (UnimplementedAuthServiceServer) UpdateProfileName(context.Context, *UpdateProfileNameInput) (*v1.Profile, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateProfileName not implemented")
 }
 func (UnimplementedAuthServiceServer) ChangePassword(context.Context, *ChangePasswordInput) (*MutationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangePassword not implemented")
 }
-func (UnimplementedAuthServiceServer) RequestEmailVerification(context.Context, *v1.EmailInput) (*v1.SuccessResponse, error) {
+func (UnimplementedAuthServiceServer) RequestEmailVerification(context.Context, *v11.EmailInput) (*v11.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RequestEmailVerification not implemented")
 }
-func (UnimplementedAuthServiceServer) RequestPasswordReset(context.Context, *v1.EmailInput) (*v1.SuccessResponse, error) {
+func (UnimplementedAuthServiceServer) RequestPasswordReset(context.Context, *v11.EmailInput) (*v11.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RequestPasswordReset not implemented")
 }
-func (UnimplementedAuthServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedAuthServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*v11.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method VerifyEmail not implemented")
 }
-func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*v11.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResetPassword not implemented")
 }
 func (UnimplementedAuthServiceServer) testEmbeddedByValue() {}
@@ -278,24 +262,6 @@ func _AuthService_Register_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).Register(ctx, req.(*RegisterRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AuthService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmptyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).Logout(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthService_Logout_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).Logout(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -373,7 +339,7 @@ func _AuthService_ChangePassword_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _AuthService_RequestEmailVerification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmailInput)
+	in := new(v11.EmailInput)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -385,13 +351,13 @@ func _AuthService_RequestEmailVerification_Handler(srv interface{}, ctx context.
 		FullMethod: AuthService_RequestEmailVerification_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).RequestEmailVerification(ctx, req.(*v1.EmailInput))
+		return srv.(AuthServiceServer).RequestEmailVerification(ctx, req.(*v11.EmailInput))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AuthService_RequestPasswordReset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmailInput)
+	in := new(v11.EmailInput)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -403,7 +369,7 @@ func _AuthService_RequestPasswordReset_Handler(srv interface{}, ctx context.Cont
 		FullMethod: AuthService_RequestPasswordReset_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).RequestPasswordReset(ctx, req.(*v1.EmailInput))
+		return srv.(AuthServiceServer).RequestPasswordReset(ctx, req.(*v11.EmailInput))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -458,10 +424,6 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _AuthService_Register_Handler,
-		},
-		{
-			MethodName: "Logout",
-			Handler:    _AuthService_Logout_Handler,
 		},
 		{
 			MethodName: "GenerateScopedToken",

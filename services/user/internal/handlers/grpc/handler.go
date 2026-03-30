@@ -7,9 +7,9 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
-	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
 	"github.com/rijum8906/relay/services/user/internal/dto"
 	authservice "github.com/rijum8906/relay/services/user/internal/services/auth"
 	"github.com/rijum8906/relay/services/user/internal/utils"
@@ -72,7 +72,7 @@ func (h *AuthHandler) Register(ctx context.Context, req *authv1.RegisterRequest)
 	return result, nil
 }
 
-func (h *AuthHandler) Logout(ctx context.Context, req *corev1.EmptyRequest) (*corev1.SuccessResponse, error) {
+func (h *AuthHandler) Logout(ctx context.Context, req *sessionv1.LogoutRequest) (*sessionv1.LogoutResponse, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("logout request is required"))
 	}
@@ -88,7 +88,7 @@ func (h *AuthHandler) Logout(ctx context.Context, req *corev1.EmptyRequest) (*co
 		return nil, utils.MapAppError(appErr)
 	}
 
-	return &corev1.SuccessResponse{
+	return &sessionv1.LogoutResponse{
 		Success: result,
 	}, nil
 }
