@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package user_service.auth.v1;
+
+import "user_service/models/v1/model.proto";
+
+message AuthResponse {
+  user_service.models.v1.User user = 1;
+  user_service.models.v1.Profile profile = 2;
+  user_service.models.v1.AuthToken tokens = 3;
+}

@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package user_service.session.v1;
+
+message LogoutResponse {
+  bool success = 1;
+}

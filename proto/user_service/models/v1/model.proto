@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package user_service.models.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Token {
+  string value = 1;
+  google.protobuf.Timestamp expires_in = 2;
+}
+
+message AuthToken {
+  Token access_token = 1;
+  Token refresh_token = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  bool is_email_verified = 3;
+  google.protobuf.Timestamp email_verified_at = 4;
+  bool two_factor_enabled = 5;
+  google.protobuf.Timestamp two_factor_enabled_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message Profile {
+  string id = 1;
+  string user_id = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string avatar_url = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}

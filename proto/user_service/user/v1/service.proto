@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package user_service.user.v1;
+
+import "core/v1/common.proto";
+import "user_service/models/v1/model.proto";
+import "user_service/user/v1/request.proto";
+import "user_service/user/v1/response.proto";
+
+service UserService {
+  rpc GenerateScopedToken(GenerateScopedTokenRequest) returns (GenerateScopedTokenResponse);
+  rpc UpdateProfileAvatarUrl(UpdateProfileAvatarUrlRequest) returns (user_service.models.v1.Profile);
+  rpc UpdateProfileName(UpdateProfileNameRequest) returns (user_service.models.v1.Profile);
+  rpc ChangePassword(ChangePasswordRequest) returns (core.v1.SuccessResponse);
+}
