@@ -7,6 +7,7 @@
 package sessionv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -21,27 +22,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type LogoutResponse struct {
+type GetSessionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Sessions      []*v1.Session          `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *LogoutResponse) Reset() {
-	*x = LogoutResponse{}
+func (x *GetSessionsResponse) Reset() {
+	*x = GetSessionsResponse{}
 	mi := &file_user_service_session_v1_response_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *LogoutResponse) String() string {
+func (x *GetSessionsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogoutResponse) ProtoMessage() {}
+func (*GetSessionsResponse) ProtoMessage() {}
 
-func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
+func (x *GetSessionsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_user_service_session_v1_response_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -53,25 +54,71 @@ func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogoutResponse.ProtoReflect.Descriptor instead.
-func (*LogoutResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetSessionsResponse.ProtoReflect.Descriptor instead.
+func (*GetSessionsResponse) Descriptor() ([]byte, []int) {
 	return file_user_service_session_v1_response_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *LogoutResponse) GetSuccess() bool {
+func (x *GetSessionsResponse) GetSessions() []*v1.Session {
 	if x != nil {
-		return x.Success
+		return x.Sessions
 	}
-	return false
+	return nil
+}
+
+type GetActiveSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*v1.Session          `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetActiveSessionsResponse) Reset() {
+	*x = GetActiveSessionsResponse{}
+	mi := &file_user_service_session_v1_response_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetActiveSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetActiveSessionsResponse) ProtoMessage() {}
+
+func (x *GetActiveSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_session_v1_response_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetActiveSessionsResponse.ProtoReflect.Descriptor instead.
+func (*GetActiveSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_session_v1_response_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *GetActiveSessionsResponse) GetSessions() []*v1.Session {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
 }
 
 var File_user_service_session_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_service_session_v1_response_proto_rawDesc = "" +
 	"\n" +
-	"&user_service/session/v1/response.proto\x12\x17user_service.session.v1\"*\n" +
-	"\x0eLogoutResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccessB\xf0\x01\n" +
+	"&user_service/session/v1/response.proto\x12\x17user_service.session.v1\x1a\"user_service/models/v1/model.proto\"R\n" +
+	"\x13GetSessionsResponse\x12;\n" +
+	"\bsessions\x18\x01 \x03(\v2\x1f.user_service.models.v1.SessionR\bsessions\"X\n" +
+	"\x19GetActiveSessionsResponse\x12;\n" +
+	"\bsessions\x18\x01 \x03(\v2\x1f.user_service.models.v1.SessionR\bsessionsB\xf0\x01\n" +
 	"\x1bcom.user_service.session.v1B\rResponseProtoP\x01ZHgithub.com/rijum8906/relay/packages/pb/user_service/session/v1;sessionv1\xa2\x02\x03USX\xaa\x02\x16UserService.Session.V1\xca\x02\x16UserService\\Session\\V1\xe2\x02\"UserService\\Session\\V1\\GPBMetadata\xea\x02\x18UserService::Session::V1b\x06proto3"
 
 var (
@@ -86,16 +133,20 @@ func file_user_service_session_v1_response_proto_rawDescGZIP() []byte {
 	return file_user_service_session_v1_response_proto_rawDescData
 }
 
-var file_user_service_session_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_user_service_session_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_user_service_session_v1_response_proto_goTypes = []any{
-	(*LogoutResponse)(nil), // 0: user_service.session.v1.LogoutResponse
+	(*GetSessionsResponse)(nil),       // 0: user_service.session.v1.GetSessionsResponse
+	(*GetActiveSessionsResponse)(nil), // 1: user_service.session.v1.GetActiveSessionsResponse
+	(*v1.Session)(nil),                // 2: user_service.models.v1.Session
 }
 var file_user_service_session_v1_response_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: user_service.session.v1.GetSessionsResponse.sessions:type_name -> user_service.models.v1.Session
+	2, // 1: user_service.session.v1.GetActiveSessionsResponse.sessions:type_name -> user_service.models.v1.Session
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_service_session_v1_response_proto_init() }
@@ -109,7 +160,7 @@ func file_user_service_session_v1_response_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_session_v1_response_proto_rawDesc), len(file_user_service_session_v1_response_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

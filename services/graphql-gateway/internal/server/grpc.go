@@ -4,7 +4,7 @@ package server
 import (
 	"log"
 
-	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

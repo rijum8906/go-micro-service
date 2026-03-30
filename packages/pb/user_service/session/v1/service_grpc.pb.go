@@ -8,7 +8,6 @@ package sessionv1
 
 import (
 	context "context"
-	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SessionService_Logout_FullMethodName = "/user_service.session.v1.SessionService/Logout"
+	SessionService_GetSessions_FullMethodName       = "/user_service.session.v1.SessionService/GetSessions"
+	SessionService_GetActiveSessions_FullMethodName = "/user_service.session.v1.SessionService/GetActiveSessions"
 )
 
 // SessionServiceClient is the client API for SessionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SessionServiceClient interface {
-	Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
+	GetActiveSessions(ctx context.Context, in *GetActiveSessionsRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -38,10 +39,20 @@ func NewSessionServiceClient(cc grpc.ClientConnInterface) SessionServiceClient {
 	return &sessionServiceClient{cc}
 }
 
-func (c *sessionServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
+func (c *sessionServiceClient) GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(LogoutResponse)
-	err := c.cc.Invoke(ctx, SessionService_Logout_FullMethodName, in, out, cOpts...)
+	out := new(GetSessionsResponse)
+	err := c.cc.Invoke(ctx, SessionService_GetSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) GetActiveSessions(ctx context.Context, in *GetActiveSessionsRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetActiveSessionsResponse)
+	err := c.cc.Invoke(ctx, SessionService_GetActiveSessions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +63,8 @@ func (c *sessionServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, 
 // All implementations should embed UnimplementedSessionServiceServer
 // for forward compatibility.
 type SessionServiceServer interface {
-	Logout(context.Context, *v1.EmptyRequest) (*LogoutResponse, error)
+	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
+	GetActiveSessions(context.Context, *GetActiveSessionsRequest) (*GetActiveSessionsResponse, error)
 }
 
 // UnimplementedSessionServiceServer should be embedded to have
@@ -62,8 +74,11 @@ type SessionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSessionServiceServer struct{}
 
-func (UnimplementedSessionServiceServer) Logout(context.Context, *v1.EmptyRequest) (*LogoutResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
+func (UnimplementedSessionServiceServer) GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSessions not implemented")
+}
+func (UnimplementedSessionServiceServer) GetActiveSessions(context.Context, *GetActiveSessionsRequest) (*GetActiveSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetActiveSessions not implemented")
 }
 func (UnimplementedSessionServiceServer) testEmbeddedByValue() {}
 
@@ -85,20 +100,38 @@ func RegisterSessionServiceServer(s grpc.ServiceRegistrar, srv SessionServiceSer
 	s.RegisterService(&SessionService_ServiceDesc, srv)
 }
 
-func _SessionService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmptyRequest)
+func _SessionService_GetSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSessionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SessionServiceServer).Logout(ctx, in)
+		return srv.(SessionServiceServer).GetSessions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SessionService_Logout_FullMethodName,
+		FullMethod: SessionService_GetSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServiceServer).Logout(ctx, req.(*v1.EmptyRequest))
+		return srv.(SessionServiceServer).GetSessions(ctx, req.(*GetSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_GetActiveSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetActiveSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).GetActiveSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_GetActiveSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).GetActiveSessions(ctx, req.(*GetActiveSessionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -111,8 +144,12 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SessionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Logout",
-			Handler:    _SessionService_Logout_Handler,
+			MethodName: "GetSessions",
+			Handler:    _SessionService_GetSessions_Handler,
+		},
+		{
+			MethodName: "GetActiveSessions",
+			Handler:    _SessionService_GetActiveSessions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

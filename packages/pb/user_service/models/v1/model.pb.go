@@ -318,6 +318,114 @@ func (x *Profile) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type Session struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	UserAgent     string                 `protobuf:"bytes,4,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	IpAddress     string                 `protobuf:"bytes,5,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
+	DeviceId      string                 `protobuf:"bytes,6,opt,name=device_id,json=deviceId,proto3" json:"device_id,omitempty"`
+	LastLoginAt   *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=last_login_at,json=lastLoginAt,proto3" json:"last_login_at,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Session) Reset() {
+	*x = Session{}
+	mi := &file_user_service_models_v1_model_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Session) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Session) ProtoMessage() {}
+
+func (x *Session) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_models_v1_model_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Session.ProtoReflect.Descriptor instead.
+func (*Session) Descriptor() ([]byte, []int) {
+	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Session) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Session) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *Session) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+func (x *Session) GetUserAgent() string {
+	if x != nil {
+		return x.UserAgent
+	}
+	return ""
+}
+
+func (x *Session) GetIpAddress() string {
+	if x != nil {
+		return x.IpAddress
+	}
+	return ""
+}
+
+func (x *Session) GetDeviceId() string {
+	if x != nil {
+		return x.DeviceId
+	}
+	return ""
+}
+
+func (x *Session) GetLastLoginAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastLoginAt
+	}
+	return nil
+}
+
+func (x *Session) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Session) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
 var File_user_service_models_v1_model_proto protoreflect.FileDescriptor
 
 const file_user_service_models_v1_model_proto_rawDesc = "" +
@@ -352,7 +460,21 @@ const file_user_service_models_v1_model_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\xe6\x01\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xe8\x02\n" +
+	"\aSession\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12#\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\x12\x1d\n" +
+	"\n" +
+	"user_agent\x18\x04 \x01(\tR\tuserAgent\x12\x1d\n" +
+	"\n" +
+	"ip_address\x18\x05 \x01(\tR\tipAddress\x12\x1b\n" +
+	"\tdevice_id\x18\x06 \x01(\tR\bdeviceId\x12>\n" +
+	"\rlast_login_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\vlastLoginAt\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\xe6\x01\n" +
 	"\x1acom.user_service.models.v1B\n" +
 	"ModelProtoP\x01ZFgithub.com/rijum8906/relay/packages/pb/user_service/models/v1;modelsv1\xa2\x02\x03UMX\xaa\x02\x15UserService.Models.V1\xca\x02\x15UserService\\Models\\V1\xe2\x02!UserService\\Models\\V1\\GPBMetadata\xea\x02\x17UserService::Models::V1b\x06proto3"
 
@@ -368,29 +490,33 @@ func file_user_service_models_v1_model_proto_rawDescGZIP() []byte {
 	return file_user_service_models_v1_model_proto_rawDescData
 }
 
-var file_user_service_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_user_service_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_user_service_models_v1_model_proto_goTypes = []any{
 	(*Token)(nil),                 // 0: user_service.models.v1.Token
 	(*AuthToken)(nil),             // 1: user_service.models.v1.AuthToken
 	(*User)(nil),                  // 2: user_service.models.v1.User
 	(*Profile)(nil),               // 3: user_service.models.v1.Profile
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*Session)(nil),               // 4: user_service.models.v1.Session
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
 var file_user_service_models_v1_model_proto_depIdxs = []int32{
-	4, // 0: user_service.models.v1.Token.expires_in:type_name -> google.protobuf.Timestamp
-	0, // 1: user_service.models.v1.AuthToken.access_token:type_name -> user_service.models.v1.Token
-	0, // 2: user_service.models.v1.AuthToken.refresh_token:type_name -> user_service.models.v1.Token
-	4, // 3: user_service.models.v1.User.email_verified_at:type_name -> google.protobuf.Timestamp
-	4, // 4: user_service.models.v1.User.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
-	4, // 5: user_service.models.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	4, // 6: user_service.models.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	4, // 7: user_service.models.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
-	4, // 8: user_service.models.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+	5,  // 0: user_service.models.v1.Token.expires_in:type_name -> google.protobuf.Timestamp
+	0,  // 1: user_service.models.v1.AuthToken.access_token:type_name -> user_service.models.v1.Token
+	0,  // 2: user_service.models.v1.AuthToken.refresh_token:type_name -> user_service.models.v1.Token
+	5,  // 3: user_service.models.v1.User.email_verified_at:type_name -> google.protobuf.Timestamp
+	5,  // 4: user_service.models.v1.User.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
+	5,  // 5: user_service.models.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 6: user_service.models.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 7: user_service.models.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 8: user_service.models.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 9: user_service.models.v1.Session.last_login_at:type_name -> google.protobuf.Timestamp
+	5,  // 10: user_service.models.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 11: user_service.models.v1.Session.updated_at:type_name -> google.protobuf.Timestamp
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_user_service_models_v1_model_proto_init() }
@@ -404,7 +530,7 @@ func file_user_service_models_v1_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_models_v1_model_proto_rawDesc), len(file_user_service_models_v1_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

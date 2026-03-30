@@ -2,7 +2,7 @@
 package utils
 
 import (
-	modelsv1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
+	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 )
 

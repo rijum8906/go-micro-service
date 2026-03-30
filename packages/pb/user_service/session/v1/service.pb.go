@@ -7,7 +7,6 @@
 package sessionv1
 
 import (
-	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,20 +24,25 @@ var File_user_service_session_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_session_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"%user_service/session/v1/service.proto\x12\x17user_service.session.v1\x1a\x14core/v1/common.proto\x1a&user_service/session/v1/response.proto2Z\n" +
-	"\x0eSessionService\x12H\n" +
-	"\x06Logout\x12\x15.core.v1.EmptyRequest\x1a'.user_service.session.v1.LogoutResponseB\xef\x01\n" +
+	"%user_service/session/v1/service.proto\x12\x17user_service.session.v1\x1a%user_service/session/v1/request.proto\x1a&user_service/session/v1/response.proto2\xf6\x01\n" +
+	"\x0eSessionService\x12h\n" +
+	"\vGetSessions\x12+.user_service.session.v1.GetSessionsRequest\x1a,.user_service.session.v1.GetSessionsResponse\x12z\n" +
+	"\x11GetActiveSessions\x121.user_service.session.v1.GetActiveSessionsRequest\x1a2.user_service.session.v1.GetActiveSessionsResponseB\xef\x01\n" +
 	"\x1bcom.user_service.session.v1B\fServiceProtoP\x01ZHgithub.com/rijum8906/relay/packages/pb/user_service/session/v1;sessionv1\xa2\x02\x03USX\xaa\x02\x16UserService.Session.V1\xca\x02\x16UserService\\Session\\V1\xe2\x02\"UserService\\Session\\V1\\GPBMetadata\xea\x02\x18UserService::Session::V1b\x06proto3"
 
 var file_user_service_session_v1_service_proto_goTypes = []any{
-	(*v1.EmptyRequest)(nil), // 0: core.v1.EmptyRequest
-	(*LogoutResponse)(nil),  // 1: user_service.session.v1.LogoutResponse
+	(*GetSessionsRequest)(nil),        // 0: user_service.session.v1.GetSessionsRequest
+	(*GetActiveSessionsRequest)(nil),  // 1: user_service.session.v1.GetActiveSessionsRequest
+	(*GetSessionsResponse)(nil),       // 2: user_service.session.v1.GetSessionsResponse
+	(*GetActiveSessionsResponse)(nil), // 3: user_service.session.v1.GetActiveSessionsResponse
 }
 var file_user_service_session_v1_service_proto_depIdxs = []int32{
-	0, // 0: user_service.session.v1.SessionService.Logout:input_type -> core.v1.EmptyRequest
-	1, // 1: user_service.session.v1.SessionService.Logout:output_type -> user_service.session.v1.LogoutResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // 0: user_service.session.v1.SessionService.GetSessions:input_type -> user_service.session.v1.GetSessionsRequest
+	1, // 1: user_service.session.v1.SessionService.GetActiveSessions:input_type -> user_service.session.v1.GetActiveSessionsRequest
+	2, // 2: user_service.session.v1.SessionService.GetSessions:output_type -> user_service.session.v1.GetSessionsResponse
+	3, // 3: user_service.session.v1.SessionService.GetActiveSessions:output_type -> user_service.session.v1.GetActiveSessionsResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -49,6 +53,7 @@ func file_user_service_session_v1_service_proto_init() {
 	if File_user_service_session_v1_service_proto != nil {
 		return
 	}
+	file_user_service_session_v1_request_proto_init()
 	file_user_service_session_v1_response_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{

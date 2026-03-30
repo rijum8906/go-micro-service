@@ -8,12 +8,12 @@ message GetActiveSessionsRequest {
   string user_id = 1;
 }
 
-message GetSessions {
+message GetSessionsRequest {
   string user_id = 1;
   core.v1.PaginationRequest page = 2;
 }
 
-message RevokeSession {
+message RevokeSessionRequest {
   string scoped_token = 1;
   string session_id = 2;
 }

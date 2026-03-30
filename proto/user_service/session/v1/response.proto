@@ -2,6 +2,12 @@ syntax = "proto3";
 
 package user_service.session.v1;
 
-message LogoutResponse {
-  bool success = 1;
+import "user_service/models/v1/model.proto";
+
+message GetSessionsResponse {
+  repeated user_service.models.v1.Session sessions = 1;
+}
+
+message GetActiveSessionsResponse {
+  repeated user_service.models.v1.Session sessions = 1;
 }

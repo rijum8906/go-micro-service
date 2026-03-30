@@ -34,3 +34,15 @@ message Profile {
   google.protobuf.Timestamp created_at = 6;
   google.protobuf.Timestamp updated_at = 7;
 }
+
+message Session {
+  string id = 1;
+  string user_id = 2;
+  string refresh_token = 3;
+  string user_agent = 4;
+  string ip_address = 5;
+  string device_id = 6;
+  google.protobuf.Timestamp last_login_at = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}

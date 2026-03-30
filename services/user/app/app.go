@@ -26,7 +26,9 @@ type ApplicationUtils struct {
 }
 
 type ApplicationServices struct {
-	auth *handler.AuthHandler
+	auth    *handler.AuthHandler
+	user    *handler.UserHandler
+	session *handler.SessionHandler
 }
 
 type Application struct {
