@@ -8,6 +8,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/metadata"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	modelsv1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
 	"github.com/rijum8906/relay/services/user/internal/dto"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
@@ -16,6 +17,10 @@ type AuthService interface {
 	Login(ctx context.Context, data dto.Login, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
 	Register(ctx context.Context, data dto.Register, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
 	Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError)
+	GenerateScopedToken(ctx context.Context, data dto.GenerateScopedToken, user *metadata.UserInfo) (*authv1.ScopedTokenResponse, *apperror.AppError)
+	ChangePassword(ctx context.Context, data dto.ChangePassword, user *metadata.UserInfo) (*authv1.MutationResponse, *apperror.AppError)
+	UpdateProfileName(ctx context.Context, data dto.UpdateProfileName) (*modelsv1.Profile, *apperror.AppError)
+	UpdateProfileAvatarUrl(ctx context.Context, data dto.UpdateProfileAvatarUrl) (*modelsv1.Profile, *apperror.AppError)
 }
 
 type authService struct {

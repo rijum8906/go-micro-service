@@ -10,9 +10,11 @@ import (
 	"github.com/rijum8906/relay/packages/core/metadata"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	modelsv1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/dto"
 	"github.com/rijum8906/relay/services/user/internal/utils"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *authService) Login(ctx context.Context, data dto.Login, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
@@ -132,4 +134,86 @@ func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bo
 	}
 
 	return true, nil
+}
+
+func (s *authService) GenerateScopedToken(ctx context.Context, data dto.GenerateScopedToken, user *metadata.UserInfo) (*authv1.ScopedTokenResponse, *apperror.AppError) {
+	if user == nil || user.UserID == "" {
+		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	}
+
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, token.TokenScope(data.Scope))
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return &authv1.ScopedTokenResponse{
+		Token: &modelsv1.Token{
+			Value:     scopedToken,
+			ExpiresIn: timestamppb.New(time.Now().Add(s.env.ScopedTokenTTL)),
+		},
+	}, nil
+}
+
+func (s *authService) ChangePassword(ctx context.Context, data dto.ChangePassword, user *metadata.UserInfo) (*authv1.MutationResponse, *apperror.AppError) {
+	if user == nil || user.UserID == "" {
+		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	}
+
+	userID, err := uuid.Parse(user.UserID)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
+	}
+
+	dbUser, appErr := s.repos.User.GetUser(ctx, userID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	appErr = s.utils.HashService.Verify(dbUser.PasswordHash.String, data.CurrentPassword)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	newPasswordHash, appErr := s.utils.HashService.Hash(data.NewPassword)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	appErr = s.repos.User.UpdateUserPassword(ctx, userID, newPasswordHash)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return &authv1.MutationResponse{
+		Success: true,
+		Message: "password changed successfully",
+	}, nil
+}
+
+func (s *authService) UpdateProfileName(ctx context.Context, data dto.UpdateProfileName) (*modelsv1.Profile, *apperror.AppError) {
+	profileID, err := uuid.Parse(data.ProfileID)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
+	}
+
+	profile, appErr := s.repos.Profile.UpdateProfileNames(ctx, profileID, data.FirstName, data.LastName)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return utils.MapProfile(profile), nil
+}
+
+func (s *authService) UpdateProfileAvatarUrl(ctx context.Context, data dto.UpdateProfileAvatarUrl) (*modelsv1.Profile, *apperror.AppError) {
+	profileID, err := uuid.Parse(data.ProfileID)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
+	}
+
+	profile, appErr := s.repos.Profile.UpdateProfileAvatar(ctx, profileID, data.AvatarURL)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return utils.MapProfile(profile), nil
 }
