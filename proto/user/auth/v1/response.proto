@@ -16,25 +16,20 @@ message GenerateScopedTokenResponse {
 
 message ChangePasswordResponse {
   bool success = 1;
-  string message = 2;
 }
 
 message RequestEmailVerificationResponse {
   bool success = 1;
-  string message = 2;
 }
 
 message RequestPasswordResetResponse {
   bool success = 1;
-  string message = 2;
 }
 
 message VerifyEmailResponse {
   bool success = 1;
-  string message = 2;
 }
 
 message ResetPasswordResponse {
   bool success = 1;
-  string message = 2;
 }

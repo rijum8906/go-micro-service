@@ -205,7 +205,6 @@ func (s *authService) ChangePassword(ctx context.Context, req *authv1.ChangePass
 
 	return &authv1.ChangePasswordResponse{
 		Success: true,
-		Message: "password changed successfully",
 	}, nil
 }
 

@@ -129,7 +129,6 @@ func (x *GenerateScopedTokenResponse) GetToken() *v1.Token {
 type ChangePasswordResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -171,17 +170,9 @@ func (x *ChangePasswordResponse) GetSuccess() bool {
 	return false
 }
 
-func (x *ChangePasswordResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 type RequestEmailVerificationResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -223,17 +214,9 @@ func (x *RequestEmailVerificationResponse) GetSuccess() bool {
 	return false
 }
 
-func (x *RequestEmailVerificationResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 type RequestPasswordResetResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -275,17 +258,9 @@ func (x *RequestPasswordResetResponse) GetSuccess() bool {
 	return false
 }
 
-func (x *RequestPasswordResetResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 type VerifyEmailResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -327,17 +302,9 @@ func (x *VerifyEmailResponse) GetSuccess() bool {
 	return false
 }
 
-func (x *VerifyEmailResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 type ResetPasswordResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -379,13 +346,6 @@ func (x *ResetPasswordResponse) GetSuccess() bool {
 	return false
 }
 
-func (x *ResetPasswordResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 var File_user_auth_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_response_proto_rawDesc = "" +
@@ -396,22 +356,17 @@ const file_user_auth_v1_response_proto_rawDesc = "" +
 	"\aprofile\x18\x02 \x01(\v2\x17.user.models.v1.ProfileR\aprofile\x121\n" +
 	"\x06tokens\x18\x03 \x01(\v2\x19.user.models.v1.AuthTokenR\x06tokens\"J\n" +
 	"\x1bGenerateScopedTokenResponse\x12+\n" +
-	"\x05token\x18\x01 \x01(\v2\x15.user.models.v1.TokenR\x05token\"L\n" +
+	"\x05token\x18\x01 \x01(\v2\x15.user.models.v1.TokenR\x05token\"2\n" +
 	"\x16ChangePasswordResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"V\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"<\n" +
 	" RequestEmailVerificationResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"R\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"8\n" +
 	"\x1cRequestPasswordResetResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"I\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"/\n" +
 	"\x13VerifyEmailResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"K\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"1\n" +
 	"\x15ResetPasswordResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessageB\xaf\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccessB\xaf\x01\n" +
 	"\x10com.user.auth.v1B\rResponseProtoP\x01Z:github.com/rijum8906/relay/packages/pb/user/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\fUser.Auth.V1\xca\x02\fUser\\Auth\\V1\xe2\x02\x18User\\Auth\\V1\\GPBMetadata\xea\x02\x0eUser::Auth::V1b\x06proto3"
 
 var (

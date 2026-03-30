@@ -24,7 +24,6 @@ const (
 type LogoutResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -66,21 +65,13 @@ func (x *LogoutResponse) GetSuccess() bool {
 	return false
 }
 
-func (x *LogoutResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 var File_user_auth_v1_session_response_proto protoreflect.FileDescriptor
 
 const file_user_auth_v1_session_response_proto_rawDesc = "" +
 	"\n" +
-	"#user/auth/v1/session/response.proto\x12\x14user.auth.v1.session\"D\n" +
+	"#user/auth/v1/session/response.proto\x12\x14user.auth.v1.session\"*\n" +
 	"\x0eLogoutResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessageB\xda\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccessB\xda\x01\n" +
 	"\x18com.user.auth.v1.sessionB\rResponseProtoP\x01Z;github.com/rijum8906/relay/packages/pb/user/auth/v1/session\xa2\x02\x04UAVS\xaa\x02\x14User.Auth.V1.Session\xca\x02\x14User\\Auth\\V1\\Session\xe2\x02 User\\Auth\\V1\\Session\\GPBMetadata\xea\x02\x17User::Auth::V1::Sessionb\x06proto3"
 
 var (
