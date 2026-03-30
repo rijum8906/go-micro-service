@@ -21,5 +21,6 @@ func NewResolver(authClient authv1.AuthServiceClient, token *token.TokenManager)
 	return &Resolver{
 		Validate:   validator.New(),
 		AuthClient: authClient,
+		Token:      token,
 	}
 }

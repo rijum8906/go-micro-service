@@ -3,6 +3,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 
@@ -15,6 +16,7 @@ import (
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
 	"google.golang.org/grpc"
 )
 
@@ -74,6 +76,9 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 }
 
 func (a *Application) initHTTPServer() *apperror.AppError {
+	fmt.Println("origins:", a.config.CorsAllowedOrigins)
+	fmt.Println("methods:", a.config.CorsAllowedMethods)
+	fmt.Println("headers:", a.config.CorsAllowedHeaders)
 	listener, err := net.Listen("tcp", net.JoinHostPort("", a.port()))
 	if err != nil {
 		return apperror.ErrInternal.WithMessage("failed to listen for HTTP server").WithDetail("error", err.Error())
@@ -92,7 +97,7 @@ func (a *Application) initHTTPServer() *apperror.AppError {
 	a.listener = listener
 	a.server = &http.Server{
 		Addr:    net.JoinHostPort("", a.port()),
-		Handler: mux,
+		Handler: middleware.CORS(middleware.WithRequestHeaders(mux), a.config),
 	}
 
 	return nil
