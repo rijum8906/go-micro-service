@@ -10,7 +10,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/token"
-	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

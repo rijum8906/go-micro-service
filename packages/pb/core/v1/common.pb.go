@@ -189,6 +189,58 @@ func (x *EmailInput) GetEmail() string {
 	return ""
 }
 
+type PaginationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PaginationRequest) Reset() {
+	*x = PaginationRequest{}
+	mi := &file_core_v1_common_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaginationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaginationRequest) ProtoMessage() {}
+
+func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_common_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaginationRequest.ProtoReflect.Descriptor instead.
+func (*PaginationRequest) Descriptor() ([]byte, []int) {
+	return file_core_v1_common_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *PaginationRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *PaginationRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
 var File_core_v1_common_proto protoreflect.FileDescriptor
 
 const file_core_v1_common_proto_rawDesc = "" +
@@ -201,7 +253,10 @@ const file_core_v1_common_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\"\n" +
 	"\n" +
 	"EmailInput\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05emailB\x8e\x01\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"=\n" +
+	"\x11PaginationRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limitB\x8e\x01\n" +
 	"\vcom.core.v1B\vCommonProtoP\x01Z5github.com/rijum8906/relay/packages/pb/core/v1;corev1\xa2\x02\x03CXX\xaa\x02\aCore.V1\xca\x02\aCore\\V1\xe2\x02\x13Core\\V1\\GPBMetadata\xea\x02\bCore::V1b\x06proto3"
 
 var (
@@ -216,12 +271,13 @@ func file_core_v1_common_proto_rawDescGZIP() []byte {
 	return file_core_v1_common_proto_rawDescData
 }
 
-var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_core_v1_common_proto_goTypes = []any{
-	(*RequestMetadata)(nil), // 0: core.v1.RequestMetadata
-	(*EmptyRequest)(nil),    // 1: core.v1.EmptyRequest
-	(*SuccessResponse)(nil), // 2: core.v1.SuccessResponse
-	(*EmailInput)(nil),      // 3: core.v1.EmailInput
+	(*RequestMetadata)(nil),   // 0: core.v1.RequestMetadata
+	(*EmptyRequest)(nil),      // 1: core.v1.EmptyRequest
+	(*SuccessResponse)(nil),   // 2: core.v1.SuccessResponse
+	(*EmailInput)(nil),        // 3: core.v1.EmailInput
+	(*PaginationRequest)(nil), // 4: core.v1.PaginationRequest
 }
 var file_core_v1_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -242,7 +298,7 @@ func file_core_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_v1_common_proto_rawDesc), len(file_core_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

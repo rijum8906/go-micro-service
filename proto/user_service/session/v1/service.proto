@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package user_service.session.v1;
 
-import "user_service/session/v1/request.proto";
+import "core/v1/common.proto";
 import "user_service/session/v1/response.proto";
 
 service SessionService {
-  rpc Logout(LogoutRequest) returns (LogoutResponse);
+  rpc Logout(core.v1.EmptyRequest) returns (LogoutResponse);
 }

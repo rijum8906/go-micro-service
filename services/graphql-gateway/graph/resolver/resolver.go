@@ -3,7 +3,7 @@ package resolver
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/rijum8906/relay/packages/core/token"
-	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 )
 
 // This file will not be regenerated automatically.

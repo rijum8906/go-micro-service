@@ -12,7 +12,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
-	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"

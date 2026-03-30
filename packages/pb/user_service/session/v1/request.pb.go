@@ -22,42 +22,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type LogoutRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *LogoutRequest) Reset() {
-	*x = LogoutRequest{}
-	mi := &file_user_service_session_v1_request_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *LogoutRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LogoutRequest) ProtoMessage() {}
-
-func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_session_v1_request_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
-func (*LogoutRequest) Descriptor() ([]byte, []int) {
-	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{0}
-}
-
 type GetActiveSessionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -67,7 +31,7 @@ type GetActiveSessionsRequest struct {
 
 func (x *GetActiveSessionsRequest) Reset() {
 	*x = GetActiveSessionsRequest{}
-	mi := &file_user_service_session_v1_request_proto_msgTypes[1]
+	mi := &file_user_service_session_v1_request_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -79,7 +43,7 @@ func (x *GetActiveSessionsRequest) String() string {
 func (*GetActiveSessionsRequest) ProtoMessage() {}
 
 func (x *GetActiveSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_session_v1_request_proto_msgTypes[1]
+	mi := &file_user_service_session_v1_request_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -92,7 +56,7 @@ func (x *GetActiveSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetActiveSessionsRequest.ProtoReflect.Descriptor instead.
 func (*GetActiveSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{1}
+	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *GetActiveSessionsRequest) GetUserId() string {
@@ -112,7 +76,7 @@ type GetSessions struct {
 
 func (x *GetSessions) Reset() {
 	*x = GetSessions{}
-	mi := &file_user_service_session_v1_request_proto_msgTypes[2]
+	mi := &file_user_service_session_v1_request_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -124,7 +88,7 @@ func (x *GetSessions) String() string {
 func (*GetSessions) ProtoMessage() {}
 
 func (x *GetSessions) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_session_v1_request_proto_msgTypes[2]
+	mi := &file_user_service_session_v1_request_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -137,7 +101,7 @@ func (x *GetSessions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessions.ProtoReflect.Descriptor instead.
 func (*GetSessions) Descriptor() ([]byte, []int) {
-	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{2}
+	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetSessions) GetUserId() string {
@@ -164,7 +128,7 @@ type RevokeSession struct {
 
 func (x *RevokeSession) Reset() {
 	*x = RevokeSession{}
-	mi := &file_user_service_session_v1_request_proto_msgTypes[3]
+	mi := &file_user_service_session_v1_request_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -176,7 +140,7 @@ func (x *RevokeSession) String() string {
 func (*RevokeSession) ProtoMessage() {}
 
 func (x *RevokeSession) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_session_v1_request_proto_msgTypes[3]
+	mi := &file_user_service_session_v1_request_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -189,7 +153,7 @@ func (x *RevokeSession) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeSession.ProtoReflect.Descriptor instead.
 func (*RevokeSession) Descriptor() ([]byte, []int) {
-	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{3}
+	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *RevokeSession) GetScopedToken() string {
@@ -210,8 +174,7 @@ var File_user_service_session_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_session_v1_request_proto_rawDesc = "" +
 	"\n" +
-	"%user_service/session/v1/request.proto\x12\x17user_service.session.v1\x1a\x14core/v1/common.proto\"\x0f\n" +
-	"\rLogoutRequest\"3\n" +
+	"%user_service/session/v1/request.proto\x12\x17user_service.session.v1\x1a\x14core/v1/common.proto\"3\n" +
 	"\x18GetActiveSessionsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"V\n" +
 	"\vGetSessions\x12\x17\n" +
@@ -235,16 +198,15 @@ func file_user_service_session_v1_request_proto_rawDescGZIP() []byte {
 	return file_user_service_session_v1_request_proto_rawDescData
 }
 
-var file_user_service_session_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_user_service_session_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_user_service_session_v1_request_proto_goTypes = []any{
-	(*LogoutRequest)(nil),            // 0: user_service.session.v1.LogoutRequest
-	(*GetActiveSessionsRequest)(nil), // 1: user_service.session.v1.GetActiveSessionsRequest
-	(*GetSessions)(nil),              // 2: user_service.session.v1.GetSessions
-	(*RevokeSession)(nil),            // 3: user_service.session.v1.RevokeSession
-	(*v1.PaginationRequest)(nil),     // 4: core.v1.PaginationRequest
+	(*GetActiveSessionsRequest)(nil), // 0: user_service.session.v1.GetActiveSessionsRequest
+	(*GetSessions)(nil),              // 1: user_service.session.v1.GetSessions
+	(*RevokeSession)(nil),            // 2: user_service.session.v1.RevokeSession
+	(*v1.PaginationRequest)(nil),     // 3: core.v1.PaginationRequest
 }
 var file_user_service_session_v1_request_proto_depIdxs = []int32{
-	4, // 0: user_service.session.v1.GetSessions.page:type_name -> core.v1.PaginationRequest
+	3, // 0: user_service.session.v1.GetSessions.page:type_name -> core.v1.PaginationRequest
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -263,7 +225,7 @@ func file_user_service_session_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_session_v1_request_proto_rawDesc), len(file_user_service_session_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

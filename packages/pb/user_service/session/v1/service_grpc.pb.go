@@ -8,6 +8,7 @@ package sessionv1
 
 import (
 	context "context"
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -26,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SessionServiceClient interface {
-	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -37,7 +38,7 @@ func NewSessionServiceClient(cc grpc.ClientConnInterface) SessionServiceClient {
 	return &sessionServiceClient{cc}
 }
 
-func (c *sessionServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
+func (c *sessionServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LogoutResponse)
 	err := c.cc.Invoke(ctx, SessionService_Logout_FullMethodName, in, out, cOpts...)
@@ -51,7 +52,7 @@ func (c *sessionServiceClient) Logout(ctx context.Context, in *LogoutRequest, op
 // All implementations should embed UnimplementedSessionServiceServer
 // for forward compatibility.
 type SessionServiceServer interface {
-	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	Logout(context.Context, *v1.EmptyRequest) (*LogoutResponse, error)
 }
 
 // UnimplementedSessionServiceServer should be embedded to have
@@ -61,7 +62,7 @@ type SessionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSessionServiceServer struct{}
 
-func (UnimplementedSessionServiceServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
+func (UnimplementedSessionServiceServer) Logout(context.Context, *v1.EmptyRequest) (*LogoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedSessionServiceServer) testEmbeddedByValue() {}
@@ -85,7 +86,7 @@ func RegisterSessionServiceServer(s grpc.ServiceRegistrar, srv SessionServiceSer
 }
 
 func _SessionService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LogoutRequest)
+	in := new(v1.EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -97,7 +98,7 @@ func _SessionService_Logout_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: SessionService_Logout_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServiceServer).Logout(ctx, req.(*LogoutRequest))
+		return srv.(SessionServiceServer).Logout(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

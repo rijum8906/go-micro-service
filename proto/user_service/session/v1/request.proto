@@ -4,8 +4,6 @@ package user_service.session.v1;
 
 import "core/v1/common.proto";
 
-message LogoutRequest {}
-
 message GetActiveSessionsRequest {
   string user_id = 1;
 }
