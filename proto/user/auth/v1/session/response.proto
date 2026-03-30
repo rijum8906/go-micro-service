@@ -4,4 +4,5 @@ package user.auth.v1.session;
 
 message LogoutResponse {
   bool success = 1;
+  string message = 2;
 }

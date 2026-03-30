@@ -16,10 +16,10 @@ type AuthService interface {
 	Login(ctx context.Context, req *authv1.LoginRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
 	Register(ctx context.Context, req *authv1.RegisterRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
 	Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError)
-	GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenInput, user *metadata.UserInfo) (*authv1.ScopedTokenResponse, *apperror.AppError)
-	ChangePassword(ctx context.Context, req *authv1.ChangePasswordInput, user *metadata.UserInfo) (*authv1.MutationResponse, *apperror.AppError)
-	UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameInput) (*modelsv1.Profile, *apperror.AppError)
-	UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlInput) (*modelsv1.Profile, *apperror.AppError)
+	GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenRequest, user *metadata.UserInfo) (*authv1.GenerateScopedTokenResponse, *apperror.AppError)
+	ChangePassword(ctx context.Context, req *authv1.ChangePasswordRequest) (*authv1.ChangePasswordResponse, *apperror.AppError)
+	UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError)
+	UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError)
 }
 
 type authService struct {

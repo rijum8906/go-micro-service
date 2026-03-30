@@ -14,7 +14,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
-	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1/session"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"

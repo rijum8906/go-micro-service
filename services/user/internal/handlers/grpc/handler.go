@@ -7,9 +7,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1/session"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user/models/v1"
-	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
-	"github.com/rijum8906/relay/services/user/internal/dto"
 	authservice "github.com/rijum8906/relay/services/user/internal/services/auth"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
@@ -82,7 +81,7 @@ func (h *AuthHandler) Logout(ctx context.Context, req *sessionv1.LogoutRequest) 
 	}, nil
 }
 
-func (h *AuthHandler) GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenInput) (*authv1.ScopedTokenResponse, error) {
+func (h *AuthHandler) GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenRequest) (*authv1.GenerateScopedTokenResponse, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("generate scoped token request is required"))
 	}
@@ -100,17 +99,12 @@ func (h *AuthHandler) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	return result, nil
 }
 
-func (h *AuthHandler) ChangePassword(ctx context.Context, req *authv1.ChangePasswordInput) (*authv1.MutationResponse, error) {
+func (h *AuthHandler) ChangePassword(ctx context.Context, req *authv1.ChangePasswordRequest) (*authv1.ChangePasswordResponse, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("change password request is required"))
 	}
 
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
-	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("change password user metadata is required"))
-	}
-
-	result, appErr := h.service.ChangePassword(ctx, req, &userInfo)
+	result, appErr := h.service.ChangePassword(ctx, req)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -118,7 +112,7 @@ func (h *AuthHandler) ChangePassword(ctx context.Context, req *authv1.ChangePass
 	return result, nil
 }
 
-func (h *AuthHandler) UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameInput) (*modelsv1.Profile, error) {
+func (h *AuthHandler) UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameRequest) (*modelsv1.Profile, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("update profile name request is required"))
 	}
@@ -131,7 +125,7 @@ func (h *AuthHandler) UpdateProfileName(ctx context.Context, req *authv1.UpdateP
 	return result, nil
 }
 
-func (h *AuthHandler) UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlInput) (*modelsv1.Profile, error) {
+func (h *AuthHandler) UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("update profile avatar request is required"))
 	}

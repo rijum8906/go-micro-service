@@ -143,7 +143,7 @@ func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bo
 	return true, nil
 }
 
-func (s *authService) GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenInput, user *metadata.UserInfo) (*authv1.ScopedTokenResponse, *apperror.AppError) {
+func (s *authService) GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenRequest, user *metadata.UserInfo) (*authv1.GenerateScopedTokenResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("generate scoped token request is required")
 	}
@@ -157,7 +157,7 @@ func (s *authService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 		return nil, appErr
 	}
 
-	return &authv1.ScopedTokenResponse{
+	return &authv1.GenerateScopedTokenResponse{
 		Token: &modelsv1.Token{
 			Value:     scopedToken,
 			ExpiresIn: timestamppb.New(time.Now().Add(s.env.ScopedTokenTTL)),
@@ -165,28 +165,28 @@ func (s *authService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	}, nil
 }
 
-func (s *authService) ChangePassword(ctx context.Context, req *authv1.ChangePasswordInput, user *metadata.UserInfo) (*authv1.MutationResponse, *apperror.AppError) {
+func (s *authService) ChangePassword(ctx context.Context, req *authv1.ChangePasswordRequest) (*authv1.ChangePasswordResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("change password request is required")
 	}
 
-	if user == nil || user.UserID == "" {
-		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	scopedToken := req.GetScopedToken()
+	if scopedToken == nil || scopedToken.GetValue() == "" {
+		return nil, apperror.ErrValidation.WithMessage("change password scoped token is required")
 	}
 
-	userID, err := uuid.Parse(user.UserID)
+	claims, appErr := s.utils.TokenManager.ValidateScopedToken(ctx, scopedToken.GetValue())
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if claims.Scope != token.TokenScopeChangePassword {
+		return nil, apperror.ErrValidation.WithMessage("invalid scoped token scope for change password")
+	}
+
+	userID, err := uuid.Parse(claims.Subject)
 	if err != nil {
 		return nil, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
-	}
-
-	dbUser, appErr := s.repos.User.GetUser(ctx, userID)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	appErr = s.utils.HashService.Verify(dbUser.PasswordHash.String, req.GetCurrentPassword())
-	if appErr != nil {
-		return nil, appErr
 	}
 
 	newPasswordHash, appErr := s.utils.HashService.Hash(req.GetNewPassword())
@@ -199,13 +199,17 @@ func (s *authService) ChangePassword(ctx context.Context, req *authv1.ChangePass
 		return nil, appErr
 	}
 
-	return &authv1.MutationResponse{
+	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken.GetValue()); appErr != nil {
+		return nil, appErr
+	}
+
+	return &authv1.ChangePasswordResponse{
 		Success: true,
 		Message: "password changed successfully",
 	}, nil
 }
 
-func (s *authService) UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameInput) (*modelsv1.Profile, *apperror.AppError) {
+func (s *authService) UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update profile name request is required")
 	}
@@ -223,7 +227,7 @@ func (s *authService) UpdateProfileName(ctx context.Context, req *authv1.UpdateP
 	return utils.MapProfile(profile), nil
 }
 
-func (s *authService) UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlInput) (*modelsv1.Profile, *apperror.AppError) {
+func (s *authService) UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update profile avatar request is required")
 	}

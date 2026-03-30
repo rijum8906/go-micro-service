@@ -11,7 +11,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
-	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1/session"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

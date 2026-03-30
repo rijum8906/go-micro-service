@@ -10,11 +10,31 @@ message AuthResponse {
   user.models.v1.AuthToken tokens = 3;
 }
 
-message MutationResponse {
+message GenerateScopedTokenResponse {
+  user.models.v1.Token token = 1;
+}
+
+message ChangePasswordResponse {
   bool success = 1;
   string message = 2;
 }
 
-message ScopedTokenResponse {
-  user.models.v1.Token token = 1;
+message RequestEmailVerificationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RequestPasswordResetResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message VerifyEmailResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ResetPasswordResponse {
+  bool success = 1;
+  string message = 2;
 }

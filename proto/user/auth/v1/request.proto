@@ -16,6 +16,34 @@ message RegisterRequest {
   string last_name = 4;
 }
 
+message GenerateScopedTokenRequest {
+  string scope = 1;
+}
+
+message UpdateProfileAvatarUrlRequest {
+  string profile_id = 1;
+  string avatar_url = 2;
+}
+
+message UpdateProfileNameRequest {
+  string profile_id = 1;
+  string first_name = 2;
+  string last_name = 3;
+}
+
+message ChangePasswordRequest {
+  user.models.v1.Token scoped_token = 1;
+  string new_password = 2;
+}
+
+message RequestEmailVerificationRequest {
+  string email = 1;
+}
+
+message RequestPasswordResetRequest {
+  string email = 1;
+}
+
 message VerifyEmailRequest {
   user.models.v1.Token scoped_token = 1;
 }

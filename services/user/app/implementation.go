@@ -11,7 +11,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/hash"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1"
-	sessionv1 "github.com/rijum8906/relay/packages/pb/user/session"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user/auth/v1/session"
 	userdb "github.com/rijum8906/relay/services/user/internal/db"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	profilerepo "github.com/rijum8906/relay/services/user/internal/repository/profile"
