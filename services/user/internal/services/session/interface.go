@@ -6,13 +6,14 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/env"
+	"github.com/rijum8906/relay/packages/core/metadata"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
 type SessionService interface {
 	GetSessions(ctx context.Context, req *sessionv1.GetSessionsRequest) (*sessionv1.GetSessionsResponse, *apperror.AppError)
-	GetActiveSessions(ctx context.Context, req *sessionv1.GetActiveSessionsRequest) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError)
+	GetActiveSessions(ctx context.Context, userInfo *metadata.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError)
 }
 
 type sessionService struct {

@@ -8,6 +8,7 @@ package sessionv1
 
 import (
 	context "context"
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -28,7 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SessionServiceClient interface {
 	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
-	GetActiveSessions(ctx context.Context, in *GetActiveSessionsRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error)
+	GetActiveSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -49,7 +50,7 @@ func (c *sessionServiceClient) GetSessions(ctx context.Context, in *GetSessionsR
 	return out, nil
 }
 
-func (c *sessionServiceClient) GetActiveSessions(ctx context.Context, in *GetActiveSessionsRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error) {
+func (c *sessionServiceClient) GetActiveSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetActiveSessionsResponse)
 	err := c.cc.Invoke(ctx, SessionService_GetActiveSessions_FullMethodName, in, out, cOpts...)
@@ -64,7 +65,7 @@ func (c *sessionServiceClient) GetActiveSessions(ctx context.Context, in *GetAct
 // for forward compatibility.
 type SessionServiceServer interface {
 	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
-	GetActiveSessions(context.Context, *GetActiveSessionsRequest) (*GetActiveSessionsResponse, error)
+	GetActiveSessions(context.Context, *v1.EmptyRequest) (*GetActiveSessionsResponse, error)
 }
 
 // UnimplementedSessionServiceServer should be embedded to have
@@ -77,7 +78,7 @@ type UnimplementedSessionServiceServer struct{}
 func (UnimplementedSessionServiceServer) GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSessions not implemented")
 }
-func (UnimplementedSessionServiceServer) GetActiveSessions(context.Context, *GetActiveSessionsRequest) (*GetActiveSessionsResponse, error) {
+func (UnimplementedSessionServiceServer) GetActiveSessions(context.Context, *v1.EmptyRequest) (*GetActiveSessionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetActiveSessions not implemented")
 }
 func (UnimplementedSessionServiceServer) testEmbeddedByValue() {}
@@ -119,7 +120,7 @@ func _SessionService_GetSessions_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _SessionService_GetActiveSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetActiveSessionsRequest)
+	in := new(v1.EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func _SessionService_GetActiveSessions_Handler(srv interface{}, ctx context.Cont
 		FullMethod: SessionService_GetActiveSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServiceServer).GetActiveSessions(ctx, req.(*GetActiveSessionsRequest))
+		return srv.(SessionServiceServer).GetActiveSessions(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

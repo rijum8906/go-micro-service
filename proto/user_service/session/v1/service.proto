@@ -2,10 +2,11 @@ syntax = "proto3";
 
 package user_service.session.v1;
 
+import "core/v1/common.proto";
 import "user_service/session/v1/request.proto";
 import "user_service/session/v1/response.proto";
 
 service SessionService {
   rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
-  rpc GetActiveSessions(GetActiveSessionsRequest) returns (GetActiveSessionsResponse);
+  rpc GetActiveSessions(core.v1.EmptyRequest) returns (GetActiveSessionsResponse);
 }
