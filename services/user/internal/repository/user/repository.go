@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -71,6 +72,31 @@ func (r *userRepository) UpdateUserEmail(ctx context.Context, id uuid.UUID, emai
 	if err != nil {
 		return apperror.ErrInternal.WithMessage("Failed to update user").WithDetail("error", err.Error())
 	}
+	return nil
+}
+
+func (r *userRepository) VerifyUserEmail(ctx context.Context, id uuid.UUID) *apperror.AppError {
+	user, appErr := r.GetUser(ctx, id)
+	if appErr != nil {
+		return appErr
+	}
+
+	_, err := r.q.UpdateUser(ctx, db.UpdateUserParams{
+		ID:              id,
+		Email:           user.Email,
+		PasswordHash:    user.PasswordHash,
+		IsEmailVerified: true,
+		EmailVerifiedAt: pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		},
+		TwoFactorEnabled:   user.TwoFactorEnabled,
+		TwoFactorEnabledAt: user.TwoFactorEnabledAt,
+	})
+	if err != nil {
+		return apperror.ErrInternal.WithMessage("Failed to update user").WithDetail("error", err.Error())
+	}
+
 	return nil
 }
 

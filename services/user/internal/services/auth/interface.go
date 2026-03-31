@@ -15,6 +15,14 @@ type AuthService interface {
 	Login(ctx context.Context, data *authv1.LoginRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
 	Register(ctx context.Context, data *authv1.RegisterRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
 	Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError)
+	GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenRequest, user *metadata.UserInfo) (*authv1.GenerateScopedTokenResponse, *apperror.AppError)
+	ChangePassword(ctx context.Context, req *authv1.ChangePasswordRequest) (*authv1.ChangePasswordResponse, *apperror.AppError)
+	UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError)
+	UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError)
+	RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) (*authv1.RequestEmailVerificationResponse, *apperror.AppError)
+	RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) (*authv1.RequestPasswordResetResponse, *apperror.AppError)
+	VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) (*authv1.VerifyEmailResponse, *apperror.AppError)
+	ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*authv1.ResetPasswordResponse, *apperror.AppError)
 }
 
 type authService struct {

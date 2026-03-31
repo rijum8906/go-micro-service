@@ -3,10 +3,21 @@ syntax = "proto3";
 package user_service.session.v1;
 
 import "core/v1/common.proto";
+import "user_service/models/v1/model.proto";
 import "user_service/session/v1/request.proto";
 import "user_service/session/v1/response.proto";
 
 service SessionService {
+  // Retrieval
+  rpc GetCurrentSession(core.v1.EmptyRequest) returns (user_service.models.v1.Session);
   rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
   rpc GetActiveSessions(core.v1.EmptyRequest) returns (GetActiveSessionsResponse);
+
+  // Revocation
+  rpc RevokeSession(RevokeSessionRequest) returns (core.v1.SuccessResponse);
+  rpc RevokeAllSessions(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
+  rpc RevokeOtherSessions(RevokeOtherSessionsRequest) returns (core.v1.SuccessResponse);
+
+  // Termination
+  rpc TerminateExpiredSessions(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
 }

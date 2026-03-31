@@ -7,8 +7,8 @@
 package userv1
 
 import (
-	v11 "github.com/rijum8906/relay/packages/pb/core/v1"
-	v1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	v11 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -26,12 +26,15 @@ var File_user_service_user_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_user_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\xb8\x03\n" +
+	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\xbe\x04\n" +
 	"\vUserService\x12z\n" +
 	"\x13GenerateScopedToken\x120.user_service.user.v1.GenerateScopedTokenRequest\x1a1.user_service.user.v1.GenerateScopedTokenResponse\x12n\n" +
 	"\x16UpdateProfileAvatarUrl\x123.user_service.user.v1.UpdateProfileAvatarUrlRequest\x1a\x1f.user_service.models.v1.Profile\x12d\n" +
 	"\x11UpdateProfileName\x12..user_service.user.v1.UpdateProfileNameRequest\x1a\x1f.user_service.models.v1.Profile\x12W\n" +
-	"\x0eChangePassword\x12+.user_service.user.v1.ChangePasswordRequest\x1a\x18.core.v1.SuccessResponseB\xda\x01\n" +
+	"\x0eChangePassword\x12+.user_service.user.v1.ChangePasswordRequest\x1a\x18.core.v1.SuccessResponse\x12D\n" +
+	"\n" +
+	"GetProfile\x12\x15.core.v1.EmptyRequest\x1a\x1f.user_service.models.v1.Profile\x12>\n" +
+	"\aGetUser\x12\x15.core.v1.EmptyRequest\x1a\x1c.user_service.models.v1.UserB\xda\x01\n" +
 	"\x18com.user_service.user.v1B\fServiceProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/user/v1;userv1\xa2\x02\x03UUX\xaa\x02\x13UserService.User.V1\xca\x02\x13UserService\\User\\V1\xe2\x02\x1fUserService\\User\\V1\\GPBMetadata\xea\x02\x15UserService::User::V1b\x06proto3"
 
 var file_user_service_user_v1_service_proto_goTypes = []any{
@@ -39,21 +42,27 @@ var file_user_service_user_v1_service_proto_goTypes = []any{
 	(*UpdateProfileAvatarUrlRequest)(nil), // 1: user_service.user.v1.UpdateProfileAvatarUrlRequest
 	(*UpdateProfileNameRequest)(nil),      // 2: user_service.user.v1.UpdateProfileNameRequest
 	(*ChangePasswordRequest)(nil),         // 3: user_service.user.v1.ChangePasswordRequest
-	(*GenerateScopedTokenResponse)(nil),   // 4: user_service.user.v1.GenerateScopedTokenResponse
-	(*v1.Profile)(nil),                    // 5: user_service.models.v1.Profile
-	(*v11.SuccessResponse)(nil),           // 6: core.v1.SuccessResponse
+	(*v1.EmptyRequest)(nil),               // 4: core.v1.EmptyRequest
+	(*GenerateScopedTokenResponse)(nil),   // 5: user_service.user.v1.GenerateScopedTokenResponse
+	(*v11.Profile)(nil),                   // 6: user_service.models.v1.Profile
+	(*v1.SuccessResponse)(nil),            // 7: core.v1.SuccessResponse
+	(*v11.User)(nil),                      // 8: user_service.models.v1.User
 }
 var file_user_service_user_v1_service_proto_depIdxs = []int32{
 	0, // 0: user_service.user.v1.UserService.GenerateScopedToken:input_type -> user_service.user.v1.GenerateScopedTokenRequest
 	1, // 1: user_service.user.v1.UserService.UpdateProfileAvatarUrl:input_type -> user_service.user.v1.UpdateProfileAvatarUrlRequest
 	2, // 2: user_service.user.v1.UserService.UpdateProfileName:input_type -> user_service.user.v1.UpdateProfileNameRequest
 	3, // 3: user_service.user.v1.UserService.ChangePassword:input_type -> user_service.user.v1.ChangePasswordRequest
-	4, // 4: user_service.user.v1.UserService.GenerateScopedToken:output_type -> user_service.user.v1.GenerateScopedTokenResponse
-	5, // 5: user_service.user.v1.UserService.UpdateProfileAvatarUrl:output_type -> user_service.models.v1.Profile
-	5, // 6: user_service.user.v1.UserService.UpdateProfileName:output_type -> user_service.models.v1.Profile
-	6, // 7: user_service.user.v1.UserService.ChangePassword:output_type -> core.v1.SuccessResponse
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	4, // 4: user_service.user.v1.UserService.GetProfile:input_type -> core.v1.EmptyRequest
+	4, // 5: user_service.user.v1.UserService.GetUser:input_type -> core.v1.EmptyRequest
+	5, // 6: user_service.user.v1.UserService.GenerateScopedToken:output_type -> user_service.user.v1.GenerateScopedTokenResponse
+	6, // 7: user_service.user.v1.UserService.UpdateProfileAvatarUrl:output_type -> user_service.models.v1.Profile
+	6, // 8: user_service.user.v1.UserService.UpdateProfileName:output_type -> user_service.models.v1.Profile
+	7, // 9: user_service.user.v1.UserService.ChangePassword:output_type -> core.v1.SuccessResponse
+	6, // 10: user_service.user.v1.UserService.GetProfile:output_type -> user_service.models.v1.Profile
+	8, // 11: user_service.user.v1.UserService.GetUser:output_type -> user_service.models.v1.User
+	6, // [6:12] is the sub-list for method output_type
+	0, // [0:6] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

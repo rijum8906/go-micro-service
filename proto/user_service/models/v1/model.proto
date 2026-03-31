@@ -38,7 +38,6 @@ message Profile {
 message Session {
   string id = 1;
   string user_id = 2;
-  string refresh_token = 3;
   string user_agent = 4;
   string ip_address = 5;
   string device_id = 6;

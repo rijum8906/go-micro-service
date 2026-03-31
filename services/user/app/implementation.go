@@ -12,6 +12,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
+	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	userdb "github.com/rijum8906/relay/services/user/internal/db"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	profilerepo "github.com/rijum8906/relay/services/user/internal/repository/profile"
@@ -122,6 +123,7 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 	server := grpc.NewServer()
 	a.server = server
 	authv1.RegisterAuthServiceServer(server, a.services.auth)
+	userv1.RegisterUserServiceServer(server, a.services.user)
 	sessionv1.RegisterSessionServiceServer(server, a.services.session)
 
 	if a.config.AppEnv == "development" {

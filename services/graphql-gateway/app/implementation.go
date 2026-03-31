@@ -11,6 +11,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
+	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -52,9 +54,13 @@ func (a *Application) initGRPCClients() *apperror.AppError {
 
 	// Initialize gRPC clients
 	authClient := authv1.NewAuthServiceClient(conn)
+	userClinet := userv1.NewUserServiceClient(conn)
+	sessionClient := sessionv1.NewSessionServiceClient(conn)
 	a.clients = &GrpcClients{
-		AuthConn:   conn,
-		AuthClient: authClient,
+		Conn:          conn,
+		AuthClient:    authClient,
+		UserClient:    userClinet,
+		SessionClient: sessionClient,
 	}
 
 	return nil
@@ -76,8 +82,8 @@ func (a *Application) Shutdown(ctx context.Context) {
 		_ = a.server.Shutdown(shutdownCtx)
 	}
 
-	if a.clients != nil && a.clients.AuthConn != nil {
-		_ = a.clients.AuthConn.Close()
+	if a.clients != nil && a.clients.Conn != nil {
+		_ = a.clients.Conn.Close()
 	}
 
 	if a.infra != nil && a.infra.cache != nil {
@@ -94,5 +100,5 @@ func (a *Application) Addr() string {
 }
 
 func (a *Application) UserServiceAddr() string {
-	return fmt.Sprintf("%s", a.config.UserServiceAddr)
+	return a.config.UserServiceAddr
 }

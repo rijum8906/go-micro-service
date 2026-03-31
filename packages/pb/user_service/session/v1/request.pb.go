@@ -126,6 +126,58 @@ func (x *RevokeSessionRequest) GetSessionId() string {
 	return ""
 }
 
+type RevokeOtherSessionsRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	ScopedToken      string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	CurrentSessionId string                 `protobuf:"bytes,2,opt,name=current_session_id,json=currentSessionId,proto3" json:"current_session_id,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *RevokeOtherSessionsRequest) Reset() {
+	*x = RevokeOtherSessionsRequest{}
+	mi := &file_user_service_session_v1_request_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeOtherSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeOtherSessionsRequest) ProtoMessage() {}
+
+func (x *RevokeOtherSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_session_v1_request_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeOtherSessionsRequest.ProtoReflect.Descriptor instead.
+func (*RevokeOtherSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *RevokeOtherSessionsRequest) GetScopedToken() string {
+	if x != nil {
+		return x.ScopedToken
+	}
+	return ""
+}
+
+func (x *RevokeOtherSessionsRequest) GetCurrentSessionId() string {
+	if x != nil {
+		return x.CurrentSessionId
+	}
+	return ""
+}
+
 var File_user_service_session_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_session_v1_request_proto_rawDesc = "" +
@@ -137,7 +189,10 @@ const file_user_service_session_v1_request_proto_rawDesc = "" +
 	"\x14RevokeSessionRequest\x12!\n" +
 	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x02 \x01(\tR\tsessionIdB\xef\x01\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\"m\n" +
+	"\x1aRevokeOtherSessionsRequest\x12!\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12,\n" +
+	"\x12current_session_id\x18\x02 \x01(\tR\x10currentSessionIdB\xef\x01\n" +
 	"\x1bcom.user_service.session.v1B\fRequestProtoP\x01ZHgithub.com/rijum8906/relay/packages/pb/user_service/session/v1;sessionv1\xa2\x02\x03USX\xaa\x02\x16UserService.Session.V1\xca\x02\x16UserService\\Session\\V1\xe2\x02\"UserService\\Session\\V1\\GPBMetadata\xea\x02\x18UserService::Session::V1b\x06proto3"
 
 var (
@@ -152,14 +207,15 @@ func file_user_service_session_v1_request_proto_rawDescGZIP() []byte {
 	return file_user_service_session_v1_request_proto_rawDescData
 }
 
-var file_user_service_session_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_user_service_session_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_user_service_session_v1_request_proto_goTypes = []any{
-	(*GetSessionsRequest)(nil),   // 0: user_service.session.v1.GetSessionsRequest
-	(*RevokeSessionRequest)(nil), // 1: user_service.session.v1.RevokeSessionRequest
-	(*v1.PaginationRequest)(nil), // 2: core.v1.PaginationRequest
+	(*GetSessionsRequest)(nil),         // 0: user_service.session.v1.GetSessionsRequest
+	(*RevokeSessionRequest)(nil),       // 1: user_service.session.v1.RevokeSessionRequest
+	(*RevokeOtherSessionsRequest)(nil), // 2: user_service.session.v1.RevokeOtherSessionsRequest
+	(*v1.PaginationRequest)(nil),       // 3: core.v1.PaginationRequest
 }
 var file_user_service_session_v1_request_proto_depIdxs = []int32{
-	2, // 0: user_service.session.v1.GetSessionsRequest.page:type_name -> core.v1.PaginationRequest
+	3, // 0: user_service.session.v1.GetSessionsRequest.page:type_name -> core.v1.PaginationRequest
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -178,7 +234,7 @@ func file_user_service_session_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_session_v1_request_proto_rawDesc), len(file_user_service_session_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
