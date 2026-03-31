@@ -32,7 +32,7 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 		DeviceID:  input.Meta.DeviceId,
 	})
 
-	resp, err := r.AuthClient.Login(ctx, &authv1.LoginRequest{
+	resp, err := r.Clients.AuthClient.Login(ctx, &authv1.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	})
@@ -57,7 +57,7 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		DeviceID:  input.Meta.DeviceId,
 	})
 
-	res, err := r.AuthClient.Register(ctx, &authv1.RegisterRequest{
+	res, err := r.Clients.AuthClient.Register(ctx, &authv1.RegisterRequest{
 		Email:     input.Email,
 		Password:  input.Password,
 		FirstName: input.FirstName,
@@ -92,7 +92,7 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 		SessionID:   claims.ID,
 	})
 
-	res, err := r.AuthClient.Logout(ctx, &corev1.EmptyRequest{})
+	res, err := r.Clients.AuthClient.Logout(ctx, &corev1.EmptyRequest{})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
