@@ -7,6 +7,7 @@
 package sessionv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,21 +25,21 @@ var File_user_service_session_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_session_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"%user_service/session/v1/service.proto\x12\x17user_service.session.v1\x1a%user_service/session/v1/request.proto\x1a&user_service/session/v1/response.proto2\xf6\x01\n" +
+	"%user_service/session/v1/service.proto\x12\x17user_service.session.v1\x1a\x14core/v1/common.proto\x1a%user_service/session/v1/request.proto\x1a&user_service/session/v1/response.proto2\xda\x01\n" +
 	"\x0eSessionService\x12h\n" +
-	"\vGetSessions\x12+.user_service.session.v1.GetSessionsRequest\x1a,.user_service.session.v1.GetSessionsResponse\x12z\n" +
-	"\x11GetActiveSessions\x121.user_service.session.v1.GetActiveSessionsRequest\x1a2.user_service.session.v1.GetActiveSessionsResponseB\xef\x01\n" +
+	"\vGetSessions\x12+.user_service.session.v1.GetSessionsRequest\x1a,.user_service.session.v1.GetSessionsResponse\x12^\n" +
+	"\x11GetActiveSessions\x12\x15.core.v1.EmptyRequest\x1a2.user_service.session.v1.GetActiveSessionsResponseB\xef\x01\n" +
 	"\x1bcom.user_service.session.v1B\fServiceProtoP\x01ZHgithub.com/rijum8906/relay/packages/pb/user_service/session/v1;sessionv1\xa2\x02\x03USX\xaa\x02\x16UserService.Session.V1\xca\x02\x16UserService\\Session\\V1\xe2\x02\"UserService\\Session\\V1\\GPBMetadata\xea\x02\x18UserService::Session::V1b\x06proto3"
 
 var file_user_service_session_v1_service_proto_goTypes = []any{
 	(*GetSessionsRequest)(nil),        // 0: user_service.session.v1.GetSessionsRequest
-	(*GetActiveSessionsRequest)(nil),  // 1: user_service.session.v1.GetActiveSessionsRequest
+	(*v1.EmptyRequest)(nil),           // 1: core.v1.EmptyRequest
 	(*GetSessionsResponse)(nil),       // 2: user_service.session.v1.GetSessionsResponse
 	(*GetActiveSessionsResponse)(nil), // 3: user_service.session.v1.GetActiveSessionsResponse
 }
 var file_user_service_session_v1_service_proto_depIdxs = []int32{
 	0, // 0: user_service.session.v1.SessionService.GetSessions:input_type -> user_service.session.v1.GetSessionsRequest
-	1, // 1: user_service.session.v1.SessionService.GetActiveSessions:input_type -> user_service.session.v1.GetActiveSessionsRequest
+	1, // 1: user_service.session.v1.SessionService.GetActiveSessions:input_type -> core.v1.EmptyRequest
 	2, // 2: user_service.session.v1.SessionService.GetSessions:output_type -> user_service.session.v1.GetSessionsResponse
 	3, // 3: user_service.session.v1.SessionService.GetActiveSessions:output_type -> user_service.session.v1.GetActiveSessionsResponse
 	2, // [2:4] is the sub-list for method output_type

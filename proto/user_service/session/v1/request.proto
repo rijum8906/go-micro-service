@@ -4,10 +4,6 @@ package user_service.session.v1;
 
 import "core/v1/common.proto";
 
-message GetActiveSessionsRequest {
-  string user_id = 1;
-}
-
 message GetSessionsRequest {
   string user_id = 1;
   core.v1.PaginationRequest page = 2;
