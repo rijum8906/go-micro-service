@@ -3,6 +3,7 @@ package utils
 import (
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
@@ -22,16 +23,26 @@ func ParseTokens(accessToken string, refreshToken string) *modelsv1.AuthToken {
 
 func MapUser(user *db.User) *modelsv1.User {
 	return &modelsv1.User{
-		Id:    user.ID.String(),
-		Email: user.Email,
+		Id:                 user.ID.String(),
+		Email:              user.Email,
+		IsEmailVerified:    user.IsEmailVerified,
+		EmailVerifiedAt:    mapTimestamp(user.EmailVerifiedAt),
+		TwoFactorEnabled:   user.TwoFactorEnabled,
+		TwoFactorEnabledAt: mapTimestamp(user.TwoFactorEnabledAt),
+		CreatedAt:          mapTimestamp(user.CreatedAt),
+		UpdatedAt:          mapTimestamp(user.UpdatedAt),
 	}
 }
 
 func MapProfile(profile *db.Profile) *modelsv1.Profile {
 	return &modelsv1.Profile{
 		Id:        profile.ID.String(),
+		UserId:    profile.UserID.String(),
 		FirstName: profile.FirstName,
 		LastName:  profile.LastName,
+		AvatarUrl: profile.AvatarUrl,
+		CreatedAt: mapTimestamp(profile.CreatedAt),
+		UpdatedAt: mapTimestamp(profile.UpdatedAt),
 	}
 }
 
@@ -73,4 +84,12 @@ func MapAuthResponse(user *db.User, profile *db.Profile, accessToken, refreshTok
 		User:    MapUser(user),
 		Profile: MapProfile(profile),
 	}
+}
+
+func mapTimestamp(ts pgtype.Timestamptz) *timestamppb.Timestamp {
+	if !ts.Valid {
+		return nil
+	}
+
+	return timestamppb.New(ts.Time)
 }

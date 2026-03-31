@@ -9,7 +9,9 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
 	"github.com/rijum8906/relay/packages/core/token"
+	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/dto"
 	"github.com/rijum8906/relay/services/user/internal/utils"
@@ -134,107 +136,51 @@ func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bo
 	return true, nil
 }
 
-func (s *authService) GenerateScopedToken(ctx context.Context, req *authv1.GenerateScopedTokenRequest, user *metadata.UserInfo) (*authv1.GenerateScopedTokenResponse, *apperror.AppError) {
+func (s *authService) RefreshToken(ctx context.Context, req *authv1.RefreshTokenRequest, user *metadata.UserInfo) (*authv1.RefreshTokenResponse, *apperror.AppError) {
 	if req == nil {
-		return nil, apperror.ErrValidation.WithMessage("generate scoped token request is required")
+		return nil, apperror.ErrValidation.WithMessage("refresh token request is required")
 	}
 
-	if user == nil || user.UserID == "" {
-		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	if req.GetAccessToken() == "" {
+		return nil, apperror.ErrValidation.WithMessage("access token is required")
 	}
 
-	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, token.TokenScope(req.GetScope()))
+	if user == nil || user.RefreshToken == "" {
+		return nil, apperror.ErrValidation.WithMessage("refresh token metadata is required")
+	}
+
+	claims, appErr := s.utils.TokenManager.ValidateAuthToken(ctx, req.GetAccessToken())
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	return &authv1.GenerateScopedTokenResponse{
-		Token: &modelsv1.Token{
-			Value:     scopedToken,
-			ExpiresIn: timestamppb.New(time.Now().Add(s.env.ScopedTokenTTL)),
+	sessionID, err := uuid.Parse(claims.ID)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid session id").WithDetail("error", err.Error())
+	}
+
+	session, appErr := s.repos.Session.GetSessionByRefreshToken(ctx, user.RefreshToken)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if session.ID != sessionID {
+		return nil, apperror.ErrUnAuthenticated.WithMessage("refresh token does not match session")
+	}
+
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, claims.Subject, session.ID.String(), session.DeviceID, token.TokenScopeAuth)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return &authv1.RefreshTokenResponse{
+		AccessToken: &modelsv1.Token{
+			Value: accessToken,
 		},
 	}, nil
 }
 
-func (s *authService) ChangePassword(ctx context.Context, req *authv1.ChangePasswordRequest) (*authv1.ChangePasswordResponse, *apperror.AppError) {
-	if req == nil {
-		return nil, apperror.ErrValidation.WithMessage("change password request is required")
-	}
-
-	scopedToken := req.GetScopedToken()
-	if scopedToken == nil || scopedToken.GetValue() == "" {
-		return nil, apperror.ErrValidation.WithMessage("change password scoped token is required")
-	}
-
-	claims, appErr := s.utils.TokenManager.ValidateScopedToken(ctx, scopedToken.GetValue())
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	if claims.Scope != token.TokenScopeChangePassword {
-		return nil, apperror.ErrValidation.WithMessage("invalid scoped token scope for change password")
-	}
-
-	userID, err := uuid.Parse(claims.Subject)
-	if err != nil {
-		return nil, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
-	}
-
-	newPasswordHash, appErr := s.utils.HashService.Hash(req.GetNewPassword())
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	appErr = s.repos.User.UpdateUserPassword(ctx, userID, newPasswordHash)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken.GetValue()); appErr != nil {
-		return nil, appErr
-	}
-
-	return &authv1.ChangePasswordResponse{
-		Success: true,
-	}, nil
-}
-
-func (s *authService) UpdateProfileName(ctx context.Context, req *authv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError) {
-	if req == nil {
-		return nil, apperror.ErrValidation.WithMessage("update profile name request is required")
-	}
-
-	profileID, err := uuid.Parse(req.GetProfileId())
-	if err != nil {
-		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
-	}
-
-	profile, appErr := s.repos.Profile.UpdateProfileNames(ctx, profileID, req.GetFirstName(), req.GetLastName())
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return utils.MapProfile(profile), nil
-}
-
-func (s *authService) UpdateProfileAvatarUrl(ctx context.Context, req *authv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError) {
-	if req == nil {
-		return nil, apperror.ErrValidation.WithMessage("update profile avatar request is required")
-	}
-
-	profileID, err := uuid.Parse(req.GetProfileId())
-	if err != nil {
-		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
-	}
-
-	profile, appErr := s.repos.Profile.UpdateProfileAvatar(ctx, profileID, req.GetAvatarUrl())
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return utils.MapProfile(profile), nil
-}
-func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) (*authv1.RequestEmailVerificationResponse, *apperror.AppError) {
+func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("request email verification request is required")
 	}
@@ -242,23 +188,24 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
 		if appErr.Type == apperror.TypeNotFound {
-			return &authv1.RequestEmailVerificationResponse{Success: true}, nil
+			return &corev1.SuccessResponse{Success: true}, nil
 		}
 		return nil, appErr
 	}
 
 	if user.IsEmailVerified {
-		return &authv1.RequestEmailVerificationResponse{Success: true}, nil
+		return &corev1.SuccessResponse{Success: true}, nil
 	}
 
 	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeVerifyEmail); appErr != nil {
 		return nil, appErr
 	}
+	// TODO: Send the verification email or notification containing the scoped token.
 
-	return &authv1.RequestEmailVerificationResponse{Success: true}, nil
+	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) (*authv1.RequestPasswordResetResponse, *apperror.AppError) {
+func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("request password reset request is required")
 	}
@@ -266,7 +213,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
 		if appErr.Type == apperror.TypeNotFound {
-			return &authv1.RequestPasswordResetResponse{Success: true}, nil
+			return &corev1.SuccessResponse{Success: true}, nil
 		}
 		return nil, appErr
 	}
@@ -274,11 +221,12 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword); appErr != nil {
 		return nil, appErr
 	}
+	// TODO: Send the password reset email or notification containing the scoped token.
 
-	return &authv1.RequestPasswordResetResponse{Success: true}, nil
+	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *authService) VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) (*authv1.VerifyEmailResponse, *apperror.AppError) {
+func (s *authService) VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("verify email request is required")
 	}
@@ -309,13 +257,14 @@ func (s *authService) VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRe
 	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken.GetValue()); appErr != nil {
 		return nil, appErr
 	}
+	// TODO: Notify the user that their email address has been verified.
 
-	return &authv1.VerifyEmailResponse{
+	return &corev1.SuccessResponse{
 		Success: true,
 	}, nil
 }
 
-func (s *authService) ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*authv1.ResetPasswordResponse, *apperror.AppError) {
+func (s *authService) ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("reset password request is required")
 	}
@@ -352,8 +301,9 @@ func (s *authService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken.GetValue()); appErr != nil {
 		return nil, appErr
 	}
+	// TODO: Notify the user that their password has been reset.
 
-	return &authv1.ResetPasswordResponse{
+	return &corev1.SuccessResponse{
 		Success: true,
 	}, nil
 }

@@ -79,3 +79,39 @@ func (h *UserHandler) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.Up
 
 	return result, nil
 }
+
+func (h *UserHandler) GetProfile(ctx context.Context, req *corev1.EmptyRequest) (*modelsv1.Profile, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("get profile request is required"))
+	}
+
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("get profile user metadata is required"))
+	}
+
+	result, appErr := h.service.GetProfile(ctx, &userInfo)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
+
+func (h *UserHandler) GetUser(ctx context.Context, req *corev1.EmptyRequest) (*modelsv1.User, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("get user request is required"))
+	}
+
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("get user metadata is required"))
+	}
+
+	result, appErr := h.service.GetUser(ctx, &userInfo)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
