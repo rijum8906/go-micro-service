@@ -79,3 +79,73 @@ func (h *AuthHandler) Logout(ctx context.Context, req *corev1.EmptyRequest) (*co
 		Success: result,
 	}, nil
 }
+
+func (h *AuthHandler) RefreshToken(ctx context.Context, req *authv1.RefreshTokenRequest) (*authv1.RefreshTokenResponse, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("refresh token request is required"))
+	}
+
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("refresh token metadata is required"))
+	}
+
+	result, appErr := h.service.RefreshToken(ctx, req, &userInfo)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
+
+func (h *AuthHandler) RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) (*corev1.SuccessResponse, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("request email verification request is required"))
+	}
+
+	result, appErr := h.service.RequestEmailVerification(ctx, req)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
+
+func (h *AuthHandler) RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) (*corev1.SuccessResponse, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("request password reset request is required"))
+	}
+
+	result, appErr := h.service.RequestPasswordReset(ctx, req)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
+
+func (h *AuthHandler) VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) (*corev1.SuccessResponse, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("verify email request is required"))
+	}
+
+	result, appErr := h.service.VerifyEmail(ctx, req)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
+
+func (h *AuthHandler) ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*corev1.SuccessResponse, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("reset password request is required"))
+	}
+
+	result, appErr := h.service.ResetPassword(ctx, req)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}

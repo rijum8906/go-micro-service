@@ -115,3 +115,39 @@ func (s *userService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.Up
 
 	return utils.MapProfile(profile), nil
 }
+
+func (s *userService) GetProfile(ctx context.Context, userInfo *metadata.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
+	if userInfo == nil || userInfo.UserID == "" {
+		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	}
+
+	userID, appErr := utils.NewUUID(userInfo.UserID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	profile, appErr := s.repos.Profile.GetProfileByUserID(ctx, userID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return utils.MapProfile(profile), nil
+}
+
+func (s *userService) GetUser(ctx context.Context, userInfo *metadata.UserInfo) (*modelsv1.User, *apperror.AppError) {
+	if userInfo == nil || userInfo.UserID == "" {
+		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	}
+
+	userID, appErr := utils.NewUUID(userInfo.UserID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	user, appErr := s.repos.User.GetUser(ctx, userID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return utils.MapUser(user), nil
+}

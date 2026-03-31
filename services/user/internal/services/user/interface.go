@@ -1,3 +1,4 @@
+// Package user
 package user
 
 import (
@@ -17,6 +18,8 @@ type UserService interface {
 	ChangePassword(ctx context.Context, req *userv1.ChangePasswordRequest) (*corev1.SuccessResponse, *apperror.AppError)
 	UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError)
 	UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError)
+	GetProfile(ctx context.Context, user *metadata.UserInfo) (*modelsv1.Profile, *apperror.AppError)
+	GetUser(ctx context.Context, user *metadata.UserInfo) (*modelsv1.User, *apperror.AppError)
 }
 
 type userService struct {
