@@ -14,6 +14,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, data *dto.Register) (*db.User, *apperror.AppError)
 	UpdateUserPassword(ctx context.Context, id uuid.UUID, newPassHash string) *apperror.AppError
 	UpdateUserEmail(ctx context.Context, id uuid.UUID, email string) *apperror.AppError
+	VerifyUserEmail(ctx context.Context, id uuid.UUID) *apperror.AppError
 	GetUser(ctx context.Context, id uuid.UUID) (*db.User, *apperror.AppError)
 	GetUserByEmail(ctx context.Context, email string) (*db.User, *apperror.AppError)
 	DeleteUser(ctx context.Context, id uuid.UUID) *apperror.AppError
