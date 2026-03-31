@@ -107,6 +107,33 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 
 // GenerateScopedToken is the resolver for the GenerateScopedToken field.
 func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error) {
+	// if err := r.Validate.Struct(input); err != nil {
+	// 	return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	// }
+	//
+	// accessToken, appErr := utils.GetAccessTokenFromHeader(ctx)
+	// if appErr != nil {
+	// 	return nil, appErr
+	// }
+	//
+	// claims, appErr := r.Token.ValidateAuthToken(ctx, accessToken)
+	// if appErr != nil {
+	// 	return nil, appErr
+	// }
+	//
+	// ctx = metadata.SendUserInfo(ctx, metadata.UserInfo{
+	// 	UserID:      claims.Subject,
+	// 	AccessToken: accessToken,
+	// 	SessionID:   claims.ID,
+	// })
+	//
+	// res, err := r.Clients.UserClient.GenerateScopedToken(ctx, &userv1.GenerateScopedTokenRequest{
+	//
+	// })
+	// if err != nil {
+	// 	return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	// }
+
 	panic(fmt.Errorf("not implemented: GenerateScopedToken - GenerateScopedToken"))
 }
 

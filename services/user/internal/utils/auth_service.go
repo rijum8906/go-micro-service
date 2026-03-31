@@ -37,15 +37,14 @@ func MapProfile(profile *db.Profile) *modelsv1.Profile {
 
 func MapSession(session db.Session) *modelsv1.Session {
 	return &modelsv1.Session{
-		Id:           session.ID.String(),
-		UserId:       session.UserID.String(),
-		RefreshToken: session.RefreshTokenHash,
-		UserAgent:    session.UserAgent,
-		IpAddress:    session.IpAddr,
-		DeviceId:     session.DeviceID,
-		LastLoginAt:  timestamppb.New(session.LastLoginAt.Time),
-		CreatedAt:    timestamppb.New(session.CreatedAt.Time),
-		UpdatedAt:    timestamppb.New(session.UpdatedAt.Time),
+		Id:          session.ID.String(),
+		UserId:      session.UserID.String(),
+		UserAgent:   session.UserAgent,
+		IpAddress:   session.IpAddr,
+		DeviceId:    session.DeviceID,
+		LastLoginAt: timestamppb.New(session.LastLoginAt.Time),
+		CreatedAt:   timestamppb.New(session.CreatedAt.Time),
+		UpdatedAt:   timestamppb.New(session.UpdatedAt.Time),
 	}
 }
 
