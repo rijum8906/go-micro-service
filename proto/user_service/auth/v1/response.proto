@@ -9,3 +9,7 @@ message AuthResponse {
   user_service.models.v1.Profile profile = 2;
   user_service.models.v1.AuthToken tokens = 3;
 }
+
+message RefreshTokenResponse {
+  user_service.models.v1.Token access_token = 1;
+}

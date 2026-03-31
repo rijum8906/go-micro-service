@@ -32,3 +32,8 @@ message ResetPasswordRequest {
   user_service.models.v1.Token scoped_token = 1;
   string new_password = 2;
 }
+
+// Refrsh the Access Token
+message RefreshTokenRequest {
+  string access_token = 1;
+}

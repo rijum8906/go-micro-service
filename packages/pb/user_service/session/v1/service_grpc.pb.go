@@ -9,6 +9,7 @@ package sessionv1
 import (
 	context "context"
 	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	v11 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,16 +21,29 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SessionService_GetSessions_FullMethodName       = "/user_service.session.v1.SessionService/GetSessions"
-	SessionService_GetActiveSessions_FullMethodName = "/user_service.session.v1.SessionService/GetActiveSessions"
+	SessionService_GetCurrentSession_FullMethodName        = "/user_service.session.v1.SessionService/GetCurrentSession"
+	SessionService_GetSessions_FullMethodName              = "/user_service.session.v1.SessionService/GetSessions"
+	SessionService_GetActiveSessions_FullMethodName        = "/user_service.session.v1.SessionService/GetActiveSessions"
+	SessionService_RevokeSession_FullMethodName            = "/user_service.session.v1.SessionService/RevokeSession"
+	SessionService_RevokeAllSessions_FullMethodName        = "/user_service.session.v1.SessionService/RevokeAllSessions"
+	SessionService_RevokeOtherSessions_FullMethodName      = "/user_service.session.v1.SessionService/RevokeOtherSessions"
+	SessionService_TerminateExpiredSessions_FullMethodName = "/user_service.session.v1.SessionService/TerminateExpiredSessions"
 )
 
 // SessionServiceClient is the client API for SessionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SessionServiceClient interface {
+	// Retrieval
+	GetCurrentSession(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Session, error)
 	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
 	GetActiveSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error)
+	// Revocation
+	RevokeSession(ctx context.Context, in *RevokeSessionRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	RevokeAllSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	RevokeOtherSessions(ctx context.Context, in *RevokeOtherSessionsRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	// Termination
+	TerminateExpiredSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 }
 
 type sessionServiceClient struct {
@@ -38,6 +52,16 @@ type sessionServiceClient struct {
 
 func NewSessionServiceClient(cc grpc.ClientConnInterface) SessionServiceClient {
 	return &sessionServiceClient{cc}
+}
+
+func (c *sessionServiceClient) GetCurrentSession(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Session, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.Session)
+	err := c.cc.Invoke(ctx, SessionService_GetCurrentSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *sessionServiceClient) GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error) {
@@ -60,12 +84,60 @@ func (c *sessionServiceClient) GetActiveSessions(ctx context.Context, in *v1.Emp
 	return out, nil
 }
 
+func (c *sessionServiceClient) RevokeSession(ctx context.Context, in *RevokeSessionRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, SessionService_RevokeSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) RevokeAllSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, SessionService_RevokeAllSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) RevokeOtherSessions(ctx context.Context, in *RevokeOtherSessionsRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, SessionService_RevokeOtherSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sessionServiceClient) TerminateExpiredSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, SessionService_TerminateExpiredSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SessionServiceServer is the server API for SessionService service.
 // All implementations should embed UnimplementedSessionServiceServer
 // for forward compatibility.
 type SessionServiceServer interface {
+	// Retrieval
+	GetCurrentSession(context.Context, *v1.EmptyRequest) (*v11.Session, error)
 	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
 	GetActiveSessions(context.Context, *v1.EmptyRequest) (*GetActiveSessionsResponse, error)
+	// Revocation
+	RevokeSession(context.Context, *RevokeSessionRequest) (*v1.SuccessResponse, error)
+	RevokeAllSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
+	RevokeOtherSessions(context.Context, *RevokeOtherSessionsRequest) (*v1.SuccessResponse, error)
+	// Termination
+	TerminateExpiredSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
 }
 
 // UnimplementedSessionServiceServer should be embedded to have
@@ -75,11 +147,26 @@ type SessionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedSessionServiceServer struct{}
 
+func (UnimplementedSessionServiceServer) GetCurrentSession(context.Context, *v1.EmptyRequest) (*v11.Session, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCurrentSession not implemented")
+}
 func (UnimplementedSessionServiceServer) GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSessions not implemented")
 }
 func (UnimplementedSessionServiceServer) GetActiveSessions(context.Context, *v1.EmptyRequest) (*GetActiveSessionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetActiveSessions not implemented")
+}
+func (UnimplementedSessionServiceServer) RevokeSession(context.Context, *RevokeSessionRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeSession not implemented")
+}
+func (UnimplementedSessionServiceServer) RevokeAllSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeAllSessions not implemented")
+}
+func (UnimplementedSessionServiceServer) RevokeOtherSessions(context.Context, *RevokeOtherSessionsRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RevokeOtherSessions not implemented")
+}
+func (UnimplementedSessionServiceServer) TerminateExpiredSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method TerminateExpiredSessions not implemented")
 }
 func (UnimplementedSessionServiceServer) testEmbeddedByValue() {}
 
@@ -99,6 +186,24 @@ func RegisterSessionServiceServer(s grpc.ServiceRegistrar, srv SessionServiceSer
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&SessionService_ServiceDesc, srv)
+}
+
+func _SessionService_GetCurrentSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).GetCurrentSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_GetCurrentSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).GetCurrentSession(ctx, req.(*v1.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _SessionService_GetSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -137,6 +242,78 @@ func _SessionService_GetActiveSessions_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SessionService_RevokeSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).RevokeSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_RevokeSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).RevokeSession(ctx, req.(*RevokeSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_RevokeAllSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).RevokeAllSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_RevokeAllSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).RevokeAllSessions(ctx, req.(*v1.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_RevokeOtherSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeOtherSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).RevokeOtherSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_RevokeOtherSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).RevokeOtherSessions(ctx, req.(*RevokeOtherSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SessionService_TerminateExpiredSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SessionServiceServer).TerminateExpiredSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SessionService_TerminateExpiredSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SessionServiceServer).TerminateExpiredSessions(ctx, req.(*v1.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SessionService_ServiceDesc is the grpc.ServiceDesc for SessionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -145,12 +322,32 @@ var SessionService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SessionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetCurrentSession",
+			Handler:    _SessionService_GetCurrentSession_Handler,
+		},
+		{
 			MethodName: "GetSessions",
 			Handler:    _SessionService_GetSessions_Handler,
 		},
 		{
 			MethodName: "GetActiveSessions",
 			Handler:    _SessionService_GetActiveSessions_Handler,
+		},
+		{
+			MethodName: "RevokeSession",
+			Handler:    _SessionService_RevokeSession_Handler,
+		},
+		{
+			MethodName: "RevokeAllSessions",
+			Handler:    _SessionService_RevokeAllSessions_Handler,
+		},
+		{
+			MethodName: "RevokeOtherSessions",
+			Handler:    _SessionService_RevokeOtherSessions_Handler,
+		},
+		{
+			MethodName: "TerminateExpiredSessions",
+			Handler:    _SessionService_TerminateExpiredSessions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

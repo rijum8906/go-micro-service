@@ -82,6 +82,50 @@ func (x *AuthResponse) GetTokens() *v1.AuthToken {
 	return nil
 }
 
+type RefreshTokenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken   *v1.Token              `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RefreshTokenResponse) Reset() {
+	*x = RefreshTokenResponse{}
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RefreshTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RefreshTokenResponse) ProtoMessage() {}
+
+func (x *RefreshTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RefreshTokenResponse.ProtoReflect.Descriptor instead.
+func (*RefreshTokenResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_response_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *RefreshTokenResponse) GetAccessToken() *v1.Token {
+	if x != nil {
+		return x.AccessToken
+	}
+	return nil
+}
+
 var File_user_service_auth_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_response_proto_rawDesc = "" +
@@ -90,7 +134,9 @@ const file_user_service_auth_v1_response_proto_rawDesc = "" +
 	"\fAuthResponse\x120\n" +
 	"\x04user\x18\x01 \x01(\v2\x1c.user_service.models.v1.UserR\x04user\x129\n" +
 	"\aprofile\x18\x02 \x01(\v2\x1f.user_service.models.v1.ProfileR\aprofile\x129\n" +
-	"\x06tokens\x18\x03 \x01(\v2!.user_service.models.v1.AuthTokenR\x06tokensB\xdb\x01\n" +
+	"\x06tokens\x18\x03 \x01(\v2!.user_service.models.v1.AuthTokenR\x06tokens\"X\n" +
+	"\x14RefreshTokenResponse\x12@\n" +
+	"\faccess_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vaccessTokenB\xdb\x01\n" +
 	"\x18com.user_service.auth.v1B\rResponseProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\x13UserService.Auth.V1\xca\x02\x13UserService\\Auth\\V1\xe2\x02\x1fUserService\\Auth\\V1\\GPBMetadata\xea\x02\x15UserService::Auth::V1b\x06proto3"
 
 var (
@@ -105,22 +151,25 @@ func file_user_service_auth_v1_response_proto_rawDescGZIP() []byte {
 	return file_user_service_auth_v1_response_proto_rawDescData
 }
 
-var file_user_service_auth_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_user_service_auth_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_user_service_auth_v1_response_proto_goTypes = []any{
-	(*AuthResponse)(nil), // 0: user_service.auth.v1.AuthResponse
-	(*v1.User)(nil),      // 1: user_service.models.v1.User
-	(*v1.Profile)(nil),   // 2: user_service.models.v1.Profile
-	(*v1.AuthToken)(nil), // 3: user_service.models.v1.AuthToken
+	(*AuthResponse)(nil),         // 0: user_service.auth.v1.AuthResponse
+	(*RefreshTokenResponse)(nil), // 1: user_service.auth.v1.RefreshTokenResponse
+	(*v1.User)(nil),              // 2: user_service.models.v1.User
+	(*v1.Profile)(nil),           // 3: user_service.models.v1.Profile
+	(*v1.AuthToken)(nil),         // 4: user_service.models.v1.AuthToken
+	(*v1.Token)(nil),             // 5: user_service.models.v1.Token
 }
 var file_user_service_auth_v1_response_proto_depIdxs = []int32{
-	1, // 0: user_service.auth.v1.AuthResponse.user:type_name -> user_service.models.v1.User
-	2, // 1: user_service.auth.v1.AuthResponse.profile:type_name -> user_service.models.v1.Profile
-	3, // 2: user_service.auth.v1.AuthResponse.tokens:type_name -> user_service.models.v1.AuthToken
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	2, // 0: user_service.auth.v1.AuthResponse.user:type_name -> user_service.models.v1.User
+	3, // 1: user_service.auth.v1.AuthResponse.profile:type_name -> user_service.models.v1.Profile
+	4, // 2: user_service.auth.v1.AuthResponse.tokens:type_name -> user_service.models.v1.AuthToken
+	5, // 3: user_service.auth.v1.RefreshTokenResponse.access_token:type_name -> user_service.models.v1.Token
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_user_service_auth_v1_response_proto_init() }
@@ -134,7 +183,7 @@ func file_user_service_auth_v1_response_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_auth_v1_response_proto_rawDesc), len(file_user_service_auth_v1_response_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

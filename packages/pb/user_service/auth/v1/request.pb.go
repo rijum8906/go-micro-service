@@ -326,6 +326,51 @@ func (x *ResetPasswordRequest) GetNewPassword() string {
 	return ""
 }
 
+// Refrsh the Access Token
+type RefreshTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RefreshTokenRequest) Reset() {
+	*x = RefreshTokenRequest{}
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RefreshTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RefreshTokenRequest) ProtoMessage() {}
+
+func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RefreshTokenRequest.ProtoReflect.Descriptor instead.
+func (*RefreshTokenRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RefreshTokenRequest) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
 var File_user_service_auth_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_request_proto_rawDesc = "" +
@@ -348,7 +393,9 @@ const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\fscoped_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vscopedToken\"{\n" +
 	"\x14ResetPasswordRequest\x12@\n" +
 	"\fscoped_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vscopedToken\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPasswordB\xda\x01\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"8\n" +
+	"\x13RefreshTokenRequest\x12!\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessTokenB\xda\x01\n" +
 	"\x18com.user_service.auth.v1B\fRequestProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\x13UserService.Auth.V1\xca\x02\x13UserService\\Auth\\V1\xe2\x02\x1fUserService\\Auth\\V1\\GPBMetadata\xea\x02\x15UserService::Auth::V1b\x06proto3"
 
 var (
@@ -363,7 +410,7 @@ func file_user_service_auth_v1_request_proto_rawDescGZIP() []byte {
 	return file_user_service_auth_v1_request_proto_rawDescData
 }
 
-var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*LoginRequest)(nil),                    // 0: user_service.auth.v1.LoginRequest
 	(*RegisterRequest)(nil),                 // 1: user_service.auth.v1.RegisterRequest
@@ -371,11 +418,12 @@ var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*RequestPasswordResetRequest)(nil),     // 3: user_service.auth.v1.RequestPasswordResetRequest
 	(*VerifyEmailRequest)(nil),              // 4: user_service.auth.v1.VerifyEmailRequest
 	(*ResetPasswordRequest)(nil),            // 5: user_service.auth.v1.ResetPasswordRequest
-	(*v1.Token)(nil),                        // 6: user_service.models.v1.Token
+	(*RefreshTokenRequest)(nil),             // 6: user_service.auth.v1.RefreshTokenRequest
+	(*v1.Token)(nil),                        // 7: user_service.models.v1.Token
 }
 var file_user_service_auth_v1_request_proto_depIdxs = []int32{
-	6, // 0: user_service.auth.v1.VerifyEmailRequest.scoped_token:type_name -> user_service.models.v1.Token
-	6, // 1: user_service.auth.v1.ResetPasswordRequest.scoped_token:type_name -> user_service.models.v1.Token
+	7, // 0: user_service.auth.v1.VerifyEmailRequest.scoped_token:type_name -> user_service.models.v1.Token
+	7, // 1: user_service.auth.v1.ResetPasswordRequest.scoped_token:type_name -> user_service.models.v1.Token
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -394,7 +442,7 @@ func file_user_service_auth_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_auth_v1_request_proto_rawDesc), len(file_user_service_auth_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -12,4 +12,6 @@ service UserService {
   rpc UpdateProfileAvatarUrl(UpdateProfileAvatarUrlRequest) returns (user_service.models.v1.Profile);
   rpc UpdateProfileName(UpdateProfileNameRequest) returns (user_service.models.v1.Profile);
   rpc ChangePassword(ChangePasswordRequest) returns (core.v1.SuccessResponse);
+  rpc GetProfile(core.v1.EmptyRequest) returns (user_service.models.v1.Profile);
+  rpc GetUser(core.v1.EmptyRequest) returns (user_service.models.v1.User);
 }

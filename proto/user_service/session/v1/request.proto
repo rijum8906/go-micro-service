@@ -13,3 +13,8 @@ message RevokeSessionRequest {
   string scoped_token = 1;
   string session_id = 2;
 }
+
+message RevokeOtherSessionsRequest {
+  string scoped_token = 1;
+  string current_session_id = 2;
+}
