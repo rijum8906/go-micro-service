@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/metadata"
+	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *metadata.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError) {
+func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *dto.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("generate scoped token request is required")
 	}
@@ -116,7 +116,7 @@ func (s *userService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.Up
 	return utils.MapProfile(profile), nil
 }
 
-func (s *userService) GetProfile(ctx context.Context, userInfo *metadata.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
+func (s *userService) GetProfile(ctx context.Context, userInfo *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
 	if userInfo == nil || userInfo.UserID == "" {
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}
@@ -134,7 +134,7 @@ func (s *userService) GetProfile(ctx context.Context, userInfo *metadata.UserInf
 	return utils.MapProfile(profile), nil
 }
 
-func (s *userService) GetUser(ctx context.Context, userInfo *metadata.UserInfo) (*modelsv1.User, *apperror.AppError) {
+func (s *userService) GetUser(ctx context.Context, userInfo *dto.UserInfo) (*modelsv1.User, *apperror.AppError) {
 	if userInfo == nil || userInfo.UserID == "" {
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}

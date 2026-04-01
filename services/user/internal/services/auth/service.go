@@ -7,17 +7,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/metadata"
+	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
-	"github.com/rijum8906/relay/services/user/internal/dto"
 	"github.com/rijum8906/relay/services/user/internal/utils"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
+func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	user, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
 	if appErr != nil {
 		return nil, appErr
@@ -62,7 +62,7 @@ func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, clie
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
 
-func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
+func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
 	if appErr != nil && appErr.Type != apperror.TypeNotFound {
 		return nil, appErr
@@ -74,7 +74,7 @@ func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest
 	}
 	data.Password = hashedPass
 
-	user, appErr := s.repos.User.CreateUser(ctx, &dto.Register{
+	user, appErr := s.repos.User.CreateUser(ctx, &authv1.RegisterRequest{
 		Email:     data.Email,
 		Password:  data.Password,
 		FirstName: data.FirstName,
@@ -122,7 +122,7 @@ func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
 
-func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError) {
+func (s *authService) Logout(ctx context.Context, client *dto.UserInfo) (bool, *apperror.AppError) {
 	sessionID, err := uuid.Parse(client.SessionID)
 	if err != nil {
 		return false, apperror.ErrInternal.WithMessage("Failed to parse session ID").WithDetail("error", err.Error())
@@ -136,30 +136,13 @@ func (s *authService) Logout(ctx context.Context, client *metadata.UserInfo) (bo
 	return true, nil
 }
 
-func (s *authService) RefreshToken(ctx context.Context, req *authv1.RefreshTokenRequest, user *metadata.UserInfo) (*authv1.RefreshTokenResponse, *apperror.AppError) {
-	if req == nil {
-		return nil, apperror.ErrValidation.WithMessage("refresh token request is required")
-	}
-
-	if req.GetAccessToken() == "" {
-		return nil, apperror.ErrValidation.WithMessage("access token is required")
-	}
-
-	if user == nil || user.RefreshToken == "" {
-		return nil, apperror.ErrValidation.WithMessage("refresh token metadata is required")
-	}
-
-	claims, appErr := s.utils.TokenManager.ValidateAuthToken(ctx, req.GetAccessToken())
+func (s *authService) RefreshToken(ctx context.Context, user *dto.UserInfo) (*authv1.RefreshTokenResponse, *apperror.AppError) {
+	sessionID, appErr := utils.NewUUID(user.SessionID)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	sessionID, err := uuid.Parse(claims.ID)
-	if err != nil {
-		return nil, apperror.ErrValidation.WithMessage("invalid session id").WithDetail("error", err.Error())
-	}
-
-	session, appErr := s.repos.Session.GetSessionByRefreshToken(ctx, user.RefreshToken)
+	session, appErr := s.repos.Session.GetSession(ctx, sessionID)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -168,7 +151,7 @@ func (s *authService) RefreshToken(ctx context.Context, req *authv1.RefreshToken
 		return nil, apperror.ErrUnAuthenticated.WithMessage("refresh token does not match session")
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, claims.Subject, session.ID.String(), session.DeviceID, token.TokenScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.UserID, session.ID.String(), session.DeviceID, token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -176,6 +159,9 @@ func (s *authService) RefreshToken(ctx context.Context, req *authv1.RefreshToken
 	return &authv1.RefreshTokenResponse{
 		AccessToken: &modelsv1.Token{
 			Value: accessToken,
+			ExpiresAt: &timestamppb.Timestamp{
+				Seconds: int64(s.env.SessionTTL.Seconds()),
+			},
 		},
 	}, nil
 }

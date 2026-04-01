@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
@@ -26,7 +27,7 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClinetInfo(ctx, dto.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,
@@ -51,7 +52,7 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClinetInfo(ctx, dto.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,
@@ -86,7 +87,7 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 		return nil, appErr
 	}
 
-	ctx = metadata.SendUserInfo(ctx, metadata.UserInfo{
+	ctx = metadata.SendUserInfo(ctx, dto.UserInfo{
 		UserID:      claims.Subject,
 		AccessToken: accessToken,
 		SessionID:   claims.ID,
@@ -113,7 +114,7 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userd
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClinetInfo(ctx, dto.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,
@@ -139,7 +140,7 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input userdto.Rese
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClinetInfo(ctx, dto.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,
@@ -166,7 +167,7 @@ func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input u
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClinetInfo(ctx, dto.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,
@@ -192,7 +193,7 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+	ctx = metadata.SendClinetInfo(ctx, dto.ClientInfo{
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  input.Meta.DeviceId,

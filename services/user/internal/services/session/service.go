@@ -42,7 +42,7 @@ func (s *sessionService) GetSessions(ctx context.Context, req *sessionv1.GetSess
 
 }
 
-func (s *sessionService) GetActiveSessions(ctx context.Context, userInfo *metadata.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError) {
+func (s *sessionService) GetActiveSessions(ctx context.Context, userInfo *dto.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError) {
 	userID, appErr := utils.NewUUID(userInfo.UserID)
 	if appErr != nil {
 		return nil, appErr
