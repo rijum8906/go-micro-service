@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -50,6 +51,9 @@ type ComplexityRoot struct {
 		RequestEmailVerification func(childComplexity int, input userdto.RequestEmailVerificationInput) int
 		RequestPasswordReset     func(childComplexity int, input userdto.RequestPasswordResetInput) int
 		ResetPassword            func(childComplexity int, input userdto.ResetPasswordInput) int
+		RevokeAllSessions        func(childComplexity int, input model.ScopedTokenInput) int
+		RevokeOthersSession      func(childComplexity int, input model.RevokeOthersSessionInput) int
+		RevokeSession            func(childComplexity int, token string) int
 		UpdateProfileAvatarURL   func(childComplexity int, input userdto.UpdateProfileAvatarUrlInput) int
 		UpdateProfileName        func(childComplexity int, input userdto.UpdateProfileNameInput) int
 		VerifyEmail              func(childComplexity int, input userdto.VerifyEmailInput) int
@@ -71,7 +75,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Empty func(childComplexity int) int
+		Empty             func(childComplexity int) int
+		GetActiveSessions func(childComplexity int, input model.ScopedTokenInput) int
+		GetCurrentSession func(childComplexity int) int
+		GetSessions       func(childComplexity int, input *model.GetSessionsInput) int
+		Me                func(childComplexity int) int
+		MyProfile         func(childComplexity int) int
 	}
 
 	ScopedTokenResponse struct {
@@ -89,7 +98,7 @@ type ComplexityRoot struct {
 	}
 
 	Token struct {
-		ExpiresIn func(childComplexity int) int
+		ExpiresAt func(childComplexity int) int
 		Value     func(childComplexity int) int
 	}
 
@@ -257,6 +266,42 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Mutation.ResetPassword(childComplexity, args["input"].(userdto.ResetPasswordInput)), true
 
+	case "Mutation.RevokeAllSessions":
+		if e.ComplexityRoot.Mutation.RevokeAllSessions == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_RevokeAllSessions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.RevokeAllSessions(childComplexity, args["input"].(model.ScopedTokenInput)), true
+
+	case "Mutation.RevokeOthersSession":
+		if e.ComplexityRoot.Mutation.RevokeOthersSession == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_RevokeOthersSession_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.RevokeOthersSession(childComplexity, args["input"].(model.RevokeOthersSessionInput)), true
+
+	case "Mutation.RevokeSession":
+		if e.ComplexityRoot.Mutation.RevokeSession == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_RevokeSession_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.RevokeSession(childComplexity, args["token"].(string)), true
+
 	case "Mutation.UpdateProfileAvatarUrl":
 		if e.ComplexityRoot.Mutation.UpdateProfileAvatarURL == nil {
 			break
@@ -363,6 +408,51 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.Empty(childComplexity), true
 
+	case "Query.GetActiveSessions":
+		if e.ComplexityRoot.Query.GetActiveSessions == nil {
+			break
+		}
+
+		args, err := ec.field_Query_GetActiveSessions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetActiveSessions(childComplexity, args["input"].(model.ScopedTokenInput)), true
+
+	case "Query.GetCurrentSession":
+		if e.ComplexityRoot.Query.GetCurrentSession == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.GetCurrentSession(childComplexity), true
+
+	case "Query.GetSessions":
+		if e.ComplexityRoot.Query.GetSessions == nil {
+			break
+		}
+
+		args, err := ec.field_Query_GetSessions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetSessions(childComplexity, args["input"].(*model.GetSessionsInput)), true
+
+	case "Query.Me":
+		if e.ComplexityRoot.Query.Me == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.Me(childComplexity), true
+
+	case "Query.MyProfile":
+		if e.ComplexityRoot.Query.MyProfile == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.MyProfile(childComplexity), true
+
 	case "ScopedTokenResponse.token":
 		if e.ComplexityRoot.ScopedTokenResponse.Token == nil {
 			break
@@ -419,12 +509,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Session.UserID(childComplexity), true
 
-	case "Token.expiresIn":
-		if e.ComplexityRoot.Token.ExpiresIn == nil {
+	case "Token.expiresAt":
+		if e.ComplexityRoot.Token.ExpiresAt == nil {
 			break
 		}
 
-		return e.ComplexityRoot.Token.ExpiresIn(childComplexity), true
+		return e.ComplexityRoot.Token.ExpiresAt(childComplexity), true
 
 	case "Token.value":
 		if e.ComplexityRoot.Token.Value == nil {
@@ -498,14 +588,19 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputChangePasswordInput,
+		ec.unmarshalInputEmailInput,
 		ec.unmarshalInputGenerateScopedTokenInput,
+		ec.unmarshalInputGetSessionsInput,
 		ec.unmarshalInputLoginInput,
 		ec.unmarshalInputLogoutInput,
+		ec.unmarshalInputPaginationInput,
 		ec.unmarshalInputRegisterInput,
 		ec.unmarshalInputRequestEmailVerificationInput,
 		ec.unmarshalInputRequestMetaInput,
 		ec.unmarshalInputRequestPasswordResetInput,
 		ec.unmarshalInputResetPasswordInput,
+		ec.unmarshalInputRevokeOthersSessionInput,
+		ec.unmarshalInputScopedTokenInput,
 		ec.unmarshalInputUpdateProfileAvatarUrlInput,
 		ec.unmarshalInputUpdateProfileNameInput,
 		ec.unmarshalInputVerifyEmailInput,
@@ -614,83 +709,7 @@ enum AuthMethod {
   SERVICE_ACCOUNT   # Service-to-service authentication
 }
 `, BuiltIn: false},
-	{Name: "../schema/core/v1/scalars.graphqls", Input: `scalar DateTime
-`, BuiltIn: false},
-	{Name: "../schema/core/v1/schema.graphqls", Input: `type Mutation {
-  _empty: String
-}
-
-type Query {
-  _empty: String
-}
-`, BuiltIn: false},
-	{Name: "../schema/core/v1/types.graphqls", Input: `input RequestMetaInput {
-  deviceId: String!
-}
-`, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input LoginInput {
-  email: String!
-  password: String!
-  meta: RequestMetaInput!
-}
-
-input RegisterInput {
-  email: String!
-  password: String!
-  firstName: String!
-  lastName: String!
-  meta: RequestMetaInput!
-}
-
-input LogoutInput {
-  meta: RequestMetaInput!
-}
-
-input GenerateScopedTokenInput {
-  scope: TokenScope!
-  authMethod: AuthMethod!
-  authValue: String!
-  meta: RequestMetaInput!
-}
-
-input UpdateProfileAvatarUrlInput {
-  profileId: ID!
-  avatarUrl: String!
-}
-
-input UpdateProfileNameInput {
-  profileId: ID!
-  firstName: String!
-  lastName: String!
-}
-
-input ChangePasswordInput {
-  token: String!
-  newPassword: String!
-  meta: RequestMetaInput!
-}
-
-input RequestPasswordResetInput {
-  email: String!
-  meta: RequestMetaInput!
-}
-
-input ResetPasswordInput {
-  token: String!
-  newPassword: String!
-}
-
-input RequestEmailVerificationInput {
-  email: String!
-  meta: RequestMetaInput!
-}
-
-input  VerifyEmailInput {
-  token: String!
-  meta: RequestMetaInput!
-}
-`, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/models.graphqls", Input: `type User {
+	{Name: "../schema/core/v1/models.graphqls", Input: `type User {
   id: ID!
   email: String!
   isEmailVerified: Boolean!
@@ -721,14 +740,77 @@ type Session {
   updatedAt: DateTime!
 }
 `, BuiltIn: false},
+	{Name: "../schema/core/v1/scalars.graphqls", Input: `scalar DateTime
+`, BuiltIn: false},
+	{Name: "../schema/core/v1/schema.graphqls", Input: `type Mutation {
+  _empty: String
+}
+
+type Query {
+  _empty: String
+}
+`, BuiltIn: false},
+	{Name: "../schema/core/v1/types.graphqls", Input: `input RequestMetaInput {
+  deviceId: String!
+}
+
+input PaginationInput {
+  page: Int!
+  limit: Int!
+}
+
+input ScopedTokenInput {
+  scopedToken: String!
+  meta: RequestMetaInput!
+}
+
+input EmailInput {
+  email: String!
+  meta: RequestMetaInput!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input LoginInput {
+  email: String!
+  password: String!
+  meta: RequestMetaInput!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  meta: RequestMetaInput!
+}
+
+input LogoutInput {
+  meta: RequestMetaInput!
+}
+
+input RequestPasswordResetInput {
+  email: String!
+  meta: RequestMetaInput!
+}
+
+input ResetPasswordInput {
+  token: String!
+  newPassword: String!
+}
+
+input RequestEmailVerificationInput {
+  email: String!
+  meta: RequestMetaInput!
+}
+
+input  VerifyEmailInput {
+  token: String!
+  meta: RequestMetaInput!
+}
+`, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/mutations.graphqls", Input: `extend type Mutation {
     Login(input: LoginInput!): AuthResponse!
     Register(input: RegisterInput!): AuthResponse!
     Logout(input: LogoutInput!): MutationResponse!
-    GenerateScopedToken(input: GenerateScopedTokenInput!): ScopedTokenResponse!
-    UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
-    UpdateProfileName(input: UpdateProfileNameInput!): Profile!
-    ChangePassword(input: ChangePasswordInput!): MutationResponse!
     RequestPasswordReset(input: RequestPasswordResetInput!): MutationResponse!
     ResetPassword(input: ResetPasswordInput!): MutationResponse!
     RequestEmailVerification(
@@ -740,7 +822,7 @@ type Session {
 	{Name: "../schema/user/auth/v1/queries.graphqls", Input: ``, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/types.graphqls", Input: `type Token {
   value: String!
-  expiresIn: DateTime!
+  expiresAt: DateTime!
 }
 
 type AuthTokens {
@@ -763,5 +845,65 @@ type MutationResponse {
    token: Token!
  }
 `, BuiltIn: false},
+	{Name: "../schema/user/session/v1/inputs.graphqls", Input: `input GetSessionsInput {
+  paginationRequest: PaginationInput!
+}
+
+input RevokeOthersSessionInput {
+  scopedToken: String!
+  token: String!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/session/v1/mutations.graphqls", Input: `extend type Mutation {
+  # Revoke
+  RevokeSession(token: String!): MutationResponse!
+  RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
+  RevokeOthersSession(input: RevokeOthersSessionInput!): MutationResponse!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/session/v1/queries.graphqls", Input: `extend type Query {
+  GetSessions(input: GetSessionsInput): [Session!]
+  GetActiveSessions(input: ScopedTokenInput!): [Session!]
+  GetCurrentSession: Session!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/session/v1/types.graphqls", Input: ``, BuiltIn: false},
+	{Name: "../schema/user/user/v1/inputs.graphqls", Input: `input GenerateScopedTokenInput {
+  scope: TokenScope!
+  authMethod: AuthMethod!
+  authValue: String!
+  meta: RequestMetaInput!
+}
+
+input UpdateProfileAvatarUrlInput {
+  profileId: ID!
+  avatarUrl: String!
+}
+
+input UpdateProfileNameInput {
+  profileId: ID!
+  firstName: String!
+  lastName: String!
+}
+
+input ChangePasswordInput {
+  token: String!
+  newPassword: String!
+  meta: RequestMetaInput!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/user/v1/mutations.graphqls", Input: `extend type Mutation {
+  GenerateScopedToken(input: GenerateScopedTokenInput!): ScopedTokenResponse!
+  UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
+  UpdateProfileName(input: UpdateProfileNameInput!): Profile!
+  ChangePassword(input: ChangePasswordInput!): MutationResponse!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/user/v1/queries.graphqls", Input: `extend type Query {
+  MyProfile: Profile!
+  Me: User!
+}
+`, BuiltIn: false},
+	{Name: "../schema/user/user/v1/types.graphqls", Input: ``, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

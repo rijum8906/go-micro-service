@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
+)
+
 type AuthResponse struct {
 	Tokens  *AuthTokens `json:"tokens"`
 	User    *User       `json:"user"`
@@ -13,12 +17,26 @@ type AuthTokens struct {
 	RefreshToken *Token `json:"refreshToken"`
 }
 
+type EmailInput struct {
+	Email string               `json:"email"`
+	Meta  *coredto.RequestMeta `json:"meta"`
+}
+
+type GetSessionsInput struct {
+	PaginationRequest *PaginationInput `json:"paginationRequest"`
+}
+
 type Mutation struct {
 }
 
 type MutationResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
+}
+
+type PaginationInput struct {
+	Page  int32 `json:"page"`
+	Limit int32 `json:"limit"`
 }
 
 type Profile struct {
@@ -32,6 +50,16 @@ type Profile struct {
 }
 
 type Query struct {
+}
+
+type RevokeOthersSessionInput struct {
+	ScopedToken string `json:"scopedToken"`
+	Token       string `json:"token"`
+}
+
+type ScopedTokenInput struct {
+	ScopedToken string               `json:"scopedToken"`
+	Meta        *coredto.RequestMeta `json:"meta"`
 }
 
 type ScopedTokenResponse struct {
@@ -50,7 +78,7 @@ type Session struct {
 
 type Token struct {
 	Value     string `json:"value"`
-	ExpiresIn string `json:"expiresIn"`
+	ExpiresAt string `json:"expiresAt"`
 }
 
 type User struct {

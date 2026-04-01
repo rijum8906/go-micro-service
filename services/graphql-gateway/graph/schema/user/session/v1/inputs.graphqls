@@ -1,0 +1,8 @@
+input GetSessionsInput {
+  paginationRequest: PaginationInput!
+}
+
+input RevokeOthersSessionInput {
+  scopedToken: String!
+  token: String!
+}

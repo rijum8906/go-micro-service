@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 )
 
@@ -117,6 +118,36 @@ func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.C
 				return it, err
 			}
 			it.Meta = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGetSessionsInput(ctx context.Context, obj any) (model.GetSessionsInput, error) {
+	var it model.GetSessionsInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"paginationRequest"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "paginationRequest":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paginationRequest"))
+			data, err := ec.unmarshalNPaginationInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPaginationInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PaginationRequest = data
 		}
 	}
 	return it, nil
@@ -365,6 +396,43 @@ func (ec *executionContext) unmarshalInputResetPasswordInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRevokeOthersSessionInput(ctx context.Context, obj any) (model.RevokeOthersSessionInput, error) {
+	var it model.RevokeOthersSessionInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scopedToken", "token"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scopedToken":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopedToken"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopedToken = data
+		case "token":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Token = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateProfileAvatarUrlInput(ctx context.Context, obj any) (userdto.UpdateProfileAvatarUrlInput, error) {
 	var it userdto.UpdateProfileAvatarUrlInput
 	if obj == nil {
@@ -535,6 +603,11 @@ func (ec *executionContext) unmarshalNResetPasswordInput2githubᚗcomᚋrijum890
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNRevokeOthersSessionInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeOthersSessionInput(ctx context.Context, v any) (model.RevokeOthersSessionInput, error) {
+	res, err := ec.unmarshalInputRevokeOthersSessionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNUpdateProfileAvatarUrlInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐUpdateProfileAvatarUrlInput(ctx context.Context, v any) (userdto.UpdateProfileAvatarUrlInput, error) {
 	res, err := ec.unmarshalInputUpdateProfileAvatarUrlInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -548,6 +621,14 @@ func (ec *executionContext) unmarshalNUpdateProfileNameInput2githubᚗcomᚋriju
 func (ec *executionContext) unmarshalNVerifyEmailInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐVerifyEmailInput(ctx context.Context, v any) (userdto.VerifyEmailInput, error) {
 	res, err := ec.unmarshalInputVerifyEmailInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOGetSessionsInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionsInput(ctx context.Context, v any) (*model.GetSessionsInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGetSessionsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 // endregion ***************************** type.gotpl *****************************

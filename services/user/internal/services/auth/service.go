@@ -187,9 +187,6 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 
 	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
-		if appErr.Type == apperror.TypeNotFound {
-			return &corev1.SuccessResponse{Success: true}, nil
-		}
 		return nil, appErr
 	}
 
@@ -232,11 +229,11 @@ func (s *authService) VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRe
 	}
 
 	scopedToken := req.GetScopedToken()
-	if scopedToken == nil || scopedToken.GetValue() == "" {
+	if scopedToken == "" {
 		return nil, apperror.ErrValidation.WithMessage("verify email scoped token is required")
 	}
 
-	claims, appErr := s.utils.TokenManager.ValidateScopedToken(ctx, scopedToken.GetValue())
+	claims, appErr := s.utils.TokenManager.ValidateScopedToken(ctx, scopedToken)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -254,7 +251,7 @@ func (s *authService) VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRe
 		return nil, appErr
 	}
 
-	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken.GetValue()); appErr != nil {
+	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken); appErr != nil {
 		return nil, appErr
 	}
 	// TODO: Notify the user that their email address has been verified.
@@ -270,11 +267,11 @@ func (s *authService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 	}
 
 	scopedToken := req.GetScopedToken()
-	if scopedToken == nil || scopedToken.GetValue() == "" {
+	if scopedToken == "" {
 		return nil, apperror.ErrValidation.WithMessage("reset password scoped token is required")
 	}
 
-	claims, appErr := s.utils.TokenManager.ValidateScopedToken(ctx, scopedToken.GetValue())
+	claims, appErr := s.utils.TokenManager.ValidateScopedToken(ctx, scopedToken)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -298,7 +295,7 @@ func (s *authService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 		return nil, appErr
 	}
 
-	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken.GetValue()); appErr != nil {
+	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken); appErr != nil {
 		return nil, appErr
 	}
 	// TODO: Notify the user that their password has been reset.

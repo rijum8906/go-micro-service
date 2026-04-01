@@ -105,35 +105,128 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 	}, nil
 }
 
+// RequestPasswordReset is the resolver for the RequestPasswordReset field.
+func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	browserInfo := utils.GetBrowserInfo(ctx)
+
+	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+		UserAgent: browserInfo.UserAgent,
+		IPAddress: browserInfo.IPAddr,
+		DeviceID:  input.Meta.DeviceId,
+	})
+
+	resp, err := r.Clients.AuthClient.RequestPasswordReset(ctx, &authv1.RequestPasswordResetRequest{
+		Email: input.Email,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return &model.MutationResponse{
+		Success: resp.Success,
+	}, nil
+}
+
+// ResetPassword is the resolver for the ResetPassword field.
+func (r *mutationResolver) ResetPassword(ctx context.Context, input userdto.ResetPasswordInput) (*model.MutationResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	browserInfo := utils.GetBrowserInfo(ctx)
+
+	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+		UserAgent: browserInfo.UserAgent,
+		IPAddress: browserInfo.IPAddr,
+		DeviceID:  input.Meta.DeviceId,
+	})
+
+	resp, err := r.Clients.AuthClient.ResetPassword(ctx, &authv1.ResetPasswordRequest{
+		ScopedToken: input.Token,
+		NewPassword: input.NewPassword,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return &model.MutationResponse{
+		Success: resp.Success,
+	}, nil
+}
+
+// RequestEmailVerification is the resolver for the RequestEmailVerification field.
+func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input userdto.RequestEmailVerificationInput) (*model.MutationResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	browserInfo := utils.GetBrowserInfo(ctx)
+
+	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+		UserAgent: browserInfo.UserAgent,
+		IPAddress: browserInfo.IPAddr,
+		DeviceID:  input.Meta.DeviceId,
+	})
+
+	resp, err := r.Clients.AuthClient.RequestEmailVerification(ctx, &authv1.RequestEmailVerificationRequest{
+		Email: input.Email,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return &model.MutationResponse{
+		Success: resp.Success,
+	}, nil
+}
+
+// VerifyEmail is the resolver for the VerifyEmail field.
+func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	browserInfo := utils.GetBrowserInfo(ctx)
+
+	ctx = metadata.SendClinetInfo(ctx, metadata.ClientInfo{
+		UserAgent: browserInfo.UserAgent,
+		IPAddress: browserInfo.IPAddr,
+		DeviceID:  input.Meta.DeviceId,
+	})
+
+	resp, err := r.Clients.AuthClient.VerifyEmail(ctx, &authv1.VerifyEmailRequest{
+		ScopedToken: input.Token,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return &model.MutationResponse{
+		Success: resp.Success,
+	}, nil
+}
+
+// RevokeSession is the resolver for the RevokeSession field.
+func (r *mutationResolver) RevokeSession(ctx context.Context, token string) (*model.MutationResponse, error) {
+	panic(fmt.Errorf("not implemented: RevokeSession - RevokeSession"))
+}
+
+// RevokeAllSessions is the resolver for the RevokeAllSessions field.
+func (r *mutationResolver) RevokeAllSessions(ctx context.Context, input model.ScopedTokenInput) (*model.MutationResponse, error) {
+	panic(fmt.Errorf("not implemented: RevokeAllSessions - RevokeAllSessions"))
+}
+
+// RevokeOthersSession is the resolver for the RevokeOthersSession field.
+func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.MutationResponse, error) {
+	panic(fmt.Errorf("not implemented: RevokeOthersSession - RevokeOthersSession"))
+}
+
 // GenerateScopedToken is the resolver for the GenerateScopedToken field.
 func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error) {
-	// if err := r.Validate.Struct(input); err != nil {
-	// 	return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	// }
-	//
-	// accessToken, appErr := utils.GetAccessTokenFromHeader(ctx)
-	// if appErr != nil {
-	// 	return nil, appErr
-	// }
-	//
-	// claims, appErr := r.Token.ValidateAuthToken(ctx, accessToken)
-	// if appErr != nil {
-	// 	return nil, appErr
-	// }
-	//
-	// ctx = metadata.SendUserInfo(ctx, metadata.UserInfo{
-	// 	UserID:      claims.Subject,
-	// 	AccessToken: accessToken,
-	// 	SessionID:   claims.ID,
-	// })
-	//
-	// res, err := r.Clients.UserClient.GenerateScopedToken(ctx, &userv1.GenerateScopedTokenRequest{
-	//
-	// })
-	// if err != nil {
-	// 	return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
-	// }
-
 	panic(fmt.Errorf("not implemented: GenerateScopedToken - GenerateScopedToken"))
 }
 
@@ -150,24 +243,4 @@ func (r *mutationResolver) UpdateProfileName(ctx context.Context, input userdto.
 // ChangePassword is the resolver for the ChangePassword field.
 func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error) {
 	panic(fmt.Errorf("not implemented: ChangePassword - ChangePassword"))
-}
-
-// RequestPasswordReset is the resolver for the RequestPasswordReset field.
-func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error) {
-	panic(fmt.Errorf("not implemented: RequestPasswordReset - RequestPasswordReset"))
-}
-
-// ResetPassword is the resolver for the ResetPassword field.
-func (r *mutationResolver) ResetPassword(ctx context.Context, input userdto.ResetPasswordInput) (*model.MutationResponse, error) {
-	panic(fmt.Errorf("not implemented: ResetPassword - ResetPassword"))
-}
-
-// RequestEmailVerification is the resolver for the RequestEmailVerification field.
-func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input userdto.RequestEmailVerificationInput) (*model.MutationResponse, error) {
-	panic(fmt.Errorf("not implemented: RequestEmailVerification - RequestEmailVerification"))
-}
-
-// VerifyEmail is the resolver for the VerifyEmail field.
-func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error) {
-	panic(fmt.Errorf("not implemented: VerifyEmail - VerifyEmail"))
 }

@@ -22,17 +22,25 @@ type MutationResolver interface {
 	Login(ctx context.Context, input userdto.LoginInput) (*model.AuthResponse, error)
 	Register(ctx context.Context, input userdto.RegisterInput) (*model.AuthResponse, error)
 	Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error)
-	GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error)
-	UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error)
-	UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error)
-	ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error)
 	RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error)
 	ResetPassword(ctx context.Context, input userdto.ResetPasswordInput) (*model.MutationResponse, error)
 	RequestEmailVerification(ctx context.Context, input userdto.RequestEmailVerificationInput) (*model.MutationResponse, error)
 	VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error)
+	RevokeSession(ctx context.Context, token string) (*model.MutationResponse, error)
+	RevokeAllSessions(ctx context.Context, input model.ScopedTokenInput) (*model.MutationResponse, error)
+	RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.MutationResponse, error)
+	GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error)
+	UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error)
+	UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error)
+	ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error)
 }
 type QueryResolver interface {
 	Empty(ctx context.Context) (*string, error)
+	GetSessions(ctx context.Context, input *model.GetSessionsInput) ([]*model.Session, error)
+	GetActiveSessions(ctx context.Context, input model.ScopedTokenInput) ([]*model.Session, error)
+	GetCurrentSession(ctx context.Context) (*model.Session, error)
+	MyProfile(ctx context.Context) (*model.Profile, error)
+	Me(ctx context.Context) (*model.User, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -127,6 +135,39 @@ func (ec *executionContext) field_Mutation_ResetPassword_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_RevokeAllSessions_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_RevokeOthersSession_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRevokeOthersSessionInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeOthersSessionInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_RevokeSession_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "token", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_UpdateProfileAvatarUrl_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -153,6 +194,28 @@ func (ec *executionContext) field_Mutation_VerifyEmail_args(ctx context.Context,
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNVerifyEmailInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐVerifyEmailInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_GetActiveSessions_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_GetSessions_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOGetSessionsInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetSessionsInput)
 	if err != nil {
 		return nil, err
 	}
@@ -347,6 +410,335 @@ func (ec *executionContext) fieldContext_Mutation_Logout(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_Logout_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_RequestPasswordReset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_RequestPasswordReset,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RequestPasswordReset(ctx, fc.Args["input"].(userdto.RequestPasswordResetInput))
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_RequestPasswordReset(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_RequestPasswordReset_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_ResetPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_ResetPassword,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().ResetPassword(ctx, fc.Args["input"].(userdto.ResetPasswordInput))
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_ResetPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_ResetPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_RequestEmailVerification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_RequestEmailVerification,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RequestEmailVerification(ctx, fc.Args["input"].(userdto.RequestEmailVerificationInput))
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_RequestEmailVerification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_RequestEmailVerification_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_VerifyEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_VerifyEmail,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().VerifyEmail(ctx, fc.Args["input"].(userdto.VerifyEmailInput))
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_VerifyEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_VerifyEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_RevokeSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_RevokeSession,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RevokeSession(ctx, fc.Args["token"].(string))
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_RevokeSession(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_RevokeSession_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_RevokeAllSessions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_RevokeAllSessions,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RevokeAllSessions(ctx, fc.Args["input"].(model.ScopedTokenInput))
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_RevokeAllSessions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_RevokeAllSessions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_RevokeOthersSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_RevokeOthersSession,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RevokeOthersSession(ctx, fc.Args["input"].(model.RevokeOthersSessionInput))
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_RevokeOthersSession(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_RevokeOthersSession_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -559,194 +951,6 @@ func (ec *executionContext) fieldContext_Mutation_ChangePassword(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_RequestPasswordReset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_RequestPasswordReset,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().RequestPasswordReset(ctx, fc.Args["input"].(userdto.RequestPasswordResetInput))
-		},
-		nil,
-		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_RequestPasswordReset(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_MutationResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_MutationResponse_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_RequestPasswordReset_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_ResetPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_ResetPassword,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().ResetPassword(ctx, fc.Args["input"].(userdto.ResetPasswordInput))
-		},
-		nil,
-		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_ResetPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_MutationResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_MutationResponse_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_ResetPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_RequestEmailVerification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_RequestEmailVerification,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().RequestEmailVerification(ctx, fc.Args["input"].(userdto.RequestEmailVerificationInput))
-		},
-		nil,
-		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_RequestEmailVerification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_MutationResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_MutationResponse_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_RequestEmailVerification_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_VerifyEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_VerifyEmail,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().VerifyEmail(ctx, fc.Args["input"].(userdto.VerifyEmailInput))
-		},
-		nil,
-		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_VerifyEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_MutationResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_MutationResponse_message(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_VerifyEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query__empty(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -771,6 +975,257 @@ func (ec *executionContext) fieldContext_Query__empty(_ context.Context, field g
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_GetSessions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_GetSessions,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().GetSessions(ctx, fc.Args["input"].(*model.GetSessionsInput))
+		},
+		nil,
+		ec.marshalOSession2ᚕᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSessionᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_GetSessions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Session_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Session_userId(ctx, field)
+			case "refreshToken":
+				return ec.fieldContext_Session_refreshToken(ctx, field)
+			case "deviceId":
+				return ec.fieldContext_Session_deviceId(ctx, field)
+			case "ipAddr":
+				return ec.fieldContext_Session_ipAddr(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Session_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Session_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Session", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_GetSessions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_GetActiveSessions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_GetActiveSessions,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().GetActiveSessions(ctx, fc.Args["input"].(model.ScopedTokenInput))
+		},
+		nil,
+		ec.marshalOSession2ᚕᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSessionᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_GetActiveSessions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Session_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Session_userId(ctx, field)
+			case "refreshToken":
+				return ec.fieldContext_Session_refreshToken(ctx, field)
+			case "deviceId":
+				return ec.fieldContext_Session_deviceId(ctx, field)
+			case "ipAddr":
+				return ec.fieldContext_Session_ipAddr(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Session_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Session_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Session", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_GetActiveSessions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_GetCurrentSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_GetCurrentSession,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().GetCurrentSession(ctx)
+		},
+		nil,
+		ec.marshalNSession2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSession,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_GetCurrentSession(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Session_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Session_userId(ctx, field)
+			case "refreshToken":
+				return ec.fieldContext_Session_refreshToken(ctx, field)
+			case "deviceId":
+				return ec.fieldContext_Session_deviceId(ctx, field)
+			case "ipAddr":
+				return ec.fieldContext_Session_ipAddr(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Session_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Session_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Session", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_MyProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_MyProfile,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().MyProfile(ctx)
+		},
+		nil,
+		ec.marshalNProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_MyProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Profile_userId(ctx, field)
+			case "firstName":
+				return ec.fieldContext_Profile_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_Profile_lastName(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Profile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Profile_updatedAt(ctx, field)
+			case "avatarUrl":
+				return ec.fieldContext_Profile_avatarUrl(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_Me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_Me,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().Me(ctx)
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_Me(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "isEmailVerified":
+				return ec.fieldContext_User_isEmailVerified(ctx, field)
+			case "emailVerifiedAt":
+				return ec.fieldContext_User_emailVerifiedAt(ctx, field)
+			case "twoFactorEnabled":
+				return ec.fieldContext_User_twoFactorEnabled(ctx, field)
+			case "twoFactorEnabledAt":
+				return ec.fieldContext_User_twoFactorEnabledAt(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -940,34 +1395,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "GenerateScopedToken":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_GenerateScopedToken(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "UpdateProfileAvatarUrl":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_UpdateProfileAvatarUrl(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "UpdateProfileName":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_UpdateProfileName(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "ChangePassword":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ChangePassword(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "RequestPasswordReset":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_RequestPasswordReset(ctx, field)
@@ -992,6 +1419,55 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "VerifyEmail":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_VerifyEmail(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "RevokeSession":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_RevokeSession(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "RevokeAllSessions":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_RevokeAllSessions(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "RevokeOthersSession":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_RevokeOthersSession(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "GenerateScopedToken":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_GenerateScopedToken(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "UpdateProfileAvatarUrl":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_UpdateProfileAvatarUrl(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "UpdateProfileName":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_UpdateProfileName(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ChangePassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_ChangePassword(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -1048,6 +1524,110 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query__empty(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "GetSessions":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_GetSessions(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "GetActiveSessions":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_GetActiveSessions(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "GetCurrentSession":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_GetCurrentSession(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "MyProfile":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_MyProfile(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "Me":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_Me(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 

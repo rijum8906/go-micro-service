@@ -182,8 +182,8 @@ func (ec *executionContext) fieldContext_AuthTokens_accessToken(_ context.Contex
 			switch field.Name {
 			case "value":
 				return ec.fieldContext_Token_value(ctx, field)
-			case "expiresIn":
-				return ec.fieldContext_Token_expiresIn(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_Token_expiresAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
@@ -217,8 +217,8 @@ func (ec *executionContext) fieldContext_AuthTokens_refreshToken(_ context.Conte
 			switch field.Name {
 			case "value":
 				return ec.fieldContext_Token_value(ctx, field)
-			case "expiresIn":
-				return ec.fieldContext_Token_expiresIn(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_Token_expiresAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
@@ -310,8 +310,8 @@ func (ec *executionContext) fieldContext_ScopedTokenResponse_token(_ context.Con
 			switch field.Name {
 			case "value":
 				return ec.fieldContext_Token_value(ctx, field)
-			case "expiresIn":
-				return ec.fieldContext_Token_expiresIn(ctx, field)
+			case "expiresAt":
+				return ec.fieldContext_Token_expiresAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
 		},
@@ -348,14 +348,14 @@ func (ec *executionContext) fieldContext_Token_value(_ context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Token_expiresIn(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
+func (ec *executionContext) _Token_expiresAt(ctx context.Context, field graphql.CollectedField, obj *model.Token) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Token_expiresIn,
+		ec.fieldContext_Token_expiresAt,
 		func(ctx context.Context) (any, error) {
-			return obj.ExpiresIn, nil
+			return obj.ExpiresAt, nil
 		},
 		nil,
 		ec.marshalNDateTime2string,
@@ -364,7 +364,7 @@ func (ec *executionContext) _Token_expiresIn(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_Token_expiresIn(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Token_expiresAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Token",
 		Field:      field,
@@ -380,6 +380,80 @@ func (ec *executionContext) fieldContext_Token_expiresIn(_ context.Context, fiel
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
+
+func (ec *executionContext) unmarshalInputEmailInput(ctx context.Context, obj any) (model.EmailInput, error) {
+	var it model.EmailInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email", "meta"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Meta = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputPaginationInput(ctx context.Context, obj any) (model.PaginationInput, error) {
+	var it model.PaginationInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"page", "limit"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "page":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Page = data
+		case "limit":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Limit = data
+		}
+	}
+	return it, nil
+}
 
 func (ec *executionContext) unmarshalInputRequestMetaInput(ctx context.Context, obj any) (coredto.RequestMeta, error) {
 	var it coredto.RequestMeta
@@ -406,6 +480,43 @@ func (ec *executionContext) unmarshalInputRequestMetaInput(ctx context.Context, 
 				return it, err
 			}
 			it.DeviceId = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputScopedTokenInput(ctx context.Context, obj any) (model.ScopedTokenInput, error) {
+	var it model.ScopedTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scopedToken", "meta"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scopedToken":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopedToken"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopedToken = data
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Meta = data
 		}
 	}
 	return it, nil
@@ -611,8 +722,8 @@ func (ec *executionContext) _Token(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "expiresIn":
-			out.Values[i] = ec._Token_expiresIn(ctx, field, obj)
+		case "expiresAt":
+			out.Values[i] = ec._Token_expiresAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -681,8 +792,23 @@ func (ec *executionContext) marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906
 	return ec._MutationResponse(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNPaginationInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐPaginationInput(ctx context.Context, v any) (*model.PaginationInput, error) {
+	res, err := ec.unmarshalInputPaginationInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx context.Context, v any) (coredto.RequestMeta, error) {
 	res, err := ec.unmarshalInputRequestMetaInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx context.Context, v any) (*coredto.RequestMeta, error) {
+	res, err := ec.unmarshalInputRequestMetaInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenInput(ctx context.Context, v any) (model.ScopedTokenInput, error) {
+	res, err := ec.unmarshalInputScopedTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

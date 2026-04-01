@@ -1,0 +1,6 @@
+extend type Mutation {
+  # Revoke
+  RevokeSession(token: String!): MutationResponse!
+  RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
+  RevokeOthersSession(input: RevokeOthersSessionInput!): MutationResponse!
+}

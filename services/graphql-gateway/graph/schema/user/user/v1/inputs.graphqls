@@ -1,0 +1,23 @@
+input GenerateScopedTokenInput {
+  scope: TokenScope!
+  authMethod: AuthMethod!
+  authValue: String!
+  meta: RequestMetaInput!
+}
+
+input UpdateProfileAvatarUrlInput {
+  profileId: ID!
+  avatarUrl: String!
+}
+
+input UpdateProfileNameInput {
+  profileId: ID!
+  firstName: String!
+  lastName: String!
+}
+
+input ChangePasswordInput {
+  token: String!
+  newPassword: String!
+  meta: RequestMetaInput!
+}

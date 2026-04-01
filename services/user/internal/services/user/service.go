@@ -32,7 +32,7 @@ func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.Gener
 	return &userv1.GenerateScopedTokenResponse{
 		Token: &modelsv1.Token{
 			Value:     scopedToken,
-			ExpiresIn: timestamppb.New(time.Now().Add(s.env.ScopedTokenTTL)),
+			ExpiresAt: timestamppb.New(time.Now().Add(s.env.ScopedTokenTTL)),
 		},
 	}, nil
 }

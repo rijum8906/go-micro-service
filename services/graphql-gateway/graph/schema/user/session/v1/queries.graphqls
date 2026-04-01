@@ -1,0 +1,5 @@
+extend type Query {
+  GetSessions(input: GetSessionsInput): [Session!]
+  GetActiveSessions(input: ScopedTokenInput!): [Session!]
+  GetCurrentSession: Session!
+}

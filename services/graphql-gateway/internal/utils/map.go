@@ -35,11 +35,11 @@ func MapTokens(tokens *modelsv1.AuthToken) *model.AuthTokens {
 	return &model.AuthTokens{
 		AccessToken: &model.Token{
 			Value:     tokens.AccessToken.Value,
-			ExpiresIn: tokens.AccessToken.ExpiresIn.String(),
+			ExpiresAt: tokens.AccessToken.ExpiresAt.String(),
 		},
 		RefreshToken: &model.Token{
 			Value:     tokens.RefreshToken.Value,
-			ExpiresIn: tokens.RefreshToken.ExpiresIn.String(),
+			ExpiresAt: tokens.RefreshToken.ExpiresAt.String(),
 		},
 	}
 }
