@@ -53,6 +53,10 @@ RETURNING *;
 DELETE FROM sessions
 WHERE id = $1;
 
+-- name: DeleteExpiredSessions :exec
+DELETE FROM sessions
+WHERE expires_at <= now();
+
 -- name: DeleteSessionsByUserID :exec
 DELETE FROM sessions
 WHERE user_id = $1;

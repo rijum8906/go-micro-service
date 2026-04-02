@@ -71,6 +71,16 @@ func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const DeleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
+DELETE FROM sessions
+WHERE expires_at <= now()
+`
+
+func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, DeleteExpiredSessions)
+	return err
+}
+
 const DeleteSessionsByUserID = `-- name: DeleteSessionsByUserID :exec
 DELETE FROM sessions
 WHERE user_id = $1
