@@ -54,7 +54,7 @@ func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, clie
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.TokenScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -114,7 +114,7 @@ func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest
 		return nil, appErr
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), client.DeviceID, token.TokenScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.ID.String(), session.ID.String(), token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -151,7 +151,7 @@ func (s *authService) RefreshToken(ctx context.Context, user *dto.UserInfo) (*au
 		return nil, apperror.ErrUnAuthenticated.WithMessage("refresh token does not match session")
 	}
 
-	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.UserID, session.ID.String(), session.DeviceID, token.TokenScopeAuth)
+	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.UserID, session.ID.String(), token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr
 	}

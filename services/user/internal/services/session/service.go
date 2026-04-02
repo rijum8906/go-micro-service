@@ -99,10 +99,14 @@ func (s *sessionService) RevokeSession(ctx context.Context, req *sessionv1.Revok
 		return nil, apperror.ErrForbidden.WithMessage("session does not belong to user")
 	}
 
+	// Delete refresh token from db
 	appErr = s.repos.Session.RevokeSession(ctx, session.ID)
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	// delete access token from cache
+	s.utils.TokenManager.RevokeAuthToken(ctx, userInfo.UserID, session.ID.String())
 
 	return &corev1.SuccessResponse{
 		Success: true,
@@ -124,10 +128,14 @@ func (s *sessionService) RevokeAllSessions(ctx context.Context, userInfo *dto.Us
 		return nil, appErr
 	}
 
+	// delete refresh token from db
 	appErr = s.utils.TokenManager.RevokeAllUserTokens(ctx, userInfo.UserID)
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	// delete access token from cache
+	s.utils.TokenManager.RevokeAllUserTokens(ctx, userInfo.UserID)
 
 	return &corev1.SuccessResponse{
 		Success: true,
