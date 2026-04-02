@@ -11,7 +11,7 @@ message GetSessionsRequest {
 
 message RevokeSessionRequest {
   string scoped_token = 1;
-  string session_id = 2;
+  string token_to_revoke = 2;
 }
 
 message RevokeOtherSessionsRequest {

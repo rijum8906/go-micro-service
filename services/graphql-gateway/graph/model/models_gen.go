@@ -57,6 +57,11 @@ type RevokeOthersSessionInput struct {
 	Token       string `json:"token"`
 }
 
+type RevokeSessionInput struct {
+	ScopedToken   string `json:"scopedToken"`
+	TokenToRevoke string `json:"tokenToRevoke"`
+}
+
 type ScopedTokenInput struct {
 	ScopedToken string               `json:"scopedToken"`
 	Meta        *coredto.RequestMeta `json:"meta"`

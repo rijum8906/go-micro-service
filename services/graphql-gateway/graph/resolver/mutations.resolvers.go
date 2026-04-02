@@ -14,6 +14,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
@@ -212,8 +213,37 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 }
 
 // RevokeSession is the resolver for the RevokeSession field.
-func (r *mutationResolver) RevokeSession(ctx context.Context, token string) (*model.MutationResponse, error) {
-	panic(fmt.Errorf("not implemented: RevokeSession - RevokeSession"))
+func (r *mutationResolver) RevokeSession(ctx context.Context, input *model.RevokeSessionInput) (*model.MutationResponse, error) {
+	accessToken, appErr := utils.GetAccessTokenFromHeader(ctx)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	claims, appErr := r.Token.ValidateAuthToken(ctx, accessToken)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	ctx = metadata.SendUserInfo(ctx, dto.UserInfo{
+		UserID:      claims.Subject,
+		AccessToken: accessToken,
+		SessionID:   claims.ID,
+	})
+
+	res, err := r.Clients.SessionClient.RevokeSession(ctx, &sessionv1.RevokeSessionRequest{
+		ScopedToken:   input.ScopedToken,
+		TokenToRevoke: input.TokenToRevoke,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+	if !res.Success {
+		return nil, apperror.ErrInternal.WithMessage("failed to revoke session")
+	}
+
+	return &model.MutationResponse{
+		Success: res.Success,
+	}, nil
 }
 
 // RevokeAllSessions is the resolver for the RevokeAllSessions field.

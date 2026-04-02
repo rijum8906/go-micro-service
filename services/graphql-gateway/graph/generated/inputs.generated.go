@@ -433,6 +433,43 @@ func (ec *executionContext) unmarshalInputRevokeOthersSessionInput(ctx context.C
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRevokeSessionInput(ctx context.Context, obj any) (model.RevokeSessionInput, error) {
+	var it model.RevokeSessionInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scopedToken", "tokenToRevoke"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scopedToken":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopedToken"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ScopedToken = data
+		case "tokenToRevoke":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tokenToRevoke"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TokenToRevoke = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateProfileAvatarUrlInput(ctx context.Context, obj any) (userdto.UpdateProfileAvatarUrlInput, error) {
 	var it userdto.UpdateProfileAvatarUrlInput
 	if obj == nil {
@@ -628,6 +665,14 @@ func (ec *executionContext) unmarshalOGetSessionsInput2ᚖgithubᚗcomᚋrijum89
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputGetSessionsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalORevokeSessionInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeSessionInput(ctx context.Context, v any) (*model.RevokeSessionInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputRevokeSessionInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

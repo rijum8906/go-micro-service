@@ -26,7 +26,7 @@ type MutationResolver interface {
 	ResetPassword(ctx context.Context, input userdto.ResetPasswordInput) (*model.MutationResponse, error)
 	RequestEmailVerification(ctx context.Context, input userdto.RequestEmailVerificationInput) (*model.MutationResponse, error)
 	VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error)
-	RevokeSession(ctx context.Context, token string) (*model.MutationResponse, error)
+	RevokeSession(ctx context.Context, input *model.RevokeSessionInput) (*model.MutationResponse, error)
 	RevokeAllSessions(ctx context.Context, input model.ScopedTokenInput) (*model.MutationResponse, error)
 	RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.MutationResponse, error)
 	GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error)
@@ -160,11 +160,11 @@ func (ec *executionContext) field_Mutation_RevokeOthersSession_args(ctx context.
 func (ec *executionContext) field_Mutation_RevokeSession_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "token", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalORevokeSessionInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeSessionInput)
 	if err != nil {
 		return nil, err
 	}
-	args["token"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -612,7 +612,7 @@ func (ec *executionContext) _Mutation_RevokeSession(ctx context.Context, field g
 		ec.fieldContext_Mutation_RevokeSession,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().RevokeSession(ctx, fc.Args["token"].(string))
+			return ec.Resolvers.Mutation().RevokeSession(ctx, fc.Args["input"].(*model.RevokeSessionInput))
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,

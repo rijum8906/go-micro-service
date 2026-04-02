@@ -53,7 +53,7 @@ type ComplexityRoot struct {
 		ResetPassword            func(childComplexity int, input userdto.ResetPasswordInput) int
 		RevokeAllSessions        func(childComplexity int, input model.ScopedTokenInput) int
 		RevokeOthersSession      func(childComplexity int, input model.RevokeOthersSessionInput) int
-		RevokeSession            func(childComplexity int, token string) int
+		RevokeSession            func(childComplexity int, input *model.RevokeSessionInput) int
 		UpdateProfileAvatarURL   func(childComplexity int, input userdto.UpdateProfileAvatarUrlInput) int
 		UpdateProfileName        func(childComplexity int, input userdto.UpdateProfileNameInput) int
 		VerifyEmail              func(childComplexity int, input userdto.VerifyEmailInput) int
@@ -300,7 +300,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.RevokeSession(childComplexity, args["token"].(string)), true
+		return e.ComplexityRoot.Mutation.RevokeSession(childComplexity, args["input"].(*model.RevokeSessionInput)), true
 
 	case "Mutation.UpdateProfileAvatarUrl":
 		if e.ComplexityRoot.Mutation.UpdateProfileAvatarURL == nil {
@@ -600,6 +600,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRequestPasswordResetInput,
 		ec.unmarshalInputResetPasswordInput,
 		ec.unmarshalInputRevokeOthersSessionInput,
+		ec.unmarshalInputRevokeSessionInput,
 		ec.unmarshalInputScopedTokenInput,
 		ec.unmarshalInputUpdateProfileAvatarUrlInput,
 		ec.unmarshalInputUpdateProfileNameInput,
@@ -853,10 +854,14 @@ input RevokeOthersSessionInput {
   scopedToken: String!
   token: String!
 }
+
+input RevokeSessionInput {
+  scopedToken: String!
+  tokenToRevoke: String!
+}
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/mutations.graphqls", Input: `extend type Mutation {
-  # Revoke
-  RevokeSession(token: String!): MutationResponse!
+  RevokeSession(input: RevokeSessionInput): MutationResponse!
   RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
   RevokeOthersSession(input: RevokeOthersSessionInput!): MutationResponse!
 }
