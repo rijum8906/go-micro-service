@@ -26,8 +26,13 @@ func (h *SessionHandler) GetSessions(ctx context.Context, req *sessionv1.GetSess
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("get sessions request is required"))
 	}
-
-	result, appErr := h.service.GetSessions(ctx, req)
+	
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("get session user metadata is required"))
+	}
+	
+	result, appErr := h.service.GetSessions(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}

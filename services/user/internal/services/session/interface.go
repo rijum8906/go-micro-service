@@ -12,7 +12,7 @@ import (
 )
 
 type SessionService interface {
-	GetSessions(ctx context.Context, req *sessionv1.GetSessionsRequest) (*sessionv1.GetSessionsResponse, *apperror.AppError)
+	GetSessions(ctx context.Context, req *sessionv1.GetSessionsRequest, userInfo *metadata.UserInfo) (*sessionv1.GetSessionsResponse, *apperror.AppError)
 	GetActiveSessions(ctx context.Context, userInfo *metadata.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError)
 }
 
