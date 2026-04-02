@@ -2,10 +2,6 @@ extend type Mutation {
     Login(input: LoginInput!): AuthResponse!
     Register(input: RegisterInput!): AuthResponse!
     Logout(input: LogoutInput!): MutationResponse!
-    GenerateScopedToken(input: GenerateScopedTokenInput!): ScopedTokenResponse!
-    UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
-    UpdateProfileName(input: UpdateProfileNameInput!): Profile!
-    ChangePassword(input: ChangePasswordInput!): MutationResponse!
     RequestPasswordReset(input: RequestPasswordResetInput!): MutationResponse!
     ResetPassword(input: ResetPasswordInput!): MutationResponse!
     RequestEmailVerification(

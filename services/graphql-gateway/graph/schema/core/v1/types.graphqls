@@ -1,3 +1,18 @@
 input RequestMetaInput {
   deviceId: String!
 }
+
+input PaginationInput {
+  page: Int!
+  limit: Int!
+}
+
+input ScopedTokenInput {
+  scopedToken: String!
+  meta: RequestMetaInput!
+}
+
+input EmailInput {
+  email: String!
+  meta: RequestMetaInput!
+}

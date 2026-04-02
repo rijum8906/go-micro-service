@@ -90,7 +90,7 @@ func (h *AuthHandler) RefreshToken(ctx context.Context, req *authv1.RefreshToken
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("refresh token metadata is required"))
 	}
 
-	result, appErr := h.service.RefreshToken(ctx, req, &userInfo)
+	result, appErr := h.service.RefreshToken(ctx, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}

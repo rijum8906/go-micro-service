@@ -7,7 +7,6 @@
 package authv1
 
 import (
-	v1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -232,7 +231,7 @@ func (x *RequestPasswordResetRequest) GetEmail() string {
 
 type VerifyEmailRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ScopedToken   *v1.Token              `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	ScopedToken   string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -267,16 +266,16 @@ func (*VerifyEmailRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *VerifyEmailRequest) GetScopedToken() *v1.Token {
+func (x *VerifyEmailRequest) GetScopedToken() string {
 	if x != nil {
 		return x.ScopedToken
 	}
-	return nil
+	return ""
 }
 
 type ResetPasswordRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ScopedToken   *v1.Token              `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	ScopedToken   string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
 	NewPassword   string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -312,11 +311,11 @@ func (*ResetPasswordRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ResetPasswordRequest) GetScopedToken() *v1.Token {
+func (x *ResetPasswordRequest) GetScopedToken() string {
 	if x != nil {
 		return x.ScopedToken
 	}
-	return nil
+	return ""
 }
 
 func (x *ResetPasswordRequest) GetNewPassword() string {
@@ -375,7 +374,7 @@ var File_user_service_auth_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/auth/v1/request.proto\x12\x14user_service.auth.v1\x1a\"user_service/models/v1/model.proto\"@\n" +
+	"\"user_service/auth/v1/request.proto\x12\x14user_service.auth.v1\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x7f\n" +
@@ -388,11 +387,11 @@ const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\x1fRequestEmailVerificationRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"3\n" +
 	"\x1bRequestPasswordResetRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\"V\n" +
-	"\x12VerifyEmailRequest\x12@\n" +
-	"\fscoped_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vscopedToken\"{\n" +
-	"\x14ResetPasswordRequest\x12@\n" +
-	"\fscoped_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vscopedToken\x12!\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"7\n" +
+	"\x12VerifyEmailRequest\x12!\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\"\\\n" +
+	"\x14ResetPasswordRequest\x12!\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12!\n" +
 	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"8\n" +
 	"\x13RefreshTokenRequest\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessTokenB\xda\x01\n" +
@@ -419,16 +418,13 @@ var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*VerifyEmailRequest)(nil),              // 4: user_service.auth.v1.VerifyEmailRequest
 	(*ResetPasswordRequest)(nil),            // 5: user_service.auth.v1.ResetPasswordRequest
 	(*RefreshTokenRequest)(nil),             // 6: user_service.auth.v1.RefreshTokenRequest
-	(*v1.Token)(nil),                        // 7: user_service.models.v1.Token
 }
 var file_user_service_auth_v1_request_proto_depIdxs = []int32{
-	7, // 0: user_service.auth.v1.VerifyEmailRequest.scoped_token:type_name -> user_service.models.v1.Token
-	7, // 1: user_service.auth.v1.ResetPasswordRequest.scoped_token:type_name -> user_service.models.v1.Token
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_user_service_auth_v1_request_proto_init() }

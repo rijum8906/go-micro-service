@@ -4,119 +4,82 @@ package metadata
 import (
 	"context"
 
+	"github.com/rijum8906/relay/packages/core/dto"
 	"google.golang.org/grpc/metadata"
 )
 
-const (
-	MetaDeviceIDKey     = "device-id"
-	MetaUserAgentKey    = "user-agent"
-	MetaClientIPKey     = "client-ip"
-	MetaClientTypeKey   = "client-type"
-	MetaAPIVersionKey   = "api-version"
-	MetaSDKVersionKey   = "sdk-version"
-	MetaRequestIDKey    = "request-id"
-	MetaSessionIDKey    = "session-id"
-	MetaTraceIDKey      = "trace-id"
-	MetaLocaleKey       = "locale"
-	MetaUserIDKey       = "user-id"
-	MetaAccessTokenKey  = "access-token"
-	MetaRefreshTokenKey = "refresh-token"
-)
-
-type UserInfo struct {
-	UserID       string
-	AccessToken  string
-	RefreshToken string
-	SessionID    string
-}
-
-type ClientInfo struct {
-	DeviceID   string
-	UserAgent  string
-	IPAddress  string
-	ClientType string
-	APIVersion string
-	SDKVersion string
-	RequestID  string
-	SessionID  string
-	TraceID    string
-	Locale     string
-}
-
 // Send adds client info to outgoing gRPC metadata.
-func Send(ctx context.Context, info ClientInfo) context.Context {
+func Send(ctx context.Context, info dto.ClientInfo) context.Context {
 	return SendClientInfo(ctx, info)
 }
 
 // Receive extracts client info from incoming gRPC metadata.
-func Receive(ctx context.Context) (ClientInfo, bool) {
+func Receive(ctx context.Context) (dto.ClientInfo, bool) {
 	return ReceiveClientInfo(ctx)
 }
 
 // SendClientInfo adds client info to outgoing gRPC metadata.
-func SendClientInfo(ctx context.Context, info ClientInfo) context.Context {
+func SendClientInfo(ctx context.Context, info dto.ClientInfo) context.Context {
 	return appendOutgoing(ctx,
-		MetaDeviceIDKey, info.DeviceID,
-		MetaUserAgentKey, info.UserAgent,
-		MetaClientIPKey, info.IPAddress,
-		MetaClientTypeKey, info.ClientType,
-		MetaAPIVersionKey, info.APIVersion,
-		MetaSDKVersionKey, info.SDKVersion,
-		MetaRequestIDKey, info.RequestID,
-		MetaSessionIDKey, info.SessionID,
-		MetaTraceIDKey, info.TraceID,
-		MetaLocaleKey, info.Locale,
+		dto.MetaDeviceIDKey, info.DeviceID,
+		dto.MetaUserAgentKey, info.UserAgent,
+		dto.MetaClientIPKey, info.IPAddress,
+		dto.MetaClientTypeKey, info.ClientType,
+		dto.MetaAPIVersionKey, info.APIVersion,
+		dto.MetaSDKVersionKey, info.SDKVersion,
+		dto.MetaRequestIDKey, info.RequestID,
+		dto.MetaSessionIDKey, info.SessionID,
+		dto.MetaTraceIDKey, info.TraceID,
+		dto.MetaLocaleKey, info.Locale,
 	)
 }
 
 // SendClinetInfo preserves backward compatibility with the previous typoed API.
-func SendClinetInfo(ctx context.Context, info ClientInfo) context.Context {
+func SendClinetInfo(ctx context.Context, info dto.ClientInfo) context.Context {
 	return SendClientInfo(ctx, info)
 }
 
 // ReceiveClientInfo extracts client info from incoming gRPC metadata.
-func ReceiveClientInfo(ctx context.Context) (ClientInfo, bool) {
+func ReceiveClientInfo(ctx context.Context) (dto.ClientInfo, bool) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return ClientInfo{}, false
+		return dto.ClientInfo{}, false
 	}
 
-	return ClientInfo{
-		DeviceID:   first(md, MetaDeviceIDKey),
-		UserAgent:  first(md, MetaUserAgentKey),
-		IPAddress:  first(md, MetaClientIPKey),
-		ClientType: first(md, MetaClientTypeKey),
-		APIVersion: first(md, MetaAPIVersionKey),
-		SDKVersion: first(md, MetaSDKVersionKey),
-		RequestID:  first(md, MetaRequestIDKey),
-		SessionID:  first(md, MetaSessionIDKey),
-		TraceID:    first(md, MetaTraceIDKey),
-		Locale:     first(md, MetaLocaleKey),
+	return dto.ClientInfo{
+		DeviceID:   first(md, dto.MetaDeviceIDKey),
+		UserAgent:  first(md, dto.MetaUserAgentKey),
+		IPAddress:  first(md, dto.MetaClientIPKey),
+		ClientType: first(md, dto.MetaClientTypeKey),
+		APIVersion: first(md, dto.MetaAPIVersionKey),
+		SDKVersion: first(md, dto.MetaSDKVersionKey),
+		RequestID:  first(md, dto.MetaRequestIDKey),
+		SessionID:  first(md, dto.MetaSessionIDKey),
+		TraceID:    first(md, dto.MetaTraceIDKey),
+		Locale:     first(md, dto.MetaLocaleKey),
 	}, true
 }
 
 // SendUserInfo adds user identity metadata to the outgoing context.
-func SendUserInfo(ctx context.Context, info UserInfo) context.Context {
+func SendUserInfo(ctx context.Context, info dto.UserInfo) context.Context {
 	return appendOutgoing(ctx,
-		MetaUserIDKey, info.UserID,
-		MetaAccessTokenKey, info.AccessToken,
-		MetaRefreshTokenKey, info.RefreshToken,
-		MetaSessionIDKey, info.SessionID,
+		dto.MetaUserIDKey, info.UserID,
+		dto.MetaAccessTokenKey, info.AccessToken,
+		dto.MetaSessionIDKey, info.SessionID,
 	)
 }
 
 // ReceiveUserInfo extracts user identity metadata from the incoming context.
-func ReceiveUserInfo(ctx context.Context) (UserInfo, bool) {
+func ReceiveUserInfo(ctx context.Context) (dto.UserInfo, bool) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return UserInfo{}, false
+		return dto.UserInfo{}, false
 	}
 
-	return UserInfo{
-		UserID:       first(md, MetaUserIDKey),
-		AccessToken:  first(md, MetaAccessTokenKey),
-		RefreshToken: first(md, MetaRefreshTokenKey),
-		SessionID:    first(md, MetaSessionIDKey),
+	return dto.UserInfo{
+		UserID:      first(md, dto.MetaUserIDKey),
+		AccessToken: first(md, dto.MetaAccessTokenKey),
+		SessionID:   first(md, dto.MetaSessionIDKey),
 	}, true
 }
 

@@ -5,18 +5,18 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/env"
-	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
 type AuthService interface {
-	Login(ctx context.Context, data *authv1.LoginRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
-	Register(ctx context.Context, data *authv1.RegisterRequest, client *metadata.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
-	Logout(ctx context.Context, client *metadata.UserInfo) (bool, *apperror.AppError)
-	RefreshToken(ctx context.Context, req *authv1.RefreshTokenRequest, user *metadata.UserInfo) (*authv1.RefreshTokenResponse, *apperror.AppError)
+	Login(ctx context.Context, data *authv1.LoginRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
+	Register(ctx context.Context, data *authv1.RegisterRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
+	Logout(ctx context.Context, client *dto.UserInfo) (bool, *apperror.AppError)
+	RefreshToken(ctx context.Context, user *dto.UserInfo) (*authv1.RefreshTokenResponse, *apperror.AppError)
 	RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) (*corev1.SuccessResponse, *apperror.AppError)
 	RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) (*corev1.SuccessResponse, *apperror.AppError)
 	VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) (*corev1.SuccessResponse, *apperror.AppError)

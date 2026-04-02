@@ -5,8 +5,8 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/env"
-	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
@@ -14,11 +14,11 @@ import (
 )
 
 type SessionService interface {
-	GetSessions(ctx context.Context, req *sessionv1.GetSessionsRequest, userInfo *metadata.UserInfo) (*sessionv1.GetSessionsResponse, *apperror.AppError)
-	GetActiveSessions(ctx context.Context, userInfo *metadata.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError)
-	GetCurrentSession(ctx context.Context, userInfo *metadata.UserInfo) (*modelsv1.Session, *apperror.AppError)
-	RevokeSession(ctx context.Context, req *sessionv1.RevokeSessionRequest, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
-	RevokeAllSessions(ctx context.Context, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
+	GetSessions(ctx context.Context, req *sessionv1.GetSessionsRequest, userInfo *dto.UserInfo) (*sessionv1.GetSessionsResponse, *apperror.AppError)
+	GetActiveSessions(ctx context.Context, userInfo *dto.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError)
+	GetCurrentSession(ctx context.Context, userInfo *dto.UserInfo) (*modelsv1.Session, *apperror.AppError)
+	RevokeSession(ctx context.Context, req *sessionv1.RevokeSessionRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
+	RevokeAllSessions(ctx context.Context, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 	TerminateExpiredSessions(ctx context.Context) (*corev1.SuccessResponse, *apperror.AppError)
 }
 

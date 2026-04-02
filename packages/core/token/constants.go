@@ -1,5 +1,8 @@
 package token
 
+// NOTE: do no change this without adding the same types in graphql-gateway
+// schema (schema/core/v1/enums.graphqls)
+
 type TokenScope string
 
 const (
