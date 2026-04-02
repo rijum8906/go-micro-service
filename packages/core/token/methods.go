@@ -9,7 +9,10 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
-func (m *TokenManager) IssueAuthToken(ctx context.Context, subject, sessionID, deviceID string, scope TokenScope) (string, *apperror.AppError) {
+// NOTE: Auth Token Redis key format {UserID}:{SessionID}
+// Scoped Token Redis key format {Token}
+
+func (m *TokenManager) IssueAuthToken(ctx context.Context, subject, sessionID string, scope TokenScope) (string, *apperror.AppError) {
 	// NOTE: use this same key for jti and redis key
 	key := generateAuthTokenKey(subject, sessionID)
 
@@ -102,7 +105,7 @@ func (m *TokenManager) ValidateScopedToken(ctx context.Context, tokenStr string)
 	return claims, nil
 }
 
-func (m *TokenManager) RevokeAuthToken(ctx context.Context, subject, sessionID, deviceID string) *apperror.AppError {
+func (m *TokenManager) RevokeAuthToken(ctx context.Context, subject, sessionID string) *apperror.AppError {
 	key := generateAuthTokenKey(subject, sessionID)
 
 	err := m.Store.Del(ctx, key)
