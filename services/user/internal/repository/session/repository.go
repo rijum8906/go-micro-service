@@ -51,3 +51,19 @@ func (r *sessionRepository) RevokeSession(ctx context.Context, id uuid.UUID) *ap
 	}
 	return nil
 }
+
+func (r *sessionRepository) RevokeAllSessions(ctx context.Context, userID uuid.UUID) *apperror.AppError {
+	err := r.q.RevokeActiveSessions(ctx, userID)
+	if err != nil {
+		return apperror.ErrInternal.WithMessage("Failed to revoke all sessions").WithDetail("error", err.Error())
+	}
+	return nil
+}
+
+func (r *sessionRepository) TerminateExpiredSessions(ctx context.Context) *apperror.AppError {
+	err := r.q.DeleteExpiredSessions(ctx)
+	if err != nil {
+		return apperror.ErrInternal.WithMessage("Failed to terminate expired sessions").WithDetail("error", err.Error())
+	}
+	return nil
+}

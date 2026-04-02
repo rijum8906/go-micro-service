@@ -15,6 +15,8 @@ type SessionRepository interface {
 	GetSessionByRefreshToken(ctx context.Context, refreshToken string) (*db.Session, *apperror.AppError)
 	GetActiveSessions(ctx context.Context, userID uuid.UUID, limit, offfset int32) (*[]db.Session, *apperror.AppError)
 	RevokeSession(ctx context.Context, id uuid.UUID) *apperror.AppError
+	RevokeAllSessions(ctx context.Context, userID uuid.UUID) *apperror.AppError
+	TerminateExpiredSessions(ctx context.Context) *apperror.AppError
 }
 
 type sessionRepository struct {
