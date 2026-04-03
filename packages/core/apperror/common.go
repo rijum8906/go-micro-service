@@ -1,44 +1,49 @@
 package apperror
 
-// Codes
+type ErrorCode string
+
 const (
-	CodeInternal        = "INTERNAL_ERROR"
-	CodeNotFound        = "NOT_FOUND"
-	CodeValidation      = "VALIDATION_FAILED"
-	CodeUnAuthenticated = "UNAUTHENTICATED"
-	CodeForbidden       = "FORBIDDEN"
-	CodeThirdParty      = "EXTERNAL_SERVICE_ERROR"
+	CodeInternal        ErrorCode = "INTERNAL"
+	CodeNotFound        ErrorCode = "NOT_FOUND"
+	CodeValidation      ErrorCode = "VALIDATION"
+	CodeUnAuthenticated ErrorCode = "UNAUTHENTICATED"
+	CodeForbidden       ErrorCode = "FORBIDDEN"
+	CodeConflict        ErrorCode = "CONFLICT"
+	CodeBadRequest      ErrorCode = "BAD_REQUEST"
+	CodeTimeout         ErrorCode = "TIMEOUT"
+	CodeRateLimit       ErrorCode = "RATE_LIMIT"
+	CodeThirdParty      ErrorCode = "THIRD_PARTY"
+	CodeDatabase        ErrorCode = "DATABASE_ERROR"
+	CodeCache           ErrorCode = "CACHE_ERROR"
+	CodeDependency      ErrorCode = "DEPENDENCY_ERROR"
+	CodePrecondition    ErrorCode = "PRECONDITION_FAILED"
+	CodeTooManyRequests ErrorCode = "TOO_MANY_REQUESTS"
+	CodeUnavailable     ErrorCode = "SERVICE_UNAVAILABLE"
 )
 
 // Common Errors
 var (
 	ErrInternal = &AppError{
-		Type:    TypeInternal,
 		Code:    CodeInternal,
 		Message: "Internal Server Error",
 	}
 	ErrForbidden = &AppError{
-		Type:    TypeForbidden,
 		Code:    CodeForbidden,
 		Message: "Forbidden",
 	}
 	ErrNotFound = &AppError{
-		Type:    TypeNotFound,
 		Code:    CodeNotFound,
 		Message: "Not Found",
 	}
 	ErrUnAuthenticated = &AppError{
-		Type:    TypeUnAuthenticated,
 		Code:    CodeUnAuthenticated,
 		Message: "Unauthenticated",
 	}
 	ErrThirdParty = &AppError{
-		Type:    TypeThirdParty,
 		Code:    CodeThirdParty,
 		Message: "External Service Error",
 	}
 	ErrValidation = &AppError{
-		Type:    TypeValidation,
 		Code:    CodeValidation,
 		Message: "Validation Failed",
 	}
