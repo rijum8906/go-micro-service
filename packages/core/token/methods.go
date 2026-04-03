@@ -20,12 +20,12 @@ func (m *TokenManager) IssueAuthToken(ctx context.Context, subject, sessionID st
 
 	token, err := tokenClaims.SignedString(m.Config.JwtSecret)
 	if err != nil {
-		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to generate token").WithDetail("error", err.Error())
+		return "", apperror.New(apperror.CodeInternal, "failed to generate token").WithDetail("error", err.Error())
 	}
 
 	err = m.Store.Set(ctx, key, subject, m.Config.SessionTTL)
 	if err != nil {
-		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to set token").WithDetail("error", err.Error())
+		return "", apperror.New(apperror.CodeInternal, "failed to set token").WithDetail("error", err.Error())
 	}
 
 	return token, nil
@@ -37,12 +37,12 @@ func (m *TokenManager) IssueScopedToken(ctx context.Context, subject string, sco
 
 	token, err := tokenClaims.SignedString(m.Config.JwtSecret)
 	if err != nil {
-		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to generate token").WithDetail("error", err.Error())
+		return "", apperror.New(apperror.CodeInternal, "failed to generate token").WithDetail("error", err.Error())
 	}
 
 	err = m.Store.Set(ctx, token, subject, m.Config.ScopedTokenTTL)
 	if err != nil {
-		return "", apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to set token").WithDetail("error", err.Error())
+		return "", apperror.New(apperror.CodeInternal, "failed to set token").WithDetail("error", err.Error())
 	}
 
 	return token, nil
@@ -110,14 +110,14 @@ func (m *TokenManager) RevokeAuthToken(ctx context.Context, subject, sessionID s
 
 	err := m.Store.Del(ctx, key)
 	if err != nil {
-		return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to revoke token").WithDetail("error", err.Error())
+		return apperror.New(apperror.CodeInternal, "failed to revoke token").WithDetail("error", err.Error())
 	}
 	return nil
 }
 
 func (m *TokenManager) RevokeScopedToken(ctx context.Context, token string) *apperror.AppError {
 	if err := m.Store.Del(ctx, token); err != nil {
-		return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to revoke token").WithDetail("error", err.Error())
+		return apperror.New(apperror.CodeInternal, "failed to revoke token").WithDetail("error", err.Error())
 	}
 
 	return nil

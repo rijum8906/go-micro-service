@@ -87,13 +87,13 @@ func GetAccessTokenFromHeader(ctx context.Context) (string, *apperror.AppError) 
 	// Check Bearer prefix
 	const bearerPrefix = "Bearer "
 	if !strings.HasPrefix(authHeader, bearerPrefix) {
-		return "", apperror.New(apperror.TypeValidation, apperror.CodeUnAuthenticated, "invalid authorization format, expected Bearer token")
+		return "", apperror.New(apperror.CodeUnAuthenticated, "invalid authorization format, expected Bearer token")
 	}
 
 	// Extract token
 	token := strings.TrimPrefix(authHeader, bearerPrefix)
 	if token == "" {
-		return "", apperror.New(apperror.TypeValidation, apperror.CodeUnAuthenticated, "empty token")
+		return "", apperror.New(apperror.CodeUnAuthenticated, "empty token")
 	}
 
 	return token, nil

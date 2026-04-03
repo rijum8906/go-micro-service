@@ -29,7 +29,7 @@ func generateTokenClaims(subject, id string, scope TokenScope, ttl time.Duration
 
 func mapRedisError(err error) *apperror.AppError {
 	if errors.Is(err, redis.Nil) {
-		return apperror.New(apperror.TypeUnAuthenticated, apperror.CodeUnAuthenticated, "token does not exist").WithDetail("error", err.Error())
+		return apperror.New(apperror.CodeUnAuthenticated, "token does not exist").WithDetail("error", err.Error())
 	}
-	return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to get token").WithDetail("error", err.Error())
+	return apperror.New(apperror.CodeInternal, "failed to get token").WithDetail("error", err.Error())
 }

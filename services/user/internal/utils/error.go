@@ -13,21 +13,21 @@ func MapAppError(appErr *apperror.AppError) error {
 		return nil
 	}
 
-	if appErr.Type == apperror.TypeInternal {
+	if appErr.Code == apperror.CodeInternal {
 		fmt.Println("error: ", appErr.Error()) // TODO: log.Error()
 		fmt.Println("error details: ", appErr.Details)
 	}
 
-	switch appErr.Type {
-	case apperror.TypeValidation:
+	switch appErr.Code {
+	case apperror.CodeValidation:
 		return status.Error(codes.InvalidArgument, appErr.Message)
-	case apperror.TypeUnAuthenticated:
+	case apperror.CodeUnAuthenticated:
 		return status.Error(codes.Unauthenticated, appErr.Message)
-	case apperror.TypeForbidden:
+	case apperror.CodeForbidden:
 		return status.Error(codes.PermissionDenied, appErr.Message)
-	case apperror.TypeNotFound:
+	case apperror.CodeNotFound:
 		return status.Error(codes.NotFound, appErr.Message)
-	case apperror.TypeThirdParty:
+	case apperror.CodeThirdParty:
 		return status.Error(codes.Unavailable, appErr.Message)
 	default:
 		return status.Error(codes.Internal, appErr.Message)

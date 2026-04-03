@@ -64,11 +64,11 @@ func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, clie
 
 func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
-	if appErr != nil && appErr.Type != apperror.TypeNotFound {
+	if appErr != nil && appErr.Code != apperror.CodeInternal {
 		return nil, appErr
 	}
 	if appErr == nil {
-		return nil, apperror.ErrValidation.WithMessage("email already exists")
+		return nil, apperror.New(apperror.CodeConflict, "email already exists")
 	}
 
 	hashedPass, appErr := s.utils.HashService.Hash(data.Password)
@@ -196,7 +196,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 
 	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
-		if appErr.Type == apperror.TypeNotFound {
+		if appErr.Code == apperror.CodeInternal {
 			return &corev1.SuccessResponse{Success: true}, nil
 		}
 		return nil, appErr

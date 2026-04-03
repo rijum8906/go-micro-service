@@ -7,6 +7,16 @@ DB_PASSWORD ?= postgres
 DB_HOST ?= localhost
 DB_PORT ?= 5432
 
+# Test database configuration
+TEST_DB_CONTAINER_NAME := test_postgres_db
+TEST_DB_PORT := 5433
+TEST_DB_USER := test_user
+TEST_DB_PASSWORD := test_password
+TEST_DB_NAME := test_db
+TEST_DB_SSL_MODE := disable
+TEST_DB_URL := postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=$(TEST_DB_SSL_MODE)&search_path=public
+
+
 # Connection URLs
 DB_URL := postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable&search_path=public
 DEV_DB_URL := docker://postgres/17/dev?search_path=public
@@ -83,3 +93,41 @@ db-rollback:
 		--url "$(DB_URL)" \
 		--dir "file://db/migrations" \
 		--dev-url "$(DEV_DB_URL)" \
+
+init-test:
+	@echo "Initializing test"
+	@echo "Starting PostgreSQL test container"
+	docker run -d \
+		--name $(TEST_DB_CONTAINER_NAME) \
+		-e POSTGRES_USER=$(TEST_DB_USER) \
+		-e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) \
+		-e POSTGRES_DB=$(TEST_DB_NAME) \
+		-p $(TEST_DB_PORT):5432 \
+		postgres:16-alpine \
+		-c 'log_statement=all'
+	# Wait for PostgreSQL to be ready
+	@echo "Waiting for PostgreSQL to be ready..."
+	@for i in $$(seq 1 30); do \
+		if docker exec $(TEST_DB_CONTAINER_NAME) pg_isready -U $(TEST_DB_USER) > /dev/null 2>&1; then \
+			echo "PostgreSQL is ready!"; \
+			break; \
+		fi; \
+		echo "Waiting... $$i/30"; \
+		sleep 1; \
+		if [ $$i -eq 30 ]; then \
+			echo "Timeout waiting for PostgreSQL"; \
+			exit 1; \
+		fi; \
+	done
+	@echo "Applying migrations in database"
+		atlas migrate apply \
+		--url "$(TEST_DB_URL)" \
+		--dir "file://db/migrations"
+	@echo "Migrations applied."
+	@echo "========================================="
+	@echo "Test environment ready!"
+	@echo "Database URL: $(TEST_DB_URL)"
+	@echo "========================================="
+
+test:
+	go test -v ./...

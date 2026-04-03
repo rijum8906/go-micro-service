@@ -3,21 +3,8 @@ package apperror
 
 import "fmt"
 
-type ErrorType int
-
-const (
-	TypeValidation ErrorType = iota
-	TypeUnAuthenticated
-	TypeForbidden
-	TypeNotFound
-	TypeInternal
-	TypeThirdParty
-	TypeUnknown
-)
-
 type AppError struct {
-	Type      ErrorType
-	Code      string
+	Code      ErrorCode
 	Message   string
 	Details   []Detail
 	RequestID string
@@ -28,9 +15,8 @@ type Detail struct {
 	Message string
 }
 
-func New(errType ErrorType, code, message string) *AppError {
+func New(code ErrorCode, message string) *AppError {
 	return &AppError{
-		Type:    errType,
 		Code:    code,
 		Message: message,
 	}
