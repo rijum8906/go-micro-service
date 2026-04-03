@@ -16,6 +16,7 @@ type SessionRepository interface {
 	GetActiveSessions(ctx context.Context, userID uuid.UUID, limit, offfset int32) (*[]db.Session, *apperror.AppError)
 	RevokeSession(ctx context.Context, id uuid.UUID) *apperror.AppError
 	RevokeAllSessions(ctx context.Context, userID uuid.UUID) *apperror.AppError
+	RevokeOtherSessions(ctx context.Context, userID, currentSessionID uuid.UUID) *apperror.AppError
 	TerminateExpiredSessions(ctx context.Context) *apperror.AppError
 }
 

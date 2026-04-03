@@ -36,6 +36,11 @@ UPDATE sessions
 SET is_revoked = true
 WHERE user_id = $1 AND is_revoked = false;
 
+-- name: RevokeOtherSessions :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE user_id = $1 AND id <> $2 AND is_revoked = false;
+
 -- name: CreateSession :one
 INSERT INTO sessions (
     user_id,

@@ -140,6 +140,54 @@ func (s *sessionService) RevokeAllSessions(ctx context.Context, userInfo *metada
 	}, nil
 }
 
+func (s *sessionService) RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("revoke other sessions request is required")
+	}
+	if userInfo == nil || userInfo.UserID == "" || userInfo.SessionID == "" {
+		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	}
+	if req.GetCurrentSessionId() == "" {
+		return nil, apperror.ErrValidation.WithMessage("current session id is required")
+	}
+	if req.GetCurrentSessionId() != userInfo.SessionID {
+		return nil, apperror.ErrForbidden.WithMessage("current session does not match authenticated session")
+	}
+
+	userID, appErr := utils.NewUUID(userInfo.UserID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	currentSessionID, appErr := utils.NewUUID(req.GetCurrentSessionId())
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	currentSession, appErr := s.repos.Session.GetSession(ctx, currentSessionID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if currentSession.UserID.String() != userInfo.UserID {
+		return nil, apperror.ErrForbidden.WithMessage("session does not belong to user")
+	}
+
+	appErr = s.repos.Session.RevokeOtherSessions(ctx, userID, currentSessionID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	appErr = s.utils.TokenManager.RevokeOtherUserTokens(ctx, userInfo.UserID, currentSessionID.String())
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return &corev1.SuccessResponse{
+		Success: true,
+	}, nil
+}
+
 func (s *sessionService) TerminateExpiredSessions(ctx context.Context) (*corev1.SuccessResponse, *apperror.AppError) {
 	appErr := s.repos.Session.TerminateExpiredSessions(ctx)
 	if appErr != nil {

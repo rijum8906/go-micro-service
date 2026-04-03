@@ -114,6 +114,24 @@ func (h *SessionHandler) RevokeAllSessions(ctx context.Context, req *corev1.Empt
 	return result, nil
 }
 
+func (h *SessionHandler) RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest) (*corev1.SuccessResponse, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("revoke other sessions request is required"))
+	}
+
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("revoke other sessions metadata is required"))
+	}
+
+	result, appErr := h.service.RevokeOtherSessions(ctx, req, &userInfo)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return result, nil
+}
+
 func (h *SessionHandler) TerminateExpiredSessions(ctx context.Context, req *corev1.EmptyRequest) (*corev1.SuccessResponse, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("terminate expired sessions request is required"))

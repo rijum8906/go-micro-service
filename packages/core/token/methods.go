@@ -143,3 +143,35 @@ func (m *TokenManager) RevokeAllUserTokens(ctx context.Context, subject string) 
 	}
 	return nil
 }
+
+func (m *TokenManager) RevokeOtherUserTokens(ctx context.Context, subject, currentSessionID string) *apperror.AppError {
+	pattern := fmt.Sprintf("%s:*", subject)
+	currentKey := generateAuthTokenKey(subject, currentSessionID)
+
+	var cursor uint64
+	for {
+		keys, nextCursor, err := m.Store.Scan(ctx, cursor, pattern, 10)
+		if err != nil {
+			return apperror.ErrInternal.WithMessage("failed to find sessions")
+		}
+
+		filtered := make([]string, 0, len(keys))
+		for _, key := range keys {
+			if key == currentKey {
+				continue
+			}
+			filtered = append(filtered, key)
+		}
+
+		if len(filtered) > 0 {
+			m.Store.Del(ctx, filtered...)
+		}
+
+		cursor = nextCursor
+		if cursor == 0 {
+			break
+		}
+	}
+
+	return nil
+}
