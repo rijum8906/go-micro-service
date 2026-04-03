@@ -2,16 +2,13 @@ package profile_test
 
 import (
 	"context"
-	"errors"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	coredb "github.com/rijum8906/relay/packages/core/db"
-	migrations "github.com/rijum8906/relay/services/user/db/migrations"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/repository/profile"
 )
@@ -135,25 +132,9 @@ func newTestRepo(t *testing.T) (profile.ProfileRepository, *db.Queries, context.
 	t.Cleanup(pool.Close)
 
 	querier := db.New(pool)
-	applyMigrations(t, ctx, pool)
 	resetTables(t, ctx, pool)
 
 	return profile.NewProfileRepository(querier), querier, ctx
-}
-
-func applyMigrations(t *testing.T, ctx context.Context, pool db.DBTX) {
-	t.Helper()
-
-	allMigrations, err := migrations.All()
-	if err != nil {
-		t.Fatalf("migrations.All() error = %v", err)
-	}
-
-	for _, migration := range allMigrations {
-		if _, err := pool.Exec(ctx, migration.Content); err != nil && !isIgnorableMigrationError(err) {
-			t.Fatalf("apply migration %s error = %v", migration.Name, err)
-		}
-	}
 }
 
 func resetTables(t *testing.T, ctx context.Context, pool db.DBTX) {
@@ -197,20 +178,6 @@ func mustCreateProfile(t *testing.T, repo profile.ProfileRepository, ctx context
 
 func uniqueEmail() string {
 	return "profile-" + uuid.NewString() + "@example.com"
-}
-
-func isIgnorableMigrationError(err error) bool {
-	var pgErr *pgconn.PgError
-	if !errors.As(err, &pgErr) {
-		return false
-	}
-
-	switch pgErr.Code {
-	case "42P07", "42710":
-		return true
-	default:
-		return false
-	}
 }
 
 func TestMain(m *testing.M) {

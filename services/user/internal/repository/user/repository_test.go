@@ -2,16 +2,13 @@ package user_test
 
 import (
 	"context"
-	"errors"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	coredb "github.com/rijum8906/relay/packages/core/db"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
-	migrations "github.com/rijum8906/relay/services/user/db"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/repository/user"
 )
@@ -178,25 +175,9 @@ func newTestRepo(t *testing.T) (user.UserRepository, context.Context) {
 	}
 	t.Cleanup(pool.Close)
 
-	applyMigrations(t, ctx, pool)
 	resetUsersTable(t, ctx, pool)
 
 	return user.NewAuthRepository(db.New(pool)), ctx
-}
-
-func applyMigrations(t *testing.T, ctx context.Context, pool db.DBTX) {
-	t.Helper()
-
-	allMigrations, err := migrations.All()
-	if err != nil {
-		t.Fatalf("migrations.All() error = %v", err)
-	}
-
-	for _, migration := range allMigrations {
-		if _, err := pool.Exec(ctx, migration.Content); err != nil && !isIgnorableMigrationError(err) {
-			t.Fatalf("apply migration %s error = %v", migration.Name, err)
-		}
-	}
 }
 
 func resetUsersTable(t *testing.T, ctx context.Context, pool db.DBTX) {
@@ -228,20 +209,6 @@ func newRegisterRequest() *authv1.RegisterRequest {
 
 func uniqueEmail() string {
 	return "user-" + uuid.NewString() + "@example.com"
-}
-
-func isIgnorableMigrationError(err error) bool {
-	var pgErr *pgconn.PgError
-	if !errors.As(err, &pgErr) {
-		return false
-	}
-
-	switch pgErr.Code {
-	case "42P07", "42710":
-		return true
-	default:
-		return false
-	}
 }
 
 func TestMain(m *testing.M) {
