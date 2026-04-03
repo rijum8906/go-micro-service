@@ -68,7 +68,7 @@ func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest
 		return nil, appErr
 	}
 	if appErr == nil {
-		return nil, apperror.ErrValidation.WithMessage("email already exists")
+		return nil, apperror.New(apperror.CodeConflict, "email already exists")
 	}
 
 	hashedPass, appErr := s.utils.HashService.Hash(data.Password)
