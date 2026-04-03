@@ -9,7 +9,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	coredb "github.com/rijum8906/relay/packages/core/db"
 	"github.com/rijum8906/relay/packages/core/env"
-	migrations "github.com/rijum8906/relay/services/user/db/migrations"
+	migrations "github.com/rijum8906/relay/services/user/db"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	}
 
 	pool, appErr := coredb.Connect(ctx, coredb.Config{
-		Host:        cfg.DBHost,
+		Host:        "localhost",
 		Port:        cfg.DBPort,
 		User:        cfg.DBUser,
 		Password:    cfg.DBPassword,
