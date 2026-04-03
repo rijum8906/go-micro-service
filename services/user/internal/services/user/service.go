@@ -2,17 +2,16 @@ package user
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreutils"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/user/internal/utils"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *dto.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError) {
@@ -32,7 +31,7 @@ func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.Gener
 	return &userv1.GenerateScopedTokenResponse{
 		Token: &modelsv1.Token{
 			Value:     scopedToken,
-			ExpiresAt: timestamppb.New(time.Now().Add(s.env.ScopedTokenTTL)),
+			ExpiresAt: coreutils.ParseToProtoTimestamp(s.env.ScopedTokenTTL),
 		},
 	}, nil
 }
@@ -80,7 +79,7 @@ func (s *userService) ChangePassword(ctx context.Context, req *userv1.ChangePass
 	}, nil
 }
 
-func (s *userService) UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError) {
+func (s *userService) UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest, userInfo *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update profile name request is required")
 	}
@@ -88,6 +87,10 @@ func (s *userService) UpdateProfileName(ctx context.Context, req *userv1.UpdateP
 	profileID, err := uuid.Parse(req.GetProfileId())
 	if err != nil {
 		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
+	}
+
+	if appErr := s.validateProfileAccess(ctx, profileID, userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	profile, appErr := s.repos.Profile.UpdateProfileNames(ctx, profileID, req.GetFirstName(), req.GetLastName())
@@ -98,7 +101,7 @@ func (s *userService) UpdateProfileName(ctx context.Context, req *userv1.UpdateP
 	return utils.MapProfile(profile), nil
 }
 
-func (s *userService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError) {
+func (s *userService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest, userInfo *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update profile avatar request is required")
 	}
@@ -106,6 +109,10 @@ func (s *userService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.Up
 	profileID, err := uuid.Parse(req.GetProfileId())
 	if err != nil {
 		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
+	}
+
+	if appErr := s.validateProfileAccess(ctx, profileID, userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	profile, appErr := s.repos.Profile.UpdateProfileAvatar(ctx, profileID, req.GetAvatarUrl())
@@ -150,4 +157,26 @@ func (s *userService) GetUser(ctx context.Context, userInfo *dto.UserInfo) (*mod
 	}
 
 	return utils.MapUser(user), nil
+}
+
+func (s *userService) validateProfileAccess(ctx context.Context, profileID uuid.UUID, userInfo *dto.UserInfo) *apperror.AppError {
+	if userInfo == nil || userInfo.UserID == "" {
+		return apperror.ErrValidation.WithMessage("user metadata is required")
+	}
+
+	userID, appErr := utils.NewUUID(userInfo.UserID)
+	if appErr != nil {
+		return appErr
+	}
+
+	profile, appErr := s.repos.Profile.GetProfileByUserID(ctx, userID)
+	if appErr != nil {
+		return appErr
+	}
+
+	if profile.ID != profileID {
+		return apperror.ErrForbidden.WithMessage("profile does not belong to user")
+	}
+
+	return nil
 }

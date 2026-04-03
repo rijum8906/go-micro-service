@@ -7,32 +7,98 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/rijum8906/relay/packages/core/apperror"
+	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 )
 
 // GetSessions is the resolver for the GetSessions field.
 func (r *queryResolver) GetSessions(ctx context.Context, input *model.GetSessionsInput) ([]*model.Session, error) {
-	panic(fmt.Errorf("not implemented: GetSessions - GetSessions"))
+	if input == nil || input.PaginationRequest == nil {
+		return nil, apperror.ErrValidation.WithMessage("pagination request is required")
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.SessionClient.GetSessions(ctx, &sessionv1.GetSessionsRequest{
+		Page: &corev1.PaginationRequest{
+			Page:  input.PaginationRequest.Page,
+			Limit: input.PaginationRequest.Limit,
+		},
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapSessions(res.Sessions), nil
 }
 
 // GetActiveSessions is the resolver for the GetActiveSessions field.
 func (r *queryResolver) GetActiveSessions(ctx context.Context, input model.ScopedTokenInput) ([]*model.Session, error) {
-	panic(fmt.Errorf("not implemented: GetActiveSessions - GetActiveSessions"))
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.SessionClient.GetActiveSessions(ctx, &corev1.EmptyRequest{})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapSessions(res.Sessions), nil
 }
 
 // GetCurrentSession is the resolver for the GetCurrentSession field.
 func (r *queryResolver) GetCurrentSession(ctx context.Context) (*model.Session, error) {
-	panic(fmt.Errorf("not implemented: GetCurrentSession - GetCurrentSession"))
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.SessionClient.GetCurrentSession(ctx, &corev1.EmptyRequest{})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapSession(res), nil
 }
 
 // MyProfile is the resolver for the MyProfile field.
 func (r *queryResolver) MyProfile(ctx context.Context) (*model.Profile, error) {
-	panic(fmt.Errorf("not implemented: MyProfile - MyProfile"))
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.UserClient.GetProfile(ctx, &corev1.EmptyRequest{})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapProfile(res), nil
 }
 
 // Me is the resolver for the Me field.
 func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: Me - Me"))
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapUser(res), nil
 }
