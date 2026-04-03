@@ -39,11 +39,14 @@ jobs:
           go-version: "1.26.1"
           cache: true
 
+      - name: Verify Go Version
+        run: go version
+
       - name: Setup Workspace
         run: |
-          go work init
-          go work add services/*
-          go work add packages/*
+          (which go) work init
+          (which go) work add services/*
+          (which go) work add packages/*
 
       - name: Install Dependencies
         run: go mod download
