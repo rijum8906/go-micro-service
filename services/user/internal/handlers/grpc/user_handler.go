@@ -59,7 +59,12 @@ func (h *UserHandler) UpdateProfileName(ctx context.Context, req *userv1.UpdateP
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("update profile name request is required"))
 	}
 
-	result, appErr := h.service.UpdateProfileName(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("update profile name user metadata is required"))
+	}
+
+	result, appErr := h.service.UpdateProfileName(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -72,7 +77,12 @@ func (h *UserHandler) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.Up
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("update profile avatar request is required"))
 	}
 
-	result, appErr := h.service.UpdateProfileAvatarUrl(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("update profile avatar user metadata is required"))
+	}
+
+	result, appErr := h.service.UpdateProfileAvatarUrl(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}

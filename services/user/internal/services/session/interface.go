@@ -19,6 +19,7 @@ type SessionService interface {
 	GetCurrentSession(ctx context.Context, userInfo *dto.UserInfo) (*modelsv1.Session, *apperror.AppError)
 	RevokeSession(ctx context.Context, req *sessionv1.RevokeSessionRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 	RevokeAllSessions(ctx context.Context, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
+	RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 	TerminateExpiredSessions(ctx context.Context) (*corev1.SuccessResponse, *apperror.AppError)
   RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 }

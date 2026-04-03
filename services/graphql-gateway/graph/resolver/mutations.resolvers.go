@@ -7,11 +7,11 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
@@ -217,7 +217,27 @@ func (r *mutationResolver) RevokeAllSessions(ctx context.Context, input model.Sc
 
 // RevokeOthersSession is the resolver for the RevokeOthersSession field.
 func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.MutationResponse, error) {
-	panic(fmt.Errorf("not implemented: RevokeOthersSession - RevokeOthersSession"))
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.SessionClient.RevokeOtherSessions(ctx, &sessionv1.RevokeOtherSessionsRequest{
+		ScopedToken:      input.ScopedToken,
+		CurrentSessionId: input.Token,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+	if !res.Success {
+		return nil, apperror.ErrInternal.WithMessage("failed to revoke other sessions")
+	}
+
+	return &model.MutationResponse{Success: res.Success, Message: "sessions revoked"}, nil
 }
 
 // GenerateScopedToken is the resolver for the GenerateScopedToken field.
@@ -255,15 +275,72 @@ func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdt
 
 // UpdateProfileAvatarURL is the resolver for the UpdateProfileAvatarUrl field.
 func (r *mutationResolver) UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error) {
-	panic(fmt.Errorf("not implemented: UpdateProfileAvatarURL - UpdateProfileAvatarUrl"))
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.UserClient.UpdateProfileAvatarUrl(ctx, &userv1.UpdateProfileAvatarUrlRequest{
+		ProfileId: input.ProfileID,
+		AvatarUrl: input.AvatarURL,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapProfile(res), nil
 }
 
 // UpdateProfileName is the resolver for the UpdateProfileName field.
 func (r *mutationResolver) UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error) {
-	panic(fmt.Errorf("not implemented: UpdateProfileName - UpdateProfileName"))
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.UserClient.UpdateProfileName(ctx, &userv1.UpdateProfileNameRequest{
+		ProfileId: input.ProfileID,
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapProfile(res), nil
 }
 
 // ChangePassword is the resolver for the ChangePassword field.
 func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error) {
-	panic(fmt.Errorf("not implemented: ChangePassword - ChangePassword"))
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.UserClient.ChangePassword(ctx, &userv1.ChangePasswordRequest{
+		ScopedToken: &modelsv1.Token{
+			Value: input.Token,
+		},
+		NewPassword: input.NewPassword,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+	if !res.Success {
+		return nil, apperror.ErrInternal.WithMessage("failed to change password")
+	}
+
+	return &model.MutationResponse{Success: res.Success, Message: "password updated"}, nil
 }

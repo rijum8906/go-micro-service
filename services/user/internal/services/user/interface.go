@@ -16,8 +16,8 @@ import (
 type UserService interface {
 	GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *dto.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError)
 	ChangePassword(ctx context.Context, req *userv1.ChangePasswordRequest) (*corev1.SuccessResponse, *apperror.AppError)
-	UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError)
-	UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError)
+	UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
+	UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
 	GetProfile(ctx context.Context, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
 	GetUser(ctx context.Context, user *dto.UserInfo) (*modelsv1.User, *apperror.AppError)
 }
