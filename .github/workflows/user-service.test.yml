@@ -58,7 +58,7 @@ jobs:
 
       - name: Run Migration
         run: |
-          atlas migrate apply --url "${{ env.TEST_DB_URL }}" --dir "file://db/migrations" --auto-approve --allow-dirty
+          atlas migrate apply --url "${{ env.TEST_DB_URL }}" --dir "file://db/migrations" --allow-dirty
 
       - name: Run unit tests
         working-directory: services/user
