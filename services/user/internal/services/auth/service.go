@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreutils"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -14,7 +15,6 @@ import (
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/utils"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
@@ -66,6 +66,9 @@ func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest
 	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
 	if appErr != nil && appErr.Type != apperror.TypeNotFound {
 		return nil, appErr
+	}
+	if appErr == nil {
+		return nil, apperror.ErrValidation.WithMessage("email already exists")
 	}
 
 	hashedPass, appErr := s.utils.HashService.Hash(data.Password)
@@ -158,10 +161,8 @@ func (s *authService) RefreshToken(ctx context.Context, user *dto.UserInfo) (*au
 
 	return &authv1.RefreshTokenResponse{
 		AccessToken: &modelsv1.Token{
-			Value: accessToken,
-			ExpiresAt: &timestamppb.Timestamp{
-				Seconds: int64(s.env.SessionTTL.Seconds()),
-			},
+			Value:     accessToken,
+			ExpiresAt: coreutils.ParseToProtoTimestamp(s.env.SessionTTL),
 		},
 	}, nil
 }
