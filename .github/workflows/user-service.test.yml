@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 env:
-  TEST_DB_URL: "postgres://test_user:test_password@postgres:5433/test_db?sslmode=disable&search_path=public"
+  TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
 
 jobs:
   test:
