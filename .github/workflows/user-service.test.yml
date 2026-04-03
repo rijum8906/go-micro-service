@@ -43,7 +43,10 @@ jobs:
         run: go version
 
       - name: Setup Workspace
-        run: go work init && go work add services/* && go work add packages/*
+        run: |
+          go work init
+          go work use services/*
+          go work use packages/*
 
       - name: Install Dependencies
         run: go mod download
