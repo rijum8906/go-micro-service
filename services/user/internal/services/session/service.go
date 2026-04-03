@@ -142,7 +142,7 @@ func (s *sessionService) RevokeAllSessions(ctx context.Context, userInfo *dto.Us
 	}, nil
 }
 
-func (s *sessionService) RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *sessionService) RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("revoke other sessions request is required")
 	}
