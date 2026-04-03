@@ -21,7 +21,7 @@ type SessionService interface {
 	RevokeAllSessions(ctx context.Context, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 	RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 	TerminateExpiredSessions(ctx context.Context) (*corev1.SuccessResponse, *apperror.AppError)
-  RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
+   RevokeOtherSessions(ctx context.Context, req *sessionv1.RevokeOtherSessionsRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 }
 
 type sessionService struct {
