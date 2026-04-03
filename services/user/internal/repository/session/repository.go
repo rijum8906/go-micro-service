@@ -60,6 +60,17 @@ func (r *sessionRepository) RevokeAllSessions(ctx context.Context, userID uuid.U
 	return nil
 }
 
+func (r *sessionRepository) RevokeOtherSessions(ctx context.Context, userID, currentSessionID uuid.UUID) *apperror.AppError {
+	err := r.q.RevokeOtherSessions(ctx, db.RevokeOtherSessionsParams{
+		UserID: userID,
+		ID:     currentSessionID,
+	})
+	if err != nil {
+		return apperror.ErrInternal.WithMessage("Failed to revoke other sessions").WithDetail("error", err.Error())
+	}
+	return nil
+}
+
 func (r *sessionRepository) TerminateExpiredSessions(ctx context.Context) *apperror.AppError {
 	err := r.q.DeleteExpiredSessions(ctx)
 	if err != nil {

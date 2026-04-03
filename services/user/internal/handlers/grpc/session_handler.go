@@ -121,7 +121,7 @@ func (h *SessionHandler) RevokeOtherSessions(ctx context.Context, req *sessionv1
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("revoke other sessions user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("revoke other sessions metadata is required"))
 	}
 
 	result, appErr := h.service.RevokeOtherSessions(ctx, req, &userInfo)

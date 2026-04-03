@@ -27,6 +27,7 @@ type Querier interface {
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	RevokeActiveSessions(ctx context.Context, userID uuid.UUID) error
+	RevokeOtherSessions(ctx context.Context, arg RevokeOtherSessionsParams) error
 	RevokeSession(ctx context.Context, id uuid.UUID) error
 	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) (Session, error)
