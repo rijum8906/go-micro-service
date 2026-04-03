@@ -1,6 +1,6 @@
 type Token {
   value: String!
-  expiresIn: DateTime!
+  expiresAt: DateTime!
 }
 
 type AuthTokens {

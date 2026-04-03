@@ -1,0 +1,6 @@
+extend type Mutation {
+  GenerateScopedToken(input: GenerateScopedTokenInput!): ScopedTokenResponse!
+  UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
+  UpdateProfileName(input: UpdateProfileNameInput!): Profile!
+  ChangePassword(input: ChangePasswordInput!): MutationResponse!
+}

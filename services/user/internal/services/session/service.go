@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/metadata"
+	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
@@ -16,7 +16,7 @@ const (
 	activeSessionLimit int32 = 100
 )
 
-func (s *sessionService) GetSessions(ctx context.Context, req *sessionv1.GetSessionsRequest, userInfo *metadata.UserInfo) (*sessionv1.GetSessionsResponse, *apperror.AppError) {
+func (s *sessionService) GetSessions(ctx context.Context, req *sessionv1.GetSessionsRequest, userInfo *dto.UserInfo) (*sessionv1.GetSessionsResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("get sessions request is required")
 	}
@@ -39,10 +39,9 @@ func (s *sessionService) GetSessions(ctx context.Context, req *sessionv1.GetSess
 	return &sessionv1.GetSessionsResponse{
 		Sessions: utils.MapSessions(*sessions),
 	}, nil
-
 }
 
-func (s *sessionService) GetActiveSessions(ctx context.Context, userInfo *metadata.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError) {
+func (s *sessionService) GetActiveSessions(ctx context.Context, userInfo *dto.UserInfo) (*sessionv1.GetActiveSessionsResponse, *apperror.AppError) {
 	userID, appErr := utils.NewUUID(userInfo.UserID)
 	if appErr != nil {
 		return nil, appErr
@@ -58,7 +57,7 @@ func (s *sessionService) GetActiveSessions(ctx context.Context, userInfo *metada
 	}, nil
 }
 
-func (s *sessionService) GetCurrentSession(ctx context.Context, userInfo *metadata.UserInfo) (*modelsv1.Session, *apperror.AppError) {
+func (s *sessionService) GetCurrentSession(ctx context.Context, userInfo *dto.UserInfo) (*modelsv1.Session, *apperror.AppError) {
 	if userInfo == nil || userInfo.UserID == "" || userInfo.SessionID == "" {
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}
@@ -80,23 +79,18 @@ func (s *sessionService) GetCurrentSession(ctx context.Context, userInfo *metada
 	return utils.MapSession(*session), nil
 }
 
-func (s *sessionService) RevokeSession(ctx context.Context, req *sessionv1.RevokeSessionRequest, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *sessionService) RevokeSession(ctx context.Context, req *sessionv1.RevokeSessionRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("revoke session request is required")
 	}
 	if userInfo == nil || userInfo.UserID == "" {
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}
-	if req.GetSessionId() == "" {
+	if req.GetTokenToRevoke() == "" {
 		return nil, apperror.ErrValidation.WithMessage("session id is required")
 	}
 
-	sessionID, appErr := utils.NewUUID(req.GetSessionId())
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	session, appErr := s.repos.Session.GetSession(ctx, sessionID)
+	session, appErr := s.repos.Session.GetSessionByRefreshToken(ctx, req.GetTokenToRevoke())
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -105,17 +99,21 @@ func (s *sessionService) RevokeSession(ctx context.Context, req *sessionv1.Revok
 		return nil, apperror.ErrForbidden.WithMessage("session does not belong to user")
 	}
 
-	appErr = s.repos.Session.RevokeSession(ctx, sessionID)
+	// Delete refresh token from db
+	appErr = s.repos.Session.RevokeSession(ctx, session.ID)
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	// delete access token from cache
+	s.utils.TokenManager.RevokeAuthToken(ctx, userInfo.UserID, session.ID.String())
 
 	return &corev1.SuccessResponse{
 		Success: true,
 	}, nil
 }
 
-func (s *sessionService) RevokeAllSessions(ctx context.Context, userInfo *metadata.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *sessionService) RevokeAllSessions(ctx context.Context, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if userInfo == nil || userInfo.UserID == "" || userInfo.SessionID == "" {
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}
@@ -130,10 +128,14 @@ func (s *sessionService) RevokeAllSessions(ctx context.Context, userInfo *metada
 		return nil, appErr
 	}
 
+	// delete refresh token from db
 	appErr = s.utils.TokenManager.RevokeAllUserTokens(ctx, userInfo.UserID)
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	// delete access token from cache
+	s.utils.TokenManager.RevokeAllUserTokens(ctx, userInfo.UserID)
 
 	return &corev1.SuccessResponse{
 		Success: true,

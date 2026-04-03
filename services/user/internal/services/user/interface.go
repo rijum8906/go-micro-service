@@ -5,8 +5,8 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/env"
-	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
@@ -14,12 +14,12 @@ import (
 )
 
 type UserService interface {
-	GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *metadata.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError)
+	GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *dto.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError)
 	ChangePassword(ctx context.Context, req *userv1.ChangePasswordRequest) (*corev1.SuccessResponse, *apperror.AppError)
 	UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest) (*modelsv1.Profile, *apperror.AppError)
 	UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, *apperror.AppError)
-	GetProfile(ctx context.Context, user *metadata.UserInfo) (*modelsv1.Profile, *apperror.AppError)
-	GetUser(ctx context.Context, user *metadata.UserInfo) (*modelsv1.User, *apperror.AppError)
+	GetProfile(ctx context.Context, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
+	GetUser(ctx context.Context, user *dto.UserInfo) (*modelsv1.User, *apperror.AppError)
 }
 
 type userService struct {

@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
-	"github.com/rijum8906/relay/services/user/internal/dto"
 )
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, data *dto.Register) (*db.User, *apperror.AppError)
+	CreateUser(ctx context.Context, data *authv1.RegisterRequest) (*db.User, *apperror.AppError)
 	UpdateUserPassword(ctx context.Context, id uuid.UUID, newPassHash string) *apperror.AppError
 	UpdateUserEmail(ctx context.Context, id uuid.UUID, email string) *apperror.AppError
 	VerifyUserEmail(ctx context.Context, id uuid.UUID) *apperror.AppError

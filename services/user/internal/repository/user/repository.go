@@ -9,11 +9,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
-	"github.com/rijum8906/relay/services/user/internal/dto"
 )
 
-func (r *userRepository) CreateUser(ctx context.Context, data *dto.Register) (*db.User, *apperror.AppError) {
+func (r *userRepository) CreateUser(ctx context.Context, data *authv1.RegisterRequest) (*db.User, *apperror.AppError) {
 	user, err := r.q.CreateUser(ctx, db.CreateUserParams{
 		Email: data.Email,
 		PasswordHash: pgtype.Text{

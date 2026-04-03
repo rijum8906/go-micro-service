@@ -7,6 +7,7 @@
 package modelsv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -25,7 +26,7 @@ const (
 type Token struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
-	ExpiresIn     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -67,9 +68,61 @@ func (x *Token) GetValue() string {
 	return ""
 }
 
-func (x *Token) GetExpiresIn() *timestamppb.Timestamp {
+func (x *Token) GetExpiresAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.ExpiresIn
+		return x.ExpiresAt
+	}
+	return nil
+}
+
+type ScopedToken struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Scope         v1.TokenScope          `protobuf:"varint,1,opt,name=scope,proto3,enum=core.v1.TokenScope" json:"scope,omitempty"`
+	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScopedToken) Reset() {
+	*x = ScopedToken{}
+	mi := &file_user_service_models_v1_model_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScopedToken) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScopedToken) ProtoMessage() {}
+
+func (x *ScopedToken) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_models_v1_model_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScopedToken.ProtoReflect.Descriptor instead.
+func (*ScopedToken) Descriptor() ([]byte, []int) {
+	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ScopedToken) GetScope() v1.TokenScope {
+	if x != nil {
+		return x.Scope
+	}
+	return v1.TokenScope(0)
+}
+
+func (x *ScopedToken) GetExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiresAt
 	}
 	return nil
 }
@@ -84,7 +137,7 @@ type AuthToken struct {
 
 func (x *AuthToken) Reset() {
 	*x = AuthToken{}
-	mi := &file_user_service_models_v1_model_proto_msgTypes[1]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -96,7 +149,7 @@ func (x *AuthToken) String() string {
 func (*AuthToken) ProtoMessage() {}
 
 func (x *AuthToken) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_models_v1_model_proto_msgTypes[1]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,7 +162,7 @@ func (x *AuthToken) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthToken.ProtoReflect.Descriptor instead.
 func (*AuthToken) Descriptor() ([]byte, []int) {
-	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{1}
+	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *AuthToken) GetAccessToken() *Token {
@@ -142,7 +195,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_user_service_models_v1_model_proto_msgTypes[2]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -154,7 +207,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_models_v1_model_proto_msgTypes[2]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -167,7 +220,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{2}
+	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *User) GetId() string {
@@ -241,7 +294,7 @@ type Profile struct {
 
 func (x *Profile) Reset() {
 	*x = Profile{}
-	mi := &file_user_service_models_v1_model_proto_msgTypes[3]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -253,7 +306,7 @@ func (x *Profile) String() string {
 func (*Profile) ProtoMessage() {}
 
 func (x *Profile) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_models_v1_model_proto_msgTypes[3]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -266,7 +319,7 @@ func (x *Profile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Profile.ProtoReflect.Descriptor instead.
 func (*Profile) Descriptor() ([]byte, []int) {
-	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{3}
+	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Profile) GetId() string {
@@ -334,7 +387,7 @@ type Session struct {
 
 func (x *Session) Reset() {
 	*x = Session{}
-	mi := &file_user_service_models_v1_model_proto_msgTypes[4]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -346,7 +399,7 @@ func (x *Session) String() string {
 func (*Session) ProtoMessage() {}
 
 func (x *Session) ProtoReflect() protoreflect.Message {
-	mi := &file_user_service_models_v1_model_proto_msgTypes[4]
+	mi := &file_user_service_models_v1_model_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -359,7 +412,7 @@ func (x *Session) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Session.ProtoReflect.Descriptor instead.
 func (*Session) Descriptor() ([]byte, []int) {
-	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{4}
+	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Session) GetId() string {
@@ -422,11 +475,15 @@ var File_user_service_models_v1_model_proto protoreflect.FileDescriptor
 
 const file_user_service_models_v1_model_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/models/v1/model.proto\x12\x16user_service.models.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"X\n" +
+	"\"user_service/models/v1/model.proto\x12\x16user_service.models.v1\x1a\x13core/v1/enums.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"X\n" +
 	"\x05Token\x12\x14\n" +
 	"\x05value\x18\x01 \x01(\tR\x05value\x129\n" +
 	"\n" +
-	"expires_in\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresIn\"\x91\x01\n" +
+	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"s\n" +
+	"\vScopedToken\x12)\n" +
+	"\x05scope\x18\x01 \x01(\x0e2\x13.core.v1.TokenScopeR\x05scope\x129\n" +
+	"\n" +
+	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\x91\x01\n" +
 	"\tAuthToken\x12@\n" +
 	"\faccess_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vaccessToken\x12B\n" +
 	"\rrefresh_token\x18\x02 \x01(\v2\x1d.user_service.models.v1.TokenR\frefreshToken\"\x93\x03\n" +
@@ -481,33 +538,37 @@ func file_user_service_models_v1_model_proto_rawDescGZIP() []byte {
 	return file_user_service_models_v1_model_proto_rawDescData
 }
 
-var file_user_service_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_user_service_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_user_service_models_v1_model_proto_goTypes = []any{
 	(*Token)(nil),                 // 0: user_service.models.v1.Token
-	(*AuthToken)(nil),             // 1: user_service.models.v1.AuthToken
-	(*User)(nil),                  // 2: user_service.models.v1.User
-	(*Profile)(nil),               // 3: user_service.models.v1.Profile
-	(*Session)(nil),               // 4: user_service.models.v1.Session
-	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*ScopedToken)(nil),           // 1: user_service.models.v1.ScopedToken
+	(*AuthToken)(nil),             // 2: user_service.models.v1.AuthToken
+	(*User)(nil),                  // 3: user_service.models.v1.User
+	(*Profile)(nil),               // 4: user_service.models.v1.Profile
+	(*Session)(nil),               // 5: user_service.models.v1.Session
+	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(v1.TokenScope)(0),            // 7: core.v1.TokenScope
 }
 var file_user_service_models_v1_model_proto_depIdxs = []int32{
-	5,  // 0: user_service.models.v1.Token.expires_in:type_name -> google.protobuf.Timestamp
-	0,  // 1: user_service.models.v1.AuthToken.access_token:type_name -> user_service.models.v1.Token
-	0,  // 2: user_service.models.v1.AuthToken.refresh_token:type_name -> user_service.models.v1.Token
-	5,  // 3: user_service.models.v1.User.email_verified_at:type_name -> google.protobuf.Timestamp
-	5,  // 4: user_service.models.v1.User.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
-	5,  // 5: user_service.models.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	5,  // 6: user_service.models.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	5,  // 7: user_service.models.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
-	5,  // 8: user_service.models.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
-	5,  // 9: user_service.models.v1.Session.last_login_at:type_name -> google.protobuf.Timestamp
-	5,  // 10: user_service.models.v1.Session.created_at:type_name -> google.protobuf.Timestamp
-	5,  // 11: user_service.models.v1.Session.updated_at:type_name -> google.protobuf.Timestamp
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	6,  // 0: user_service.models.v1.Token.expires_at:type_name -> google.protobuf.Timestamp
+	7,  // 1: user_service.models.v1.ScopedToken.scope:type_name -> core.v1.TokenScope
+	6,  // 2: user_service.models.v1.ScopedToken.expires_at:type_name -> google.protobuf.Timestamp
+	0,  // 3: user_service.models.v1.AuthToken.access_token:type_name -> user_service.models.v1.Token
+	0,  // 4: user_service.models.v1.AuthToken.refresh_token:type_name -> user_service.models.v1.Token
+	6,  // 5: user_service.models.v1.User.email_verified_at:type_name -> google.protobuf.Timestamp
+	6,  // 6: user_service.models.v1.User.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
+	6,  // 7: user_service.models.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 8: user_service.models.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	6,  // 9: user_service.models.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 10: user_service.models.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
+	6,  // 11: user_service.models.v1.Session.last_login_at:type_name -> google.protobuf.Timestamp
+	6,  // 12: user_service.models.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 13: user_service.models.v1.Session.updated_at:type_name -> google.protobuf.Timestamp
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_user_service_models_v1_model_proto_init() }
@@ -521,7 +582,7 @@ func file_user_service_models_v1_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_models_v1_model_proto_rawDesc), len(file_user_service_models_v1_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
