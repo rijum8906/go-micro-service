@@ -2,6 +2,9 @@ package auth
 
 import (
 	"context"
+	"fmt"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -64,11 +67,11 @@ func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, clie
 
 func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
-	if appErr != nil && appErr.Code != apperror.CodeInternal {
-		return nil, appErr
-	}
 	if appErr == nil {
 		return nil, apperror.New(apperror.CodeConflict, "email already exists")
+	}
+	if appErr.Code != apperror.CodeNotFound {
+		return nil, appErr
 	}
 
 	hashedPass, appErr := s.utils.HashService.Hash(data.Password)
@@ -181,10 +184,30 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return &corev1.SuccessResponse{Success: true}, nil
 	}
 
-	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeVerifyEmail); appErr != nil {
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeVerifyEmail)
+	if appErr != nil {
 		return nil, appErr
 	}
-	// TODO: Send the verification email or notification containing the scoped token.
+
+	email := dto.EmailMetadata{
+		JobSubject: dto.JobEmailVerification,
+		Sender:     s.emailSender(),
+		Recipients: []dto.EmailRecipient{{Email: user.Email}},
+		Content: dto.EmailContent{
+			SubjectLine:  "Verify your email",
+			TemplateName: "verify-email",
+		},
+		BodyData: map[string]string{
+			"app_name":           s.env.AppName,
+			"email":              user.Email,
+			"verification_token": scopedToken,
+			"verification_url":   s.buildTokenURL("verify-email", scopedToken),
+		},
+	}
+
+	if appErr = s.publisher.PublishEmail(email); appErr != nil {
+		return nil, appErr
+	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
 }
@@ -196,16 +219,36 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 
 	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
-		if appErr.Code == apperror.CodeInternal {
+		if appErr.Code == apperror.CodeNotFound {
 			return &corev1.SuccessResponse{Success: true}, nil
 		}
 		return nil, appErr
 	}
 
-	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword); appErr != nil {
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword)
+	if appErr != nil {
 		return nil, appErr
 	}
-	// TODO: Send the password reset email or notification containing the scoped token.
+
+	email := dto.EmailMetadata{
+		JobSubject: dto.JobEmailPasswordReset,
+		Sender:     s.emailSender(),
+		Recipients: []dto.EmailRecipient{{Email: user.Email}},
+		Content: dto.EmailContent{
+			SubjectLine:  "Reset your password",
+			TemplateName: "password-reset",
+		},
+		BodyData: map[string]string{
+			"app_name":    s.env.AppName,
+			"email":       user.Email,
+			"reset_token": scopedToken,
+			"reset_url":   s.buildTokenURL("reset-password", scopedToken),
+		},
+	}
+
+	if appErr = s.publisher.PublishEmail(email); appErr != nil {
+		return nil, appErr
+	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
 }
@@ -290,4 +333,16 @@ func (s *authService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 	return &corev1.SuccessResponse{
 		Success: true,
 	}, nil
+}
+
+func (s *authService) emailSender() dto.EmailSender {
+	return dto.EmailSender{
+		Email: s.env.EmailFromAddress,
+		Name:  s.env.EmailFromName,
+	}
+}
+
+func (s *authService) buildTokenURL(path, scopedToken string) string {
+	baseURL := strings.TrimRight(s.env.AppBaseURL, "/")
+	return fmt.Sprintf("%s/%s?token=%s", baseURL, strings.TrimLeft(path, "/"), url.QueryEscape(scopedToken))
 }

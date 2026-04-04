@@ -16,6 +16,9 @@ type Config struct {
 	AppName string `env:"APP_NAME,required"`
 	Port    int    `env:"PORT" envDefault:"8080"`
 
+	// App / Web
+	AppBaseURL string `env:"APP_BASE_URL" envDefault:"http://localhost:3000"`
+
 	// Services' Address
 	UserServiceAddr    string `env:"USER_SERVICE_ADDR" envDefault:"user-service:8081"`
 	GraphQLGatewayAddr string `env:"GRAPHQL_GATEWAY_ADDR" envDefault:"graphql-gateway:8080"`
@@ -32,6 +35,14 @@ type Config struct {
 	RedisHost string `env:"REDIS_HOST,required"`
 	RedisPort int    `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPass string `env:"REDIS_PASS"`
+
+	// NATS
+	NATSURL        string `env:"NATS_URL" envDefault:"nats://localhost:4222"`
+	NATSClientName string `env:"NATS_CLIENT_NAME" envDefault:"user-service"`
+
+	// Email
+	EmailFromAddress string `env:"EMAIL_FROM_ADDRESS" envDefault:"noreply@relay.local"`
+	EmailFromName    string `env:"EMAIL_FROM_NAME" envDefault:"Relay"`
 
 	// JWT
 	JWTSecret    string `env:"JWT_SECRET,required"`

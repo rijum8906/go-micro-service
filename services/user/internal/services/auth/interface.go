@@ -24,12 +24,17 @@ type AuthService interface {
 }
 
 type authService struct {
-	env   *env.Config
-	repos *utils.Repos
-	utils *utils.Utils
+	env       *env.Config
+	repos     *utils.Repos
+	utils     *utils.Utils
+	publisher EmailPublisher
 }
 
-func NewAuthService(repo *utils.Repos, utils *utils.Utils, env *env.Config) (AuthService, *apperror.AppError) {
+type EmailPublisher interface {
+	PublishEmail(dto.EmailMetadata) *apperror.AppError
+}
+
+func NewAuthService(repo *utils.Repos, utils *utils.Utils, env *env.Config, publisher EmailPublisher) (AuthService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("repos", "auth repositories are not configured")
 	}
@@ -39,10 +44,14 @@ func NewAuthService(repo *utils.Repos, utils *utils.Utils, env *env.Config) (Aut
 	if env == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("env", "auth environment config is not configured")
 	}
+	if publisher == nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("publisher", "email publisher is not configured")
+	}
 
 	return &authService{
-		env:   env,
-		repos: repo,
-		utils: utils,
+		env:       env,
+		repos:     repo,
+		utils:     utils,
+		publisher: publisher,
 	}, nil
 }
