@@ -8,6 +8,11 @@ SELECT *
 FROM sessions
 WHERE user_id = $1 ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
 
+-- name: GetActiveSessionsByUserID :many
+SELECT *
+FROM sessions
+WHERE user_id = $1 AND is_revoked = false ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
+
 -- name: GetSessionByRefreshTokenHash :one
 SELECT *
 FROM sessions

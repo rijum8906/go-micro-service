@@ -33,7 +33,7 @@ func (r *sessionRepository) GetSessionByRefreshToken(ctx context.Context, token 
 }
 
 func (r *sessionRepository) GetActiveSessions(ctx context.Context, userID uuid.UUID, limit, offfset int32) (*[]db.Session, *apperror.AppError) {
-	sessions, err := r.q.GetSessionsByUserID(ctx, db.GetSessionsByUserIDParams{
+	sessions, err := r.q.GetActiveSessionsByUserID(ctx, db.GetActiveSessionsByUserIDParams{
 		UserID: userID,
 		Limit:  limit,
 		Offset: offfset,

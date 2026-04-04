@@ -102,38 +102,111 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
-const UpdateUser = `-- name: UpdateUser :one
+const UpdateUserEmail = `-- name: UpdateUserEmail :one
 UPDATE users
-SET email = $2,
-password_hash = $3,
-is_email_verified = $4,
-email_verified_at = $5,
-two_factor_enabled = $6,
-two_factor_enabled_at = $7
+SET email = $2
 WHERE id = $1
 RETURNING id, email, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at
 `
 
-type UpdateUserParams struct {
+type UpdateUserEmailParams struct {
+	ID    uuid.UUID
+	Email string
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error) {
+	row := q.db.QueryRow(ctx, UpdateUserEmail, arg.ID, arg.Email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.IsEmailVerified,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.EmailVerifiedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const UpdateUserIsEmailVerified = `-- name: UpdateUserIsEmailVerified :one
+UPDATE users
+SET is_email_verified = $2,
+    email_verified_at = $3
+WHERE id = $1
+RETURNING id, email, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at
+`
+
+type UpdateUserIsEmailVerifiedParams struct {
+	ID              uuid.UUID
+	IsEmailVerified bool
+	EmailVerifiedAt pgtype.Timestamptz
+}
+
+func (q *Queries) UpdateUserIsEmailVerified(ctx context.Context, arg UpdateUserIsEmailVerifiedParams) (User, error) {
+	row := q.db.QueryRow(ctx, UpdateUserIsEmailVerified, arg.ID, arg.IsEmailVerified, arg.EmailVerifiedAt)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.IsEmailVerified,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.EmailVerifiedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const UpdateUserPassword = `-- name: UpdateUserPassword :one
+UPDATE users
+SET password_hash = $2
+WHERE id = $1
+RETURNING id, email, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at
+`
+
+type UpdateUserPasswordParams struct {
+	ID           uuid.UUID
+	PasswordHash pgtype.Text
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
+	row := q.db.QueryRow(ctx, UpdateUserPassword, arg.ID, arg.PasswordHash)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.IsEmailVerified,
+		&i.TwoFactorEnabled,
+		&i.TwoFactorEnabledAt,
+		&i.EmailVerifiedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const UpdateUserTwoFactor = `-- name: UpdateUserTwoFactor :one
+UPDATE users
+SET two_factor_enabled = $2,
+    two_factor_enabled_at = $3
+WHERE id = $1
+RETURNING id, email, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at
+`
+
+type UpdateUserTwoFactorParams struct {
 	ID                 uuid.UUID
-	Email              string
-	PasswordHash       pgtype.Text
-	IsEmailVerified    bool
-	EmailVerifiedAt    pgtype.Timestamptz
 	TwoFactorEnabled   bool
 	TwoFactorEnabledAt pgtype.Timestamptz
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, UpdateUser,
-		arg.ID,
-		arg.Email,
-		arg.PasswordHash,
-		arg.IsEmailVerified,
-		arg.EmailVerifiedAt,
-		arg.TwoFactorEnabled,
-		arg.TwoFactorEnabledAt,
-	)
+func (q *Queries) UpdateUserTwoFactor(ctx context.Context, arg UpdateUserTwoFactorParams) (User, error) {
+	row := q.db.QueryRow(ctx, UpdateUserTwoFactor, arg.ID, arg.TwoFactorEnabled, arg.TwoFactorEnabledAt)
 	var i User
 	err := row.Scan(
 		&i.ID,

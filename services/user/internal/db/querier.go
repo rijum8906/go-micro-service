@@ -19,7 +19,8 @@ type Querier interface {
 	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteSessionsByUserID(ctx context.Context, userID uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
-	GetProfile(ctx context.Context, userID uuid.UUID) (Profile, error)
+	GetActiveSessionsByUserID(ctx context.Context, arg GetActiveSessionsByUserIDParams) ([]Session, error)
+	GetProfile(ctx context.Context, id uuid.UUID) (Profile, error)
 	GetProfileByUserID(ctx context.Context, userID uuid.UUID) (Profile, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetSessionByRefreshTokenHash(ctx context.Context, refreshTokenHash string) (Session, error)
@@ -29,9 +30,13 @@ type Querier interface {
 	RevokeActiveSessions(ctx context.Context, userID uuid.UUID) error
 	RevokeOtherSessions(ctx context.Context, arg RevokeOtherSessionsParams) error
 	RevokeSession(ctx context.Context, id uuid.UUID) error
-	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
+	UpdateProfileAvatarURL(ctx context.Context, arg UpdateProfileAvatarURLParams) (Profile, error)
+	UpdateProfileName(ctx context.Context, arg UpdateProfileNameParams) (Profile, error)
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) (Session, error)
-	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)
+	UpdateUserIsEmailVerified(ctx context.Context, arg UpdateUserIsEmailVerifiedParams) (User, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
+	UpdateUserTwoFactor(ctx context.Context, arg UpdateUserTwoFactorParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)
