@@ -10,26 +10,26 @@ import (
 
 func (c *Client) Subscribe(subject string, handler func([]byte)) (*nats.Subscription, *apperror.AppError) {
 	if c == nil || c.Conn == nil {
-		return nil, apperror.New(apperror.TypeInternal, apperror.CodeInternal, "nats client is not initialized")
+		return nil, apperror.New(apperror.CodeInternal, "nats client is not initialized")
 	}
 
 	if !c.IsConnected() {
-		return nil, apperror.New(apperror.TypeThirdParty, apperror.CodeThirdParty, "nats connection is not ready")
+		return nil, apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
 	}
 
 	if handler == nil {
-		return nil, apperror.New(apperror.TypeValidation, apperror.CodeValidation, "subscriber handler is required")
+		return nil, apperror.New(apperror.CodeValidation, "subscriber handler is required")
 	}
 
 	if !dto.IsValidJobSubject(subject) {
-		return nil, apperror.New(apperror.TypeValidation, apperror.CodeValidation, "invalid job subject").WithDetail("subject", subject)
+		return nil, apperror.New(apperror.CodeValidation, "invalid job subject").WithDetail("subject", subject)
 	}
 
 	sub, err := c.Conn.Subscribe(subject, func(msg *nats.Msg) {
 		handler(msg.Data)
 	})
 	if err != nil {
-		return nil, apperror.New(apperror.TypeThirdParty, apperror.CodeThirdParty, "failed to subscribe to nats subject").WithDetail("error", err.Error())
+		return nil, apperror.New(apperror.CodeThirdParty, "failed to subscribe to nats subject").WithDetail("error", err.Error())
 	}
 
 	return sub, nil
@@ -37,7 +37,7 @@ func (c *Client) Subscribe(subject string, handler func([]byte)) (*nats.Subscrip
 
 func (c *Client) SubscribeEmail(subject string, handler func(dto.EmailMessage)) (*nats.Subscription, *apperror.AppError) {
 	if handler == nil {
-		return nil, apperror.New(apperror.TypeValidation, apperror.CodeValidation, "email subscriber handler is required")
+		return nil, apperror.New(apperror.CodeValidation, "email subscriber handler is required")
 	}
 
 	return c.Subscribe(subject, func(data []byte) {
@@ -56,7 +56,7 @@ func (c *Client) SubscribeEmail(subject string, handler func(dto.EmailMessage)) 
 
 func (c *Client) SubscribeNotification(subject string, handler func(dto.NotificationMessage)) (*nats.Subscription, *apperror.AppError) {
 	if handler == nil {
-		return nil, apperror.New(apperror.TypeValidation, apperror.CodeValidation, "notification subscriber handler is required")
+		return nil, apperror.New(apperror.CodeValidation, "notification subscriber handler is required")
 	}
 
 	return c.Subscribe(subject, func(data []byte) {

@@ -45,7 +45,7 @@ func Connect(ctx context.Context, cfg Config) (*Client, *apperror.AppError) {
 
 	conn, err := nats.Connect(url, opts...)
 	if err != nil {
-		return nil, apperror.New(apperror.TypeThirdParty, apperror.CodeThirdParty, "failed to connect to nats").WithDetail("error", err.Error())
+		return nil, apperror.New(apperror.CodeThirdParty, "failed to connect to nats").WithDetail("error", err.Error())
 	}
 
 	return &Client{
@@ -59,7 +59,7 @@ func (c *Client) Drain() *apperror.AppError {
 	}
 
 	if err := c.Conn.Drain(); err != nil {
-		return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to drain nats connection").WithDetail("error", err.Error())
+		return apperror.New(apperror.CodeInternal, "failed to drain nats connection").WithDetail("error", err.Error())
 	}
 
 	return nil

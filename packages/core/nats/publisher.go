@@ -9,19 +9,19 @@ import (
 
 func (c *Client) Publish(subject string, payload []byte) *apperror.AppError {
 	if c == nil || c.Conn == nil {
-		return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "nats client is not initialized")
+		return apperror.New(apperror.CodeInternal, "nats client is not initialized")
 	}
 
 	if !c.IsConnected() {
-		return apperror.New(apperror.TypeThirdParty, apperror.CodeThirdParty, "nats connection is not ready")
+		return apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
 	}
 
 	if !dto.IsValidJobSubject(subject) {
-		return apperror.New(apperror.TypeValidation, apperror.CodeValidation, "invalid job subject").WithDetail("subject", subject)
+		return apperror.New(apperror.CodeValidation, "invalid job subject").WithDetail("subject", subject)
 	}
 
 	if err := c.Conn.Publish(subject, payload); err != nil {
-		return apperror.New(apperror.TypeThirdParty, apperror.CodeThirdParty, "failed to publish nats message").WithDetail("error", err.Error())
+		return apperror.New(apperror.CodeThirdParty, "failed to publish nats message").WithDetail("error", err.Error())
 	}
 
 	return nil
@@ -30,7 +30,7 @@ func (c *Client) Publish(subject string, payload []byte) *apperror.AppError {
 func (c *Client) PublishJSON(subject string, payload any) *apperror.AppError {
 	raw, err := json.Marshal(payload)
 	if err != nil {
-		return apperror.New(apperror.TypeInternal, apperror.CodeInternal, "failed to marshal nats payload").WithDetail("error", err.Error())
+		return apperror.New(apperror.CodeInternal, "failed to marshal nats payload").WithDetail("error", err.Error())
 	}
 
 	return c.Publish(subject, raw)

@@ -405,5 +405,5 @@ func validateURLField(field, value string) *apperror.AppError {
 }
 
 func validationError(field, message string) *apperror.AppError {
-	return apperror.New(apperror.TypeValidation, apperror.CodeValidation, message).WithDetail(field, message)
+	return apperror.New(apperror.CodeValidation, message).WithDetail(field, message)
 }
