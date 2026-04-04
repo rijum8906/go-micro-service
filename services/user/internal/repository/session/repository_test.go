@@ -29,7 +29,7 @@ func TestSessionRepository_CreateAndGetSession(t *testing.T) {
 	if appErr != nil {
 		t.Fatalf("failed to get session: %v", appErr)
 	}
-	if verifySession(session1, fetchedSess) {
+	if !verifySession(session1, fetchedSess) {
 		t.Fatalf("GetSession() session = %v, want %v", fetchedSess, session1)
 	}
 
@@ -38,7 +38,7 @@ func TestSessionRepository_CreateAndGetSession(t *testing.T) {
 	if appErr != nil {
 		t.Fatalf("failed to get session: %v", appErr)
 	}
-	if verifySession(session1, fetchedSess2) {
+	if !verifySession(session1, fetchedSess2) {
 		t.Fatalf("GetSessionByRefreshToken() session = %v, want %v", fetchedSess2, session1)
 	}
 }

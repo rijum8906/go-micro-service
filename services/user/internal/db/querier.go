@@ -33,7 +33,10 @@ type Querier interface {
 	UpdateProfileAvatarURL(ctx context.Context, arg UpdateProfileAvatarURLParams) (Profile, error)
 	UpdateProfileName(ctx context.Context, arg UpdateProfileNameParams) (Profile, error)
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) (Session, error)
-	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error)
+	UpdateUserIsEmailVerified(ctx context.Context, arg UpdateUserIsEmailVerifiedParams) (User, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
+	UpdateUserTwoFactor(ctx context.Context, arg UpdateUserTwoFactorParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

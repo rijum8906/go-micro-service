@@ -51,7 +51,7 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*db.
 }
 
 func (r *userRepository) UpdateUserPassword(ctx context.Context, id uuid.UUID, newPassHash string) *apperror.AppError {
-	_, err := r.q.UpdateUser(ctx, db.UpdateUserParams{
+	_, err := r.q.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
 		ID: id,
 		PasswordHash: pgtype.Text{
 			Valid:  true,
@@ -65,7 +65,7 @@ func (r *userRepository) UpdateUserPassword(ctx context.Context, id uuid.UUID, n
 }
 
 func (r *userRepository) UpdateUserEmail(ctx context.Context, id uuid.UUID, email string) *apperror.AppError {
-	_, err := r.q.UpdateUser(ctx, db.UpdateUserParams{
+	_, err := r.q.UpdateUserEmail(ctx, db.UpdateUserEmailParams{
 		ID:    id,
 		Email: email,
 	})
@@ -76,22 +76,18 @@ func (r *userRepository) UpdateUserEmail(ctx context.Context, id uuid.UUID, emai
 }
 
 func (r *userRepository) VerifyUserEmail(ctx context.Context, id uuid.UUID) *apperror.AppError {
-	user, appErr := r.GetUser(ctx, id)
+	_, appErr := r.GetUser(ctx, id)
 	if appErr != nil {
 		return appErr
 	}
 
-	_, err := r.q.UpdateUser(ctx, db.UpdateUserParams{
+	_, err := r.q.UpdateUserIsEmailVerified(ctx, db.UpdateUserIsEmailVerifiedParams{
 		ID:              id,
-		Email:           user.Email,
-		PasswordHash:    user.PasswordHash,
 		IsEmailVerified: true,
 		EmailVerifiedAt: pgtype.Timestamptz{
 			Time:  time.Now(),
 			Valid: true,
 		},
-		TwoFactorEnabled:   user.TwoFactorEnabled,
-		TwoFactorEnabledAt: user.TwoFactorEnabledAt,
 	})
 	if err != nil {
 		return apperror.ErrInternal.WithMessage("Failed to update user").WithDetail("error", err.Error())
