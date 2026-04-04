@@ -63,11 +63,11 @@ func (q *Queries) DeleteProfile(ctx context.Context, id uuid.UUID) error {
 const GetProfile = `-- name: GetProfile :one
 SELECT id, user_id, first_name, last_name, avatar_url, created_at, updated_at
 FROM profiles
-WHERE user_id = $1 LIMIT 1
+WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetProfile(ctx context.Context, userID uuid.UUID) (Profile, error) {
-	row := q.db.QueryRow(ctx, GetProfile, userID)
+func (q *Queries) GetProfile(ctx context.Context, id uuid.UUID) (Profile, error) {
+	row := q.db.QueryRow(ctx, GetProfile, id)
 	var i Profile
 	err := row.Scan(
 		&i.ID,
@@ -102,29 +102,49 @@ func (q *Queries) GetProfileByUserID(ctx context.Context, userID uuid.UUID) (Pro
 	return i, err
 }
 
-const UpdateProfile = `-- name: UpdateProfile :one
+const UpdateProfileAvatarURL = `-- name: UpdateProfileAvatarURL :one
 UPDATE profiles
-SET first_name = $2,
-last_name = $3,
-avatar_url = $4
+SET avatar_url = $2
 WHERE id = $1
 RETURNING id, user_id, first_name, last_name, avatar_url, created_at, updated_at
 `
 
-type UpdateProfileParams struct {
+type UpdateProfileAvatarURLParams struct {
 	ID        uuid.UUID
-	FirstName string
-	LastName  string
 	AvatarUrl string
 }
 
-func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error) {
-	row := q.db.QueryRow(ctx, UpdateProfile,
-		arg.ID,
-		arg.FirstName,
-		arg.LastName,
-		arg.AvatarUrl,
+func (q *Queries) UpdateProfileAvatarURL(ctx context.Context, arg UpdateProfileAvatarURLParams) (Profile, error) {
+	row := q.db.QueryRow(ctx, UpdateProfileAvatarURL, arg.ID, arg.AvatarUrl)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.FirstName,
+		&i.LastName,
+		&i.AvatarUrl,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
+	return i, err
+}
+
+const UpdateProfileName = `-- name: UpdateProfileName :one
+UPDATE profiles
+SET first_name = $2,
+last_name = $3
+WHERE id = $1
+RETURNING id, user_id, first_name, last_name, avatar_url, created_at, updated_at
+`
+
+type UpdateProfileNameParams struct {
+	ID        uuid.UUID
+	FirstName string
+	LastName  string
+}
+
+func (q *Queries) UpdateProfileName(ctx context.Context, arg UpdateProfileNameParams) (Profile, error) {
+	row := q.db.QueryRow(ctx, UpdateProfileName, arg.ID, arg.FirstName, arg.LastName)
 	var i Profile
 	err := row.Scan(
 		&i.ID,
