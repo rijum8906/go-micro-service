@@ -189,15 +189,16 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
-	email := dto.EmailMetadata{
-		JobSubject: dto.JobEmailVerification,
-		Sender:     s.emailSender(),
-		Recipients: []dto.EmailRecipient{{Email: user.Email}},
-		Content: dto.EmailContent{
-			SubjectLine:  "Verify your email",
-			TemplateName: "verify-email",
+	email := dto.EmailMessage{
+		Meta: dto.EmailMetadata{
+			JobSubject: dto.JobEmailVerification,
+			Sender:     s.emailSender(),
+			Recipients: []dto.EmailRecipient{{Email: user.Email}},
 		},
-		BodyData: map[string]string{
+		Template: dto.EmailTemplate{
+			Name: "verify-email",
+		},
+		BodyContent: map[string]string{
 			"app_name":           s.env.AppName,
 			"email":              user.Email,
 			"verification_token": scopedToken,
@@ -230,15 +231,16 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 		return nil, appErr
 	}
 
-	email := dto.EmailMetadata{
-		JobSubject: dto.JobEmailPasswordReset,
-		Sender:     s.emailSender(),
-		Recipients: []dto.EmailRecipient{{Email: user.Email}},
-		Content: dto.EmailContent{
-			SubjectLine:  "Reset your password",
-			TemplateName: "password-reset",
+	email := dto.EmailMessage{
+		Meta: dto.EmailMetadata{
+			JobSubject: dto.JobEmailPasswordReset,
+			Sender:     s.emailSender(),
+			Recipients: []dto.EmailRecipient{{Email: user.Email}},
 		},
-		BodyData: map[string]string{
+		Template: dto.EmailTemplate{
+			Name: "password-reset",
+		},
+		BodyContent: map[string]string{
 			"app_name":    s.env.AppName,
 			"email":       user.Email,
 			"reset_token": scopedToken,

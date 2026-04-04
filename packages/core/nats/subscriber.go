@@ -35,13 +35,13 @@ func (c *Client) Subscribe(subject string, handler func([]byte)) (*nats.Subscrip
 	return sub, nil
 }
 
-func (c *Client) SubscribeEmail(subject string, handler func(dto.EmailMetadata)) (*nats.Subscription, *apperror.AppError) {
+func (c *Client) SubscribeEmail(subject string, handler func(dto.EmailMessage)) (*nats.Subscription, *apperror.AppError) {
 	if handler == nil {
 		return nil, apperror.New(apperror.CodeValidation, "email subscriber handler is required")
 	}
 
 	return c.Subscribe(subject, func(data []byte) {
-		var message dto.EmailMetadata
+		var message dto.EmailMessage
 		if err := json.Unmarshal(data, &message); err != nil {
 			return
 		}

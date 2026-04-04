@@ -31,7 +31,7 @@ type authService struct {
 }
 
 type EmailPublisher interface {
-	PublishEmail(dto.EmailMetadata) *apperror.AppError
+	PublishEmail(dto.EmailMessage) *apperror.AppError
 }
 
 func NewAuthService(repo *utils.Repos, utils *utils.Utils, env *env.Config, publisher EmailPublisher) (AuthService, *apperror.AppError) {

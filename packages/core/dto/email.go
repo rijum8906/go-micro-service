@@ -8,13 +8,21 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
+type EmailMessage struct {
+	Meta        EmailMetadata     `json:"meta"`
+	BodyContent map[string]string `json:"body_content"`
+	Attachments []EmailAttachment `json:"attachments"`
+	Template    EmailTemplate     `json:"template"`
+}
+
 type EmailMetadata struct {
-	JobSubject  JobSubject        `json:"job_subject"`
-	Sender      EmailSender       `json:"sender"`
-	Recipients  []EmailRecipient  `json:"recipients"`
-	Content     EmailContent      `json:"content"`
-	Attachments []EmailAttachment `json:"attachments,omitempty"`
-	BodyData    map[string]string
+	JobSubject JobSubject       `json:"job_subject"`
+	Sender     EmailSender      `json:"sender"`
+	Recipients []EmailRecipient `json:"recipients"`
+}
+
+type EmailTemplate struct {
+	Name string `json:"name"`
 }
 
 type EmailRecipient struct {
@@ -25,13 +33,6 @@ type EmailRecipient struct {
 type EmailSender struct {
 	Email string `json:"email"`
 	Name  string `json:"name,omitempty"`
-}
-
-type EmailContent struct {
-	SubjectLine  string `json:"subject_line"`
-	TemplateName string `json:"template_name,omitempty"`
-	TextBody     string `json:"text_body,omitempty"`
-	HTMLBody     string `json:"html_body,omitempty"`
 }
 
 type EmailAttachment struct {
@@ -89,6 +90,28 @@ type WebhookNotificationData struct {
 	Payload map[string]any `json:"payload,omitempty"`
 }
 
+func (m EmailMessage) Validate() *apperror.AppError {
+	if appErr := m.Meta.Validate(); appErr != nil {
+		return appErr
+	}
+
+	if appErr := m.Template.Validate(); appErr != nil {
+		return appErr
+	}
+
+	if len(m.BodyContent) == 0 {
+		return validationError("body_content", "body content is required")
+	}
+
+	for i, attachment := range m.Attachments {
+		if appErr := attachment.Validate(); appErr != nil {
+			return appErr.WithDetail("attachment_index", strconv.Itoa(i))
+		}
+	}
+
+	return nil
+}
+
 func (m EmailMetadata) Validate() *apperror.AppError {
 	if !IsValidJobSubject(m.JobSubject.String()) || m.JobSubject.Domain() != string(DomainEmail) {
 		return validationError("job_subject", "invalid email job subject")
@@ -108,26 +131,7 @@ func (m EmailMetadata) Validate() *apperror.AppError {
 		}
 	}
 
-	if appErr := m.Content.Validate(); appErr != nil {
-		return appErr
-	}
-
-	for i, attachment := range m.Attachments {
-		if appErr := attachment.Validate(); appErr != nil {
-			return appErr.WithDetail("attachment_index", strconv.Itoa(i))
-		}
-	}
-
-	switch m.JobSubject {
-	case JobEmailVerification, JobEmailPasswordReset, JobEmailWelcome, JobEmailNotification,
-		JobEmailTaskAssigned, JobEmailDailyDigest:
-		if len(m.BodyData) == 0 {
-			return validationError("body_data", "body data is required")
-		}
-		return nil
-	default:
-		return nil
-	}
+	return nil
 }
 
 func (r EmailRecipient) Validate() *apperror.AppError {
@@ -138,13 +142,9 @@ func (s EmailSender) Validate() *apperror.AppError {
 	return validateEmailField("sender.email", s.Email)
 }
 
-func (c EmailContent) Validate() *apperror.AppError {
-	if c.SubjectLine == "" {
-		return validationError("content.subject_line", "subject line is required")
-	}
-
-	if c.TemplateName == "" && c.TextBody == "" && c.HTMLBody == "" {
-		return validationError("content", "template name, text body, or html body is required")
+func (t EmailTemplate) Validate() *apperror.AppError {
+	if t.Name == "" {
+		return validationError("template.name", "template name is required")
 	}
 
 	return nil

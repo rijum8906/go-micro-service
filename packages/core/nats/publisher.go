@@ -36,12 +36,12 @@ func (c *Client) PublishJSON(subject string, payload any) *apperror.AppError {
 	return c.Publish(subject, raw)
 }
 
-func (c *Client) PublishEmail(message dto.EmailMetadata) *apperror.AppError {
+func (c *Client) PublishEmail(message dto.EmailMessage) *apperror.AppError {
 	if appErr := message.Validate(); appErr != nil {
 		return appErr
 	}
 
-	return c.PublishJSON(message.JobSubject.String(), message)
+	return c.PublishJSON(message.Meta.JobSubject.String(), message)
 }
 
 func (c *Client) PublishNotification(message dto.NotificationMessage) *apperror.AppError {
