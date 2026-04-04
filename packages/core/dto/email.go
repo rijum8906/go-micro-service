@@ -8,15 +8,13 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
-type EmailMessage struct {
-	JobSubject        JobSubject              `json:"job_subject"`
-	Sender            EmailSender             `json:"sender"`
-	Recipients        []EmailRecipient        `json:"recipients"`
-	Content           EmailContent            `json:"content"`
-	Attachments       []EmailAttachment       `json:"attachments,omitempty"`
-	VerificationData  *VerificationEmailData  `json:"verification_data,omitempty"`
-	PasswordResetData *PasswordResetEmailData `json:"password_reset_data,omitempty"`
-	WelcomeData       *WelcomeEmailData       `json:"welcome_data,omitempty"`
+type EmailMetadata struct {
+	JobSubject  JobSubject        `json:"job_subject"`
+	Sender      EmailSender       `json:"sender"`
+	Recipients  []EmailRecipient  `json:"recipients"`
+	Content     EmailContent      `json:"content"`
+	Attachments []EmailAttachment `json:"attachments,omitempty"`
+	BodyData    map[string]string
 }
 
 type EmailRecipient struct {
@@ -40,29 +38,6 @@ type EmailAttachment struct {
 	FileName    string `json:"file_name"`
 	ContentType string `json:"content_type"`
 	URL         string `json:"url"`
-}
-
-type VerificationEmailData struct {
-	UserID            string `json:"user_id"`
-	Email             string `json:"email"`
-	FirstName         string `json:"first_name,omitempty"`
-	VerificationToken string `json:"verification_token"`
-	VerificationURL   string `json:"verification_url"`
-}
-
-type PasswordResetEmailData struct {
-	UserID     string `json:"user_id"`
-	Email      string `json:"email"`
-	FirstName  string `json:"first_name,omitempty"`
-	ResetToken string `json:"reset_token"`
-	ResetURL   string `json:"reset_url"`
-}
-
-type WelcomeEmailData struct {
-	UserID    string `json:"user_id"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name,omitempty"`
-	LoginURL  string `json:"login_url"`
 }
 
 type NotificationChannel string
@@ -114,7 +89,7 @@ type WebhookNotificationData struct {
 	Payload map[string]any `json:"payload,omitempty"`
 }
 
-func (m EmailMessage) Validate() *apperror.AppError {
+func (m EmailMetadata) Validate() *apperror.AppError {
 	if !IsValidJobSubject(m.JobSubject.String()) || m.JobSubject.Domain() != string(DomainEmail) {
 		return validationError("job_subject", "invalid email job subject")
 	}
@@ -144,21 +119,12 @@ func (m EmailMessage) Validate() *apperror.AppError {
 	}
 
 	switch m.JobSubject {
-	case JobEmailVerification:
-		if m.VerificationData == nil {
-			return validationError("verification_data", "verification data is required")
+	case JobEmailVerification, JobEmailPasswordReset, JobEmailWelcome, JobEmailNotification,
+		JobEmailTaskAssigned, JobEmailDailyDigest:
+		if len(m.BodyData) == 0 {
+			return validationError("body_data", "body data is required")
 		}
-		return m.VerificationData.Validate()
-	case JobEmailPasswordReset:
-		if m.PasswordResetData == nil {
-			return validationError("password_reset_data", "password reset data is required")
-		}
-		return m.PasswordResetData.Validate()
-	case JobEmailWelcome:
-		if m.WelcomeData == nil {
-			return validationError("welcome_data", "welcome data is required")
-		}
-		return m.WelcomeData.Validate()
+		return nil
 	default:
 		return nil
 	}
@@ -192,54 +158,6 @@ func (a EmailAttachment) Validate() *apperror.AppError {
 		return validationError("attachment.content_type", "content type is required")
 	}
 	if appErr := validateURLField("attachment.url", a.URL); appErr != nil {
-		return appErr
-	}
-
-	return nil
-}
-
-func (d VerificationEmailData) Validate() *apperror.AppError {
-	if d.UserID == "" {
-		return validationError("verification_data.user_id", "user id is required")
-	}
-	if appErr := validateEmailField("verification_data.email", d.Email); appErr != nil {
-		return appErr
-	}
-	if d.VerificationToken == "" {
-		return validationError("verification_data.verification_token", "verification token is required")
-	}
-	if appErr := validateURLField("verification_data.verification_url", d.VerificationURL); appErr != nil {
-		return appErr
-	}
-
-	return nil
-}
-
-func (d PasswordResetEmailData) Validate() *apperror.AppError {
-	if d.UserID == "" {
-		return validationError("password_reset_data.user_id", "user id is required")
-	}
-	if appErr := validateEmailField("password_reset_data.email", d.Email); appErr != nil {
-		return appErr
-	}
-	if d.ResetToken == "" {
-		return validationError("password_reset_data.reset_token", "reset token is required")
-	}
-	if appErr := validateURLField("password_reset_data.reset_url", d.ResetURL); appErr != nil {
-		return appErr
-	}
-
-	return nil
-}
-
-func (d WelcomeEmailData) Validate() *apperror.AppError {
-	if d.UserID == "" {
-		return validationError("welcome_data.user_id", "user id is required")
-	}
-	if appErr := validateEmailField("welcome_data.email", d.Email); appErr != nil {
-		return appErr
-	}
-	if appErr := validateURLField("welcome_data.login_url", d.LoginURL); appErr != nil {
 		return appErr
 	}
 

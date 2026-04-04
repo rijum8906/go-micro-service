@@ -36,7 +36,7 @@ func (c *Client) PublishJSON(subject string, payload any) *apperror.AppError {
 	return c.Publish(subject, raw)
 }
 
-func (c *Client) PublishEmail(message dto.EmailMessage) *apperror.AppError {
+func (c *Client) PublishEmail(message dto.EmailMetadata) *apperror.AppError {
 	if appErr := message.Validate(); appErr != nil {
 		return appErr
 	}
