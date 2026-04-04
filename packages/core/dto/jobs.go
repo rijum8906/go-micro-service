@@ -103,7 +103,7 @@ func GetAllJobSubjects() []JobSubject {
 // IsValidJobSubject checks if subject follows job pattern
 func IsValidJobSubject(subject string) bool {
 	parts := strings.Split(subject, ".")
-	if len(parts) != 3 {
+	if len(parts) != 3 && len(parts) != 4 {
 		return false
 	}
 
@@ -118,4 +118,8 @@ func IsValidJobSubject(subject string) bool {
 // FormatJobSubject creates a formatted job subject
 func FormatJobSubject(domain Domain, entity, action string) JobSubject {
 	return JobSubject(string(domain) + "." + entity + "." + action)
+}
+
+func FormatSecondJobSubject(domain Domain, entity, subtype string, action string) JobSubject {
+	return JobSubject(string(domain) + "." + entity + "." + subtype + "." + action)
 }
