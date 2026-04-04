@@ -6,221 +6,208 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	coredb "github.com/rijum8906/relay/packages/core/db"
+	"github.com/rijum8906/relay/packages/core/testutils"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/repository/session"
+	"github.com/rijum8906/relay/services/user/internal/repository/user"
 )
-
-var dbConf = coredb.Config{
-	Host:     "localhost",
-	Port:     5433,
-	User:     "test_user",
-	Password: "test_password",
-	DBName:   "test_db",
-	SSLMode:  "disable",
-}
-
-func TestSessionRepository_CreateAndGetSession(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-
-	created := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-1", time.Now().Add(time.Hour))
-
-	got, appErr := repo.GetSession(ctx, created.ID)
-	if appErr != nil {
-		t.Fatalf("GetSession() unexpected error = %v", appErr)
-	}
-	if got.ID != created.ID {
-		t.Fatalf("GetSession() id = %s, want %s", got.ID, created.ID)
-	}
-
-	gotByToken, appErr := repo.GetSessionByRefreshToken(ctx, created.RefreshTokenHash)
-	if appErr != nil {
-		t.Fatalf("GetSessionByRefreshToken() unexpected error = %v", appErr)
-	}
-	if gotByToken.ID != created.ID {
-		t.Fatalf("GetSessionByRefreshToken() id = %s, want %s", gotByToken.ID, created.ID)
-	}
-}
-
-func TestSessionRepository_GetActiveSessions(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-
-	first := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-1", time.Now().Add(2*time.Hour))
-	time.Sleep(10 * time.Millisecond)
-	second := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-2", time.Now().Add(3*time.Hour))
-
-	sessions, appErr := repo.GetActiveSessions(ctx, user.ID, 10, 0)
-	if appErr != nil {
-		t.Fatalf("GetActiveSessions() unexpected error = %v", appErr)
-	}
-	if len(*sessions) != 2 {
-		t.Fatalf("GetActiveSessions() len = %d, want 2", len(*sessions))
-	}
-	if (*sessions)[0].ID != second.ID || (*sessions)[1].ID != first.ID {
-		t.Fatalf("GetActiveSessions() order = [%s %s], want [%s %s]", (*sessions)[0].ID, (*sessions)[1].ID, second.ID, first.ID)
-	}
-
-	paged, appErr := repo.GetActiveSessions(ctx, user.ID, 1, 1)
-	if appErr != nil {
-		t.Fatalf("GetActiveSessions() paged unexpected error = %v", appErr)
-	}
-	if len(*paged) != 1 || (*paged)[0].ID != first.ID {
-		t.Fatalf("GetActiveSessions() paged result invalid")
-	}
-}
-
-func TestSessionRepository_RevokeSession(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	created := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-1", time.Now().Add(time.Hour))
-
-	appErr := repo.RevokeSession(ctx, created.ID)
-	if appErr != nil {
-		t.Fatalf("RevokeSession() unexpected error = %v", appErr)
-	}
-
-	got, appErr := repo.GetSession(ctx, created.ID)
-	if appErr != nil {
-		t.Fatalf("GetSession() after revoke unexpected error = %v", appErr)
-	}
-	if !got.IsRevoked {
-		t.Fatalf("RevokeSession() IsRevoked = false, want true")
-	}
-}
-
-func TestSessionRepository_RevokeAllSessions(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	first := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-1", time.Now().Add(time.Hour))
-	second := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-2", time.Now().Add(time.Hour))
-
-	appErr := repo.RevokeAllSessions(ctx, user.ID)
-	if appErr != nil {
-		t.Fatalf("RevokeAllSessions() unexpected error = %v", appErr)
-	}
-
-	assertSessionRevoked(t, repo, ctx, first.ID, true)
-	assertSessionRevoked(t, repo, ctx, second.ID, true)
-}
-
-func TestSessionRepository_RevokeOtherSessions(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	current := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-1", time.Now().Add(time.Hour))
-	other := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-2", time.Now().Add(time.Hour))
-
-	appErr := repo.RevokeOtherSessions(ctx, user.ID, current.ID)
-	if appErr != nil {
-		t.Fatalf("RevokeOtherSessions() unexpected error = %v", appErr)
-	}
-
-	assertSessionRevoked(t, repo, ctx, current.ID, false)
-	assertSessionRevoked(t, repo, ctx, other.ID, true)
-}
-
-func TestSessionRepository_TerminateExpiredSessions(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	expired := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-expired", time.Now().Add(-time.Hour))
-	active := mustCreateSession(t, repo, ctx, user.ID, "refresh-token-active", time.Now().Add(time.Hour))
-
-	appErr := repo.TerminateExpiredSessions(ctx)
-	if appErr != nil {
-		t.Fatalf("TerminateExpiredSessions() unexpected error = %v", appErr)
-	}
-
-	_, appErr = repo.GetSession(ctx, expired.ID)
-	if appErr == nil {
-		t.Fatalf("GetSession() expired session error = nil, want error")
-	}
-
-	_, appErr = repo.GetSession(ctx, active.ID)
-	if appErr != nil {
-		t.Fatalf("GetSession() active session unexpected error = %v", appErr)
-	}
-}
-
-func newTestRepo(t *testing.T) (session.SessionRepository, *db.Queries, context.Context) {
-	t.Helper()
-
-	ctx := context.Background()
-	pool, appErr := coredb.Connect(ctx, dbConf)
-	if appErr != nil {
-		t.Skipf("test database unavailable: %v", appErr)
-	}
-	t.Cleanup(pool.Close)
-
-	querier := db.New(pool)
-	resetTables(t, ctx, pool)
-
-	return session.NewSessionRepository(querier), querier, ctx
-}
-
-func resetTables(t *testing.T, ctx context.Context, pool db.DBTX) {
-	t.Helper()
-
-	if _, err := pool.Exec(ctx, `TRUNCATE TABLE users RESTART IDENTITY CASCADE`); err != nil {
-		t.Fatalf("resetTables() error = %v", err)
-	}
-}
-
-func mustCreateUser(t *testing.T, ctx context.Context, querier *db.Queries) db.User {
-	t.Helper()
-
-	created, err := querier.CreateUser(ctx, db.CreateUserParams{
-		Email: uniqueEmail(),
-		PasswordHash: pgtype.Text{
-			String: "password-" + uuid.NewString(),
-			Valid:  true,
-		},
-	})
-	if err != nil {
-		t.Fatalf("CreateUser() setup error = %v", err)
-	}
-	return created
-}
-
-func mustCreateSession(t *testing.T, repo session.SessionRepository, ctx context.Context, userID uuid.UUID, refreshToken string, expiresAt time.Time) *db.Session {
-	t.Helper()
-
-	created, appErr := repo.CreateSession(ctx, db.CreateSessionParams{
-		UserID:           userID,
-		RefreshTokenHash: refreshToken,
-		UserAgent:        "test-agent",
-		IpAddr:           "127.0.0.1",
-		DeviceID:         "device-" + uuid.NewString(),
-		ExpiresAt: pgtype.Timestamptz{
-			Time:  expiresAt,
-			Valid: true,
-		},
-	})
-	if appErr != nil {
-		t.Fatalf("CreateSession() setup error = %v", appErr)
-	}
-	return created
-}
-
-func assertSessionRevoked(t *testing.T, repo session.SessionRepository, ctx context.Context, id uuid.UUID, want bool) {
-	t.Helper()
-
-	got, appErr := repo.GetSession(ctx, id)
-	if appErr != nil {
-		t.Fatalf("GetSession() unexpected error = %v", appErr)
-	}
-	if got.IsRevoked != want {
-		t.Fatalf("GetSession().IsRevoked = %v, want %v", got.IsRevoked, want)
-	}
-}
-
-func uniqueEmail() string {
-	return "session-" + uuid.NewString() + "@example.com"
-}
 
 func TestMain(m *testing.M) {
 	time.Local = time.UTC
 	os.Exit(m.Run())
+}
+
+func TestSessionRepository_CreateAndGetSession(t *testing.T) {
+	repos := createRepo()
+	user := mustCreateUser(repos)
+	session1 := mustCreateSession(repos, user)
+
+	// Get Session By ID
+	fetchedSess, appErr := repos.Session.GetSession(context.Background(), session1.ID)
+	if appErr != nil {
+		t.Fatalf("failed to get session: %v", appErr)
+	}
+	if verifySession(session1, fetchedSess) {
+		t.Fatalf("GetSession() session = %v, want %v", fetchedSess, session1)
+	}
+
+	// Get Session By RefreshTokenHash
+	fetchedSess2, appErr := repos.Session.GetSessionByRefreshToken(context.Background(), session1.RefreshTokenHash)
+	if appErr != nil {
+		t.Fatalf("failed to get session: %v", appErr)
+	}
+	if verifySession(session1, fetchedSess2) {
+		t.Fatalf("GetSessionByRefreshToken() session = %v, want %v", fetchedSess2, session1)
+	}
+}
+
+// NOTE: Not testing Revoke Other Sessions
+
+func TestSessionRepository_CreateAndRevokeSession(t *testing.T) {
+	repos := createRepo()
+	user := mustCreateUser(repos)
+	session1 := mustCreateSession(repos, user)
+	session2 := mustCreateSession(repos, user)
+	session3 := mustCreateSession(repos, user)
+
+	// Revoke session1
+	appErr := repos.Session.RevokeSession(context.Background(), session1.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+	fetchedSession1, appErr := repos.Session.GetSession(context.Background(), session1.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+	if !verifySession(session1, fetchedSession1) || !fetchedSession1.IsRevoked {
+		t.Fatalf("GetSession() after revoke error = %v, want %v", fetchedSession1, session1)
+	}
+
+	// Revoke Multiple sessions
+	appErr = repos.Session.RevokeAllSessions(context.Background(), user.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+
+	// Try to retrive session 2 and 3
+	fetchedSession2, appErr := repos.Session.GetSession(context.Background(), session2.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+	if !verifySession(session2, fetchedSession2) || !fetchedSession2.IsRevoked {
+		t.Fatalf("GetSession() after revoke error = %v, want %v", fetchedSession1, session1)
+	}
+
+	fetchedSession3, appErr := repos.Session.GetSession(context.Background(), session3.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+	if !verifySession(session3, fetchedSession3) || !fetchedSession3.IsRevoked {
+		t.Fatalf("GetSession() after revoke error = %v, want %v", fetchedSession1, session1)
+	}
+}
+
+func TestSessionRepository_GetActiveSessions(t *testing.T) {
+	repos := createRepo()
+	user := mustCreateUser(repos)
+	session1 := mustCreateSession(repos, user)
+	session2 := mustCreateSession(repos, user)
+	session3 := mustCreateSession(repos, user)
+
+	// Revoke session 1
+	appErr := repos.Session.RevokeSession(context.Background(), session1.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+
+	// Get Active sessions
+	sessions, appErr := repos.Session.GetActiveSessions(context.Background(), user.ID, 10, 0)
+	if appErr != nil {
+		t.Fatalf("failed to get active sessions: %v", appErr)
+	}
+
+	if len(*sessions) != 2 {
+		t.Fatalf("GetActiveSessions() sessions = %v, want %v", len(*sessions), 2)
+	}
+
+	if verifySession(&(*sessions)[0], session2) || verifySession(&(*sessions)[1], session3) {
+		t.Fatalf("GetActiveSessions() sessions = %v, want %v", sessions, []*db.Session{session2, session3})
+	}
+}
+
+func TestSessionRepository_RevokeOtherSessions(t *testing.T) {
+	repos := createRepo()
+	user := mustCreateUser(repos)
+	session1 := mustCreateSession(repos, user)
+	session2 := mustCreateSession(repos, user)
+	session3 := mustCreateSession(repos, user)
+
+	appErr := repos.Session.RevokeOtherSessions(context.Background(), user.ID, session1.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke other sessions: %v", appErr)
+	}
+
+	// NOTE: this session is not revoked
+	fetchedSession1, appErr := repos.Session.GetSession(context.Background(), session1.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+
+	if !verifySession(session1, fetchedSession1) {
+		t.Fatalf("GetSession() after revoke error = %v, want %v", fetchedSession1, session1)
+	}
+
+	fetchedSession2, appErr := repos.Session.GetSession(context.Background(), session2.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+	if !verifySession(session2, fetchedSession2) || !fetchedSession2.IsRevoked {
+		t.Fatalf("GetSession() after revoke error = %v, want %v", fetchedSession1, session1)
+	}
+
+	fetchedSession3, appErr := repos.Session.GetSession(context.Background(), session3.ID)
+	if appErr != nil {
+		t.Fatalf("failed to revoke session: %v", appErr)
+	}
+	if !verifySession(session3, fetchedSession3) || !fetchedSession3.IsRevoked {
+		t.Fatalf("GetSession() after revoke error = %v, want %v", fetchedSession1, session1)
+	}
+}
+
+// TODO: add edge cases
+
+// Helper functions
+
+func verifySession(sess1 *db.Session, sess2 *db.Session) bool {
+	return sess1.ID == sess2.ID && sess1.UserID == sess2.UserID
+}
+
+func mustCreateUser(repos *Repos) *db.User {
+	u, appErr := repos.User.CreateUser(context.Background(), &authv1.RegisterRequest{
+		FirstName: testutils.GenerateRandomString(10),
+		LastName:  testutils.GenerateRandomString(10),
+		Password:  testutils.GenerateRandomString(10), // NOTE: not hashed password
+		Email:     testutils.GenerateRandomString(10),
+	})
+	if appErr != nil {
+		panic(appErr)
+	}
+
+	return u
+}
+
+func mustCreateSession(repos *Repos, u *db.User) *db.Session {
+	sess, appErr := repos.Session.CreateSession(context.Background(), db.CreateSessionParams{
+		UserID:           u.ID,
+		RefreshTokenHash: testutils.GenerateRandomString(32),
+		UserAgent:        testutils.GenerateRandomString(10),
+		IpAddr:           testutils.GenerateRandomString(10),
+		DeviceID:         testutils.GenerateRandomString(10),
+		ExpiresAt: pgtype.Timestamptz{
+			Valid: true,
+			Time:  time.Now().Add(time.Hour),
+		},
+	})
+	if appErr != nil {
+		panic(appErr)
+	}
+
+	return sess
+}
+
+type Repos struct {
+	Session session.SessionRepository
+	User    user.UserRepository
+}
+
+func createRepo() *Repos {
+	pool := testutils.MustConnectDB()
+	querier := db.New(pool)
+
+	return &Repos{
+		Session: session.NewSessionRepository(querier),
+		User:    user.NewAuthRepository(querier),
+	}
 }

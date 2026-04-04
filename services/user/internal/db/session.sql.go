@@ -61,16 +61,6 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 	return i, err
 }
 
-const DeleteSession = `-- name: DeleteSession :exec
-DELETE FROM sessions
-WHERE id = $1
-`
-
-func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, DeleteSession, id)
-	return err
-}
-
 const DeleteExpiredSessions = `-- name: DeleteExpiredSessions :exec
 DELETE FROM sessions
 WHERE expires_at <= now()
@@ -78,6 +68,16 @@ WHERE expires_at <= now()
 
 func (q *Queries) DeleteExpiredSessions(ctx context.Context) error {
 	_, err := q.db.Exec(ctx, DeleteExpiredSessions)
+	return err
+}
+
+const DeleteSession = `-- name: DeleteSession :exec
+DELETE FROM sessions
+WHERE id = $1
+`
+
+func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, DeleteSession, id)
 	return err
 }
 
@@ -89,6 +89,50 @@ WHERE user_id = $1
 func (q *Queries) DeleteSessionsByUserID(ctx context.Context, userID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, DeleteSessionsByUserID, userID)
 	return err
+}
+
+const GetActiveSessionsByUserID = `-- name: GetActiveSessionsByUserID :many
+SELECT id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
+FROM sessions
+WHERE user_id = $1 AND is_revoked = false ORDER BY last_login_at DESC LIMIT $2 OFFSET $3
+`
+
+type GetActiveSessionsByUserIDParams struct {
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) GetActiveSessionsByUserID(ctx context.Context, arg GetActiveSessionsByUserIDParams) ([]Session, error) {
+	rows, err := q.db.Query(ctx, GetActiveSessionsByUserID, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Session{}
+	for rows.Next() {
+		var i Session
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.RefreshTokenHash,
+			&i.UserAgent,
+			&i.IpAddr,
+			&i.DeviceID,
+			&i.LastLoginAt,
+			&i.ExpiresAt,
+			&i.IsRevoked,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const GetSession = `-- name: GetSession :one

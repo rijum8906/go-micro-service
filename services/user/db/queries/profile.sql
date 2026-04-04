@@ -1,18 +1,23 @@
 -- name: GetProfile :one
 SELECT *
 FROM profiles
-WHERE user_id = $1 LIMIT 1;
+WHERE id = $1 LIMIT 1;
 
 -- name: GetProfileByUserID :one
 SELECT *
 FROM profiles
 WHERE user_id = $1 LIMIT 1;
 
--- name: UpdateProfile :one
+-- name: UpdateProfileName :one
 UPDATE profiles
 SET first_name = $2,
-last_name = $3,
-avatar_url = $4
+last_name = $3
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateProfileAvatarURL :one
+UPDATE profiles
+SET avatar_url = $2
 WHERE id = $1
 RETURNING *;
 

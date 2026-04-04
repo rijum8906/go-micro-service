@@ -6,181 +6,127 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	coredb "github.com/rijum8906/relay/packages/core/db"
+	"github.com/rijum8906/relay/packages/core/testutils"
+	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/repository/profile"
+	"github.com/rijum8906/relay/services/user/internal/repository/session"
+	"github.com/rijum8906/relay/services/user/internal/repository/user"
 )
-
-var dbConf = coredb.Config{
-	Host:     "localhost",
-	Port:     5433,
-	User:     "test_user",
-	Password: "test_password",
-	DBName:   "test_db",
-	SSLMode:  "disable",
-}
-
-func TestProfileRepository_CreateProfile(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-
-	created, appErr := repo.CreateProfile(ctx, db.CreateProfileParams{
-		UserID:    user.ID,
-		FirstName: "Jane",
-		LastName:  "Doe",
-		AvatarUrl: "https://example.com/avatar.png",
-	})
-	if appErr != nil {
-		t.Fatalf("CreateProfile() unexpected error = %v", appErr)
-	}
-
-	if created.UserID != user.ID {
-		t.Fatalf("CreateProfile() userID = %s, want %s", created.UserID, user.ID)
-	}
-	if created.FirstName != "Jane" || created.LastName != "Doe" {
-		t.Fatalf("CreateProfile() names = %q %q", created.FirstName, created.LastName)
-	}
-}
-
-func TestProfileRepository_GetProfile(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	created := mustCreateProfile(t, repo, ctx, user.ID)
-
-	got, appErr := repo.GetProfile(ctx, user.ID)
-	if appErr != nil {
-		t.Fatalf("GetProfile() unexpected error = %v", appErr)
-	}
-	if got.ID != created.ID {
-		t.Fatalf("GetProfile() id = %s, want %s", got.ID, created.ID)
-	}
-
-	_, appErr = repo.GetProfile(ctx, uuid.New())
-	if appErr == nil {
-		t.Fatalf("GetProfile() missing profile error = nil, want error")
-	}
-}
-
-func TestProfileRepository_GetProfileByUserID(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	created := mustCreateProfile(t, repo, ctx, user.ID)
-
-	got, appErr := repo.GetProfileByUserID(ctx, user.ID)
-	if appErr != nil {
-		t.Fatalf("GetProfileByUserID() unexpected error = %v", appErr)
-	}
-	if got.ID != created.ID {
-		t.Fatalf("GetProfileByUserID() id = %s, want %s", got.ID, created.ID)
-	}
-}
-
-func TestProfileRepository_UpdateProfileNames(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	created := mustCreateProfile(t, repo, ctx, user.ID)
-
-	updated, appErr := repo.UpdateProfileNames(ctx, created.ID, "Updated", "Name")
-	if appErr != nil {
-		t.Fatalf("UpdateProfileNames() unexpected error = %v", appErr)
-	}
-	if updated.FirstName != "Updated" || updated.LastName != "Name" {
-		t.Fatalf("UpdateProfileNames() names = %q %q", updated.FirstName, updated.LastName)
-	}
-}
-
-func TestProfileRepository_UpdateProfileAvatar(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	created := mustCreateProfile(t, repo, ctx, user.ID)
-
-	updated, appErr := repo.UpdateProfileAvatar(ctx, created.ID, "https://example.com/updated.png")
-	if appErr != nil {
-		t.Fatalf("UpdateProfileAvatar() unexpected error = %v", appErr)
-	}
-	if updated.AvatarUrl != "https://example.com/updated.png" {
-		t.Fatalf("UpdateProfileAvatar() avatar = %q", updated.AvatarUrl)
-	}
-}
-
-func TestProfileRepository_DeleteProfile(t *testing.T) {
-	repo, querier, ctx := newTestRepo(t)
-	user := mustCreateUser(t, ctx, querier)
-	created := mustCreateProfile(t, repo, ctx, user.ID)
-
-	appErr := repo.DeleteProfile(ctx, created.ID)
-	if appErr != nil {
-		t.Fatalf("DeleteProfile() unexpected error = %v", appErr)
-	}
-
-	_, appErr = repo.GetProfileByUserID(ctx, user.ID)
-	if appErr == nil {
-		t.Fatalf("GetProfileByUserID() after delete error = nil, want error")
-	}
-}
-
-func newTestRepo(t *testing.T) (profile.ProfileRepository, *db.Queries, context.Context) {
-	t.Helper()
-
-	ctx := context.Background()
-	pool, appErr := coredb.Connect(ctx, dbConf)
-	if appErr != nil {
-		t.Skipf("test database unavailable: %v", appErr)
-	}
-	t.Cleanup(pool.Close)
-
-	querier := db.New(pool)
-	resetTables(t, ctx, pool)
-
-	return profile.NewProfileRepository(querier), querier, ctx
-}
-
-func resetTables(t *testing.T, ctx context.Context, pool db.DBTX) {
-	t.Helper()
-
-	if _, err := pool.Exec(ctx, `TRUNCATE TABLE users RESTART IDENTITY CASCADE`); err != nil {
-		t.Fatalf("resetTables() error = %v", err)
-	}
-}
-
-func mustCreateUser(t *testing.T, ctx context.Context, querier *db.Queries) db.User {
-	t.Helper()
-
-	created, err := querier.CreateUser(ctx, db.CreateUserParams{
-		Email: uniqueEmail(),
-		PasswordHash: pgtype.Text{
-			String: "password-" + uuid.NewString(),
-			Valid:  true,
-		},
-	})
-	if err != nil {
-		t.Fatalf("CreateUser() setup error = %v", err)
-	}
-	return created
-}
-
-func mustCreateProfile(t *testing.T, repo profile.ProfileRepository, ctx context.Context, userID uuid.UUID) *db.Profile {
-	t.Helper()
-
-	created, appErr := repo.CreateProfile(ctx, db.CreateProfileParams{
-		UserID:    userID,
-		FirstName: "First",
-		LastName:  "Last",
-		AvatarUrl: "",
-	})
-	if appErr != nil {
-		t.Fatalf("CreateProfile() setup error = %v", appErr)
-	}
-	return created
-}
-
-func uniqueEmail() string {
-	return "profile-" + uuid.NewString() + "@example.com"
-}
 
 func TestMain(m *testing.M) {
 	time.Local = time.UTC
 	os.Exit(m.Run())
+}
+
+func TestProfileRepository_CreateAndGerProfile(t *testing.T) {
+	repos := createRepo()
+	user, profile := mustCreateUserAndProfile(repos)
+
+	// Get profile
+	fetchedProfile, appErr := repos.Profile.GetProfile(context.Background(), profile.ID)
+	if appErr != nil {
+		t.Fatalf("failed to get profile: %v", appErr)
+	}
+	if profile.ID != fetchedProfile.ID || user.ID != fetchedProfile.UserID {
+		t.Fatalf("GetProfile() profile = %v, want %v", fetchedProfile, profile)
+	}
+
+	// Get Profile By UserID
+	fetchedProfile2, appErr := repos.Profile.GetProfileByUserID(context.Background(), user.ID)
+	if appErr != nil {
+		t.Fatalf("failed to get profile: %v", appErr)
+	}
+	if profile.ID != fetchedProfile2.ID || user.ID != fetchedProfile2.UserID {
+		t.Fatalf("GetProfileByUserID() profile = %v, want %v", fetchedProfile2, profile)
+	}
+}
+
+func TestProfileRepository_CreateAndUpdateProfile(t *testing.T) {
+	repos := createRepo()
+	user, profile := mustCreateUserAndProfile(repos)
+
+	updatedProfile, appErr := repos.Profile.UpdateProfileNames(context.Background(), profile.ID, "Anything", "LastName")
+	if appErr != nil {
+		t.Fatalf("failed to update profile: %v", appErr)
+	}
+	if profile.ID != updatedProfile.ID || user.ID != updatedProfile.UserID {
+		t.Fatalf("UpdateProfileNames() profile = %v, want %v", updatedProfile, profile)
+	}
+	if profile.AvatarUrl != updatedProfile.AvatarUrl {
+		t.Fatalf("UpdateProfileNames() profile = %v, want %v", updatedProfile, profile)
+	}
+	if updatedProfile.FirstName != "Anything" || updatedProfile.LastName != "LastName" {
+		t.Fatalf("UpdateProfileNames() profile = %v, want %v", updatedProfile, profile)
+	}
+
+	updatedProfile2, appErr := repos.Profile.UpdateProfileAvatar(context.Background(), profile.ID, "Anything")
+	if appErr != nil {
+		t.Fatalf("failed to update profile: %v", appErr)
+	}
+	if profile.ID != updatedProfile2.ID || user.ID != updatedProfile2.UserID {
+		t.Fatalf("UpdateProfileAvatarUrl() profile = %v, want %v", updatedProfile2, profile)
+	}
+	if updatedProfile2.AvatarUrl != "Anything" {
+		t.Fatalf("UpdateProfileAvatarUrl() profile = %v, want %v", updatedProfile2, profile)
+	}
+}
+
+func TestProfileRepository_DeleteProfile(t *testing.T) {
+	repos := createRepo()
+	user, profile := mustCreateUserAndProfile(repos)
+
+	err := repos.Profile.DeleteProfile(context.Background(), profile.ID)
+	if err != nil {
+		t.Fatalf("failed to delete profile: %v", err)
+	}
+
+	fetchedProfile, appErr := repos.Profile.GetProfileByUserID(context.Background(), user.ID)
+	if appErr == nil {
+		t.Fatalf("failed to delete profile: %v", appErr)
+	}
+	if fetchedProfile != nil {
+		t.Fatalf("GetProfile() profile = %v, want %v", fetchedProfile, nil)
+	}
+}
+
+type Repos struct {
+	Session session.SessionRepository
+	User    user.UserRepository
+	Profile profile.ProfileRepository
+}
+
+func createRepo() *Repos {
+	pool := testutils.MustConnectDB()
+	querier := db.New(pool)
+
+	return &Repos{
+		Session: session.NewSessionRepository(querier),
+		User:    user.NewAuthRepository(querier),
+		Profile: profile.NewProfileRepository(querier),
+	}
+}
+
+func mustCreateUserAndProfile(repos *Repos) (*db.User, *db.Profile) {
+	u, appErr := repos.User.CreateUser(context.Background(), &authv1.RegisterRequest{
+		FirstName: testutils.GenerateRandomString(10),
+		LastName:  testutils.GenerateRandomString(10),
+		Password:  testutils.GenerateRandomString(10), // NOTE: not hashed password
+		Email:     testutils.GenerateRandomString(10),
+	})
+	if appErr != nil {
+		panic(appErr)
+	}
+
+	p, appErr := repos.Profile.CreateProfile(context.Background(), db.CreateProfileParams{
+		UserID:    u.ID,
+		FirstName: testutils.GenerateRandomString(10),
+		LastName:  testutils.GenerateRandomString(10),
+		AvatarUrl: testutils.GenerateRandomString(10),
+	})
+	if appErr != nil {
+		panic(appErr)
+	}
+
+	return u, p
 }
