@@ -11,6 +11,7 @@ func main() {
 	flagStartAll := flag.Bool("start-all", false, "Run tests")
 	flagStopAll := flag.Bool("stop-all", false, "Stop tests")
 	flagMigrate := flag.Bool("migrate", false, "Migrate database")
+	flagRunTests := flag.Bool("run-tests", false, "Run tests")
 
 	// Parse flags
 	flag.Parse()
@@ -27,5 +28,9 @@ func main() {
 
 	if *flagMigrate {
 		cli.Migrate()
+	}
+
+	if *flagRunTests {
+		cli.RunTests()
 	}
 }
