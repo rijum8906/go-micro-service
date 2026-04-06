@@ -14,3 +14,7 @@ func GenerateRandomString(length int) string {
 	}
 	return result.String()
 }
+
+func GenerateRandomEmail() string {
+	return GenerateRandomString(10) + "@example.com"
+}
