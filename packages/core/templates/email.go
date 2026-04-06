@@ -34,14 +34,17 @@ var emailTemplateSet = map[EmailTemplate]struct{}{
 	EmailTemplateVerifyEmail:   {},
 }
 
-// FS embeds the canonical on-disk email template tree.
+// FS embeds the canonical on-disk template trees.
 //
 // Expected structure:
 //   - email/<name>/subject.tmpl
 //   - email/<name>/body.txt.tmpl
 //   - email/<name>/body.html.tmpl
+//   - notification/<name>/title.tmpl
+//   - notification/<name>/body.tmpl
+//   - notification/<name>/action_url.tmpl
 //
-//go:embed email
+//go:embed email notification
 var FS embed.FS
 
 func (t EmailTemplate) String() string {

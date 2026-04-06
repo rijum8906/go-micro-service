@@ -47,13 +47,11 @@ const (
 )
 
 type NotificationMessage struct {
-	JobSubject  JobSubject               `json:"job_subject"`
-	Channel     NotificationChannel      `json:"channel"`
-	Recipient   NotificationRecipient    `json:"recipient"`
-	Content     NotificationContent      `json:"content"`
-	PushData    *PushNotificationData    `json:"push_data,omitempty"`
-	SMSData     *SMSNotificationData     `json:"sms_data,omitempty"`
-	WebhookData *WebhookNotificationData `json:"webhook_data,omitempty"`
+	JobSubject  JobSubject                     `json:"job_subject"`
+	Channel     NotificationChannel            `json:"channel"`
+	Recipient   NotificationRecipient          `json:"recipient"`
+	BodyContent map[string]string              `json:"body_content"`
+	Template    templates.NotificationTemplate `json:"template"`
 }
 
 type NotificationRecipient struct {
@@ -170,8 +168,12 @@ func (m NotificationMessage) Validate() *apperror.AppError {
 		return appErr
 	}
 
-	if appErr := m.Content.Validate(); appErr != nil {
+	if appErr := m.Template.Validate(); appErr != nil {
 		return appErr
+	}
+
+	if len(m.BodyContent) == 0 {
+		return validationError("body_content", "body content is required")
 	}
 
 	switch m.Channel {
@@ -179,29 +181,19 @@ func (m NotificationMessage) Validate() *apperror.AppError {
 		if m.JobSubject != JobNotificationPush {
 			return validationError("job_subject", "job subject does not match push notification channel")
 		}
-		if m.PushData == nil {
-			return validationError("push_data", "push data is required")
-		}
-		return m.PushData.Validate(m.Recipient)
 	case NotificationChannelSMS:
 		if m.JobSubject != JobNotificationSMS {
 			return validationError("job_subject", "job subject does not match sms notification channel")
 		}
-		if m.SMSData == nil {
-			return validationError("sms_data", "sms data is required")
-		}
-		return m.SMSData.Validate(m.Recipient)
 	case NotificationChannelWebhook:
 		if m.JobSubject != JobNotificationWebhook {
 			return validationError("job_subject", "job subject does not match webhook notification channel")
 		}
-		if m.WebhookData == nil {
-			return validationError("webhook_data", "webhook data is required")
-		}
-		return m.WebhookData.Validate(m.Recipient)
 	default:
 		return validationError("channel", "unsupported notification channel")
 	}
+
+	return nil
 }
 
 func (c NotificationChannel) Validate() *apperror.AppError {
