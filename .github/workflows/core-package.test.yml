@@ -1,4 +1,4 @@
-name: User Service Test
+name: Core Package Test
 
 on:
   push:
@@ -15,16 +15,12 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
+      redis:
+        image: redis
         ports:
-          - "5433:5432"
+          - "6380:6379"
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -51,16 +47,6 @@ jobs:
       - name: Install Dependencies
         run: go mod download
 
-      - name: Setup Atlas
-        uses: ariga/setup-atlas@v0
-        with:
-          cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
-
-      - name: Run Migration
-        working-directory: services/user
-        run: |
-          atlas migrate apply --url "${{ env.TEST_DB_URL }}" --dir "file://db/migrations" --allow-dirty
-
       - name: Run unit tests
-        working-directory: services/user
+        working-directory: packages/core
         run: go test -v ./...
