@@ -6,23 +6,20 @@ import (
 	"strconv"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/templates"
 )
 
 type EmailMessage struct {
-	Meta        EmailMetadata     `json:"meta"`
-	BodyContent map[string]string `json:"body_content"`
-	Attachments []EmailAttachment `json:"attachments"`
-	Template    EmailTemplate     `json:"template"`
+	Meta        EmailMetadata           `json:"meta"`
+	BodyContent map[string]string       `json:"body_content"`
+	Attachments []*EmailAttachment      `json:"attachments"`
+	Template    templates.EmailTemplate `json:"template"`
 }
 
 type EmailMetadata struct {
 	JobSubject JobSubject       `json:"job_subject"`
 	Sender     EmailSender      `json:"sender"`
 	Recipients []EmailRecipient `json:"recipients"`
-}
-
-type EmailTemplate struct {
-	Name string `json:"name"`
 }
 
 type EmailRecipient struct {
@@ -104,6 +101,10 @@ func (m EmailMessage) Validate() *apperror.AppError {
 	}
 
 	for i, attachment := range m.Attachments {
+		if attachment == nil {
+			return validationError("attachments", "attachment is required").WithDetail("attachment_index", strconv.Itoa(i))
+		}
+
 		if appErr := attachment.Validate(); appErr != nil {
 			return appErr.WithDetail("attachment_index", strconv.Itoa(i))
 		}
@@ -140,14 +141,6 @@ func (r EmailRecipient) Validate() *apperror.AppError {
 
 func (s EmailSender) Validate() *apperror.AppError {
 	return validateEmailField("sender.email", s.Email)
-}
-
-func (t EmailTemplate) Validate() *apperror.AppError {
-	if t.Name == "" {
-		return validationError("template.name", "template name is required")
-	}
-
-	return nil
 }
 
 func (a EmailAttachment) Validate() *apperror.AppError {

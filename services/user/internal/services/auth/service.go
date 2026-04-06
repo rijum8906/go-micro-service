@@ -12,6 +12,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreutils"
 	"github.com/rijum8906/relay/packages/core/dto"
+	"github.com/rijum8906/relay/packages/core/templates"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
@@ -195,9 +196,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 			Sender:     s.emailSender(),
 			Recipients: []dto.EmailRecipient{{Email: user.Email}},
 		},
-		Template: dto.EmailTemplate{
-			Name: "verify-email",
-		},
+		Template: templates.EmailTemplateVerifyEmail,
 		BodyContent: map[string]string{
 			"app_name":           s.env.AppName,
 			"email":              user.Email,
@@ -237,9 +236,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 			Sender:     s.emailSender(),
 			Recipients: []dto.EmailRecipient{{Email: user.Email}},
 		},
-		Template: dto.EmailTemplate{
-			Name: "password-reset",
-		},
+		Template: templates.EmailTemplateResetPassword,
 		BodyContent: map[string]string{
 			"app_name":    s.env.AppName,
 			"email":       user.Email,
