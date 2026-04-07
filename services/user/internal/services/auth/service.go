@@ -64,7 +64,7 @@ func (s *authService) Login(ctx context.Context, data *authv1.LoginRequest, clie
 
 func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError) {
 	_, appErr := s.repos.User.GetUserByEmail(ctx, data.Email)
-	if appErr != nil && appErr.Code != apperror.CodeInternal {
+	if appErr != nil && appErr.Code == apperror.CodeInternal {
 		return nil, appErr
 	}
 	if appErr == nil {
@@ -152,6 +152,11 @@ func (s *authService) RefreshToken(ctx context.Context, user *dto.UserInfo) (*au
 
 	if session.ID != sessionID {
 		return nil, apperror.ErrUnAuthenticated.WithMessage("refresh token does not match session")
+	}
+
+	appErr = s.utils.TokenManager.RevokeAuthToken(ctx, user.UserID, user.SessionID)
+	if appErr != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to revoke last token").WithDetail("error", appErr.Error())
 	}
 
 	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.UserID, session.ID.String(), token.TokenScopeAuth)

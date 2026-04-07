@@ -25,10 +25,10 @@ type UserService interface {
 type userService struct {
 	env   *env.Config
 	repos *utils.Repos
-	utils *utils.Utils
+	utils *utils.ServiceUtils
 }
 
-func NewUserService(repo *utils.Repos, utils *utils.Utils, env *env.Config) (UserService, *apperror.AppError) {
+func NewUserService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Config) (UserService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize user service").WithDetail("repos", "user repositories are not configured")
 	}
