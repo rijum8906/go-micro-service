@@ -6,15 +6,11 @@ SHELL := /bin/sh
 
 help:
 	@printf "Available targets:\n"
-	@printf "  make setup SERVICE=<service>  Run a service setup target\n"
-	@printf "  make setup-proto              Install Buf CLI\n"
+	@printf "  make setup           Setup the project\n"
+	@printf "  make setup-proto     Install Buf CLI\n"
 
 setup:
-	@if [ -z "$(SERVICE)" ]; then \
-		printf "SERVICE is required. Usage: make setup SERVICE=<service>\n" >&2; \
-		exit 1; \
-	fi
-	@$(MAKE) -C services/$(SERVICE) setup
+	go run cmd/setup/main.go
 
 setup-proto:
 	npm install -g @bufbuild/buf
