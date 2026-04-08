@@ -10,7 +10,7 @@ help:
 	@printf "  make setup-proto     Install Buf CLI\n"
 
 setup:
-	go run cmd/setup/main.go
+	go run cmd/main.go --setup
 
 setup-proto:
 	npm install -g @bufbuild/buf
