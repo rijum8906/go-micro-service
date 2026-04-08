@@ -20,6 +20,7 @@ func Setup() {
 
 	// Step 2: Add services and packages (using shell for wildcards)
 	runCommand("sh", "-c", "go work use ./packages/*")
+	runCommand("sh", "-c", "go work use .")
 	runCommand("sh", "-c", "go work use ./services/*")
 
 	// Step 3: Download dependencies
