@@ -6,15 +6,15 @@ SHELL := /bin/sh
 
 help:
 	@printf "Available targets:\n"
-	@printf "  make setup SERVICE=<service>  Run a service setup target\n"
-	@printf "  make setup-proto              Install Buf CLI\n"
+	@printf "  make setup           Setup the project\n"
+	@printf "  make setup-proto     Install Buf CLI\n"
+	@printf "  dev                  Start the docker compose\n"
 
 setup:
-	@if [ -z "$(SERVICE)" ]; then \
-		printf "SERVICE is required. Usage: make setup SERVICE=<service>\n" >&2; \
-		exit 1; \
-	fi
-	@$(MAKE) -C services/$(SERVICE) setup
+	go run cmd/main.go --setup
 
 setup-proto:
 	npm install -g @bufbuild/buf
+
+dev:
+	go run cmd/main.go --dev
