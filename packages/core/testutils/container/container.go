@@ -22,7 +22,34 @@ type Container struct {
 }
 
 // Run starts the container
+// Download pulls the container image without running it
+func (c *Container) Download() error {
+	args := []string{"pull", c.Image}
+
+	cmd := exec.Command("docker", args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to download image %s: %w\nOutput: %s", c.Image, err, output)
+	}
+
+	return nil
+}
+
+// Run creates and starts the container
 func (c *Container) Run() error {
+	// First ensure image is downloaded
+	if err := c.Download(); err != nil {
+		return fmt.Errorf("failed to prepare image: %w", err)
+	}
+
+	// Check if container already exists
+	if c.Exists() {
+		// Remove existing container
+		if err := c.Remove(); err != nil {
+			return fmt.Errorf("failed to remove existing container: %w", err)
+		}
+	}
+
 	args := []string{"run", "-d", "--name", c.Name}
 
 	// Add port mapping
@@ -48,6 +75,57 @@ func (c *Container) Run() error {
 	return nil
 }
 
+// RunOnly runs container without downloading (assumes image exists)
+func (c *Container) RunOnly() error {
+	args := []string{"run", "-d", "--name", c.Name}
+
+	if c.PortMap.HostPort != "" && c.PortMap.ContainerPort != "" {
+		args = append(args, "-p", fmt.Sprintf("%s:%s", c.PortMap.HostPort, c.PortMap.ContainerPort))
+	}
+
+	for key, value := range c.Env {
+		args = append(args, "-e", fmt.Sprintf("%s=%s", key, value))
+	}
+
+	args = append(args, c.Image)
+
+	cmd := exec.Command("docker", args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to run container %s: %w\nOutput: %s", c.Name, err, output)
+	}
+
+	c.Running = true
+	return nil
+}
+
+// Exists checks if container exists
+func (c *Container) Exists() bool {
+	cmd := exec.Command("docker", "ps", "-a", "-f", "name="+c.Name, "--format", "{{.Names}}")
+	out, _ := cmd.Output()
+	return strings.TrimSpace(string(out)) == c.Name
+}
+
+// Remove stops and removes the container
+func (c *Container) Remove() error {
+	if !c.Exists() {
+		return nil
+	}
+
+	// Stop container
+	stopCmd := exec.Command("docker", "stop", c.Name)
+	stopCmd.Run() // Ignore error if not running
+
+	// Remove container
+	rmCmd := exec.Command("docker", "rm", c.Name)
+	if output, err := rmCmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("failed to remove container %s: %w\nOutput: %s", c.Name, err, output)
+	}
+
+	c.Running = false
+	return nil
+}
+
 // Stop stops and removes the container
 func (c *Container) Stop() error {
 	// Check if container exists
@@ -64,21 +142,8 @@ func (c *Container) Stop() error {
 		}
 	}
 
-	// Remove container
-	rmCmd := exec.Command("docker", "rm", c.Name)
-	if output, err := rmCmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to remove container %s: %w\nOutput: %s", c.Name, err, output)
-	}
-
 	c.Running = false
 	return nil
-}
-
-// Exists checks if container exists (running or stopped)
-func (c *Container) Exists() bool {
-	cmd := exec.Command("docker", "ps", "-a", "-f", "name="+c.Name, "--format", "{{.Names}}")
-	out, _ := cmd.Output()
-	return strings.TrimSpace(string(out)) == c.Name
 }
 
 // IsRunning checks if container is currently running
@@ -105,9 +170,9 @@ type ContainerManager struct {
 	Containers []*Container
 }
 
-func NewContainerManager() *ContainerManager {
+func NewContainerManager(containers []*Container) *ContainerManager {
 	return &ContainerManager{
-		Containers: make([]*Container, 0),
+		Containers: containers,
 	}
 }
 
@@ -154,4 +219,13 @@ func (m *ContainerManager) RemoveAll() error {
 	}
 	m.Containers = make([]*Container, 0)
 	return nil
+}
+
+func (m *ContainerManager) ExistsAll() bool {
+	for _, container := range m.Containers {
+		if !container.Exists() {
+			return false
+		}
+	}
+	return true
 }

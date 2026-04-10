@@ -1,133 +1,116 @@
 SHELL := /bin/sh
 
-# Database configuration
-DB_NAME ?= postgres
-DB_USER ?= postgres
-DB_PASSWORD ?= postgres
-DB_HOST ?= localhost
-DB_PORT ?= 5432
-
-# Test database configuration
-TEST_DB_CONTAINER_NAME := test_postgres_db
-TEST_DB_PORT := 5433
-TEST_DB_USER := test_user
-TEST_DB_PASSWORD := test_password
-TEST_DB_NAME := test_db
-TEST_DB_SSL_MODE := disable
-TEST_DB_URL := postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@localhost:$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=$(TEST_DB_SSL_MODE)&search_path=public
-
-
-# Connection URLs
-DB_URL := postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable&search_path=public
-DEV_DB_URL := docker://postgres/17/dev?search_path=public
+CLI_RUN := go run ./cmd/cli/main.go
+LEGACY_RUN := go run ./cmd/test-cli/main.go
+GO_TEST := go test -v ./...
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup db-new db-apply db-status db-schema
+.PHONY: \
+	help \
+	run \
+	setup \
+	test \
+	db-apply \
+	db-migrate \
+	db-status \
+	db-new \
+	db-schema \
+	db-rehash \
+	db-rollback \
+	db-reset \
+	test-setup \
+	test-start \
+	test-run \
+	test-stop \
+	init-test \
+	test-migrate \
+	test-all \
+	stop-test
 
 help:
 	@echo "Available targets:"
-	@echo "  make setup                 - Install tools (sqlc, atlas)"
-	@echo "  make db-new NAME=xxx       - Generate migration from schema changes"
-	@echo "  make db-apply              - Apply pending migrations"
-	@echo "  make db-status             - Show migration status"
-	@echo "  make db-schema             - Apply schema directly (initial setup)"
-	@echo "  make db-init               - Initialize migration system"
-	@echo "  make db-rehash             - Recalculate atlas.sum"
+	@echo "  make run                        - Run the user service"
+	@echo "  make setup                      - Install sqlc and atlas"
+	@echo "  make test                       - Run Go tests"
+	@echo ""
+	@echo "Database:"
+	@echo "  make db-apply                   - Apply pending migrations"
+	@echo "  make db-migrate                 - Alias for db-apply"
+	@echo "  make db-status                  - Show migration status"
+	@echo "  make db-new NAME=xxx            - Generate migration from schema changes"
+	@echo "  make db-schema                  - Apply schema directly"
+	@echo "  make db-rehash                  - Recalculate atlas.sum"
+	@echo "  make db-rollback COUNT=1        - Roll back migrations"
+	@echo "  make db-reset                   - Clean database and reapply migrations"
+	@echo ""
+	@echo "Local test environment:"
+	@echo "  make test-setup                 - Prepare the local test environment"
+	@echo "  make test-start                 - Start local test containers"
+	@echo "  make test-run                   - Run Go tests"
+	@echo "  make test-stop                  - Stop local test containers"
+	@echo "  make test-migrate               - Apply embedded SQL migrations to the test database"
+	@echo "  make test-all                   - Start test env, migrate, and run tests"
+	@echo ""
+	@echo "Compatibility aliases:"
+	@echo "  make init-test                  - Alias for test-start"
+	@echo "  make stop-test                  - Alias for test-stop"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make db-new NAME=add_users_table"
+	@echo "  make db-rollback COUNT=2"
 	@echo "  make db-apply DB_NAME=mydb"
 
+run:
+	@go run ./cmd/main.go
+
 setup:
-	@echo "Installing sqlc..."
-	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-	@echo "Installing atlas..."
-	curl -sSf https://atlasgo.sh | sh
-	@echo "Setup complete! Run 'make db-init' to initialize migrations."
-
-
-db-new:
-	@if [ -z "$(NAME)" ]; then \
-		echo "Error: NAME is required. Usage: make db-new NAME=your_migration_name"; \
-		exit 1; \
-	fi
-	@echo "Generating migration: $(NAME)"
-	atlas migrate diff $(NAME) \
-		--dir "file://db/migrations" \
-		--to "file://db/schema.sql" \
-		--dev-url "$(DEV_DB_URL)"
-	@echo "Migration generated. Review the file in db/migrations/"
-
-db-apply:
-	@echo "Applying migrations to $(DB_NAME) database..."
-	atlas migrate apply \
-		--url "$(DB_URL)" \
-		--dir "file://db/migrations"
-	@echo "Migrations applied."
-
-db-status:
-	@echo "Migration status for $(DB_NAME):"
-	atlas migrate status \
-		--url "$(DB_URL)" \
-		--dir "file://db/migrations"
-
-db-schema:
-	@echo "Applying schema directly to $(DB_NAME) database..."
-	atlas schema apply \
-		--url "$(DB_URL)" \
-		--to "file://db/schema.sql" \
-		--dev-url "$(DEV_DB_URL)" \
-		--auto-approve
-	@echo "Schema applied."
-
-db-rehash:
-	@echo "Rehashing migration directory..."
-	atlas migrate hash --dir "file://db/migrations"
-	@echo "atlas.sum updated."
-
-
-db-rollback:
-	@echo "Rolling back $(or $(COUNT),1) migration(s)..."
-	atlas migrate down $(or $(COUNT),1) \
-		--url "$(DB_URL)" \
-		--dir "file://db/migrations" \
-		--dev-url "$(DEV_DB_URL)" \
-
-init-test:
-	@echo "Initializing test"
-	@echo "Starting PostgreSQL test container"
-	docker run -d \
-		--name $(TEST_DB_CONTAINER_NAME) \
-		-e POSTGRES_USER=$(TEST_DB_USER) \
-		-e POSTGRES_PASSWORD=$(TEST_DB_PASSWORD) \
-		-e POSTGRES_DB=$(TEST_DB_NAME) \
-		-p $(TEST_DB_PORT):5432 \
-		postgres:16-alpine \
-		-c 'log_statement=all'
-	# Wait for PostgreSQL to be ready
-	@echo "Waiting for PostgreSQL to be ready..."
-	@for i in $$(seq 1 30); do \
-		if docker exec $(TEST_DB_CONTAINER_NAME) pg_isready -U $(TEST_DB_USER) > /dev/null 2>&1; then \
-			echo "PostgreSQL is ready!"; \
-			break; \
-		fi; \
-		echo "Waiting... $$i/30"; \
-		sleep 1; \
-		if [ $$i -eq 30 ]; then \
-			echo "Timeout waiting for PostgreSQL"; \
-			exit 1; \
-		fi; \
-	done
-	@echo "Applying migrations in database"
-		atlas migrate apply \
-		--url "$(TEST_DB_URL)" \
-		--dir "file://db/migrations"
-	@echo "Migrations applied."
-	@echo "========================================="
-	@echo "Test environment ready!"
-	@echo "Database URL: $(TEST_DB_URL)"
-	@echo "========================================="
+	@$(LEGACY_RUN) setup
 
 test:
-	go test -v ./...
+	@$(GO_TEST)
+
+db-apply:
+	@$(CLI_RUN) db apply
+
+db-migrate: db-apply
+
+db-status:
+	@$(CLI_RUN) db status
+
+db-new:
+	@$(CLI_RUN) db new --name "$(NAME)"
+
+db-schema:
+	@$(CLI_RUN) db schema
+
+db-rehash:
+	@$(CLI_RUN) db rehash
+
+db-rollback:
+	@$(CLI_RUN) db rollback --count $(or $(COUNT),1)
+
+db-reset:
+	@$(CLI_RUN) db reset
+
+test-setup:
+	@$(CLI_RUN) test setup
+
+test-start:
+	@$(CLI_RUN) test start
+
+test-run:
+	@$(GO_TEST)
+
+test-stop:
+	@$(CLI_RUN) test stop
+
+init-test: test-start
+
+test-migrate:
+	@$(LEGACY_RUN) env-migrate
+
+test-all:
+	@$(LEGACY_RUN) env-test
+
+stop-test: test-stop

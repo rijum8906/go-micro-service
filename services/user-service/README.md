@@ -134,7 +134,7 @@ REFRESH_TOKEN_TTL=600h
 
 ```bash
 make db-apply
-go run ./cmd/main.go
+make run
 ```
 
 In `development`, gRPC reflection is enabled automatically.
@@ -148,26 +148,82 @@ make db-status
 make db-apply
 make db-new NAME=add_some_change
 make db-rehash
+make db-reset
 ```
 
 `db/schema.sql` is the source schema, `db/migrations/` stores Atlas migrations,
 and `internal/db/` contains generated query code.
 
+Atlas is only required for the versioned database workflow above. The local
+test migration flow can run without Atlas.
+
 ## Testing
 
-Run the Go test suite:
+Run the unit test suite:
 
 ```bash
 make test
 ```
 
-There is also a small helper CLI for local integration-style test setup:
+For the local integration-style flow:
 
 ```bash
-go run ./cmd/test-cli --start-all
-go run ./cmd/test-cli --migrate
-go run ./cmd/test-cli --run-tests
-go run ./cmd/test-cli --stop-all
+make test-start
+make test-migrate
+make test-run
+make test-stop
+```
+
+`make test-migrate` uses the embedded SQL loader in `db/migration.go` and
+applies the SQL files directly to the test database. It does not require Atlas
+and does not use migration version tracking.
+
+Or run the full flow in one command:
+
+```bash
+make test-all
+```
+
+## Available Commands
+
+Primary Make targets:
+
+```bash
+make run
+make setup
+make test
+make test-run
+```
+
+Database commands:
+
+```bash
+make db-apply
+make db-migrate
+make db-status
+make db-new NAME=add_some_change
+make db-schema
+make db-rehash
+make db-rollback COUNT=1
+make db-reset
+```
+
+Local test environment commands:
+
+```bash
+make test-setup
+make test-start
+make test-run      # runs go test
+make test-stop
+make test-migrate     # embedded SQL, no Atlas
+make test-all
+```
+
+Compatibility aliases:
+
+```bash
+make init-test
+make stop-test
 ```
 
 ## Docker

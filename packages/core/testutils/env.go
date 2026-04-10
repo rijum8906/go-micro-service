@@ -10,7 +10,7 @@ func NewTestEnv() *env.Config {
 	os.Setenv("APP_NAME", "Test App")
 	os.Setenv("DB_HOST", "localhost")
 	os.Setenv("DB_USER", "test_user")
-	os.Setenv("DB_PASS", "test_password")
+	os.Setenv("DB_PASSWORD", "test_password")
 	os.Setenv("DB_NAME", "test_db")
 	os.Setenv("REDIS_HOST", "localhost")
 	os.Setenv("REDIS_PORT", "6379")
