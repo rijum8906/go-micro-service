@@ -13,6 +13,7 @@ GO_TEST := go test -v ./...
 	test \
 	db-apply \
 	db-migrate \
+	db-sql-apply \
 	db-status \
 	db-new \
 	db-schema \
@@ -35,14 +36,15 @@ help:
 	@echo "  make test                       - Run Go tests"
 	@echo ""
 	@echo "Database:"
-	@echo "  make db-apply                   - Apply pending migrations"
+	@echo "  make db-apply                   - Apply pending Atlas migrations"
 	@echo "  make db-migrate                 - Alias for db-apply"
-	@echo "  make db-status                  - Show migration status"
-	@echo "  make db-new NAME=xxx            - Generate migration from schema changes"
-	@echo "  make db-schema                  - Apply schema directly"
+	@echo "  make db-sql-apply               - Apply embedded SQL migrations without Atlas"
+	@echo "  make db-status                  - Show Atlas migration status"
+	@echo "  make db-new NAME=xxx            - Generate an Atlas migration from schema changes"
+	@echo "  make db-schema                  - Apply schema directly with Atlas"
 	@echo "  make db-rehash                  - Recalculate atlas.sum"
-	@echo "  make db-rollback COUNT=1        - Roll back migrations"
-	@echo "  make db-reset                   - Clean database and reapply migrations"
+	@echo "  make db-rollback COUNT=1        - Roll back Atlas migrations"
+	@echo "  make db-reset                   - Clean database and reapply Atlas migrations"
 	@echo ""
 	@echo "Local test environment:"
 	@echo "  make test-setup                 - Prepare the local test environment"
@@ -59,6 +61,7 @@ help:
 	@echo "Examples:"
 	@echo "  make db-new NAME=add_users_table"
 	@echo "  make db-rollback COUNT=2"
+	@echo "  make db-sql-apply"
 	@echo "  make db-apply DB_NAME=mydb"
 
 run:
@@ -71,27 +74,30 @@ test:
 	@$(GO_TEST)
 
 db-apply:
-	@$(CLI_RUN) db apply
+	@$(CLI_RUN) db atlas apply
 
 db-migrate: db-apply
 
+db-sql-apply:
+	@$(CLI_RUN) db sql apply
+
 db-status:
-	@$(CLI_RUN) db status
+	@$(CLI_RUN) db atlas status
 
 db-new:
-	@$(CLI_RUN) db new --name "$(NAME)"
+	@$(CLI_RUN) db atlas new --name "$(NAME)"
 
 db-schema:
-	@$(CLI_RUN) db schema
+	@$(CLI_RUN) db atlas schema
 
 db-rehash:
-	@$(CLI_RUN) db rehash
+	@$(CLI_RUN) db atlas rehash
 
 db-rollback:
-	@$(CLI_RUN) db rollback --count $(or $(COUNT),1)
+	@$(CLI_RUN) db atlas rollback --count $(or $(COUNT),1)
 
 db-reset:
-	@$(CLI_RUN) db reset
+	@$(CLI_RUN) db atlas reset
 
 test-setup:
 	@$(CLI_RUN) test setup
