@@ -141,21 +141,44 @@ In `development`, gRPC reflection is enabled automatically.
 
 ## Database Workflow
 
-Common schema tasks:
+This service now supports two migration flows:
+
+- Atlas migrations for the normal versioned schema workflow
+- embedded SQL migrations for direct application without Atlas version tracking
+
+Atlas workflow:
 
 ```bash
 make db-status
 make db-apply
+make db-sql-apply
 make db-new NAME=add_some_change
 make db-rehash
 make db-reset
 ```
 
-`db/schema.sql` is the source schema, `db/migrations/` stores Atlas migrations,
-and `internal/db/` contains generated query code.
+Embedded SQL workflow without Atlas:
 
-Atlas is only required for the versioned database workflow above. The local
-test migration flow can run without Atlas.
+```bash
+go run ./cmd/cli/main.go db sql apply
+```
+
+CLI structure:
+
+```bash
+go run ./cmd/cli/main.go db atlas apply
+go run ./cmd/cli/main.go db atlas status
+go run ./cmd/cli/main.go db atlas new --name add_some_change
+go run ./cmd/cli/main.go db sql apply
+```
+
+`db/schema.sql` is the source schema, `db/migrations/` stores Atlas migrations,
+`db/*.sql` is also embedded for the direct SQL migration flow, and `internal/db/`
+contains generated query code.
+
+The `make db-apply`, `make db-status`, `make db-new`, `make db-schema`,
+`make db-rehash`, `make db-rollback`, and `make db-reset` targets use the Atlas
+workflow. `make db-sql-apply` runs the embedded SQL flow without Atlas.
 
 ## Testing
 
@@ -200,12 +223,27 @@ Database commands:
 ```bash
 make db-apply
 make db-migrate
+make db-sql-apply
 make db-status
 make db-new NAME=add_some_change
 make db-schema
 make db-rehash
 make db-rollback COUNT=1
 make db-reset
+```
+
+Direct CLI database commands:
+
+```bash
+go run ./cmd/cli/main.go db atlas apply
+go run ./cmd/cli/main.go db atlas migrate
+go run ./cmd/cli/main.go db atlas status
+go run ./cmd/cli/main.go db atlas new --name add_some_change
+go run ./cmd/cli/main.go db atlas schema
+go run ./cmd/cli/main.go db atlas rehash
+go run ./cmd/cli/main.go db atlas rollback --count 1
+go run ./cmd/cli/main.go db atlas reset
+go run ./cmd/cli/main.go db sql apply
 ```
 
 Local test environment commands:
