@@ -33,3 +33,12 @@ func mapRedisError(err error) *apperror.AppError {
 	}
 	return apperror.New(apperror.CodeInternal, "failed to get token").WithDetail("error", err.Error())
 }
+
+func MapTokenError(err error) *apperror.AppError {
+	if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
+		return apperror.New(apperror.CodeTokenInvalidSignature, "invalid token signature").WithDetail("error", err.Error())
+	} else if errors.Is(err, jwt.ErrTokenExpired) {
+		return apperror.New(apperror.CodeTokenExpired, "token has expired").WithDetail("error", err.Error())
+	}
+	return apperror.New(apperror.CodeTokenInvalid, "failed to parse token").WithDetail("error", err.Error())
+}

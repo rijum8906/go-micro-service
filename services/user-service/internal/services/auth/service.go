@@ -158,6 +158,11 @@ func (s *authService) RefreshToken(ctx context.Context, user *dto.UserInfo) (*au
 		return nil, apperror.ErrUnAuthenticated.WithMessage("refresh token does not match session")
 	}
 
+	appErr = s.utils.TokenManager.RevokeAuthToken(ctx, user.UserID, user.SessionID)
+	if appErr != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to revoke last token").WithDetail("error", appErr.Error())
+	}
+
 	accessToken, appErr := s.utils.TokenManager.IssueAuthToken(ctx, user.UserID, session.ID.String(), token.TokenScopeAuth)
 	if appErr != nil {
 		return nil, appErr

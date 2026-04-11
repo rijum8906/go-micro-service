@@ -26,10 +26,10 @@ type SessionService interface {
 type sessionService struct {
 	env   *env.Config
 	repos *utils.Repos
-	utils *utils.Utils
+	utils *utils.ServiceUtils
 }
 
-func NewSessionService(repo *utils.Repos, utils *utils.Utils, env *env.Config) (SessionService, *apperror.AppError) {
+func NewSessionService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Config) (SessionService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize session service").WithDetail("repos", "session repositories are not configured")
 	}

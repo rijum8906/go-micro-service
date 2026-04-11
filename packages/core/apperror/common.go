@@ -3,6 +3,7 @@ package apperror
 type ErrorCode string
 
 const (
+	// Core
 	CodeInternal        ErrorCode = "INTERNAL"
 	CodeNotFound        ErrorCode = "NOT_FOUND"
 	CodeValidation      ErrorCode = "VALIDATION"
@@ -19,6 +20,11 @@ const (
 	CodePrecondition    ErrorCode = "PRECONDITION_FAILED"
 	CodeTooManyRequests ErrorCode = "TOO_MANY_REQUESTS"
 	CodeUnavailable     ErrorCode = "SERVICE_UNAVAILABLE"
+
+	// Token
+	CodeTokenInvalidSignature ErrorCode = "INVALID_SIGNATURE"
+	CodeTokenExpired          ErrorCode = "TOKEN_EXPIRED"
+	CodeTokenInvalid          ErrorCode = "INVALID_TOKEN"
 )
 
 // Common Errors

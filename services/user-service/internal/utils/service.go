@@ -11,7 +11,7 @@ import (
 	"github.com/rijum8906/relay/services/user/internal/repository/user"
 )
 
-type Utils struct {
+type ServiceUtils struct {
 	TokenManager *token.TokenManager
 	HashService  hash.HashService
 }
@@ -22,8 +22,8 @@ type Repos struct {
 	Session session.SessionRepository
 }
 
-func NewUtils(tokenManager *token.TokenManager, hashService hash.HashService) *Utils {
-	return &Utils{
+func NewUtils(tokenManager *token.TokenManager, hashService hash.HashService) *ServiceUtils {
+	return &ServiceUtils{
 		TokenManager: tokenManager,
 		HashService:  hashService,
 	}

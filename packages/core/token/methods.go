@@ -13,6 +13,11 @@ import (
 // Scoped Token Redis key format {Token}
 
 func (m *TokenManager) IssueAuthToken(ctx context.Context, subject, sessionID string, scope TokenScope) (string, *apperror.AppError) {
+	isValid := scope.Validate()
+	if !isValid {
+		return "", apperror.New(apperror.CodeTokenInvalid, "invalid token scope")
+	}
+
 	// NOTE: use this same key for jti and redis key
 	key := generateAuthTokenKey(subject, sessionID)
 
@@ -33,6 +38,11 @@ func (m *TokenManager) IssueAuthToken(ctx context.Context, subject, sessionID st
 
 func (m *TokenManager) IssueScopedToken(ctx context.Context, subject string, scope TokenScope) (string, *apperror.AppError) {
 	// NOTE: for scoped token, the jti will be random and the redis key will be the token
+	isValid := scope.Validate()
+	if !isValid {
+		return "", apperror.New(apperror.CodeTokenInvalid, "invalid token scope")
+	}
+
 	tokenClaims := generateTokenClaims(subject, uuid.UUIDv4(), scope, m.Config.ScopedTokenTTL)
 
 	token, err := tokenClaims.SignedString(m.Config.JwtSecret)
@@ -54,9 +64,8 @@ func (m *TokenManager) ValidateAuthToken(ctx context.Context, tokenStr string) (
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		return m.Config.JwtSecret, nil
 	})
-
-	if err != nil || !token.Valid {
-		return nil, apperror.ErrUnAuthenticated.WithMessage("invalid or expired token signature")
+	if err != nil {
+		return nil, MapTokenError(err)
 	}
 
 	claims, ok := token.Claims.(*Claims)
@@ -85,9 +94,8 @@ func (m *TokenManager) ValidateScopedToken(ctx context.Context, tokenStr string)
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		return m.Config.JwtSecret, nil
 	})
-
-	if err != nil || !token.Valid {
-		return nil, apperror.ErrUnAuthenticated.WithMessage("invalid or expired token signature")
+	if err != nil {
+		return nil, MapTokenError(err)
 	}
 
 	claims, ok := token.Claims.(*Claims)
