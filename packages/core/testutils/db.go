@@ -14,6 +14,7 @@ const (
 	DBPassword = "test_password"
 	DBName     = "test_db"
 	DBSSLMode  = "disable"
+	DevDBURL   = "docker://postgres/17/dev?search_path=public"
 )
 
 var DBConf = db.Config{

@@ -28,6 +28,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis
+        ports:
+          - "6380:6379"
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout Code
@@ -57,10 +66,10 @@ jobs:
           cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
 
       - name: Run Migration
-        working-directory: services/user
+        working-directory: services/user-service
         run: |
           atlas migrate apply --url "${{ env.TEST_DB_URL }}" --dir "file://db/migrations" --allow-dirty
 
       - name: Run unit tests
-        working-directory: services/user
+        working-directory: services/user-service
         run: go test -v ./...

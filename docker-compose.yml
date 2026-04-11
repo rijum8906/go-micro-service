@@ -23,7 +23,7 @@ services:
   user-service:
     build:
       context: .
-      dockerfile: ./services/user/Dockerfile
+      dockerfile: ./services/user-service/Dockerfile
     environment:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
     ports:
