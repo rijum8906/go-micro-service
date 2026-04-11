@@ -170,10 +170,8 @@ func TestSessionService_RevokeOtherSessions(t *testing.T) {
 	password := "test1234"
 
 	registerRes := MustCreateUserAndProfile(authService, password)
-	
-	oldAccessToken := registerRes.Tokens.AccessToken.Value
 
-	claims, appErr := serviceUtils.TokenManager.ValidateAuthToken(
+	currentClaims, appErr := serviceUtils.TokenManager.ValidateAuthToken(
 		context.Background(),
 		registerRes.Tokens.AccessToken.Value,
 	)
@@ -181,11 +179,27 @@ func TestSessionService_RevokeOtherSessions(t *testing.T) {
 		t.Fatalf("expected nil, got: %v", appErr)
 	}
 
-	revokeOtherSessions, appErr := sessionService.RevokeOtherSessions(context.Background(),&sessionv1.RevokeOtherSessionsRequest{
-		ScopedToken: registerRes.Tokens.AccessToken.Value,
+	loginRes, appErr := authService.Login(context.Background(), &authv1.LoginRequest{
+		Email:    registerRes.User.Email,
+		Password: password,
+	}, testutils.GenerateClientInfo())
+	if appErr != nil {
+		t.Fatalf("expected nil, got: %v", appErr)
+	}
+
+	otherClaims, appErr := serviceUtils.TokenManager.ValidateAuthToken(
+		context.Background(),
+		loginRes.Tokens.AccessToken.Value,
+	)
+	if appErr != nil {
+		t.Fatalf("expected nil, got: %v", appErr)
+	}
+
+	revokeOtherSessions, appErr := sessionService.RevokeOtherSessions(context.Background(), &sessionv1.RevokeOtherSessionsRequest{
+		CurrentSessionId: currentClaims.ID,
 	}, &dto.UserInfo{
 		UserID:    registerRes.User.Id,
-		SessionID: claims.ID,
+		SessionID: currentClaims.ID,
 	})
 	if appErr != nil {
 		t.Fatalf("expected nil, got: %v", appErr)
@@ -197,8 +211,17 @@ func TestSessionService_RevokeOtherSessions(t *testing.T) {
 		t.Fatal("expected success, got false")
 	}
 
-	_, appErr = serviceUtils.TokenManager.ValidateAuthToken(context.Background(), oldAccessToken)
+	_, appErr = serviceUtils.TokenManager.ValidateAuthToken(context.Background(), registerRes.Tokens.AccessToken.Value)
+	if appErr != nil {
+		t.Fatalf("expected current token to remain valid, got: %v", appErr)
+	}
+
+	_, appErr = serviceUtils.TokenManager.ValidateAuthToken(context.Background(), loginRes.Tokens.AccessToken.Value)
 	if appErr == nil {
-		t.Fatal("expected token to be revoked")
+		t.Fatal("expected other token to be revoked")
+	}
+
+	if otherClaims.ID == currentClaims.ID {
+		t.Fatal("expected different session ids for current and other sessions")
 	}
 }
