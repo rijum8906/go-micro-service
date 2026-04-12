@@ -1,162 +1,270 @@
 package template_test
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/template"
 )
 
-func mustCreateTemplateManager() template.TemplateManager {
-	m, err := template.NewTemplateManager("../../templates/")
+func mustCreateTemplateManager(t *testing.T) template.TemplateManager {
+	t.Helper()
+
+	manager, err := template.NewTemplateManager(filepath.Join("..", "..", "templates"))
 	if err != nil {
-		panic(err)
+		t.Fatalf("failed to create template manager: %v", err)
 	}
 
-	return m
+	return manager
 }
 
-func Test_templateManager_LoadTemplates_Failure(t *testing.T) {
-	_, err := template.NewTemplateManager("../templates/")
-	if err == nil {
-		t.Errorf("expected error, got nil")
+func TestNewTemplateManager_Failure(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		name         string
+		templatesDir string
+	}{
+		{
+			name:         "empty directory",
+			templatesDir: "",
+		},
+		{
+			name:         "missing directory",
+			templatesDir: filepath.Join("..", "..", "missing-templates"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := template.NewTemplateManager(tc.templatesDir)
+			if err == nil {
+				t.Fatal("expected constructor error, got nil")
+			}
+		})
 	}
 }
 
-func Test_templateManager_ReloadTemplates(t *testing.T) {
-	tm := mustCreateTemplateManager()
-	err := tm.ReloadTemplates()
-	if err != nil {
-		t.Errorf("failed to reload templates: %v", err)
+func TestTemplateManager_ReloadTemplates(t *testing.T) {
+	t.Parallel()
+
+	tm := mustCreateTemplateManager(t)
+	if err := tm.ReloadTemplates(); err != nil {
+		t.Fatalf("reload returned error: %v", err)
 	}
 }
 
-func Test_templateManager_RenderToString(t *testing.T) {
-	tm := mustCreateTemplateManager()
+func TestTemplateManager_ValidateData(t *testing.T) {
+	t.Parallel()
 
-	// Test Reset Password Email
-	resetPassowrdData := template.PasswordResetDTO{
+	tm := mustCreateTemplateManager(t)
+
+	testCases := []struct {
+		name     string
+		data     any
+		wantErr  bool
+		wantCode apperror.ErrorCode
+	}{
+		{
+			name: "valid password reset dto",
+			data: template.PasswordResetDTO{
+				ClientName:  "John Doe",
+				ClientEmail: "john@example.com",
+				ResetToken:  "token123",
+				Validity:    "15 minutes",
+			},
+		},
+		{
+			name:     "nil data",
+			data:     nil,
+			wantErr:  true,
+			wantCode: apperror.CodeValidation,
+		},
+		{
+			name: "invalid email verification dto",
+			data: template.EmailVerificationDTO{
+				ClientName:        "John Doe",
+				ClientEmail:       "invalid-email",
+				VerificationToken: "",
+				Validity:          "",
+			},
+			wantErr:  true,
+			wantCode: apperror.CodeValidation,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := tm.ValidateData(tc.data)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatal("expected validation error, got nil")
+				}
+				if err.Code != tc.wantCode {
+					t.Fatalf("unexpected error code: got %s want %s", err.Code, tc.wantCode)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("expected no validation error, got %v", err)
+			}
+		})
+	}
+}
+
+func TestTemplateManager_RenderToString(t *testing.T) {
+	t.Parallel()
+
+	tm := mustCreateTemplateManager(t)
+
+	testCases := []struct {
+		name         string
+		templateType template.TemplateType
+		data         any
+		wantContains []string
+	}{
+		{
+			name:         "password reset",
+			templateType: template.TemplateTypeEmailPasswordReset,
+			data: template.PasswordResetDTO{
+				ClientName:  "John Doe",
+				ClientEmail: "john@example.com",
+				ResetToken:  "token123",
+				Validity:    "15 minutes",
+			},
+			wantContains: []string{"John Doe", "john@example.com", "token123", "15 minutes"},
+		},
+		{
+			name:         "welcome email",
+			templateType: template.TemplateTypeEmailWelcome,
+			data: template.WelcomeTemplateDTO{
+				ClientName:  "John Doe",
+				ClientEmail: "john@example.com",
+			},
+			wantContains: []string{"John Doe", "john@example.com"},
+		},
+		{
+			name:         "email verification",
+			templateType: template.TemplateTypeEmailVerification,
+			data: template.EmailVerificationDTO{
+				ClientName:        "John Doe",
+				ClientEmail:       "john@example.com",
+				VerificationToken: "verify-123",
+				Validity:          "15 minutes",
+			},
+			wantContains: []string{"John Doe", "john@example.com", "verify-123", "15 minutes"},
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			rendered, err := tm.RenderToString(tc.templateType, tc.data)
+			if err != nil {
+				t.Fatalf("render returned error: %v", err)
+			}
+			if strings.TrimSpace(rendered) == "" {
+				t.Fatal("rendered template is empty")
+			}
+			for _, expected := range tc.wantContains {
+				if !strings.Contains(rendered, expected) {
+					t.Fatalf("rendered template does not contain %q: %s", expected, rendered)
+				}
+			}
+		})
+	}
+}
+
+func TestTemplateManager_RenderToBytes(t *testing.T) {
+	t.Parallel()
+
+	tm := mustCreateTemplateManager(t)
+
+	data := template.PasswordResetDTO{
 		ClientName:  "John Doe",
-		ClientEmail: "example@example.com",
+		ClientEmail: "john@example.com",
 		ResetToken:  "token123",
 		Validity:    "15 minutes",
 	}
 
-	templateStr, err := tm.RenderToString(template.TemplateTypeEmailPasswordReset, resetPassowrdData)
+	rendered, err := tm.RenderToBytes(template.TemplateTypeEmailPasswordReset, data)
 	if err != nil {
-		t.Errorf("failed to render template: %v", err)
+		t.Fatalf("render returned error: %v", err)
 	}
 
-	if templateStr == "" {
-		t.Errorf("template is empty")
+	renderedString := string(rendered)
+	if strings.TrimSpace(renderedString) == "" {
+		t.Fatal("rendered template is empty")
 	}
 
-	if !strings.Contains(templateStr, "token123") || !strings.Contains(templateStr, "John Doe") || !strings.Contains(templateStr, "example@example.com") || !strings.Contains(templateStr, "15 minutes") {
-		t.Errorf("password reset token is not masked, got %s", templateStr)
-	}
-
-	// Test Welcome Email
-	welcomeData := template.WelcomeTemplateDTO{
-		ClientName:  "John Doe",
-		ClientEmail: "example@example.com",
-	}
-
-	templateStr, err = tm.RenderToString(template.TemplateTypeEmailWelcome, welcomeData)
-	if err != nil {
-		t.Errorf("failed to render template: %v", err)
-	}
-
-	if templateStr == "" {
-		t.Errorf("template is empty")
-	}
-
-	if !strings.Contains(templateStr, "John Doe") || !strings.Contains(templateStr, "example@example.com") {
-		t.Errorf("password reset token is not masked, got %s", templateStr)
-	}
-
-	// Test Email Verification
-	verificationData := template.EmailVerificationDTO{
-		ClientName:  "John Doe",
-		ClientEmail: "example@example.com",
-	}
-
-	templateStr, err = tm.RenderToString(template.TemplateTypeEmailVerification, verificationData)
-	if err != nil {
-		t.Errorf("failed to render template: %v", err)
-	}
-
-	if templateStr == "" {
-		t.Errorf("template is empty")
-	}
-
-	if !strings.Contains(templateStr, "John Doe") || !strings.Contains(templateStr, "example@example.com") {
-		t.Errorf("password reset token is not masked, got %s", templateStr)
+	for _, expected := range []string{"John Doe", "john@example.com", "token123", "15 minutes"} {
+		if !strings.Contains(renderedString, expected) {
+			t.Fatalf("rendered template does not contain %q: %s", expected, renderedString)
+		}
 	}
 }
 
-func Test_templateManager_RenderToBytes(t *testing.T) {
-	tm := mustCreateTemplateManager()
+func TestTemplateManager_RenderFailures(t *testing.T) {
+	t.Parallel()
 
-	// Test Reset Password Email
-	resetPassowrdData := template.PasswordResetDTO{
-		ClientName:  "John Doe",
-		ClientEmail: "example@example.com",
-		ResetToken:  "token123",
-		Validity:    "15 minutes",
+	tm := mustCreateTemplateManager(t)
+
+	testCases := []struct {
+		name         string
+		templateType template.TemplateType
+		data         any
+		wantCode     apperror.ErrorCode
+	}{
+		{
+			name:         "empty template type",
+			templateType: "",
+			data: template.WelcomeTemplateDTO{
+				ClientName:  "John Doe",
+				ClientEmail: "john@example.com",
+			},
+			wantCode: apperror.CodeValidation,
+		},
+		{
+			name:         "unknown template",
+			templateType: template.TemplateType("missing-template"),
+			data: template.WelcomeTemplateDTO{
+				ClientName:  "John Doe",
+				ClientEmail: "john@example.com",
+			},
+			wantCode: apperror.CodeInternal,
+		},
+		{
+			name:         "invalid payload",
+			templateType: template.TemplateTypeEmailVerification,
+			data: template.EmailVerificationDTO{
+				ClientName:  "John Doe",
+				ClientEmail: "not-an-email",
+			},
+			wantCode: apperror.CodeValidation,
+		},
 	}
 
-	templateBytes, err := tm.RenderToBytes(template.TemplateTypeEmailPasswordReset, resetPassowrdData)
-	if err != nil {
-		t.Errorf("failed to render template: %v", err)
-	}
+	for _, tc := range testCases 
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	templateStr := string(templateBytes)
-
-	if templateStr == "" {
-		t.Errorf("template is empty")
-	}
-
-	if !strings.Contains(templateStr, "token123") || !strings.Contains(templateStr, "John Doe") || !strings.Contains(templateStr, "example@example.com") || !strings.Contains(templateStr, "15 minutes") {
-		t.Errorf("password reset token is not masked, got %s", templateStr)
-	}
-
-	// Test Welcome Email
-	welcomeData := template.WelcomeTemplateDTO{
-		ClientName:  "John Doe",
-		ClientEmail: "example@example.com",
-	}
-
-	templateBytes, err = tm.RenderToBytes(template.TemplateTypeEmailWelcome, welcomeData)
-	if err != nil {
-		t.Errorf("failed to render template: %v", err)
-	}
-	templateStr = string(templateBytes)
-
-	if templateStr == "" {
-		t.Errorf("template is empty")
-	}
-
-	if !strings.Contains(templateStr, "John Doe") || !strings.Contains(templateStr, "example@example.com") {
-		t.Errorf("password reset token is not masked, got %s", templateStr)
-	}
-
-	// Test Email Verification
-	verificationData := template.EmailVerificationDTO{
-		ClientName:  "John Doe",
-		ClientEmail: "example@example.com",
-	}
-
-	templateBytes, err = tm.RenderToBytes(template.TemplateTypeEmailVerification, verificationData)
-	if err != nil {
-		t.Errorf("failed to render template: %v", err)
-	}
-	templateStr = string(templateBytes)
-
-	if templateStr == "" {
-		t.Errorf("template is empty")
-	}
-
-	if !strings.Contains(templateStr, "John Doe") || !strings.Contains(templateStr, "example@example.com") {
-		t.Errorf("password reset token is not masked, got %s", templateStr)
+			_, err := tm.RenderToString(tc.templateType, tc.data)
+			if err == nil {
+				t.Fatal("expected render error, got nil")
+			}
+			if err.Code != tc.wantCode {
+				t.Fatalf("unexpected error code: got %s want %s", err.Code, tc.wantCode)
+			}
+		})
 	}
 }
