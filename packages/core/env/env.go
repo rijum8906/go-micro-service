@@ -20,6 +20,10 @@ type Config struct {
 	UserServiceAddr    string `env:"USER_SERVICE_ADDR" envDefault:"user-service:8081"`
 	GraphQLGatewayAddr string `env:"GRAPHQL_GATEWAY_ADDR" envDefault:"graphql-gateway:8080"`
 
+	// NATS
+	NATSURL        string `env:"NATS_URL" envDefault:"nats://localhost:4222"`
+	NATSClientName string `env:"NATS_CLIENT_NAME" envDefault:"user-service"`
+
 	// Postgres
 	DBHost     string `env:"DB_HOST,required"`
 	DBPort     int    `env:"DB_PORT" envDefault:"5432"`

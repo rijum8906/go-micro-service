@@ -186,10 +186,19 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return &corev1.SuccessResponse{Success: true}, nil
 	}
 
-	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeVerifyEmail); appErr != nil {
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeVerifyEmail)
+	if appErr != nil {
 		return nil, appErr
 	}
-	// TODO: Send the verification email or notification containing the scoped token.
+
+	if appErr = s.publisher.PublishJSON(dto.JobEmailVerification.String(), dto.EmailVerificationJob{
+		UserID:      user.ID.String(),
+		Email:       user.Email,
+		ScopedToken: scopedToken,
+		ExpiresIn:   s.env.ScopedTokenTTL.String(),
+	}); appErr != nil {
+		return nil, appErr
+	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
 }
@@ -201,16 +210,25 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 
 	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
-		if appErr.Code == apperror.CodeInternal {
+		if appErr.Code == apperror.CodeNotFound {
 			return &corev1.SuccessResponse{Success: true}, nil
 		}
 		return nil, appErr
 	}
 
-	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword); appErr != nil {
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword)
+	if appErr != nil {
 		return nil, appErr
 	}
-	// TODO: Send the password reset email or notification containing the scoped token.
+
+	if appErr = s.publisher.PublishJSON(dto.JobEmailPasswordReset.String(), dto.PasswordResetJob{
+		UserID:      user.ID.String(),
+		Email:       user.Email,
+		ScopedToken: scopedToken,
+		ExpiresIn:   s.env.ScopedTokenTTL.String(),
+	}); appErr != nil {
+		return nil, appErr
+	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
 }
