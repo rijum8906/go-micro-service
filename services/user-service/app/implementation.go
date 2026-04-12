@@ -9,6 +9,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
 	"github.com/rijum8906/relay/packages/core/hash"
+	corenats "github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
@@ -61,6 +62,19 @@ func (a *Application) initCache(ctx context.Context) *apperror.AppError {
 	return nil
 }
 
+func (a *Application) initNATS(ctx context.Context) *apperror.AppError {
+	client, appErr := corenats.Connect(ctx, corenats.Config{
+		URL:        a.config.NATSURL,
+		ClientName: a.config.NATSClientName,
+	})
+	if appErr != nil {
+		return appErr
+	}
+
+	a.infra.nats = client
+	return nil
+}
+
 func (a *Application) initUtils() *apperror.AppError {
 	tokenManager := token.NewTokenManager(token.Config{
 		JwtSecret:      []byte(a.config.JWTSecret),
@@ -86,7 +100,7 @@ func (a *Application) initHandler() *apperror.AppError {
 		Session: sessionrepo.NewSessionRepository(queries),
 	}
 
-	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config)
+	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config, a.infra.nats)
 	if appErr != nil {
 		return appErr
 	}
@@ -157,5 +171,9 @@ func (a *Application) Shutdown() {
 
 	if a.infra != nil && a.infra.cache != nil {
 		a.infra.cache.Close()
+	}
+
+	if a.infra != nil && a.infra.nats != nil {
+		_ = a.infra.nats.Drain()
 	}
 }

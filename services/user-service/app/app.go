@@ -10,6 +10,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/hash"
+	corenats "github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/token"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	"google.golang.org/grpc"
@@ -18,6 +19,7 @@ import (
 type ApplicationInfra struct {
 	cache    *redis.Client
 	database *pgxpool.Pool
+	nats     *corenats.Client
 }
 
 type ApplicationUtils struct {
@@ -60,6 +62,10 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	if appErr = app.initCache(ctx); appErr != nil {
+		return nil, appErr
+	}
+
+	if appErr = app.initNATS(ctx); appErr != nil {
 		return nil, appErr
 	}
 

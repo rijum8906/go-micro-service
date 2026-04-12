@@ -103,7 +103,7 @@ func GetAllJobSubjects() []JobSubject {
 // IsValidJobSubject checks if subject follows job pattern
 func IsValidJobSubject(subject string) bool {
 	parts := strings.Split(subject, ".")
-	if len(parts) != 3 {
+	if len(parts) != 3 && len(parts) != 4 {
 		return false
 	}
 
