@@ -25,7 +25,18 @@ func sampleCompanyInfo() *template.CompanyInfo {
 func mustCreateTemplateManager(t *testing.T) template.TemplateManager {
 	t.Helper()
 
-	manager, err := template.NewTemplateManager(filepath.Join("..", "..", "templates"), sampleCompanyInfo())
+	manager, err := template.NewTemplateManager(filepath.Join("..", "..", "templates"))
+	if err != nil {
+		t.Fatalf("failed to create template manager: %v", err)
+	}
+
+	return manager
+}
+
+func mustCreateTemplateManagerWithCompanyInfo(t *testing.T) template.TemplateManager {
+	t.Helper()
+
+	manager, err := template.NewTemplateManagerWithCompanyInfo(filepath.Join("..", "..", "templates"), sampleCompanyInfo())
 	if err != nil {
 		t.Fatalf("failed to create template manager: %v", err)
 	}
@@ -54,7 +65,7 @@ func TestNewTemplateManager_Failure(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			_, err := template.NewTemplateManager(tc.templatesDir, sampleCompanyInfo())
+			_, err := template.NewTemplateManager(tc.templatesDir)
 			if err == nil {
 				t.Fatal("expected constructor error, got nil")
 			}
@@ -65,7 +76,7 @@ func TestNewTemplateManager_Failure(t *testing.T) {
 func TestTemplateManager_ReloadTemplates(t *testing.T) {
 	t.Parallel()
 
-	tm := mustCreateTemplateManager(t)
+	tm := mustCreateTemplateManagerWithCompanyInfo(t)
 	if err := tm.ReloadTemplates(); err != nil {
 		t.Fatalf("reload returned error: %v", err)
 	}
@@ -135,7 +146,7 @@ func TestTemplateManager_ValidateData(t *testing.T) {
 func TestTemplateManager_RenderToString(t *testing.T) {
 	t.Parallel()
 
-	tm := mustCreateTemplateManager(t)
+	tm := mustCreateTemplateManagerWithCompanyInfo(t)
 
 	testCases := []struct {
 		name         string
@@ -220,7 +231,7 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 func TestTemplateManager_RenderToBytes(t *testing.T) {
 	t.Parallel()
 
-	tm := mustCreateTemplateManager(t)
+	tm := mustCreateTemplateManagerWithCompanyInfo(t)
 
 	data := template.PasswordResetDTO{
 		ClientName:  "John Doe",
@@ -301,5 +312,33 @@ func TestTemplateManager_RenderFailures(t *testing.T) {
 				t.Fatalf("unexpected error code: got %s want %s", err.Code, tc.wantCode)
 			}
 		})
+	}
+}
+
+func TestTemplateManager_RenderToString_GenericWrapperData(t *testing.T) {
+	t.Parallel()
+
+	tm := mustCreateTemplateManagerWithCompanyInfo(t)
+
+	type wrappedWelcomeDTO struct {
+		template.WelcomeTemplateDTO
+		Extra string
+	}
+
+	rendered, err := tm.RenderToString(template.TemplateTypeEmailWelcome, wrappedWelcomeDTO{
+		WelcomeTemplateDTO: template.WelcomeTemplateDTO{
+			ClientName:  "Jane Doe",
+			ClientEmail: "jane@example.com",
+		},
+		Extra: "ignored",
+	})
+	if err != nil {
+		t.Fatalf("render returned error: %v", err)
+	}
+
+	for _, expected := range []string{"Jane Doe", "jane@example.com", "support@relay.dev", "Relay Labs"} {
+		if !strings.Contains(rendered, expected) {
+			t.Fatalf("rendered template does not contain %q: %s", expected, rendered)
+		}
 	}
 }

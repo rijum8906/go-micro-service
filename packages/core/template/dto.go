@@ -38,18 +38,3 @@ type SocialLink struct {
 	Label string `validate:"required"`
 	URL   string `validate:"required,url"`
 }
-
-type welcomeTemplateData struct {
-	WelcomeTemplateDTO
-	CompanyInfo *CompanyInfo
-}
-
-type emailVerificationTemplateData struct {
-	EmailVerificationDTO
-	CompanyInfo *CompanyInfo
-}
-
-type passwordResetTemplateData struct {
-	PasswordResetDTO
-	CompanyInfo *CompanyInfo
-}

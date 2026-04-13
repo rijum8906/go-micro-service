@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -32,7 +33,11 @@ type templateManager struct {
 	mu           sync.RWMutex
 }
 
-func NewTemplateManager(templatesDir string, companyInfo *CompanyInfo) (TemplateManager, error) {
+func NewTemplateManager(templatesDir string) (TemplateManager, error) {
+	return NewTemplateManagerWithCompanyInfo(templatesDir, nil)
+}
+
+func NewTemplateManagerWithCompanyInfo(templatesDir string, companyInfo *CompanyInfo) (TemplateManager, error) {
 	templatesDir = strings.TrimSpace(templatesDir)
 	if templatesDir == "" {
 		return nil, errors.New("templates directory is required")
@@ -127,7 +132,7 @@ func (m *templateManager) RenderToBytes(templateType TemplateType, data any) ([]
 			WithDetail("template", templateName)
 	}
 
-	templateData, err := m.buildTemplateData(templateType, data)
+	templateData, err := m.buildTemplateData(data)
 	if err != nil {
 		return nil, err
 	}
@@ -160,60 +165,75 @@ func normalizeTemplateName(templateType TemplateType) (string, *apperror.AppErro
 	return name + templateFileExtension, nil
 }
 
-func (m *templateManager) buildTemplateData(templateType TemplateType, data any) (any, *apperror.AppError) {
-	switch templateType {
-	case TemplateTypeEmailWelcome:
-		switch dto := data.(type) {
-		case WelcomeTemplateDTO:
-			return welcomeTemplateData{
-				WelcomeTemplateDTO: dto,
-				CompanyInfo:        m.info,
-			}, nil
-		case *WelcomeTemplateDTO:
-			if dto == nil {
-				return nil, apperror.New(apperror.CodeValidation, "template data is required")
-			}
-			return welcomeTemplateData{
-				WelcomeTemplateDTO: *dto,
-				CompanyInfo:        m.info,
-			}, nil
+func (m *templateManager) buildTemplateData(data any) (any, *apperror.AppError) {
+	if m.info == nil {
+		return data, nil
+	}
+
+	if data == nil {
+		return nil, apperror.New(apperror.CodeValidation, "template data is required")
+	}
+
+	value := reflect.ValueOf(data)
+	for value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil, apperror.New(apperror.CodeValidation, "template data is required")
 		}
-	case TemplateTypeEmailVerification:
-		switch dto := data.(type) {
-		case EmailVerificationDTO:
-			return emailVerificationTemplateData{
-				EmailVerificationDTO: dto,
-				CompanyInfo:          m.info,
-			}, nil
-		case *EmailVerificationDTO:
-			if dto == nil {
-				return nil, apperror.New(apperror.CodeValidation, "template data is required")
+		value = value.Elem()
+	}
+
+	switch value.Kind() {
+	case reflect.Struct:
+		templateData := map[string]any{}
+		flattenTemplateFields(templateData, value)
+		templateData["CompanyInfo"] = m.info
+		return templateData, nil
+	case reflect.Map:
+		if value.Type().Key().Kind() == reflect.String {
+			templateData := map[string]any{}
+			iter := value.MapRange()
+			for iter.Next() {
+				templateData[iter.Key().String()] = iter.Value().Interface()
 			}
-			return emailVerificationTemplateData{
-				EmailVerificationDTO: *dto,
-				CompanyInfo:          m.info,
-			}, nil
-		}
-	case TemplateTypeEmailPasswordReset:
-		switch dto := data.(type) {
-		case PasswordResetDTO:
-			return passwordResetTemplateData{
-				PasswordResetDTO: dto,
-				CompanyInfo:      m.info,
-			}, nil
-		case *PasswordResetDTO:
-			if dto == nil {
-				return nil, apperror.New(apperror.CodeValidation, "template data is required")
-			}
-			return passwordResetTemplateData{
-				PasswordResetDTO: *dto,
-				CompanyInfo:      m.info,
-			}, nil
+			templateData["CompanyInfo"] = m.info
+			return templateData, nil
 		}
 	}
 
-	return nil, apperror.New(apperror.CodeValidation, "invalid template data").
-		WithDetail("template", string(templateType))
+	return map[string]any{
+		"Data":        data,
+		"CompanyInfo": m.info,
+	}, nil
+}
+
+func flattenTemplateFields(out map[string]any, value reflect.Value) {
+	for value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return
+		}
+		value = value.Elem()
+	}
+
+	if value.Kind() != reflect.Struct {
+		return
+	}
+
+	valueType := value.Type()
+	for i := range value.NumField() {
+		field := valueType.Field(i)
+		fieldValue := value.Field(i)
+
+		if field.Anonymous {
+			flattenTemplateFields(out, fieldValue)
+			continue
+		}
+
+		if !field.IsExported() {
+			continue
+		}
+
+		out[field.Name] = fieldValue.Interface()
+	}
 }
 
 // Type-safe helper methods
