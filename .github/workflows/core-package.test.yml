@@ -8,6 +8,10 @@ on:
 
 env:
   TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
+  TEST_SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+  TEST_SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  TEST_SMTP_HOST: ${{ secrets.SMTP_HOST }}
+  TEST_SMTP_PORT: ${{ secrets.SMTP_PORT }}
 
 jobs:
   test:

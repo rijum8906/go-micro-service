@@ -1,11 +1,13 @@
 package mailer
 
 import (
+	"errors"
 	"net/mail"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
 var validate *validator.Validate
@@ -13,6 +15,7 @@ var validate *validator.Validate
 func init() {
 	validate = validator.New()
 	_ = validate.RegisterValidation("mail_address", validateMailAddress)
+	validate.RegisterStructValidation(validateConfig, Config{})
 	validate.RegisterStructValidation(validateEnvelope, Envelope{})
 	validate.RegisterStructValidation(validateContent, Content{})
 }
@@ -20,9 +23,9 @@ func init() {
 type Config struct {
 	Host        string `validate:"required"`
 	Port        int    `validate:"required,gt=0"`
-	Username    string `validate:"required"`
-	Password    string `validate:"required"`
-	FromEmail   string `validate:"required,email"`
+	Username    string
+	Password    string
+	FromEmail   string `validate:"omitempty,email"`
 	FromName    string
 	UseTLS      bool
 	UseStartTLS bool
@@ -30,8 +33,12 @@ type Config struct {
 	Retries     int           `validate:"gte=0"`
 }
 
-func (c Config) Validate() error {
-	return validate.Struct(c)
+func (c Config) Validate() *apperror.AppError {
+	if err := validate.Struct(c); err != nil {
+		return validationError("invalid mailer config", err)
+	}
+
+	return nil
 }
 
 // Attachment represents an email attachment
@@ -41,8 +48,12 @@ type Attachment struct {
 	Data        []byte `validate:"required,min=1"`
 }
 
-func (a Attachment) Validate() error {
-	return validate.Struct(a)
+func (a Attachment) Validate() *apperror.AppError {
+	if err := validate.Struct(a); err != nil {
+		return validationError("invalid mail attachment", err)
+	}
+
+	return nil
 }
 
 // Envelope contains the addresses required for an email
@@ -53,8 +64,12 @@ type Envelope struct {
 	BCC  []mail.Address `validate:"dive,mail_address"`
 }
 
-func (m Envelope) Validate() error {
-	return validate.Struct(m)
+func (m Envelope) Validate() *apperror.AppError {
+	if err := validate.Struct(m); err != nil {
+		return validationError("invalid mail envelope", err)
+	}
+
+	return nil
 }
 
 func (m Envelope) Recipients() []mail.Address {
@@ -76,8 +91,12 @@ type Content struct {
 	Headers     map[string]string
 }
 
-func (b Content) Validate() error {
-	return validate.Struct(b)
+func (b Content) Validate() *apperror.AppError {
+	if err := validate.Struct(b); err != nil {
+		return validationError("invalid mail content", err)
+	}
+
+	return nil
 }
 
 func (b Content) HasContent() bool {
@@ -89,8 +108,12 @@ type Message struct {
 	Content  Content  `validate:"required"`
 }
 
-func (m Message) Validate() error {
-	return validate.Struct(m)
+func (m Message) Validate() *apperror.AppError {
+	if err := validate.Struct(m); err != nil {
+		return validationError("invalid mail message", err)
+	}
+
+	return nil
 }
 
 func validateMailAddress(fl validator.FieldLevel) bool {
@@ -116,6 +139,19 @@ func validateEnvelope(sl validator.StructLevel) {
 	}
 }
 
+func validateConfig(sl validator.StructLevel) {
+	config, ok := sl.Current().Interface().(Config)
+	if !ok {
+		return
+	}
+	if (config.Username == "") != (config.Password == "") {
+		sl.ReportError(config.Username, "Username", "username", "auth_pair_required", "")
+	}
+	if config.UseTLS && config.UseStartTLS {
+		sl.ReportError(config.UseTLS, "UseTLS", "useTLS", "tls_mode_conflict", "")
+	}
+}
+
 func validateContent(sl validator.StructLevel) {
 	content, ok := sl.Current().Interface().(Content)
 	if !ok {
@@ -124,4 +160,18 @@ func validateContent(sl validator.StructLevel) {
 	if !content.HasContent() {
 		sl.ReportError(content.HTML, "HTML", "html", "content_required", "")
 	}
+}
+
+func validationError(message string, err error) *apperror.AppError {
+	appErr := apperror.New(apperror.CodeValidation, message)
+
+	var validationErrs validator.ValidationErrors
+	if ok := errors.As(err, &validationErrs); ok {
+		for _, validationErr := range validationErrs {
+			appErr.WithDetail(validationErr.Field(), validationErr.Tag())
+		}
+		return appErr
+	}
+
+	return appErr.WithDetail("error", err.Error())
 }
