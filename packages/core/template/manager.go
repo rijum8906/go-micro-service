@@ -33,6 +33,7 @@ type templateManager struct {
 	mu           sync.RWMutex
 }
 
+// Preserve the original constructor for callers that do not need footer-level company metadata.
 func NewTemplateManager(templatesDir string) (TemplateManager, error) {
 	return NewTemplateManagerWithCompanyInfo(templatesDir, nil)
 }
@@ -165,6 +166,9 @@ func normalizeTemplateName(templateType TemplateType) (string, *apperror.AppErro
 	return name + templateFileExtension, nil
 }
 
+// buildTemplateData preserves the existing generic render behavior by flattening
+// struct or map payloads into a template context, then injects CompanyInfo so the
+// footer can access shared company contact/social fields without breaking older callers.
 func (m *templateManager) buildTemplateData(data any) (any, *apperror.AppError) {
 	if m.info == nil {
 		return data, nil
@@ -200,12 +204,16 @@ func (m *templateManager) buildTemplateData(data any) (any, *apperror.AppError) 
 		}
 	}
 
+	// Non-struct payloads keep their original value under Data so callers can still render them.
 	return map[string]any{
 		"Data":        data,
 		"CompanyInfo": m.info,
 	}, nil
 }
 
+// flattenTemplateFields copies exported struct fields into the template context.
+// Anonymous embedded structs are flattened recursively so existing template field
+// access like .ClientName continues to work for wrapper payloads.
 func flattenTemplateFields(out map[string]any, value reflect.Value) {
 	for value.Kind() == reflect.Pointer {
 		if value.IsNil() {
