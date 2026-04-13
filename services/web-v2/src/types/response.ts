@@ -1,62 +1,74 @@
-import type { AuthTokens } from './auth'
-import type { Profile, Session, User } from './models'
-import type { GetProfileResult } from './result'
+// #/types/response.ts
 
-/** `Profile` fields as returned by the gateway (no client-derived fields) */
-export type GqlProfileFields = {
-  id: string
-  userId: string
-  firstName: string
-  lastName: string
-  createdAt: string
-  updatedAt: string
-  avatarUrl: string | null
-}
+import type { Token } from './auth';
+import type { Account, Profile } from './models';
+import type { GetProfileResult } from './result';
 
 export interface ErrorDetail {
-  field: string
-  message: string
+  field: string;
+  message: string;
+}
+
+export interface Metadata {
+  deviceId: string;
 }
 
 export interface BaseResponse {
-  success: boolean
-  message: string
+  success: boolean;
+  message: string;
 }
 
 export interface BaseSuccessResponse<T = unknown> {
-  success: true
-  message: string
-  data?: T
+  success: true;
+  message: string;
+  data?: T;
 }
 
 export interface BaseErrorResponse {
-  success: false
-  message: string
-  errors?: ErrorDetail[]
+  success: false;
+  message: string;
+  errors?: ErrorDetail[];
 }
 
+// Matches your Go BaseErrorResponse
 export interface ErrorResponse extends BaseResponse {
-  errors?: ErrorDetail[]
+  errors?: ErrorDetail[];
 }
 
-/** Payload after Login / Register (client-facing fields) */
-export interface AuthSuccessPayload {
-  tokens: AuthTokens
-  user: User
-  profile: GqlProfileFields
+// Matches your Go BaseSuccessResponse[*dto.AuthResponse]
+export interface AuthResponse extends BaseResponse {
+  data: {
+    account: Account;
+    profiles: Profile[];
+    token: Token;
+  };
 }
 
 export interface UpdateProfileResponse extends BaseResponse {
-  data: Profile
+  data: Profile;
 }
 
 export interface GetProfileResponse extends BaseResponse {
-  data: GetProfileResult
+  data: GetProfileResult;
 }
 
-/** Raw `SessionBootstrap` query data (GraphQL field names) */
-export interface SessionBootstrapData {
-  GetCurrentSession: Session
-  Me: User
-  MyProfile: GqlProfileFields
+export interface GqlAuthPayload {
+  account: { id: string; email: string }
+  tokens: { accessToken: string; refreshToken: string }
+  profiles: Array<{
+    id: string
+    firstName: string
+    lastName: string
+    displayName: string | null
+    avatarUrl: string | null
+  }>
+}
+
+export interface GqlAuthResponse {
+  success: boolean
+  message: string
+  data: {
+    signin?: GqlAuthPayload
+    signup?: GqlAuthPayload
+  }
 }

@@ -20,12 +20,10 @@
     "@tanstack/router-plugin": "^1.132.0",
     "@tanstack/zod-form-adapter": "^0.42.1",
     "axios": "^1.13.6",
-    "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.18",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"

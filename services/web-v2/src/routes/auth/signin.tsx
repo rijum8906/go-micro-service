@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { useAuthStore } from '#/store/auth'
-import { login } from '#/api/auth'
+import { signin } from '#/api/auth'
 import { signinSchema, type SigninSchemaType } from '#/schemas/auth'
 import { ThemeToggle } from '#/components/ThemeToggle'
 import { useThemeStore } from '#/store/theme'
@@ -20,8 +20,7 @@ export const Route = createFileRoute('/auth/signin')({
 function SignInPage() {
   const router = useRouter()
   const { redirect } = Route.useSearch()
-  const applyAuthSuccess = useAuthStore((s) => s.applyAuthSuccess)
-  const isSignedIn = useAuthStore((s) => s.isSignedIn)
+  const { createToken, createAccount, createProfile, isSignedIn } = useAuthStore()
   const { theme } = useThemeStore()
   const isDark = theme === 'dark'
 
@@ -32,9 +31,21 @@ function SignInPage() {
   const form = useForm({
     defaultValues: { email: '', password: '' } as SigninSchemaType,
     onSubmit: async ({ value }) => {
-      const response = await login(value)
+      const response = await signin(value) as any
       if (response.success) {
-        applyAuthSuccess(response.data)
+        const payload = response.data.signin
+        createAccount({ id: payload.account.id, email: payload.account.email, createdAt: '', updatedAt: '', passwordHash: '' })
+        payload.profiles.forEach((p: any) => createProfile({
+          id: p.id,
+          firstName: p.firstName,
+          lastName: p.lastName,
+          displayName: p.displayName,
+          avatarUrl: p.avatarUrl,
+          accountId: payload.account.id,
+          createdAt: '',
+          updatedAt: '',
+        }))
+        createToken({ access_token: payload.tokens.accessToken, refresh_token: payload.tokens.refreshToken })
         toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {
