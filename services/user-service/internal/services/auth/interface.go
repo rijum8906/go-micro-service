@@ -23,13 +23,18 @@ type AuthService interface {
 	ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*corev1.SuccessResponse, *apperror.AppError)
 }
 
-type authService struct {
-	env   *env.Config
-	repos *utils.Repos
-	utils *utils.ServiceUtils
+type JobPublisher interface {
+	PublishJSON(subject string, payload any) *apperror.AppError
 }
 
-func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Config) (AuthService, *apperror.AppError) {
+type authService struct {
+	env       *env.Config
+	repos     *utils.Repos
+	utils     *utils.ServiceUtils
+	publisher JobPublisher
+}
+
+func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Config, publisher JobPublisher) (AuthService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("repos", "auth repositories are not configured")
 	}
@@ -39,10 +44,14 @@ func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Confi
 	if env == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("env", "auth environment config is not configured")
 	}
+	if publisher == nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("publisher", "job publisher is not configured")
+	}
 
 	return &authService{
-		env:   env,
-		repos: repo,
-		utils: utils,
+		env:       env,
+		repos:     repo,
+		utils:     utils,
+		publisher: publisher,
 	}, nil
 }

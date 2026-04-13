@@ -1,4 +1,9 @@
 services:
+  nats:
+    image: nats:2.12-alpine
+    ports:
+      - "4222:4222"
+
   # postgres
   postgres:
     image: postgres:14.22-bookworm
@@ -26,9 +31,11 @@ services:
       dockerfile: ./services/user-service/Dockerfile
     environment:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      NATS_URL: "nats://nats:4222"
     ports:
       - "8081:8081"
     depends_on:
+      - "nats"
       - "postgres"
       - "redis"
 
