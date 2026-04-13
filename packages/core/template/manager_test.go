@@ -9,10 +9,23 @@ import (
 	"github.com/rijum8906/relay/packages/core/template"
 )
 
+func sampleCompanyInfo() *template.CompanyInfo {
+	return &template.CompanyInfo{
+		Name:       "Relay Labs",
+		Emails:     []string{"support@relay.dev", "hello@relay.dev"},
+		Addresses:  []string{"123 Relay Street, Dhaka 1212", "42 Signal Avenue, Tokyo 150-0001"},
+		WebsiteURL: "https://relay.dev",
+		SocialLinks: []template.SocialLink{
+			{Label: "LinkedIn", URL: "https://linkedin.com/company/relay"},
+			{Label: "X", URL: "https://x.com/relay"},
+		},
+	}
+}
+
 func mustCreateTemplateManager(t *testing.T) template.TemplateManager {
 	t.Helper()
 
-	manager, err := template.NewTemplateManager(filepath.Join("..", "..", "templates"))
+	manager, err := template.NewTemplateManager(filepath.Join("..", "..", "templates"), sampleCompanyInfo())
 	if err != nil {
 		t.Fatalf("failed to create template manager: %v", err)
 	}
@@ -41,7 +54,7 @@ func TestNewTemplateManager_Failure(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			_, err := template.NewTemplateManager(tc.templatesDir)
+			_, err := template.NewTemplateManager(tc.templatesDir, sampleCompanyInfo())
 			if err == nil {
 				t.Fatal("expected constructor error, got nil")
 			}
@@ -139,7 +152,15 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 				ResetToken:  "token123",
 				Validity:    "15 minutes",
 			},
-			wantContains: []string{"John Doe", "john@example.com", "token123", "15 minutes"},
+			wantContains: []string{
+				"John Doe",
+				"john@example.com",
+				"token123",
+				"15 minutes",
+				"support@relay.dev",
+				"123 Relay Street, Dhaka 1212",
+				"https://linkedin.com/company/relay",
+			},
 		},
 		{
 			name:         "welcome email",
@@ -148,7 +169,12 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
 			},
-			wantContains: []string{"John Doe", "john@example.com"},
+			wantContains: []string{
+				"John Doe",
+				"john@example.com",
+				"https://relay.dev",
+				"hello@relay.dev",
+			},
 		},
 		{
 			name:         "email verification",
@@ -159,7 +185,14 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 				VerificationToken: "verify-123",
 				Validity:          "15 minutes",
 			},
-			wantContains: []string{"John Doe", "john@example.com", "verify-123", "15 minutes"},
+			wantContains: []string{
+				"John Doe",
+				"john@example.com",
+				"verify-123",
+				"15 minutes",
+				"https://x.com/relay",
+				"Relay Labs",
+			},
 		},
 	}
 
@@ -207,6 +240,9 @@ func TestTemplateManager_RenderToBytes(t *testing.T) {
 	}
 
 	for _, expected := range []string{"John Doe", "john@example.com", "token123", "15 minutes"} {
+		if !strings.Contains(renderedString, "support@relay.dev") {
+			t.Fatalf("rendered template does not contain %q: %s", "support@relay.dev", renderedString)
+		}
 		if !strings.Contains(renderedString, expected) {
 			t.Fatalf("rendered template does not contain %q: %s", expected, renderedString)
 		}
@@ -267,4 +303,3 @@ func TestTemplateManager_RenderFailures(t *testing.T) {
 		})
 	}
 }
-

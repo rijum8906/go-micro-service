@@ -27,18 +27,26 @@ type TemplateManager interface {
 
 type templateManager struct {
 	templatesDir string
+	info         *CompanyInfo
 	templates    *template.Template
 	mu           sync.RWMutex
 }
 
-func NewTemplateManager(templatesDir string) (TemplateManager, error) {
+func NewTemplateManager(templatesDir string, companyInfo *CompanyInfo) (TemplateManager, error) {
 	templatesDir = strings.TrimSpace(templatesDir)
 	if templatesDir == "" {
 		return nil, errors.New("templates directory is required")
 	}
 
+	if companyInfo != nil {
+		if err := validate.Struct(companyInfo); err != nil {
+			return nil, fmt.Errorf("invalid company info: %w", err)
+		}
+	}
+
 	tm := &templateManager{
 		templatesDir: templatesDir,
+		info:         companyInfo,
 	}
 
 	if err := tm.loadTemplates(); err != nil {
@@ -119,9 +127,14 @@ func (m *templateManager) RenderToBytes(templateType TemplateType, data any) ([]
 			WithDetail("template", templateName)
 	}
 
+	templateData, err := m.buildTemplateData(templateType, data)
+	if err != nil {
+		return nil, err
+	}
+
 	var buf bytes.Buffer
 
-	if err := m.templates.ExecuteTemplate(&buf, templateName, data); err != nil {
+	if err := m.templates.ExecuteTemplate(&buf, templateName, templateData); err != nil {
 		return nil, apperror.New(apperror.CodeInternal, "failed to render template").
 			WithDetail("template", templateName).
 			WithDetail("error", err.Error())
@@ -145,6 +158,62 @@ func normalizeTemplateName(templateType TemplateType) (string, *apperror.AppErro
 	}
 
 	return name + templateFileExtension, nil
+}
+
+func (m *templateManager) buildTemplateData(templateType TemplateType, data any) (any, *apperror.AppError) {
+	switch templateType {
+	case TemplateTypeEmailWelcome:
+		switch dto := data.(type) {
+		case WelcomeTemplateDTO:
+			return welcomeTemplateData{
+				WelcomeTemplateDTO: dto,
+				CompanyInfo:        m.info,
+			}, nil
+		case *WelcomeTemplateDTO:
+			if dto == nil {
+				return nil, apperror.New(apperror.CodeValidation, "template data is required")
+			}
+			return welcomeTemplateData{
+				WelcomeTemplateDTO: *dto,
+				CompanyInfo:        m.info,
+			}, nil
+		}
+	case TemplateTypeEmailVerification:
+		switch dto := data.(type) {
+		case EmailVerificationDTO:
+			return emailVerificationTemplateData{
+				EmailVerificationDTO: dto,
+				CompanyInfo:          m.info,
+			}, nil
+		case *EmailVerificationDTO:
+			if dto == nil {
+				return nil, apperror.New(apperror.CodeValidation, "template data is required")
+			}
+			return emailVerificationTemplateData{
+				EmailVerificationDTO: *dto,
+				CompanyInfo:          m.info,
+			}, nil
+		}
+	case TemplateTypeEmailPasswordReset:
+		switch dto := data.(type) {
+		case PasswordResetDTO:
+			return passwordResetTemplateData{
+				PasswordResetDTO: dto,
+				CompanyInfo:      m.info,
+			}, nil
+		case *PasswordResetDTO:
+			if dto == nil {
+				return nil, apperror.New(apperror.CodeValidation, "template data is required")
+			}
+			return passwordResetTemplateData{
+				PasswordResetDTO: *dto,
+				CompanyInfo:      m.info,
+			}, nil
+		}
+	}
+
+	return nil, apperror.New(apperror.CodeValidation, "invalid template data").
+		WithDetail("template", string(templateType))
 }
 
 // Type-safe helper methods
