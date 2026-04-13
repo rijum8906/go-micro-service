@@ -16,6 +16,12 @@ func NewTestEnv() *env.Config {
 	os.Setenv("REDIS_PORT", "6379")
 	os.Setenv("JWT_SECRET", "test_secret")
 	os.Setenv("SCOPED_SECRET", "test_scoped_secret")
+	os.Setenv("SMTP_HOST", "smtp.example.com")
+	os.Setenv("SMTP_PORT", "587")
+	os.Setenv("SMTP_USERNAME", "test_username")
+	os.Setenv("SMTP_PASSWORD", "test_password")
+	os.Setenv("SMTP_FROM_EMAIL", "test_from_email")
+	os.Setenv("SMTP_FROM_NAME", "Test From Name")
 
 	config, appErr := env.Load()
 	if appErr != nil {
