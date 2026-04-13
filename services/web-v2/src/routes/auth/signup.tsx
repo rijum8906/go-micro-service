@@ -20,7 +20,8 @@ export const Route = createFileRoute('/auth/signup')({
 function SignUpPage() {
   const router = useRouter()
   const { redirect } = Route.useSearch()
-  const { createToken, createAccount, createProfile, isSignedIn } = useAuthStore()
+  const applyAuthSuccess = useAuthStore((s) => s.applyAuthSuccess)
+  const isSignedIn = useAuthStore((s) => s.isSignedIn)
   const { theme } = useThemeStore()
   const isDark = theme === 'dark'
 
@@ -37,21 +38,9 @@ function SignUpPage() {
       confirmPassword: '',
     } as SignupSchemaType,
     onSubmit: async ({ value }) => {
-      const response = await signup(value) as any
+      const response = await signup(value)
       if (response.success) {
-        const payload = response.data.signup
-        createAccount({ id: payload.account.id, email: payload.account.email, createdAt: '', updatedAt: '', passwordHash: '' })
-        payload.profiles.forEach((p: any) => createProfile({
-          id: p.id,
-          firstName: p.firstName,
-          lastName: p.lastName,
-          displayName: p.displayName,
-          avatarUrl: p.avatarUrl,
-          accountId: payload.account.id,
-          createdAt: '',
-          updatedAt: '',
-        }))
-        createToken({ access_token: payload.tokens.accessToken, refresh_token: payload.tokens.refreshToken })
+        applyAuthSuccess(response.data)
         toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {
