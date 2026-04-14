@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 
@@ -27,18 +28,31 @@ type TemplateManager interface {
 
 type templateManager struct {
 	templatesDir string
+	info         *CompanyInfo
 	templates    *template.Template
 	mu           sync.RWMutex
 }
 
+// Preserve the original constructor for callers that do not need footer-level company metadata.
 func NewTemplateManager(templatesDir string) (TemplateManager, error) {
+	return NewTemplateManagerWithCompanyInfo(templatesDir, nil)
+}
+
+func NewTemplateManagerWithCompanyInfo(templatesDir string, companyInfo *CompanyInfo) (TemplateManager, error) {
 	templatesDir = strings.TrimSpace(templatesDir)
 	if templatesDir == "" {
 		return nil, errors.New("templates directory is required")
 	}
 
+	if companyInfo != nil {
+		if err := validate.Struct(companyInfo); err != nil {
+			return nil, fmt.Errorf("invalid company info: %w", err)
+		}
+	}
+
 	tm := &templateManager{
 		templatesDir: templatesDir,
+		info:         companyInfo,
 	}
 
 	if err := tm.loadTemplates(); err != nil {
@@ -119,9 +133,14 @@ func (m *templateManager) RenderToBytes(templateType TemplateType, data any) ([]
 			WithDetail("template", templateName)
 	}
 
+	templateData, err := m.buildTemplateData(data)
+	if err != nil {
+		return nil, err
+	}
+
 	var buf bytes.Buffer
 
-	if err := m.templates.ExecuteTemplate(&buf, templateName, data); err != nil {
+	if err := m.templates.ExecuteTemplate(&buf, templateName, templateData); err != nil {
 		return nil, apperror.New(apperror.CodeInternal, "failed to render template").
 			WithDetail("template", templateName).
 			WithDetail("error", err.Error())
@@ -145,6 +164,84 @@ func normalizeTemplateName(templateType TemplateType) (string, *apperror.AppErro
 	}
 
 	return name + templateFileExtension, nil
+}
+
+// buildTemplateData preserves the existing generic render behavior by flattening
+// struct or map payloads into a template context, then injects CompanyInfo so the
+// footer can access shared company contact/social fields without breaking older callers.
+func (m *templateManager) buildTemplateData(data any) (any, *apperror.AppError) {
+	if m.info == nil {
+		return data, nil
+	}
+
+	if data == nil {
+		return nil, apperror.New(apperror.CodeValidation, "template data is required")
+	}
+
+	value := reflect.ValueOf(data)
+	for value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return nil, apperror.New(apperror.CodeValidation, "template data is required")
+		}
+		value = value.Elem()
+	}
+
+	switch value.Kind() {
+	case reflect.Struct:
+		templateData := map[string]any{}
+		flattenTemplateFields(templateData, value)
+		templateData["CompanyInfo"] = m.info
+		return templateData, nil
+	case reflect.Map:
+		if value.Type().Key().Kind() == reflect.String {
+			templateData := map[string]any{}
+			iter := value.MapRange()
+			for iter.Next() {
+				templateData[iter.Key().String()] = iter.Value().Interface()
+			}
+			templateData["CompanyInfo"] = m.info
+			return templateData, nil
+		}
+	}
+
+	// Non-struct payloads keep their original value under Data so callers can still render them.
+	return map[string]any{
+		"Data":        data,
+		"CompanyInfo": m.info,
+	}, nil
+}
+
+// flattenTemplateFields copies exported struct fields into the template context.
+// Anonymous embedded structs are flattened recursively so existing template field
+// access like .ClientName continues to work for wrapper payloads.
+func flattenTemplateFields(out map[string]any, value reflect.Value) {
+	for value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return
+		}
+		value = value.Elem()
+	}
+
+	if value.Kind() != reflect.Struct {
+		return
+	}
+
+	valueType := value.Type()
+	for i := range value.NumField() {
+		field := valueType.Field(i)
+		fieldValue := value.Field(i)
+
+		if field.Anonymous {
+			flattenTemplateFields(out, fieldValue)
+			continue
+		}
+
+		if !field.IsExported() {
+			continue
+		}
+
+		out[field.Name] = fieldValue.Interface()
+	}
 }
 
 // Type-safe helper methods

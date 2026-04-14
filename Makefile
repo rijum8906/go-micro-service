@@ -2,19 +2,21 @@ SHELL := /bin/sh
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup setup-proto
+.PHONY: help setup setup-proto dev
 
 help:
+	@printf "Relay development workflow commands.\n\n"
+	@printf "Use these targets to prepare the workspace, install tooling, and start the local stack.\n\n"
 	@printf "Available targets:\n"
-	@printf "  make setup           Setup the project\n"
-	@printf "  make setup-proto     Install Buf CLI\n"
-	@printf "  dev                  Start the docker compose\n"
+	@printf "  make setup           Prepare the Relay workspace for local development\n"
+	@printf "  make setup-proto     Install the Buf CLI for protobuf workflows\n"
+	@printf "  make dev             Start the local development stack with Docker Compose\n"
 
 setup:
-	go run cmd/main.go --setup
+	go run ./cli setup
 
 setup-proto:
 	npm install -g @bufbuild/buf
 
 dev:
-	go run cmd/main.go --dev
+	go run ./cli dev
