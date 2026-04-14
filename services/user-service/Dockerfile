@@ -19,8 +19,6 @@ WORKDIR /app
 
 COPY --from=builder /app/service-user .
 
-COPY services/user-service/.env .
-
-EXPOSE 8906
+EXPOSE 8081
 
 CMD ["./service-user"]

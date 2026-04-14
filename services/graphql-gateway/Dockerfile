@@ -19,8 +19,6 @@ WORKDIR /app
 
 COPY --from=builder /app/graphql-gateway .
 
-COPY services/graphql-gateway/.env .
-
 EXPOSE 8080
 
 CMD ["./graphql-gateway"]
