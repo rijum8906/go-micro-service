@@ -58,10 +58,10 @@ func (a Attachment) Validate() *apperror.AppError {
 
 // Envelope contains the addresses required for an email
 type Envelope struct {
-	From mail.Address   `validate:"mail_address"`
-	To   []mail.Address `validate:"dive,mail_address"`
-	CC   []mail.Address `validate:"dive,mail_address"`
-	BCC  []mail.Address `validate:"dive,mail_address"`
+	From *mail.Address   `validate:"mail_address"`
+	To   []*mail.Address `validate:"dive,mail_address"`
+	CC   []*mail.Address `validate:"dive,mail_address"`
+	BCC  []*mail.Address `validate:"dive,mail_address"`
 }
 
 func (m Envelope) Validate() *apperror.AppError {
@@ -72,8 +72,8 @@ func (m Envelope) Validate() *apperror.AppError {
 	return nil
 }
 
-func (m Envelope) Recipients() []mail.Address {
-	recipients := make([]mail.Address, 0, len(m.To)+len(m.CC)+len(m.BCC))
+func (m Envelope) Recipients() []*mail.Address {
+	recipients := make([]*mail.Address, 0, len(m.To)+len(m.CC)+len(m.BCC))
 	recipients = append(recipients, m.To...)
 	recipients = append(recipients, m.CC...)
 	recipients = append(recipients, m.BCC...)
@@ -117,7 +117,7 @@ func (m Message) Validate() *apperror.AppError {
 }
 
 func validateMailAddress(fl validator.FieldLevel) bool {
-	addr, ok := fl.Field().Interface().(mail.Address)
+	addr, ok := fl.Field().Interface().(*mail.Address)
 	if !ok {
 		return false
 	}

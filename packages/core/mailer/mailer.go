@@ -4,7 +4,7 @@ package mailer
 import (
 	"bytes"
 	"context"
-	netmail "net/mail"
+	"net/mail"
 	"strings"
 	"time"
 
@@ -102,7 +102,7 @@ func buildMessage(message Message) (*gomail.Msg, *apperror.AppError) {
 		return nil, apperror.New(apperror.CodeInternal, "failed to create email message")
 	}
 
-	msg.FromMailAddress(&message.Envelope.From)
+	msg.FromMailAddress(message.Envelope.From)
 	msg.ToMailAddress(mailAddresses(message.Envelope.To)...)
 	msg.CcMailAddress(mailAddresses(message.Envelope.CC)...)
 	msg.BccMailAddress(mailAddresses(message.Envelope.BCC)...)
@@ -153,15 +153,15 @@ func setBodies(msg *gomail.Msg, content Content) *apperror.AppError {
 	return nil
 }
 
-func mailAddresses(addrs []netmail.Address) []*netmail.Address {
+func mailAddresses(addrs []*mail.Address) []*mail.Address {
 	if len(addrs) == 0 {
 		return nil
 	}
 
-	result := make([]*netmail.Address, 0, len(addrs))
+	result := make([]*mail.Address, 0, len(addrs))
 	for idx := range addrs {
 		addr := addrs[idx]
-		result = append(result, &addr)
+		result = append(result, addr)
 	}
 
 	return result

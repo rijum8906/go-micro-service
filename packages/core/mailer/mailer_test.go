@@ -169,8 +169,8 @@ func TestBuildMessageRejectsWhitespaceOnlyBody(t *testing.T) {
 
 	_, err := buildMessage(Message{
 		Envelope: Envelope{
-			From: mail.Address{Address: "sender@example.com"},
-			To:   []mail.Address{{Address: "to@example.com"}},
+			From: &mail.Address{Address: "sender@example.com"},
+			To:   []*mail.Address{{Address: "to@example.com"}},
 		},
 		Content: Content{
 			Subject: "Subject line",
@@ -193,7 +193,7 @@ func TestMailAddresses(t *testing.T) {
 		t.Fatalf("mailAddresses(nil) = %#v, want nil", got)
 	}
 
-	addresses := []mail.Address{
+	addresses := []*mail.Address{
 		{Name: "One", Address: "one@example.com"},
 		{Name: "Two", Address: "two@example.com"},
 	}
@@ -202,10 +202,10 @@ func TestMailAddresses(t *testing.T) {
 		t.Fatalf("mailAddresses() len = %d, want %d", len(got), len(addresses))
 	}
 	for idx := range addresses {
-		if got[idx] == &addresses[idx] {
-			t.Fatalf("mailAddresses() reused original pointer at index %d", idx)
+		if got[idx] != addresses[idx] {
+			t.Fatalf("mailAddresses() didn't reus original pointer at index %d", idx)
 		}
-		if *got[idx] != addresses[idx] {
+		if got[idx] != addresses[idx] {
 			t.Fatalf("mailAddresses() value = %#v, want %#v", *got[idx], addresses[idx])
 		}
 	}
@@ -226,8 +226,8 @@ func TestToImportance(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			t.Parallel()
 			if got := toImportance(tt.priority); got != tt.want {
 				t.Fatalf("toImportance() = %v, want %v", got, tt.want)
@@ -271,10 +271,10 @@ func TestConnectContext(t *testing.T) {
 func testMessage() Message {
 	return Message{
 		Envelope: Envelope{
-			From: mail.Address{Name: "Sender", Address: "sender@example.com"},
-			To:   []mail.Address{{Name: "To", Address: "to@example.com"}},
-			CC:   []mail.Address{{Name: "CC", Address: "cc@example.com"}},
-			BCC:  []mail.Address{{Name: "BCC", Address: "bcc@example.com"}},
+			From: &mail.Address{Name: "Sender", Address: "sender@example.com"},
+			To:   []*mail.Address{{Name: "To", Address: "to@example.com"}},
+			CC:   []*mail.Address{{Name: "CC", Address: "cc@example.com"}},
+			BCC:  []*mail.Address{{Name: "BCC", Address: "bcc@example.com"}},
 		},
 		Content: Content{
 			Subject:  "Subject line",
