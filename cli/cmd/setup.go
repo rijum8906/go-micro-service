@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/spf13/cobra"
 )
 
@@ -24,14 +23,14 @@ changes and you need to regenerate local setup artifacts.`,
 		fmt.Println("🔧 Setting up project...")
 
 		// Step 1: Initialize Go workspace
-		command.RunCommand("go", "work", "init")
+		runCommand("go", "work", "init")
 
 		// Step 2: Add services and packages (cross-platform)
 		addWorkspaceDirectories()
 
 		// Step 3: Download dependencies
-		command.RunCommand("go", "work", "sync")
-		command.RunCommand("go", "mod", "download")
+		runCommand("go", "work", "sync")
+		runCommand("go", "mod", "download")
 
 		// Step 4: Copy .env files
 		copyEnvFiles()
@@ -45,7 +44,7 @@ func addWorkspaceDirectories() {
 	fmt.Println("\n📦 Adding directories to workspace...")
 
 	// Add root
-	command.RunCommand("go", "work", "use", ".")
+	runCommand("go", "work", "use", ".")
 
 	// Add all packages
 	packages, err := filepath.Glob("packages/*")
@@ -54,7 +53,7 @@ func addWorkspaceDirectories() {
 	} else {
 		for _, pkg := range packages {
 			if isDirectory(pkg) {
-				command.RunCommand("go", "work", "use", pkg)
+				runCommand("go", "work", "use", pkg)
 			}
 		}
 	}
@@ -66,7 +65,7 @@ func addWorkspaceDirectories() {
 	} else {
 		for _, svc := range services {
 			if isDirectory(svc) {
-				command.RunCommand("go", "work", "use", svc)
+				runCommand("go", "work", "use", svc)
 			}
 		}
 	}
