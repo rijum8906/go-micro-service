@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "user-service ", log.LstdFlags|log.LUTC|log.Lmsgprefix)
+	logger := log.New(os.Stdout, "notification-service ", log.LstdFlags|log.LUTC|log.Lmsgprefix)
 	ctx := context.Background()
 
 	logger.Printf("starting")
