@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -63,6 +64,7 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	if appErr = app.initHandler(); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 

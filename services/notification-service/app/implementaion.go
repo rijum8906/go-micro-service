@@ -5,11 +5,15 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
+	"github.com/rijum8906/relay/packages/core/mailer"
 	"github.com/rijum8906/relay/packages/core/nats"
+	"github.com/rijum8906/relay/services/notification-service/internal/handler/broker"
+	"github.com/rijum8906/relay/services/notification-service/internal/services/email"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -67,7 +71,24 @@ func (a *Application) initUtils() *apperror.AppError {
 }
 
 func (a *Application) initHandler() *apperror.AppError {
-	return nil
+	emailService := email.New()
+	cfg := mailer.Config{
+		Host:        a.config.SMTPHost,
+		Port:        a.config.SMTPPort,
+		Username:    a.config.SMTPUsername,
+		Password:    a.config.SMTPPassword,
+		FromEmail:   a.config.SMTPFromEmail,
+		FromName:    a.config.SMTPFromName,
+		UseStartTLS: a.config.SMTPUseStartTLS,
+		UseTLS:      a.config.SMTPUseTLS,
+		Retries:     a.config.SMTPRetries,
+		Timeout:     time.Minute,
+	}
+	subscriberHandler, appErr := broker.New(emailService, a.infra.nats, &cfg)
+	if appErr != nil {
+		panic(appErr)
+	}
+	return subscriberHandler.Subscribe()
 }
 
 func (a *Application) initGRPCServer() *apperror.AppError {
