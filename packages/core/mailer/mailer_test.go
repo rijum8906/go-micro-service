@@ -2,8 +2,9 @@ package mailer
 
 import (
 	"bytes"
-	"net/mail"
+	"os"
 	"slices"
+	"strconv"
 	"testing"
 	"time"
 
@@ -70,6 +71,36 @@ func TestConnectValidation(t *testing.T) {
 				t.Fatalf("Connect() details = %#v, want field %q", err.Details, tt.wantField)
 			}
 		})
+	}
+}
+
+func TestConnect(t *testing.T) {
+	t.Parallel()
+	host := os.Getenv("TEST_SMTP_HOST")
+	portRaw := os.Getenv("TEST_SMTP_PORT")
+	portInt, err := strconv.Atoi(portRaw)
+	if err != nil {
+		panic(err)
+	}
+	username := os.Getenv("TEST_SMTP_USERNAME")
+	password := os.Getenv("TEST_SMTP_PASSWORD")
+
+	cfg := Config{
+		Host:        host,
+		Port:        portInt,
+		Username:    username,
+		Password:    password,
+		FromEmail:   username,
+		FromName:    "Riju Mondal",
+		UseStartTLS: true,
+		UseTLS:      false,
+		Retries:     3,
+		Timeout:     5 * time.Second,
+	}
+
+	_, appErr := Connect(cfg)
+	if appErr != nil {
+		panic(appErr)
 	}
 }
 
@@ -169,8 +200,8 @@ func TestBuildMessageRejectsWhitespaceOnlyBody(t *testing.T) {
 
 	_, err := buildMessage(Message{
 		Envelope: Envelope{
-			From: mail.Address{Address: "sender@example.com"},
-			To:   []mail.Address{{Address: "to@example.com"}},
+			From: "sender@example.com",
+			To:   []string{"to@example.com"},
 		},
 		Content: Content{
 			Subject: "Subject line",
@@ -189,25 +220,26 @@ func TestBuildMessageRejectsWhitespaceOnlyBody(t *testing.T) {
 func TestMailAddresses(t *testing.T) {
 	t.Parallel()
 
-	if got := mailAddresses(nil); got != nil {
+	if got, err := mailAddresses(nil); err != nil || got != nil {
 		t.Fatalf("mailAddresses(nil) = %#v, want nil", got)
 	}
 
-	addresses := []mail.Address{
-		{Name: "One", Address: "one@example.com"},
-		{Name: "Two", Address: "two@example.com"},
+	addresses := []string{
+		"One <one@example.com>",
+		"Two <two@example.com>",
 	}
-	got := mailAddresses(addresses)
+	got, err := mailAddresses(addresses)
+	if err != nil {
+		t.Fatalf("mailAddresses() error = %v", err)
+	}
 	if len(got) != len(addresses) {
 		t.Fatalf("mailAddresses() len = %d, want %d", len(got), len(addresses))
 	}
-	for idx := range addresses {
-		if got[idx] == &addresses[idx] {
-			t.Fatalf("mailAddresses() reused original pointer at index %d", idx)
-		}
-		if *got[idx] != addresses[idx] {
-			t.Fatalf("mailAddresses() value = %#v, want %#v", *got[idx], addresses[idx])
-		}
+	if got[0].Name != "One" || got[0].Address != "one@example.com" {
+		t.Fatalf("mailAddresses()[0] = %#v, want parsed first address", got[0])
+	}
+	if got[1].Name != "Two" || got[1].Address != "two@example.com" {
+		t.Fatalf("mailAddresses()[1] = %#v, want parsed second address", got[1])
 	}
 }
 
@@ -226,8 +258,8 @@ func TestToImportance(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			t.Parallel()
 			if got := toImportance(tt.priority); got != tt.want {
 				t.Fatalf("toImportance() = %v, want %v", got, tt.want)
@@ -271,10 +303,10 @@ func TestConnectContext(t *testing.T) {
 func testMessage() Message {
 	return Message{
 		Envelope: Envelope{
-			From: mail.Address{Name: "Sender", Address: "sender@example.com"},
-			To:   []mail.Address{{Name: "To", Address: "to@example.com"}},
-			CC:   []mail.Address{{Name: "CC", Address: "cc@example.com"}},
-			BCC:  []mail.Address{{Name: "BCC", Address: "bcc@example.com"}},
+			From: "Sender <sender@example.com>",
+			To:   []string{"To <to@example.com>"},
+			CC:   []string{"CC <cc@example.com>"},
+			BCC:  []string{"BCC <bcc@example.com>"},
 		},
 		Content: Content{
 			Subject:  "Subject line",

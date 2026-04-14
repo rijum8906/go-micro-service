@@ -72,7 +72,7 @@ func addWorkspaceDirectories() {
 }
 
 func copyEnvFiles() {
-	services := []string{"user-service", "graphql-gateway"}
+	services := []string{"user-service", "graphql-gateway", "notification-service"}
 
 	for _, svc := range services {
 		copyFile(".env.example", filepath.Join("services", svc, ".env"))
