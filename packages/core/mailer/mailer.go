@@ -102,10 +102,27 @@ func buildMessage(message Message) (*gomail.Msg, *apperror.AppError) {
 		return nil, apperror.New(apperror.CodeInternal, "failed to create email message")
 	}
 
-	msg.FromMailAddress(message.Envelope.From)
-	msg.ToMailAddress(mailAddresses(message.Envelope.To)...)
-	msg.CcMailAddress(mailAddresses(message.Envelope.CC)...)
-	msg.BccMailAddress(mailAddresses(message.Envelope.BCC)...)
+	from, err := mailAddress(message.Envelope.From)
+	if err != nil {
+		return nil, err
+	}
+	to, err := mailAddresses(message.Envelope.To)
+	if err != nil {
+		return nil, err
+	}
+	cc, err := mailAddresses(message.Envelope.CC)
+	if err != nil {
+		return nil, err
+	}
+	bcc, err := mailAddresses(message.Envelope.BCC)
+	if err != nil {
+		return nil, err
+	}
+
+	msg.FromMailAddress(from)
+	msg.ToMailAddress(to...)
+	msg.CcMailAddress(cc...)
+	msg.BccMailAddress(bcc...)
 	msg.Subject(message.Content.Subject)
 	msg.SetDate()
 	msg.SetMessageID()
@@ -153,18 +170,32 @@ func setBodies(msg *gomail.Msg, content Content) *apperror.AppError {
 	return nil
 }
 
-func mailAddresses(addrs []*mail.Address) []*mail.Address {
+func mailAddress(raw string) (*mail.Address, *apperror.AppError) {
+	addr, err := mail.ParseAddress(raw)
+	if err != nil {
+		return nil, apperror.New(apperror.CodeValidation, "invalid mail envelope").
+			WithDetail("address", raw).
+			WithDetail("error", err.Error())
+	}
+
+	return addr, nil
+}
+
+func mailAddresses(addrs []string) ([]*mail.Address, *apperror.AppError) {
 	if len(addrs) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	result := make([]*mail.Address, 0, len(addrs))
 	for idx := range addrs {
-		addr := addrs[idx]
+		addr, err := mailAddress(addrs[idx])
+		if err != nil {
+			return nil, err
+		}
 		result = append(result, addr)
 	}
 
-	return result
+	return result, nil
 }
 
 func toImportance(priority EmailPriority) gomail.Importance {

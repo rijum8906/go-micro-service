@@ -73,6 +73,16 @@ func TestNewTemplateManager_Failure(t *testing.T) {
 	}
 }
 
+func TestNewTemplateManager_Success(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+		_, err := template.NewTemplateManager(filepath.Join("..", "..", "templates"))
+		if err != nil {
+			t.Fatalf("failed to create template manager: %v", err)
+		}
+	})
+}
+
 func TestTemplateManager_ReloadTemplates(t *testing.T) {
 	t.Parallel()
 
