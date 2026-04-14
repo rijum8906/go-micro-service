@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 func runCommand(name string, args ...string) {
@@ -15,6 +17,11 @@ func runCommand(name string, args ...string) {
 	if err := cmd.Run(); err != nil {
 		panic(fmt.Errorf("command failed: %s %v: %w", name, args, err))
 	}
+}
+
+func isCommandAvailable(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
 }
 
 func isDirectory(path string) bool {
@@ -44,4 +51,8 @@ func copyFile(source, destination string) {
 		panic(fmt.Errorf("failed to write %s to %s: %w", destFilename, destDir, err))
 	}
 	fmt.Printf("  ✅ Copied %s to %s\n", destFilename, destDir)
+}
+
+func notImplemented(_ *cobra.Command, _ []string) {
+	fmt.Println("🚧 This command is not implemented yet.")
 }
