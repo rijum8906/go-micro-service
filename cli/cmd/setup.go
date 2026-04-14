@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/spf13/cobra"
 )
 
@@ -23,14 +24,14 @@ changes and you need to regenerate local setup artifacts.`,
 		fmt.Println("🔧 Setting up project...")
 
 		// Step 1: Initialize Go workspace
-		runCommand("go", "work", "init")
+		command.RunCommand("go", "work", "init")
 
 		// Step 2: Add services and packages (cross-platform)
 		addWorkspaceDirectories()
 
 		// Step 3: Download dependencies
-		runCommand("go", "work", "sync")
-		runCommand("go", "mod", "download")
+		command.RunCommand("go", "work", "sync")
+		command.RunCommand("go", "mod", "download")
 
 		// Step 4: Copy .env files
 		copyEnvFiles()
@@ -44,7 +45,7 @@ func addWorkspaceDirectories() {
 	fmt.Println("\n📦 Adding directories to workspace...")
 
 	// Add root
-	runCommand("go", "work", "use", ".")
+	command.RunCommand("go", "work", "use", ".")
 
 	// Add all packages
 	packages, err := filepath.Glob("packages/*")
@@ -53,7 +54,7 @@ func addWorkspaceDirectories() {
 	} else {
 		for _, pkg := range packages {
 			if isDirectory(pkg) {
-				runCommand("go", "work", "use", pkg)
+				command.RunCommand("go", "work", "use", pkg)
 			}
 		}
 	}
@@ -65,14 +66,14 @@ func addWorkspaceDirectories() {
 	} else {
 		for _, svc := range services {
 			if isDirectory(svc) {
-				runCommand("go", "work", "use", svc)
+				command.RunCommand("go", "work", "use", svc)
 			}
 		}
 	}
 }
 
 func copyEnvFiles() {
-	services := []string{"user-service", "graphql-gateway"}
+	services := []string{"user-service", "graphql-gateway", "notification-service"}
 
 	for _, svc := range services {
 		copyFile(".env.example", filepath.Join("services", svc, ".env"))
