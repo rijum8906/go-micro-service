@@ -59,6 +59,10 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 		return nil, appErr
 	}
 
+	apperror.SetConfig(apperror.Config{
+		AppEnv: app.config.AppEnv,
+	})
+
 	// Initialize Dependencies
 	if appErr = app.initCache(ctx); appErr != nil {
 		return nil, appErr

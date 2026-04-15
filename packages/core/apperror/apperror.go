@@ -1,7 +1,30 @@
 // Package apperror defines error types and functions for the application
 package apperror
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
+
+type Config struct {
+	AppEnv string
+}
+
+var (
+	config Config
+	once   sync.Once
+)
+
+// SetConfig sets the configuration once (thread-safe)
+func SetConfig(cfg Config) {
+	once.Do(func() {
+		config = cfg
+	})
+}
+
+func GetConfig() Config {
+	return config
+}
 
 type AppError struct {
 	Code      ErrorCode
@@ -41,5 +64,9 @@ func (e *AppError) WithRequestID(requestID string) *AppError {
 }
 
 func (e *AppError) Error() string {
+	if config.AppEnv != "production" {
+		fmt.Printf("Error: %s : %v", e.Message, e.Details)
+	}
+
 	return fmt.Sprintf("[%s] %s (ID: %s)", e.Code, e.Message, e.RequestID)
 }
