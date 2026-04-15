@@ -16,6 +16,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/mailer"
 	"github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/services/notification-service/internal/handler/broker"
+	"github.com/rijum8906/relay/services/notification-service/internal/repository/notificationlog"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/email"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -149,7 +150,10 @@ func (a *Application) initHandler() *apperror.AppError {
 		Retries:     a.config.SMTPRetries,
 		Timeout:     time.Minute,
 	}
-	subscriberHandler, appErr := broker.New(emailService, a.infra.nats, &cfg)
+
+	notificationLog := notificationlog.New(a.infra.database)
+
+	subscriberHandler, appErr := broker.New(emailService, a.infra.nats, &cfg, notificationLog)
 	if appErr != nil {
 		panic(appErr)
 	}

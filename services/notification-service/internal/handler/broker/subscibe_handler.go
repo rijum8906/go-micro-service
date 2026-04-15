@@ -10,20 +10,22 @@ import (
 	"github.com/rijum8906/relay/packages/core/mailer"
 	"github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/template"
+	"github.com/rijum8906/relay/services/notification-service/internal/repository/notificationlog"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/email"
 	"github.com/rijum8906/relay/services/notification-service/internal/utils"
 	"github.com/wneessen/go-mail"
 )
 
 type SubscribeHandler struct {
-	EmailService    email.Service
-	NatsClient      *nats.Client
-	templateManager template.TemplateManager
-	mailerCfg       *mailer.Config
-	mailerClient    *mail.Client
+	EmailService        email.Service
+	NatsClient          *nats.Client
+	templateManager     template.TemplateManager
+	mailerCfg           *mailer.Config
+	mailerClient        *mail.Client
+	notificationLogRepo notificationlog.NotificationLogRepository
 }
 
-func New(emailService email.Service, client *nats.Client, mailerCfg *mailer.Config) (*SubscribeHandler, *apperror.AppError) {
+func New(emailService email.Service, client *nats.Client, mailerCfg *mailer.Config, notificationLogRepo notificationlog.NotificationLogRepository) (*SubscribeHandler, *apperror.AppError) {
 	tm, err := template.NewTemplateManagerWithCompanyInfo("packages/templates", &dto.CompanyInfo{
 		Name:       "Relay",
 		Emails:     []string{"UfNwO@example.com"},
@@ -42,10 +44,11 @@ func New(emailService email.Service, client *nats.Client, mailerCfg *mailer.Conf
 	}
 
 	return &SubscribeHandler{
-		EmailService:    emailService,
-		NatsClient:      client,
-		mailerCfg:       mailerCfg,
-		templateManager: tm,
+		EmailService:        emailService,
+		NatsClient:          client,
+		mailerCfg:           mailerCfg,
+		templateManager:     tm,
+		notificationLogRepo: notificationLogRepo,
 	}, nil
 }
 
