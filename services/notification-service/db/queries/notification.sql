@@ -22,7 +22,7 @@ UPDATE notifications
 SET status = $2
 WHERE id = $1;
 
--- name: CrateNotification :one
+-- name: CreateNotification :one
 INSERT INTO notifications (
     recepient_email,
     recepient_user_id,

@@ -11,7 +11,7 @@ import (
 type Service interface {
 	CreateNotification(ctx context.Context, params db.CreateNotificationParams) (*db.Notification, *apperror.AppError)
 	GetNotification(ctx context.Context, id string) (*db.Notification, *apperror.AppError)
-	GetNotificationsByUserID(ctx context.Context, userID string) (*[]db.Notification, *apperror.AppError)
+	GetNotificationsByUserID(ctx context.Context, userID string, limit, page int) (*[]db.Notification, *apperror.AppError)
 	UpdateNotificationStatus(ctx context.Context, params db.UpdateNotificationStatusParams) *apperror.AppError
 	DeleteNotification(ctx context.Context, id string) *apperror.AppError
 }
