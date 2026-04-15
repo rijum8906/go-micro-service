@@ -29,6 +29,9 @@ var atlasDBInitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		defaultCfg := *config
 		defaultCfg.DBName = "postgres"
+
+		fmt.Println("Initializing database...")
+
 		err := command.CreateNewDatabase(&defaultCfg, config.DBName)
 		if err != nil {
 			fmt.Printf("failed to create database %s: %v", config.DBName, err)
@@ -38,6 +41,8 @@ var atlasDBInitCmd = &cobra.Command{
 		if err != nil {
 			fmt.Printf("failed to create database %s: %v", "dev_"+config.DBName, err)
 		}
+
+		fmt.Println("Database initialized.")
 	},
 }
 
