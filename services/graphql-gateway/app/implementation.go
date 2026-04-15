@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -13,9 +15,78 @@ import (
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+func (a *Application) initLogger() *apperror.AppError {
+	var zapConfig zap.Config
+
+	if a.config.AppEnv == "production" {
+		zapConfig = zap.NewProductionConfig()
+		zapConfig.EncoderConfig.TimeKey = "timestamp"
+		zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	} else {
+		zapConfig = zap.NewDevelopmentConfig()
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		zapConfig.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	}
+
+	if a.config.EnableJSON {
+		zapConfig.Encoding = "json"
+	}
+
+	if a.config.LogLevel != "" {
+		level, err := zapcore.ParseLevel(a.config.LogLevel)
+		if err != nil {
+			level = zapcore.InfoLevel
+		}
+		zapConfig.Level = zap.NewAtomicLevelAt(level)
+	}
+
+	zapConfig.DisableCaller = !a.config.EnableCaller
+	zapConfig.DisableStacktrace = !a.config.EnableStack
+
+	// Configure output paths
+	if a.config.LogFile != "" {
+		// Ensure log directory exists
+		if err := os.MkdirAll(filepath.Dir(a.config.LogFile), 0o755); err != nil {
+			return apperror.ErrInternal.
+				WithMessage("failed to create log directory").
+				WithDetail("error", err.Error())
+		}
+
+		zapConfig.OutputPaths = []string{"stdout", a.config.LogFile}
+		zapConfig.ErrorOutputPaths = []string{"stderr", a.config.LogFile}
+	} else {
+		zapConfig.OutputPaths = []string{"stdout"}
+		zapConfig.ErrorOutputPaths = []string{"stderr"}
+	}
+
+	// Build the logger
+	logger, err := zapConfig.Build(
+		zap.AddCallerSkip(1),
+		zap.AddStacktrace(zapcore.ErrorLevel),
+	)
+	if err != nil {
+		return apperror.ErrInternal.
+			WithMessage("failed to create zap logger").
+			WithDetail("error", err.Error())
+	}
+
+	a.utils.logger = logger
+
+	// Log successful initialization
+	logger.Info("Logger initialized",
+		zap.String("environment", a.config.AppEnv),
+		zap.String("level", zapConfig.Level.String()),
+		zap.Bool("caller_enabled", a.config.EnableCaller),
+	)
+
+	return nil
+}
 
 func (a *Application) initCache(ctx context.Context) *apperror.AppError {
 	cache, appErr := cache.Connect(ctx, cache.Config{

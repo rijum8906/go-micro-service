@@ -53,6 +53,13 @@ type Config struct {
 	JWTSecret    string `env:"JWT_SECRET,required"`
 	ScopedSecret string `env:"SCOPED_SECRET,required"` // For scoped tokens
 
+	// Logger
+	LogLevel     string `env:"LOG_LEVEL" envDefault:"debug"`
+	EnableJSON   bool   `env:"ENABLE_JSON" envDefault:"false"`
+	EnableCaller bool   `env:"ENABLE_CALLER" envDefault:"false"`
+	EnableStack  bool   `env:"ENABLE_STACK" envDefault:"false"`
+	LogFile      string `env:"LOG_FILE" envDefault:"-"`
+
 	// TTL
 	SessionTTL      time.Duration `env:"SESSION_TTL" envDefault:"15m"`
 	ScopedTokenTTL  time.Duration `env:"SCOPED_TOKEN_TTL" envDefault:"10m"`

@@ -4,10 +4,14 @@ package apperror
 import (
 	"fmt"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
 type Config struct {
+	Logger *zap.Logger
 	AppEnv string
+	Debug  bool
 }
 
 var (
@@ -66,6 +70,10 @@ func (e *AppError) WithRequestID(requestID string) *AppError {
 func (e *AppError) Error() string {
 	if config.AppEnv != "production" {
 		fmt.Printf("Error: %s : %v", e.Message, e.Details)
+	} else {
+		if config.Debug && e.Code == CodeInternal {
+			fmt.Printf("Error: %s : %v", e.Message, e.Details)
+		}
 	}
 
 	return fmt.Sprintf("[%s] %s (ID: %s)", e.Code, e.Message, e.RequestID)

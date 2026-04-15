@@ -19,6 +19,7 @@ import (
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -27,7 +28,8 @@ type ApplicationInfra struct {
 }
 
 type ApplicationUtils struct {
-	token *token.TokenManager
+	token  *token.TokenManager
+	logger *zap.Logger
 }
 
 type GrpcClients struct {
@@ -59,11 +61,11 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 		return nil, appErr
 	}
 
-	apperror.SetConfig(apperror.Config{
-		AppEnv: app.config.AppEnv,
-	})
-
 	// Initialize Dependencies
+	if appErr = app.initLogger(); appErr != nil {
+		return nil, appErr
+	}
+
 	if appErr = app.initCache(ctx); appErr != nil {
 		return nil, appErr
 	}
@@ -79,6 +81,12 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	if appErr = app.initHTTPServer(); appErr != nil {
 		return nil, appErr
 	}
+
+	apperror.SetConfig(apperror.Config{
+		Logger: app.utils.logger,
+		AppEnv: app.config.AppEnv,
+		Debug:  true,
+	})
 
 	return app, nil
 }
