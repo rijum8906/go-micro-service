@@ -10,6 +10,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
+	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/hash"
 	corenats "github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/token"
@@ -87,13 +88,6 @@ func (a *Application) initLogger() *apperror.AppError {
 	}
 
 	a.utils.logger = logger
-
-	// Log successful initialization
-	logger.Info("Logger initialized",
-		zap.String("environment", a.config.AppEnv),
-		zap.String("level", zapConfig.Level.String()),
-		zap.Bool("caller_enabled", a.config.EnableCaller),
-	)
 
 	return nil
 }
@@ -247,4 +241,12 @@ func (a *Application) Shutdown() {
 	if a.infra != nil && a.infra.nats != nil {
 		_ = a.infra.nats.Drain()
 	}
+}
+
+func (a *Application) GetLogger() *zap.Logger {
+	return a.utils.logger
+}
+
+func (a *Application) GetConfig() *env.Config {
+	return a.config
 }

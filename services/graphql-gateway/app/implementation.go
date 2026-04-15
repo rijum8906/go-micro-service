@@ -11,6 +11,7 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/cache"
+	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
@@ -77,13 +78,6 @@ func (a *Application) initLogger() *apperror.AppError {
 	}
 
 	a.utils.logger = logger
-
-	// Log successful initialization
-	logger.Info("Logger initialized",
-		zap.String("environment", a.config.AppEnv),
-		zap.String("level", zapConfig.Level.String()),
-		zap.Bool("caller_enabled", a.config.EnableCaller),
-	)
 
 	return nil
 }
@@ -172,4 +166,12 @@ func (a *Application) Addr() string {
 
 func (a *Application) UserServiceAddr() string {
 	return a.config.UserServiceAddr
+}
+
+func (a *Application) GetLogger() *zap.Logger {
+	return a.utils.logger
+}
+
+func (a *Application) GetConfig() *env.Config {
+	return a.config
 }
