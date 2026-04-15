@@ -1,58 +1,73 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 
-	"github.com/spf13/cobra"
+	"github.com/rijum8906/relay/packages/core/db"
+	"github.com/rijum8906/relay/packages/core/env"
 )
 
-func runCommand(name string, args ...string) {
-	fmt.Printf("  → Running: %s %v\n", name, args)
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		panic(fmt.Errorf("command failed: %s %v: %w", name, args, err))
+func getDBURL(cfg *env.Config) string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBHost,
+		cfg.DBPort,
+		cfg.DBName,
+		cfg.DBSSLMode,
+	)
+}
+
+func getDevDBURL(cfg *env.Config) string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBHost,
+		cfg.DBPort,
+		"dev_"+cfg.DBName,
+		cfg.DBSSLMode,
+	)
+}
+
+func getMigrationDir() string {
+	return "file://db/migrations"
+}
+
+func getSchemaDir() string {
+	return "file://db/schema.sql"
+}
+
+func createNewDatabase(cfg *env.Config, name string) error {
+	ctx := context.Background()
+	pool, appErr := db.Connect(context.Background(), db.Config{
+		Host:     cfg.DBHost,
+		Port:     cfg.DBPort,
+		User:     cfg.DBUser,
+		Password: cfg.DBPassword,
+		DBName:   cfg.DBName,
+		SSLMode:  cfg.DBSSLMode,
+	})
+	if appErr != nil {
+		return appErr
 	}
-}
 
-func isCommandAvailable(name string) bool {
-	_, err := exec.LookPath(name)
-	return err == nil
-}
-
-func isDirectory(path string) bool {
-	info, err := os.Stat(path)
-	return err == nil && info.IsDir()
-}
-
-func copyFile(source, destination string) {
-	sourceFilename := filepath.Base(source)
-	destFilename := filepath.Base(destination)
-
-	fmt.Printf("\n📦 Copying %s file to %s...\n", sourceFilename, destFilename)
-
-	sourceBytes, err := os.ReadFile(source)
+	// Check if database exists
+	var exists bool
+	err := pool.QueryRow(ctx,
+		"SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)",
+		name,
+	).Scan(&exists)
 	if err != nil {
-		panic(fmt.Errorf("failed to read %s: %w", sourceFilename, err))
+		return err
 	}
 
-	destDir := filepath.Dir(destination)
-	// Skip if file already exists
-	if _, err := os.Stat(destination); err == nil {
-		fmt.Printf("  ⚠️  %s already exists in %s, skipping\n", destFilename, destDir)
-		return
+	if exists {
+		return nil // Already exists
 	}
 
-	if err := os.WriteFile(destination, sourceBytes, 0o644); err != nil {
-		panic(fmt.Errorf("failed to write %s to %s: %w", destFilename, destDir, err))
-	}
-	fmt.Printf("  ✅ Copied %s to %s\n", destFilename, destDir)
-}
-
-func notImplemented(_ *cobra.Command, _ []string) {
-	fmt.Println("🚧 This command is not implemented yet.")
+	// Create database (can't use parameters for database names)
+	sql := "CREATE DATABASE " + name
+	_, err = pool.Exec(ctx, sql)
+	return err
 }

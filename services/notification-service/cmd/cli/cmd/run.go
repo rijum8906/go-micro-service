@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/spf13/cobra"
 )
 
@@ -8,7 +9,7 @@ import (
 var serviceRunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run notification service actions",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 func init() {
