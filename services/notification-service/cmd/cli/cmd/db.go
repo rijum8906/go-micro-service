@@ -11,66 +11,129 @@ import (
 	coreenv "github.com/rijum8906/relay/packages/core/env"
 	migrations "github.com/rijum8906/relay/services/notification-service/db"
 	"github.com/spf13/cobra"
+	"github.com/rijum8906/relay/packages/core/command"
 )
+
+var config *env.Config
 
 var dbCmd = &cobra.Command{
 	Use:   "db",
 	Short: "Database commands",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var atlasCmd = &cobra.Command{
 	Use:   "atlas",
 	Short: "Atlas database commands",
-	Run:   notImplemented,
+	Run: func(cmd *cobra.Command, args []string) {
+	},
+}
+
+var atlasDBInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize atlas database",
+	Run: func(cmd *cobra.Command, args []string) {
+		defaultCfg := *config
+		defaultCfg.DBName = "postgres"
+
+		fmt.Println("Initializing database...")
+
+		err := command.CreateNewDatabase(&defaultCfg, config.DBName)
+		if err != nil {
+			fmt.Printf("failed to create database %s: %v", config.DBName, err)
+		}
+
+		err = command.CreateNewDatabase(&defaultCfg, "dev_"+config.DBName)
+		if err != nil {
+			fmt.Printf("failed to create database %s: %v", "dev_"+config.DBName, err)
+		}
+
+		fmt.Println("Database initialized.")
+	},
 }
 
 var atlasApplyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Apply atlas migrations",
-	Run:   notImplemented,
+	Run: func(cmd *cobra.Command, args []string) {
+		command.RunCommand("atlas",
+			"migrate", "apply",
+			"--url", command.GetDBURL(config),
+			"--dir", command.GetMigrationDir())
+	},
 }
 
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show atlas status",
-	Run:   notImplemented,
+	Run: func(cmd *cobra.Command, args []string) {
+		command.RunCommand("atlas",
+			"migrate", "status",
+			"--url", command.GetDBURL(config),
+			"--dir", command.GetMigrationDir())
+	},
 }
 
 var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Create a new atlas migration",
-	Run:   notImplemented,
+	Run: func(cmd *cobra.Command, args []string) {
+		migrationName := args[0]
+		command.RunCommand("atlas", "migrate", "diff", migrationName,
+			"--dir", command.GetMigrationDir(),
+			"--to", command.GetSchemaDir(),
+			"--dev-url", command.GetDevDBURL(config))
+	},
 }
 
 var schemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "Apply schema actions",
-	Run:   notImplemented,
+	Run: func(cmd *cobra.Command, args []string) {
+		err := command.CreateNewDatabase(config, "dev_"+config.DBName)
+		if err != nil {
+			panic(err)
+		}
+		command.RunCommand("atlas",
+			"schema", "apply",
+			"--url", command.GetDBURL(config),
+			"--dev-url", command.GetDevDBURL(config),
+			"--file", command.GetSchemaDir(),
+			"--auto-approve")
+	},
 }
 
 var rehashCmd = &cobra.Command{
 	Use:   "rehash",
 	Short: "Rehash atlas migration checksums",
-	Run:   notImplemented,
+	Run: func(cmd *cobra.Command, args []string) {
+		command.RunCommand("atlas", "migrate", "hash",
+			"--dir", command.GetMigrationDir())
+	},
 }
 
 var rollbackCmd = &cobra.Command{
 	Use:   "rollback",
 	Short: "Rollback atlas migrations",
-	Run:   notImplemented,
+	Run: func(cmd *cobra.Command, args []string) {
+		count := args[0]
+		command.RunCommand("atlas", "migrate", "down", count,
+			"--url", command.GetDBURL(config),
+			"--dir", command.GetMigrationDir(),
+			"--dev-url", command.GetDevDBURL(config))
+	},
 }
 
 var resetCmd = &cobra.Command{
 	Use:   "reset",
 	Short: "Reset atlas migrations",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var sqlCmd = &cobra.Command{
 	Use:   "sql",
 	Short: "SQL database commands",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var sqlApplyCmd = &cobra.Command{
@@ -88,11 +151,19 @@ var sqlApplyCmd = &cobra.Command{
 }
 
 func init() {
+	envConfig, appErr := env.Load()
+	if appErr != nil {
+		panic("failed to load env")
+	}
+
+	config = envConfig
+
 	rootCmd.AddCommand(dbCmd)
 
 	dbCmd.AddCommand(atlasCmd)
 	dbCmd.AddCommand(sqlCmd)
 
+	atlasCmd.AddCommand(atlasDBInitCmd)
 	atlasCmd.AddCommand(atlasApplyCmd)
 	atlasCmd.AddCommand(statusCmd)
 	atlasCmd.AddCommand(newCmd)
@@ -102,9 +173,6 @@ func init() {
 	atlasCmd.AddCommand(resetCmd)
 
 	sqlCmd.AddCommand(sqlApplyCmd)
-
-	newCmd.Flags().String("name", "", "migration name")
-	rollbackCmd.Flags().Int("count", 1, "number of migrations to roll back")
 }
 
 func dbURL() string {

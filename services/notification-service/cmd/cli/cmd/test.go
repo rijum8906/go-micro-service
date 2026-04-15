@@ -1,47 +1,50 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/rijum8906/relay/packages/core/command"
+	"github.com/spf13/cobra"
+)
 
 var testCmd = &cobra.Command{
 	Use:   "test",
 	Short: "Test commands",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var testSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Prepare test environment",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var testRunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run tests",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start test dependencies",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop test dependencies",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var migrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "Run test migrations",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 var allCmd = &cobra.Command{
 	Use:   "all",
 	Short: "Run all test actions",
-	Run:   notImplemented,
+	Run:   command.NotImplemented,
 }
 
 func init() {

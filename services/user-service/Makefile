@@ -81,6 +81,9 @@ db-migrate: db-apply
 db-sql-apply:
 	@$(CLI_RUN) db sql apply
 
+db-init:
+	@$(CLI_RUN) db atlas init
+
 db-status:
 	@$(CLI_RUN) db atlas status
 

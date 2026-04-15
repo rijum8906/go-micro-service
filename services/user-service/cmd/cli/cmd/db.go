@@ -1,3 +1,4 @@
+// Package cmd
 package cmd
 
 import (
@@ -10,11 +11,14 @@ import (
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	coreenv "github.com/rijum8906/relay/packages/core/env"
+	"github.com/rijum8906/relay/packages/core/command"
+	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	migrations "github.com/rijum8906/relay/services/user/db"
 	"github.com/spf13/cobra"
 )
+
+var config *env.Config
 
 var dbCmd = &cobra.Command{
 	Use:   "db",
@@ -33,6 +37,29 @@ var dbSQLCmd = &cobra.Command{
 	Aliases: []string{"direct"},
 	Short:   "Manage embedded SQL migrations without Atlas",
 	Long:    "Apply the embedded SQL migration files directly without Atlas version tracking.",
+}
+
+var atlasDBInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize atlas database",
+	Run: func(cmd *cobra.Command, args []string) {
+		defaultCfg := *config
+		defaultCfg.DBName = "postgres"
+
+		fmt.Println("Initializing database...")
+
+		err := command.CreateNewDatabase(&defaultCfg, config.DBName)
+		if err != nil {
+			fmt.Printf("failed to create database %s: %v", config.DBName, err)
+		}
+
+		err = command.CreateNewDatabase(&defaultCfg, "dev_"+config.DBName)
+		if err != nil {
+			fmt.Printf("failed to create database %s: %v", "dev_"+config.DBName, err)
+		}
+
+		fmt.Println("Database initialized.")
+	},
 }
 
 func newDBAtlasApplyCmd() *cobra.Command {
@@ -221,6 +248,14 @@ func newDBSQLApplyCmd() *cobra.Command {
 }
 
 func init() {
+	envConfig, appErr := env.Load()
+	if appErr != nil {
+		panic("failed to load env")
+	}
+
+	config = envConfig
+
+	dbAtlasCmd.AddCommand(atlasDBInitCmd)
 	dbAtlasCmd.AddCommand(newDBAtlasApplyCmd())
 	dbAtlasCmd.AddCommand(newDBAtlasStatusCmd())
 	dbAtlasCmd.AddCommand(newDBAtlasNewCmd())
@@ -255,7 +290,7 @@ func runCommand(name string, args ...string) error {
 }
 
 func dbURL() string {
-	cfg := coreenv.MustLoad()
+	cfg := env.MustLoad()
 
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",

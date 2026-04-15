@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-CLI_RUN := go run ./cli/
+CLI_RUN := go run ./cmd/cli/main.go
 
 .DEFAULT_GOAL := help
 
@@ -76,8 +76,11 @@ db-sql-apply:
 db-status:
 	@$(CLI_RUN) db atlas status
 
+db-init:
+	@$(CLI_RUN) db atlas init
+
 db-new:
-	@$(CLI_RUN) db atlas new --name "$(NAME)"
+	@$(CLI_RUN) db atlas new "$(NAME)"
 
 db-schema:
 	@$(CLI_RUN) db atlas schema
@@ -86,7 +89,7 @@ db-rehash:
 	@$(CLI_RUN) db atlas rehash
 
 db-rollback:
-	@$(CLI_RUN) db atlas rollback --count $(or $(COUNT),1)
+	@$(CLI_RUN) db atlas rollback $(or $(COUNT),1)
 
 db-reset:
 	@$(CLI_RUN) db atlas reset
