@@ -76,6 +76,9 @@ db-sql-apply:
 db-status:
 	@$(CLI_RUN) db atlas status
 
+db-init:
+	@$(CLI_RUN) db atlas init
+
 db-new:
 	@$(CLI_RUN) db atlas new "$(NAME)"
 
