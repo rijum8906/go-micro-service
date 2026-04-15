@@ -2,9 +2,11 @@
 package broker
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/mailer"
@@ -69,6 +71,10 @@ func (h *SubscribeHandler) Subscribe() *apperror.AppError {
 		return apperror.ErrInternal.WithMessage("template manager is not initialized")
 	}
 
+	if h.notificationLogRepo == nil {
+		return apperror.ErrInternal.WithMessage("notification log repository is not initialized")
+	}
+
 	client, appErr := mailer.Connect(*h.mailerCfg)
 	if appErr != nil {
 		return appErr
@@ -88,24 +94,60 @@ func (h *SubscribeHandler) Subscribe() *apperror.AppError {
 }
 
 func (h *SubscribeHandler) handlerEmailVerification(raw []byte) {
+	ctx := context.Background()
+	jobID, appErr := h.notificationLogRepo.CreateJob(ctx, notificationlog.CreateJobParams{
+		JobSubject: string(dto.JobEmailVerification),
+		RawPayload: string(raw),
+	})
+	if appErr != nil {
+		fmt.Println("Error creating notification job log:", appErr.Details)
+		return
+	}
+	if appErr = h.notificationLogRepo.MarkJobProcessing(ctx, jobID); appErr != nil {
+		fmt.Println("Error marking notification job processing:", appErr.Details)
+	}
+
 	var data dto.EmailVerificationDTO
 	err := json.Unmarshal(raw, &data)
 	if err != nil {
-		// TODO: save to some logs
+		if appErr = h.notificationLogRepo.MarkJobInvalidPayload(ctx, jobID, err.Error()); appErr != nil {
+			fmt.Println("Error marking notification job invalid payload:", appErr.Details)
+		}
 		fmt.Println("Error unmarshalling job:", err)
+		return
+	}
+
+	deliveryID, appErr := h.notificationLogRepo.CreateDelivery(ctx, notificationlog.CreateDeliveryParams{
+		JobID:            jobID,
+		Channel:          "email",
+		NotificationType: "email_verification",
+		TemplateType:     string(template.TemplateTypeEmailVerification),
+		RecipientEmail:   data.ClientEmail,
+		RecipientName:    data.ClientName,
+		Subject:          "Email Verification",
+		Provider:         "smtp",
+	})
+	if appErr != nil {
+		_ = h.notificationLogRepo.MarkJobFailed(ctx, jobID, appErrorMessage(appErr))
+		fmt.Println("Error creating notification delivery log:", appErr.Details)
+		return
+	}
+	if appErr = h.notificationLogRepo.MarkDeliverySending(ctx, deliveryID); appErr != nil {
+		_ = h.notificationLogRepo.MarkJobFailed(ctx, jobID, appErrorMessage(appErr))
+		fmt.Println("Error marking notification delivery sending:", appErr.Details)
 		return
 	}
 
 	emailTemplate, appErr := h.templateManager.RenderToString(template.TemplateTypeEmailVerification, data)
 	if appErr != nil {
-		// TODO: save to some logs
+		h.logFailedAttempt(ctx, jobID, deliveryID, appErrorMessage(appErr))
 		fmt.Println("Error rendering email template:", appErr.Details)
 		return
 	}
 
 	envelop, appErr := utils.ParseMailEnvelop(h.mailerCfg, data.ClientEmail)
 	if appErr != nil {
-		// TODO: save to some logs
+		h.logFailedAttempt(ctx, jobID, deliveryID, appErrorMessage(appErr))
 		fmt.Println("Error parsing mail envelop:", appErr)
 		return
 	}
@@ -121,31 +163,83 @@ func (h *SubscribeHandler) handlerEmailVerification(raw []byte) {
 		},
 	})
 	if appErr != nil {
-		// TODO: save to some logs
+		h.logFailedAttempt(ctx, jobID, deliveryID, appErrorMessage(appErr))
 		fmt.Println("Error sending email:", appErr.Details)
+		return
+	}
+
+	if _, appErr = h.notificationLogRepo.CreateAttemptSuccess(ctx, notificationlog.CreateAttemptParams{
+		DeliveryID: deliveryID,
+		AttemptNo:  1,
+		Provider:   "smtp",
+	}); appErr != nil {
+		fmt.Println("Error creating notification success attempt log:", appErr.Details)
+	}
+	if appErr = h.notificationLogRepo.MarkDeliverySent(ctx, deliveryID, "smtp", ""); appErr != nil {
+		fmt.Println("Error marking notification delivery sent:", appErr.Details)
+		return
+	}
+	if appErr = h.notificationLogRepo.MarkJobCompleted(ctx, jobID); appErr != nil {
+		fmt.Println("Error marking notification job completed:", appErr.Details)
 		return
 	}
 }
 
 func (h *SubscribeHandler) handlerPasswordReset(raw []byte) {
+	ctx := context.Background()
+	jobID, appErr := h.notificationLogRepo.CreateJob(ctx, notificationlog.CreateJobParams{
+		JobSubject: string(dto.JobEmailPasswordReset),
+		RawPayload: string(raw),
+	})
+	if appErr != nil {
+		fmt.Println("Error creating notification job log:", appErr.Details)
+		return
+	}
+	if appErr = h.notificationLogRepo.MarkJobProcessing(ctx, jobID); appErr != nil {
+		fmt.Println("Error marking notification job processing:", appErr.Details)
+	}
+
 	var data dto.PasswordResetDTO
 	err := json.Unmarshal(raw, &data)
 	if err != nil {
-		// TODO: save to some logs
+		if appErr = h.notificationLogRepo.MarkJobInvalidPayload(ctx, jobID, err.Error()); appErr != nil {
+			fmt.Println("Error marking notification job invalid payload:", appErr.Details)
+		}
 		fmt.Println("Error unmarshalling job:", err)
+		return
+	}
+
+	deliveryID, appErr := h.notificationLogRepo.CreateDelivery(ctx, notificationlog.CreateDeliveryParams{
+		JobID:            jobID,
+		Channel:          "email",
+		NotificationType: "password_reset",
+		TemplateType:     string(template.TemplateTypeEmailPasswordReset),
+		RecipientEmail:   data.ClientEmail,
+		RecipientName:    data.ClientName,
+		Subject:          "Password Reset",
+		Provider:         "smtp",
+	})
+	if appErr != nil {
+		_ = h.notificationLogRepo.MarkJobFailed(ctx, jobID, appErrorMessage(appErr))
+		fmt.Println("Error creating notification delivery log:", appErr.Details)
+		return
+	}
+	if appErr = h.notificationLogRepo.MarkDeliverySending(ctx, deliveryID); appErr != nil {
+		_ = h.notificationLogRepo.MarkJobFailed(ctx, jobID, appErrorMessage(appErr))
+		fmt.Println("Error marking notification delivery sending:", appErr.Details)
 		return
 	}
 
 	emailTemplate, appErr := h.templateManager.RenderToString(template.TemplateTypeEmailPasswordReset, data)
 	if appErr != nil {
-		// TODO: save to some logs
+		h.logFailedAttempt(ctx, jobID, deliveryID, appErrorMessage(appErr))
 		fmt.Println("Error rendering email template:", appErr.Details)
 		return
 	}
 
 	envelop, appErr := utils.ParseMailEnvelop(h.mailerCfg, data.ClientEmail)
 	if appErr != nil {
-		// TODO: save to some logs
+		h.logFailedAttempt(ctx, jobID, deliveryID, appErrorMessage(appErr))
 		fmt.Println("Error parsing mail envelop:", appErr)
 		return
 	}
@@ -161,8 +255,53 @@ func (h *SubscribeHandler) handlerPasswordReset(raw []byte) {
 		},
 	})
 	if appErr != nil {
-		// TODO: save to some logs
+		h.logFailedAttempt(ctx, jobID, deliveryID, appErrorMessage(appErr))
 		fmt.Println("Error sending email:", appErr.Details)
 		return
 	}
+
+	if _, appErr = h.notificationLogRepo.CreateAttemptSuccess(ctx, notificationlog.CreateAttemptParams{
+		DeliveryID: deliveryID,
+		AttemptNo:  1,
+		Provider:   "smtp",
+	}); appErr != nil {
+		fmt.Println("Error creating notification success attempt log:", appErr.Details)
+	}
+	if appErr = h.notificationLogRepo.MarkDeliverySent(ctx, deliveryID, "smtp", ""); appErr != nil {
+		fmt.Println("Error marking notification delivery sent:", appErr.Details)
+		return
+	}
+	if appErr = h.notificationLogRepo.MarkJobCompleted(ctx, jobID); appErr != nil {
+		fmt.Println("Error marking notification job completed:", appErr.Details)
+		return
+	}
+}
+
+func (h *SubscribeHandler) logFailedAttempt(ctx context.Context, jobID, deliveryID uuid.UUID, errMessage string) {
+	if _, appErr := h.notificationLogRepo.CreateAttemptFailed(ctx, notificationlog.CreateAttemptParams{
+		DeliveryID:   deliveryID,
+		AttemptNo:    1,
+		ErrorMessage: errMessage,
+		ErrorDetails: "{}",
+		Provider:     "smtp",
+	}); appErr != nil {
+		fmt.Println("Error creating notification failed attempt log:", appErr.Details)
+	}
+	if appErr := h.notificationLogRepo.MarkDeliveryFailed(ctx, deliveryID, errMessage); appErr != nil {
+		fmt.Println("Error marking notification delivery failed:", appErr.Details)
+	}
+	if appErr := h.notificationLogRepo.MarkJobFailed(ctx, jobID, errMessage); appErr != nil {
+		fmt.Println("Error marking notification job failed:", appErr.Details)
+	}
+}
+
+func appErrorMessage(appErr *apperror.AppError) string {
+	if appErr == nil {
+		return ""
+	}
+	if len(appErr.Details) == 0 {
+		return appErr.Message
+	}
+
+	return fmt.Sprintf("%s: %v", appErr.Message, appErr.Details)
 }
