@@ -8,6 +8,7 @@ require (
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/rijum8906/relay/packages/core v0.0.0-20260324082703-6286eea9b4f5
 	github.com/rijum8906/relay/packages/pb v0.0.0-00010101000000-000000000000
+	go.uber.org/zap v1.27.1
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
 )
@@ -25,6 +26,7 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/wneessen/go-mail v0.7.2 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 )
 
 require (

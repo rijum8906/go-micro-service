@@ -12,6 +12,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/template"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/email"
 	"github.com/rijum8906/relay/services/notification-service/internal/utils"
+	"github.com/wneessen/go-mail"
 )
 
 type SubscribeHandler struct {
@@ -19,6 +20,7 @@ type SubscribeHandler struct {
 	NatsClient      *nats.Client
 	templateManager template.TemplateManager
 	mailerCfg       *mailer.Config
+	mailerClient    *mail.Client
 }
 
 func New(emailService email.Service, client *nats.Client, mailerCfg *mailer.Config) (*SubscribeHandler, *apperror.AppError) {
@@ -68,46 +70,96 @@ func (h *SubscribeHandler) Subscribe() *apperror.AppError {
 	if appErr != nil {
 		return appErr
 	}
+	h.mailerClient = client
 
-	h.NatsClient.Subscribe(dto.JobEmailVerification, func(b []byte) {
-		var data dto.EmailVerificationDTO
-		err := json.Unmarshal(b, &data)
-		if err != nil {
-			// TODO: save to some logs
-			fmt.Println("Error unmarshalling job:", err)
-			return
-		}
-
-		emailTemplate, appErr := h.templateManager.RenderToString(template.TemplateTypeEmailVerification, data)
-		if appErr != nil {
-			// TODO: save to some logs
-			fmt.Println("Error rendering email template:", appErr.Details)
-			return
-		}
-
-		envelop, appErr := utils.ParseMailEnvelop(h.mailerCfg, data.ClientEmail)
-		if appErr != nil {
-			// TODO: save to some logs
-			fmt.Println("Error parsing mail envelop:", appErr)
-			return
-		}
-
-		appErr = mailer.Send(client, mailer.Message{
-			Envelope: envelop,
-			Content: mailer.Content{
-				HTML:        emailTemplate,
-				Subject:     "Email Verification",
-				Priority:    mailer.EmailPriorityHigh,
-				Attachments: []mailer.Attachment{},
-				Headers:     map[string]string{},
-			},
-		})
-		if appErr != nil {
-			// TODO: save to some logs
-			fmt.Println("Error sending email:", appErr.Details)
-			return
-		}
-	})
+	_, appErr = h.NatsClient.Subscribe(dto.JobEmailVerification, h.handlerEmailVerification)
+	if appErr != nil {
+		return appErr
+	}
+	_, appErr = h.NatsClient.Subscribe(dto.JobEmailPasswordReset, h.handlerPasswordReset)
+	if appErr != nil {
+		return appErr
+	}
 
 	return nil
+}
+
+func (h *SubscribeHandler) handlerEmailVerification(raw []byte) {
+	var data dto.EmailVerificationDTO
+	err := json.Unmarshal(raw, &data)
+	if err != nil {
+		// TODO: save to some logs
+		fmt.Println("Error unmarshalling job:", err)
+		return
+	}
+
+	emailTemplate, appErr := h.templateManager.RenderToString(template.TemplateTypeEmailVerification, data)
+	if appErr != nil {
+		// TODO: save to some logs
+		fmt.Println("Error rendering email template:", appErr.Details)
+		return
+	}
+
+	envelop, appErr := utils.ParseMailEnvelop(h.mailerCfg, data.ClientEmail)
+	if appErr != nil {
+		// TODO: save to some logs
+		fmt.Println("Error parsing mail envelop:", appErr)
+		return
+	}
+
+	appErr = mailer.Send(h.mailerClient, mailer.Message{
+		Envelope: envelop,
+		Content: mailer.Content{
+			HTML:        emailTemplate,
+			Subject:     "Email Verification",
+			Priority:    mailer.EmailPriorityHigh,
+			Attachments: []mailer.Attachment{},
+			Headers:     map[string]string{},
+		},
+	})
+	if appErr != nil {
+		// TODO: save to some logs
+		fmt.Println("Error sending email:", appErr.Details)
+		return
+	}
+}
+
+func (h *SubscribeHandler) handlerPasswordReset(raw []byte) {
+	var data dto.PasswordResetDTO
+	err := json.Unmarshal(raw, &data)
+	if err != nil {
+		// TODO: save to some logs
+		fmt.Println("Error unmarshalling job:", err)
+		return
+	}
+
+	emailTemplate, appErr := h.templateManager.RenderToString(template.TemplateTypeEmailPasswordReset, data)
+	if appErr != nil {
+		// TODO: save to some logs
+		fmt.Println("Error rendering email template:", appErr.Details)
+		return
+	}
+
+	envelop, appErr := utils.ParseMailEnvelop(h.mailerCfg, data.ClientEmail)
+	if appErr != nil {
+		// TODO: save to some logs
+		fmt.Println("Error parsing mail envelop:", appErr)
+		return
+	}
+
+	appErr = mailer.Send(h.mailerClient, mailer.Message{
+		Envelope: envelop,
+		Content: mailer.Content{
+			HTML:        emailTemplate,
+			Subject:     "Password Reset",
+			Priority:    mailer.EmailPriorityHigh,
+			Attachments: []mailer.Attachment{},
+			Headers:     map[string]string{},
+		},
+	})
+	if appErr != nil {
+		// TODO: save to some logs
+		fmt.Println("Error sending email:", appErr.Details)
+		return
+	}
 }
