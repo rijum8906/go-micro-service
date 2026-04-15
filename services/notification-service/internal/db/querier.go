@@ -11,7 +11,7 @@ import (
 )
 
 type Querier interface {
-	CrateNotification(ctx context.Context, arg CrateNotificationParams) (Notification, error)
+	CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error)
 	DeleteNotification(ctx context.Context, id uuid.UUID) error
 	DeleteNotificationsByStatus(ctx context.Context, status string) error
 	DeleteNotificationsByUserID(ctx context.Context, recepientUserID uuid.UUID) error

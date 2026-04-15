@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const CrateNotification = `-- name: CrateNotification :one
+const CreateNotification = `-- name: CreateNotification :one
 INSERT INTO notifications (
     recepient_email,
     recepient_user_id,
@@ -25,7 +25,7 @@ INSERT INTO notifications (
 RETURNING id, recepient_email, recepient_user_id, message_data, status, template_type, retry_count, last_error, created_at, updated_at
 `
 
-type CrateNotificationParams struct {
+type CreateNotificationParams struct {
 	RecepientEmail  string
 	RecepientUserID uuid.UUID
 	MessageData     []byte
@@ -34,8 +34,8 @@ type CrateNotificationParams struct {
 	RetryCount      int32
 }
 
-func (q *Queries) CrateNotification(ctx context.Context, arg CrateNotificationParams) (Notification, error) {
-	row := q.db.QueryRow(ctx, CrateNotification,
+func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error) {
+	row := q.db.QueryRow(ctx, CreateNotification,
 		arg.RecepientEmail,
 		arg.RecepientUserID,
 		arg.MessageData,
