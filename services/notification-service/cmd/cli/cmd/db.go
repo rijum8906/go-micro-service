@@ -29,12 +29,12 @@ var atlasDBInitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		defaultCfg := *config
 		defaultCfg.DBName = "postgres"
-		err := createNewDatabase(&defaultCfg, config.DBName)
+		err := command.CreateNewDatabase(&defaultCfg, config.DBName)
 		if err != nil {
 			fmt.Printf("failed to create database %s: %v", config.DBName, err)
 		}
 
-		err = createNewDatabase(&defaultCfg, "dev_"+config.DBName)
+		err = command.CreateNewDatabase(&defaultCfg, "dev_"+config.DBName)
 		if err != nil {
 			fmt.Printf("failed to create database %s: %v", "dev_"+config.DBName, err)
 		}
@@ -47,8 +47,8 @@ var atlasApplyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		command.RunCommand("atlas",
 			"migrate", "apply",
-			"--url", getDBURL(config),
-			"--dir", getMigrationDir())
+			"--url", command.GetDBURL(config),
+			"--dir", command.GetMigrationDir())
 	},
 }
 
@@ -58,8 +58,8 @@ var statusCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		command.RunCommand("atlas",
 			"migrate", "status",
-			"--url", getDBURL(config),
-			"--dir", getMigrationDir())
+			"--url", command.GetDBURL(config),
+			"--dir", command.GetMigrationDir())
 	},
 }
 
@@ -69,9 +69,9 @@ var newCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		migrationName := args[0]
 		command.RunCommand("atlas", "migrate", "diff", migrationName,
-			"--dir", getMigrationDir(),
-			"--to", getSchemaDir(),
-			"--dev-url", getDevDBURL(config))
+			"--dir", command.GetMigrationDir(),
+			"--to", command.GetSchemaDir(),
+			"--dev-url", command.GetDevDBURL(config))
 	},
 }
 
@@ -79,15 +79,15 @@ var schemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "Apply schema actions",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := createNewDatabase(config, "dev_"+config.DBName)
+		err := command.CreateNewDatabase(config, "dev_"+config.DBName)
 		if err != nil {
 			panic(err)
 		}
 		command.RunCommand("atlas",
 			"schema", "apply",
-			"--url", getDBURL(config),
-			"--dev-url", getDevDBURL(config),
-			"--file", getSchemaDir(),
+			"--url", command.GetDBURL(config),
+			"--dev-url", command.GetDevDBURL(config),
+			"--file", command.GetSchemaDir(),
 			"--auto-approve")
 	},
 }
@@ -97,7 +97,7 @@ var rehashCmd = &cobra.Command{
 	Short: "Rehash atlas migration checksums",
 	Run: func(cmd *cobra.Command, args []string) {
 		command.RunCommand("atlas", "migrate", "hash",
-			"--dir", getMigrationDir())
+			"--dir", command.GetMigrationDir())
 	},
 }
 
@@ -107,9 +107,9 @@ var rollbackCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		count := args[0]
 		command.RunCommand("atlas", "migrate", "down", count,
-			"--url", getDBURL(config),
-			"--dir", getMigrationDir(),
-			"--dev-url", getDevDBURL(config))
+			"--url", command.GetDBURL(config),
+			"--dir", command.GetMigrationDir(),
+			"--dev-url", command.GetDevDBURL(config))
 	},
 }
 
