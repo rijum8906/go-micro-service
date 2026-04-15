@@ -6,16 +6,17 @@ import (
 	"testing"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/template"
 )
 
-func sampleCompanyInfo() *template.CompanyInfo {
-	return &template.CompanyInfo{
+func sampleCompanyInfo() *dto.CompanyInfo {
+	return &dto.CompanyInfo{
 		Name:       "Relay Labs",
 		Emails:     []string{"support@relay.dev", "hello@relay.dev"},
 		Addresses:  []string{"123 Relay Street, Dhaka 1212", "42 Signal Avenue, Tokyo 150-0001"},
 		WebsiteURL: "https://relay.dev",
-		SocialLinks: []template.SocialLink{
+		SocialLinks: []dto.SocialLink{
 			{Label: "LinkedIn", URL: "https://linkedin.com/company/relay"},
 			{Label: "X", URL: "https://x.com/relay"},
 		},
@@ -105,7 +106,7 @@ func TestTemplateManager_ValidateData(t *testing.T) {
 	}{
 		{
 			name: "valid password reset dto",
-			data: template.PasswordResetDTO{
+			data: dto.PasswordResetDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
 				ResetToken:  "token123",
@@ -120,7 +121,7 @@ func TestTemplateManager_ValidateData(t *testing.T) {
 		},
 		{
 			name: "invalid email verification dto",
-			data: template.EmailVerificationDTO{
+			data: dto.EmailVerificationDTO{
 				ClientName:        "John Doe",
 				ClientEmail:       "invalid-email",
 				VerificationToken: "",
@@ -167,7 +168,7 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 		{
 			name:         "password reset",
 			templateType: template.TemplateTypeEmailPasswordReset,
-			data: template.PasswordResetDTO{
+			data: dto.PasswordResetDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
 				ResetToken:  "token123",
@@ -186,7 +187,7 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 		{
 			name:         "welcome email",
 			templateType: template.TemplateTypeEmailWelcome,
-			data: template.WelcomeTemplateDTO{
+			data: dto.WelcomeTemplateDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
 			},
@@ -200,7 +201,7 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 		{
 			name:         "email verification",
 			templateType: template.TemplateTypeEmailVerification,
-			data: template.EmailVerificationDTO{
+			data: dto.EmailVerificationDTO{
 				ClientName:        "John Doe",
 				ClientEmail:       "john@example.com",
 				VerificationToken: "verify-123",
@@ -243,7 +244,7 @@ func TestTemplateManager_RenderToBytes(t *testing.T) {
 
 	tm := mustCreateTemplateManagerWithCompanyInfo(t)
 
-	data := template.PasswordResetDTO{
+	data := dto.PasswordResetDTO{
 		ClientName:  "John Doe",
 		ClientEmail: "john@example.com",
 		ResetToken:  "token123",
@@ -284,7 +285,7 @@ func TestTemplateManager_RenderFailures(t *testing.T) {
 		{
 			name:         "empty template type",
 			templateType: "",
-			data: template.WelcomeTemplateDTO{
+			data: dto.WelcomeTemplateDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
 			},
@@ -293,7 +294,7 @@ func TestTemplateManager_RenderFailures(t *testing.T) {
 		{
 			name:         "unknown template",
 			templateType: template.TemplateType("missing-template"),
-			data: template.WelcomeTemplateDTO{
+			data: dto.WelcomeTemplateDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
 			},
@@ -302,7 +303,7 @@ func TestTemplateManager_RenderFailures(t *testing.T) {
 		{
 			name:         "invalid payload",
 			templateType: template.TemplateTypeEmailVerification,
-			data: template.EmailVerificationDTO{
+			data: dto.EmailVerificationDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "not-an-email",
 			},
@@ -331,12 +332,12 @@ func TestTemplateManager_RenderToString_GenericWrapperData(t *testing.T) {
 	tm := mustCreateTemplateManagerWithCompanyInfo(t)
 
 	type wrappedWelcomeDTO struct {
-		template.WelcomeTemplateDTO
+		dto.WelcomeTemplateDTO
 		Extra string
 	}
 
 	rendered, err := tm.RenderToString(template.TemplateTypeEmailWelcome, wrappedWelcomeDTO{
-		WelcomeTemplateDTO: template.WelcomeTemplateDTO{
+		WelcomeTemplateDTO: dto.WelcomeTemplateDTO{
 			ClientName:  "Jane Doe",
 			ClientEmail: "jane@example.com",
 		},

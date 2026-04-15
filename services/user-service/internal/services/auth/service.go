@@ -9,7 +9,6 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreutils"
 	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/template"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
@@ -200,7 +199,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.PublishJSON(dto.JobEmailVerification.String(), template.EmailVerificationDTO{
+	if appErr = s.publisher.PublishJSON(dto.JobEmailVerification.String(), dto.EmailVerificationDTO{
 		ClientName:        prof.FirstName + " " + prof.LastName,
 		ClientEmail:       user.Email,
 		VerificationToken: scopedToken,
@@ -235,7 +234,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.PublishJSON(dto.JobEmailPasswordReset.String(), template.PasswordResetDTO{
+	if appErr = s.publisher.PublishJSON(dto.JobEmailPasswordReset.String(), dto.PasswordResetDTO{
 		ClientName:  prof.FirstName + " " + prof.LastName,
 		ClientEmail: user.Email,
 		ResetToken:  scopedToken,

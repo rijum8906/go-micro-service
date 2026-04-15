@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 )
 
 var validate = validator.New()
@@ -28,7 +29,7 @@ type TemplateManager interface {
 
 type templateManager struct {
 	templatesDir string
-	info         *CompanyInfo
+	info         *dto.CompanyInfo
 	templates    *template.Template
 	mu           sync.RWMutex
 }
@@ -38,7 +39,7 @@ func NewTemplateManager(templatesDir string) (TemplateManager, error) {
 	return NewTemplateManagerWithCompanyInfo(templatesDir, nil)
 }
 
-func NewTemplateManagerWithCompanyInfo(templatesDir string, companyInfo *CompanyInfo) (TemplateManager, error) {
+func NewTemplateManagerWithCompanyInfo(templatesDir string, companyInfo *dto.CompanyInfo) (TemplateManager, error) {
 	templatesDir = strings.TrimSpace(templatesDir)
 	if templatesDir == "" {
 		return nil, errors.New("templates directory is required")
@@ -245,14 +246,14 @@ func flattenTemplateFields(out map[string]any, value reflect.Value) {
 }
 
 // Type-safe helper methods
-func (m *templateManager) RenderWelcomeEmail(data WelcomeTemplateDTO) ([]byte, error) {
+func (m *templateManager) RenderWelcomeEmail(data dto.WelcomeTemplateDTO) ([]byte, error) {
 	return m.RenderToBytes(TemplateTypeEmailWelcome, data)
 }
 
-func (m *templateManager) RenderVerificationEmail(data EmailVerificationDTO) ([]byte, error) {
+func (m *templateManager) RenderVerificationEmail(data dto.EmailVerificationDTO) ([]byte, error) {
 	return m.RenderToBytes(TemplateTypeEmailVerification, data)
 }
 
-func (m *templateManager) RenderPasswordResetEmail(data PasswordResetDTO) ([]byte, error) {
+func (m *templateManager) RenderPasswordResetEmail(data dto.PasswordResetDTO) ([]byte, error) {
 	return m.RenderToBytes(TemplateTypeEmailPasswordReset, data)
 }

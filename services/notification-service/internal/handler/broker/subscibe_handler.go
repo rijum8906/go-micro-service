@@ -22,12 +22,12 @@ type SubscribeHandler struct {
 }
 
 func New(emailService email.Service, client *nats.Client, mailerCfg *mailer.Config) (*SubscribeHandler, *apperror.AppError) {
-	tm, err := template.NewTemplateManagerWithCompanyInfo("packages/templates", &template.CompanyInfo{
+	tm, err := template.NewTemplateManagerWithCompanyInfo("packages/templates", &dto.CompanyInfo{
 		Name:       "Relay",
 		Emails:     []string{"UfNwO@example.com"},
 		Addresses:  []string{"123 Main St, Anytown, USA"},
 		WebsiteURL: "https://relay.com",
-		SocialLinks: []template.SocialLink{
+		SocialLinks: []dto.SocialLink{
 			{
 				Label: "Twitter",
 				URL:   "https://twitter.com/relay",
@@ -70,8 +70,7 @@ func (h *SubscribeHandler) Subscribe() *apperror.AppError {
 	}
 
 	h.NatsClient.Subscribe(dto.JobEmailVerification, func(b []byte) {
-		fmt.Println("I got a job")
-		var data template.EmailVerificationDTO
+		var data dto.EmailVerificationDTO
 		err := json.Unmarshal(b, &data)
 		if err != nil {
 			// TODO: save to some logs
