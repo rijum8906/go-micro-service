@@ -9,7 +9,7 @@ import (
 )
 
 func (s *service) CreateNotification(ctx context.Context, params db.CreateNotificationParams) (*db.Notification, *apperror.AppError) {
-	notif, err := s.q.CrateNotification(ctx, params)
+	notif, err := s.q.CreateNotification(ctx, params)
 	if err != nil {
 		return nil, apperror.ErrInternal.WithDetail("error", err.Error())
 	}
