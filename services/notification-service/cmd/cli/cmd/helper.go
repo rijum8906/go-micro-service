@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/db"
 	"github.com/rijum8906/relay/packages/core/env"
 )
@@ -38,9 +39,9 @@ func getSchemaDir() string {
 	return "file://db/schema.sql"
 }
 
-func createNewDatabase(cfg *env.Config, name string) error {
+func createNewDatabase(cfg *env.Config, name string) *apperror.AppError {
 	ctx := context.Background()
-	pool, appErr := db.Connect(context.Background(), db.Config{
+	pool, appErr := db.Connect(ctx, db.Config{
 		Host:     cfg.DBHost,
 		Port:     cfg.DBPort,
 		User:     cfg.DBUser,
@@ -59,7 +60,7 @@ func createNewDatabase(cfg *env.Config, name string) error {
 		name,
 	).Scan(&exists)
 	if err != nil {
-		return err
+		return apperror.ErrInternal.WithDetail("error", err.Error())
 	}
 
 	if exists {
@@ -69,5 +70,9 @@ func createNewDatabase(cfg *env.Config, name string) error {
 	// Create database (can't use parameters for database names)
 	sql := "CREATE DATABASE " + name
 	_, err = pool.Exec(ctx, sql)
-	return err
+	if err != nil {
+		return apperror.ErrInternal.WithDetail("error", err.Error())
+	}
+
+	return nil
 }

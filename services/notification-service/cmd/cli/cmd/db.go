@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/spf13/cobra"
@@ -18,6 +20,24 @@ var atlasCmd = &cobra.Command{
 	Use:   "atlas",
 	Short: "Atlas database commands",
 	Run: func(cmd *cobra.Command, args []string) {
+	},
+}
+
+var atlasDBInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize atlas database",
+	Run: func(cmd *cobra.Command, args []string) {
+		defaultCfg := *config
+		defaultCfg.DBName = "postgres"
+		err := createNewDatabase(&defaultCfg, config.DBName)
+		if err != nil {
+			fmt.Printf("failed to create database %s: %v", config.DBName, err)
+		}
+
+		err = createNewDatabase(&defaultCfg, "dev_"+config.DBName)
+		if err != nil {
+			fmt.Printf("failed to create database %s: %v", "dev_"+config.DBName, err)
+		}
 	},
 }
 
@@ -124,6 +144,7 @@ func init() {
 	dbCmd.AddCommand(atlasCmd)
 	dbCmd.AddCommand(sqlCmd)
 
+	atlasCmd.AddCommand(atlasDBInitCmd)
 	atlasCmd.AddCommand(atlasApplyCmd)
 	atlasCmd.AddCommand(statusCmd)
 	atlasCmd.AddCommand(newCmd)
