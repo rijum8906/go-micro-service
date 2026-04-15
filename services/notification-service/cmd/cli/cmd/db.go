@@ -1,6 +1,17 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"context"
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+	coreenv "github.com/rijum8906/relay/packages/core/env"
+	migrations "github.com/rijum8906/relay/services/notification-service/db"
+	"github.com/spf13/cobra"
+)
 
 var dbCmd = &cobra.Command{
 	Use:   "db",
@@ -65,7 +76,15 @@ var sqlCmd = &cobra.Command{
 var sqlApplyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Apply SQL migrations",
-	Run:   notImplemented,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("Applying embedded SQL migration..")
+		err := applyEmbeddedMigrations(dbURL())
+		if err != nil {
+			return fmt.Errorf("apply embedded SQL migrations: %w", err)
+		}
+		fmt.Println("Embedded SQL migrations applied")
+		return nil
+	},
 }
 
 func init() {
@@ -86,4 +105,76 @@ func init() {
 
 	newCmd.Flags().String("name", "", "migration name")
 	rollbackCmd.Flags().Int("count", 1, "number of migrations to roll back")
+}
+
+func dbURL() string {
+	cfg := coreenv.MustLoad()
+
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBHost,
+		cfg.DBPort,
+		cfg.DBName,
+		cfg.DBSSLMode,
+	)
+}
+
+func applyEmbeddedMigrations(databaseURL string) error {
+	ctx := context.Background()
+	pool, err := pgxpool.New(ctx, databaseURL)
+	if err != nil {
+		return fmt.Errorf("connect database: %w", err)
+	}
+	defer pool.Close()
+
+	allMigrations, err := migrations.All()
+	if err != nil {
+		return fmt.Errorf("load embedded migrations: %w", err)
+	}
+
+	for _, migration := range allMigrations {
+		statements := splitSQLStatements(migration.Content)
+		for _, statement := range statements {
+			if _, err := pool.Exec(ctx, statement); err != nil {
+				if shouldIgnoreMigrationError(err) {
+					continue
+				}
+
+				return fmt.Errorf("apply migration %s: %w", migration.Name, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func splitSQLStatements(content string) []string {
+	parts := strings.Split(content, ";")
+	statements := make([]string, 0, len(parts))
+	for _, part := range parts {
+		statement := strings.TrimSpace(part)
+		if statement == "" {
+			continue
+		}
+
+		statements = append(statements, statement)
+	}
+
+	return statements
+}
+
+func shouldIgnoreMigrationError(err error) bool {
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) {
+		return false
+	}
+
+	switch pgErr.Code {
+	case "42P07", "42710":
+		return true
+	default:
+		return false
+	}
 }
