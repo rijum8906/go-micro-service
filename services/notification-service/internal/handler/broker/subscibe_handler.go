@@ -78,9 +78,6 @@ func (h *SubscribeHandler) Subscribe() *apperror.AppError {
 			return
 		}
 
-		fmt.Println(string(b))
-		fmt.Println(data)
-
 		emailTemplate, appErr := h.templateManager.RenderToString(template.TemplateTypeEmailVerification, data)
 		if appErr != nil {
 			// TODO: save to some logs

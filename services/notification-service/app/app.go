@@ -10,6 +10,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/nats"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -19,7 +20,9 @@ type ApplicationInfra struct {
 	nats     *nats.Client
 }
 
-type ApplicationUtils struct{}
+type ApplicationUtils struct {
+	logger *zap.Logger
+}
 
 type ApplicationServices struct{}
 
@@ -47,6 +50,10 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Initialize Dependencies
+	if appErr = app.initLogger(); appErr != nil {
+		return nil, appErr
+	}
+
 	if appErr = app.initDB(ctx); appErr != nil {
 		return nil, appErr
 	}
@@ -71,6 +78,12 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	if appErr = app.initGRPCServer(); appErr != nil {
 		return nil, appErr
 	}
+
+	apperror.SetConfig(apperror.Config{
+		AppEnv: app.config.AppEnv,
+		Debug:  true,
+		Logger: app.utils.logger,
+	})
 
 	return app, nil
 }
