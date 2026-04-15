@@ -3,12 +3,25 @@ package notification
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreutils"
 	"github.com/rijum8906/relay/services/notification-service/internal/db"
+	"github.com/rijum8906/relay/services/notification-service/internal/utils"
 )
 
+var validate *validator.Validate
+
+func init() {
+	validate = validator.New()
+}
+
 func (s *service) CreateNotification(ctx context.Context, params db.CreateNotificationParams) (*db.Notification, *apperror.AppError) {
+	appErr := utils.EnsureAllFields(params)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	notif, err := s.q.CreateNotification(ctx, params)
 	if err != nil {
 		return nil, apperror.ErrInternal.WithDetail("error", err.Error())

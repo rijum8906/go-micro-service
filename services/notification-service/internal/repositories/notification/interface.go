@@ -20,6 +20,8 @@ type service struct {
 	q db.Querier
 }
 
-func New() Service {
-	return &service{}
+func New(q db.Querier) Service {
+	return &service{
+		q: q,
+	}
 }

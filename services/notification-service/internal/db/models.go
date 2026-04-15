@@ -17,7 +17,7 @@ type Notification struct {
 	Status          string
 	TemplateType    string
 	RetryCount      int32
-	LastError       string
+	LastError       pgtype.Text
 	CreatedAt       pgtype.Timestamptz
 	UpdatedAt       pgtype.Timestamptz
 }
