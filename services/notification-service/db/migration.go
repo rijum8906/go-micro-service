@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-//go:embed migrations/*.sql
+//go:embed *.sql
 var files embed.FS
 
 type Migration struct {
@@ -16,7 +16,7 @@ type Migration struct {
 }
 
 func All() ([]Migration, error) {
-	matches, err := fs.Glob(files, "migrations/*.sql")
+	matches, err := fs.Glob(files, "*.sql")
 	if err != nil {
 		return nil, fmt.Errorf("failed to list migration files: %w", err)
 	}

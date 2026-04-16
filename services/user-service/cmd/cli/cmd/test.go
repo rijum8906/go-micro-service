@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/rijum8906/relay/packages/core/command"
+	"github.com/rijum8906/relay/packages/core/testutils"
+	migrations "github.com/rijum8906/relay/services/user/db"
 	"github.com/spf13/cobra"
 )
 
@@ -16,51 +20,40 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Ensure the local test containers are running",
 	Long:  "Ensure the local PostgreSQL and Redis test containers are available and running.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if testContainerManager.ExistsAll() {
-			fmt.Println("Local test containers already exist. Starting them again to ensure a clean state.")
-		}
-
-		return startContainers()
+	Run: func(cmd *cobra.Command, args []string) {
+		command.RunCommand("go", "test", "./...")
 	},
 }
 
-var setupCmd = &cobra.Command{
+var testSetupCmd = &cobra.Command{
 	Use:   "setup",
-	Short: "Prepare the local test environment",
-	Long:  "Prepare the local PostgreSQL and Redis test containers for local development and testing.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if testContainerManager.ExistsAll() {
-			fmt.Println("Local test containers already exist. Refreshing them.")
+	Short: "Prepare test environment",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Setting up test environment...")
+
+		fmt.Println("Migrating test database...")
+
+		pool := testutils.MustConnectDB()
+
+		migrations, err := migrations.All()
+		if err != nil {
+			panic(err)
 		}
 
-		return startContainers()
-	},
-}
+		for _, m := range migrations {
+			_, err = pool.Exec(context.Background(), m.Content)
+			if err != nil {
+				fmt.Printf("failed to apply migration %s: %v", m.Name, err)
+			}
+		}
 
-var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start local test containers",
-	Long:  "Start the local PostgreSQL and Redis containers used by the test environment.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return startContainers()
-	},
-}
-
-var stopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "Stop local test containers",
-	Long:  "Stop the local PostgreSQL and Redis containers used by the test environment.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return stopContainers()
+		fmt.Println("Test environment setup complete.")
 	},
 }
 
 func init() {
 	testCmd.AddCommand(runCmd)
-	testCmd.AddCommand(setupCmd)
-	testCmd.AddCommand(startCmd)
-	testCmd.AddCommand(stopCmd)
+	testCmd.AddCommand(testSetupCmd)
 
 	rootCmd.AddCommand(testCmd)
 }

@@ -37,7 +37,3 @@ sql:
               type: "string"
             db_type: "text"
             nullable: false
-          - go_type:
-              type: "string"
-            db_type: "text"
-            nullable: true

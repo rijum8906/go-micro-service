@@ -19,13 +19,7 @@ CLI_RUN := go run ./cmd/cli/main.go
 	db-rollback \
 	db-reset \
 	test-setup \
-	test-start \
 	test-run \
-	test-stop \
-	init-test \
-	test-migrate \
-	test-all \
-	stop-test
 
 help:
 	@echo "Available targets:"
@@ -42,13 +36,7 @@ help:
 	@echo "  make db-rollback COUNT=1        - Roll back Atlas migrations"
 	@echo "  make db-reset                   - Clean database and reapply Atlas migrations"
 	@echo "  make test-setup                 - Prepare the test environment"
-	@echo "  make test-start                 - Start test dependencies"
 	@echo "  make test-run                   - Run test command stub"
-	@echo "  make test-stop                  - Stop test dependencies"
-	@echo "  make init-test                  - Alias for test-start"
-	@echo "  make test-migrate               - Run test migration stub"
-	@echo "  make test-all                   - Run all test actions stub"
-	@echo "  make stop-test                  - Alias for test-stop"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make db-new NAME=add_users_table"
@@ -97,21 +85,8 @@ db-reset:
 test-setup:
 	@$(CLI_RUN) test setup
 
-test-start:
-	@$(CLI_RUN) test start
-
 test-run:
 	@$(CLI_RUN) test run
 
-test-stop:
-	@$(CLI_RUN) test stop
-
 init-test: test-start
 
-test-migrate:
-	@$(CLI_RUN) test migrate
-
-test-all:
-	@$(CLI_RUN) test all
-
-stop-test: test-stop

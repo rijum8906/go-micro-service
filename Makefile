@@ -2,7 +2,7 @@ SHELL := /bin/sh
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup setup-proto dev
+.PHONY: help setup setup-proto dev test-up
 
 help:
 	@printf "Relay development workflow commands.\n\n"
@@ -20,3 +20,6 @@ setup-proto:
 
 dev:
 	go run ./cli dev
+
+test-up:
+	docker compose -f ./docker-compose.test.yml up --build
