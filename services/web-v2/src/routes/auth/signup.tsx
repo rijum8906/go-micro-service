@@ -39,19 +39,24 @@ function SignUpPage() {
     onSubmit: async ({ value }) => {
       const response = await signup(value) as any
       if (response.success) {
-        const payload = response.data.signup
-        createAccount({ id: payload.account.id, email: payload.account.email, createdAt: '', updatedAt: '', passwordHash: '' })
-        payload.profiles.forEach((p: any) => createProfile({
-          id: p.id,
-          firstName: p.firstName,
-          lastName: p.lastName,
-          displayName: p.displayName,
-          avatarUrl: p.avatarUrl,
-          accountId: payload.account.id,
+        const payload = response.data.Register
+        const accountId = payload.user.id
+        createAccount({ id: accountId, email: payload.user.email, createdAt: '', updatedAt: '', passwordHash: '' })
+        const displayName = [payload.profile.firstName, payload.profile.lastName].filter(Boolean).join(' ') || null
+        createProfile({
+          id: payload.profile.id,
+          firstName: payload.profile.firstName,
+          lastName: payload.profile.lastName,
+          displayName,
+          avatarUrl: payload.profile.avatarUrl ?? null,
+          accountId,
           createdAt: '',
           updatedAt: '',
-        }))
-        createToken({ access_token: payload.tokens.accessToken, refresh_token: payload.tokens.refreshToken })
+        })
+        createToken({
+          access_token: payload.tokens.accessToken.value,
+          refresh_token: payload.tokens.refreshToken.value,
+        })
         toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {

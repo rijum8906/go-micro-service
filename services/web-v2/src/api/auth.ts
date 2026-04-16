@@ -1,4 +1,8 @@
-import type { SigninSchemaType, SignupSchemaType } from '#/schemas/auth'
+import type {
+  RequestPasswordResetSchemaType,
+  SigninSchemaType,
+  SignupSchemaType,
+} from '#/schemas/auth'
 import type { AuthResponse, BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
 import { useAuthStore } from '#/store/auth'
 import { generateDeviceId } from '#/lib/device'
@@ -37,28 +41,52 @@ async function gqlRequest<T>(query: string, variables?: Record<string, unknown>,
 }
 
 const SIGNIN_MUTATION = `
-  mutation Signin($input: SigninInput!) {
-    signin(input: $input) {
-      account { id email }
-      tokens { accessToken refreshToken }
-      profiles { id firstName lastName displayName avatarUrl }
+  mutation Login($input: LoginInput!) {
+    Login(input: $input) {
+      user { id email }
+      profile { id userId firstName lastName avatarUrl }
+      tokens {
+        accessToken { value expiresAt }
+        refreshToken { value expiresAt }
+      }
     }
   }
 `
 
 const SIGNUP_MUTATION = `
-  mutation Signup($input: SignupInput!) {
-    signup(input: $input) {
-      account { id email }
-      tokens { accessToken refreshToken }
-      profiles { id firstName lastName displayName avatarUrl }
+  mutation Register($input: RegisterInput!) {
+    Register(input: $input) {
+      user { id email }
+      profile { id userId firstName lastName avatarUrl }
+      tokens {
+        accessToken { value expiresAt }
+        refreshToken { value expiresAt }
+      }
     }
   }
 `
 
 const SIGNOUT_MUTATION = `
-  mutation Signout($input: SignoutInput!) {
-    signout(input: $input) {
+  mutation Logout($input: LogoutInput!) {
+    Logout(input: $input) {
+      success
+      message
+    }
+  }
+`
+
+const REQUEST_PASSWORD_RESET_MUTATION = `
+  mutation RequestPasswordReset($input: RequestPasswordResetInput!) {
+    RequestPasswordReset(input: $input) {
+      success
+      message
+    }
+  }
+`
+
+const RESET_PASSWORD_MUTATION = `
+  mutation ResetPassword($input: ResetPasswordInput!) {
+    ResetPassword(input: $input) {
       success
       message
     }
@@ -70,7 +98,7 @@ export async function signin(data: SigninSchemaType): Promise<AuthResponse | Bas
     input: {
       email: data.email,
       password: data.password,
-      metadata: { deviceId: generateDeviceId() },
+      meta: { deviceId: generateDeviceId() },
     },
   })
 }
@@ -82,13 +110,64 @@ export async function signup(data: SignupSchemaType): Promise<AuthResponse | Bas
       password: data.password,
       firstName: data.firstName,
       lastName: data.lastName,
-      metadata: { deviceId: generateDeviceId() },
+      meta: { deviceId: generateDeviceId() },
     },
   })
 }
 
 export async function signout(): Promise<BaseSuccessResponse | BaseErrorResponse> {
   return gqlRequest(SIGNOUT_MUTATION, {
-    input: { metadata: { deviceId: generateDeviceId() } },
+    input: { meta: { deviceId: generateDeviceId() } },
   }, true)
+}
+
+export async function requestPasswordReset(
+  data: RequestPasswordResetSchemaType,
+): Promise<{ success: boolean; message: string }> {
+  const result = await gqlRequest<{
+    success: boolean
+    message: string
+    data?: {
+      RequestPasswordReset: { success: boolean; message: string }
+    }
+  }>(REQUEST_PASSWORD_RESET_MUTATION, {
+    input: {
+      email: data.email,
+      meta: { deviceId: generateDeviceId() },
+    },
+  })
+  if (!result.success) {
+    return { success: false, message: result.message }
+  }
+  const payload = result.data?.RequestPasswordReset
+  return {
+    success: payload?.success ?? false,
+    message: payload?.message ?? '',
+  }
+}
+
+export async function resetPassword(input: {
+  token: string
+  newPassword: string
+}): Promise<{ success: boolean; message: string }> {
+  const result = await gqlRequest<{
+    success: boolean
+    message: string
+    data?: {
+      ResetPassword: { success: boolean; message: string }
+    }
+  }>(RESET_PASSWORD_MUTATION, {
+    input: {
+      token: input.token,
+      newPassword: input.newPassword,
+    },
+  })
+  if (!result.success) {
+    return { success: false, message: result.message }
+  }
+  const payload = result.data?.ResetPassword
+  return {
+    success: payload?.success ?? false,
+    message: payload?.message ?? '',
+  }
 }

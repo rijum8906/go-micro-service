@@ -33,19 +33,24 @@ function SignInPage() {
     onSubmit: async ({ value }) => {
       const response = await signin(value) as any
       if (response.success) {
-        const payload = response.data.signin
-        createAccount({ id: payload.account.id, email: payload.account.email, createdAt: '', updatedAt: '', passwordHash: '' })
-        payload.profiles.forEach((p: any) => createProfile({
-          id: p.id,
-          firstName: p.firstName,
-          lastName: p.lastName,
-          displayName: p.displayName,
-          avatarUrl: p.avatarUrl,
-          accountId: payload.account.id,
+        const payload = response.data.Login
+        const accountId = payload.user.id
+        createAccount({ id: accountId, email: payload.user.email, createdAt: '', updatedAt: '', passwordHash: '' })
+        const displayName = [payload.profile.firstName, payload.profile.lastName].filter(Boolean).join(' ') || null
+        createProfile({
+          id: payload.profile.id,
+          firstName: payload.profile.firstName,
+          lastName: payload.profile.lastName,
+          displayName,
+          avatarUrl: payload.profile.avatarUrl ?? null,
+          accountId,
           createdAt: '',
           updatedAt: '',
-        }))
-        createToken({ access_token: payload.tokens.accessToken, refresh_token: payload.tokens.refreshToken })
+        })
+        createToken({
+          access_token: payload.tokens.accessToken.value,
+          refresh_token: payload.tokens.refreshToken.value,
+        })
         toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {
@@ -126,6 +131,9 @@ function SignInPage() {
           </form>
 
           <p className={`text-xs text-center mt-5 ${isDark ? 'text-[#F2EDE4]/40' : 'text-[#262526]/40'}`}>
+            <Link to="/auth/forgot-password" style={{ color: '#C97D4E' }} className="hover:opacity-80 font-medium transition-opacity block mb-2">
+              Forgot password?
+            </Link>
             Don't have an account?{' '}
             <Link to="/auth/signup" style={{ color: '#C97D4E' }} className="hover:opacity-80 font-medium transition-opacity">
               Sign up

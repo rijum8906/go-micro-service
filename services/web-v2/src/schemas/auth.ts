@@ -48,3 +48,19 @@ export const changePasswordSchema = z
     path: ['confirmPassword'],
   });
 export type ChangePasswordSchemaType = z.infer<typeof changePasswordSchema>;
+
+export const requestPasswordResetSchema = z.object({
+  email: z.email('Invalid email address'),
+});
+export type RequestPasswordResetSchemaType = z.infer<typeof requestPasswordResetSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+export type ResetPasswordSchemaType = z.infer<typeof resetPasswordSchema>;
