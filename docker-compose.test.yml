@@ -1,0 +1,24 @@
+services:
+  # postgres
+  postgres:
+    image: postgres:14.22-bookworm
+    environment:
+      POSTGRES_USER: "test_user"
+      POSTGRES_PASSWORD: "test_password"
+      POSTGRES_DB: "test_db"
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_test:/var/lib/postgresql/data
+
+    # redis
+  redis:
+    image: redis:8.4.2-trixie
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_test:/var/lib/redis/data
+
+volumes:
+  redis_test:
+  pg_test:
