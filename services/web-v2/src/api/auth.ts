@@ -3,7 +3,7 @@ import type {
   SigninSchemaType,
   SignupSchemaType,
 } from '#/schemas/auth'
-import type { AuthResponse, BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
+import type { BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
 import { useAuthStore } from '#/store/auth'
 import { generateDeviceId } from '#/lib/device'
 
@@ -12,7 +12,7 @@ function getGraphQLUrl(): string {
 }
 
 function getAccessToken(): string | undefined {
-  return useAuthStore.getState().token?.access_token
+  return useAuthStore.getState().getAccessTokenValue()
 }
 
 async function gqlRequest<T>(query: string, variables?: Record<string, unknown>, authenticated = false): Promise<T> {
@@ -93,7 +93,25 @@ const RESET_PASSWORD_MUTATION = `
   }
 `
 
-export async function signin(data: SigninSchemaType): Promise<AuthResponse | BaseErrorResponse> {
+/** GraphQL `Login` / `Register` mutation payload (field names from schema) */
+type AuthMutationPayload = {
+  user: { id: string; email: string }
+  profile: {
+    id: string
+    userId: string
+    firstName: string
+    lastName: string
+    avatarUrl: string | null
+  }
+  tokens: {
+    accessToken: { value: string; expiresAt: string }
+    refreshToken: { value: string; expiresAt: string }
+  }
+}
+
+export async function signin(
+  data: SigninSchemaType,
+): Promise<BaseSuccessResponse<{ Login: AuthMutationPayload }> | BaseErrorResponse> {
   return gqlRequest(SIGNIN_MUTATION, {
     input: {
       email: data.email,
@@ -103,7 +121,9 @@ export async function signin(data: SigninSchemaType): Promise<AuthResponse | Bas
   })
 }
 
-export async function signup(data: SignupSchemaType): Promise<AuthResponse | BaseErrorResponse> {
+export async function signup(
+  data: SignupSchemaType,
+): Promise<BaseSuccessResponse<{ Register: AuthMutationPayload }> | BaseErrorResponse> {
   return gqlRequest(SIGNUP_MUTATION, {
     input: {
       email: data.email,
