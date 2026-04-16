@@ -5,14 +5,10 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"time"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/cache"
-	"github.com/rijum8906/relay/packages/core/db"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/mailer"
-	"github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/services/notification-service/internal/handler/broker"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
 	"go.uber.org/zap"
@@ -20,98 +16,84 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func (a *Application) initDB(ctx context.Context) *apperror.AppError {
-	pool, appErr := db.Connect(ctx, db.Config{
-		Host:        a.config.DBHost,
-		Port:        a.config.DBPort,
-		User:        a.config.DBUser,
-		Password:    a.config.DBPassword,
-		DBName:      a.config.DBName,
-		SSLMode:     a.config.DBSSLMode,
-		RetryCounts: 5,
-	})
+// NOTE: do not use the logger here
+
+var mailerConfig mailer.Config
+
+func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
+	// PostgreSQL
+	database, appErr := initDB(ctx, a.config)
 	if appErr != nil {
 		return appErr
 	}
+	a.infra.database = database
 
-	a.infra.database = pool
-	return nil
-}
-
-func (a *Application) initCache(ctx context.Context) *apperror.AppError {
-	cache, appErr := cache.Connect(ctx, cache.Config{
-		Host:        a.config.RedisHost,
-		Port:        a.config.RedisPort,
-		DB:          0,
-		Password:    a.config.RedisPass,
-		RetryCounts: 5,
-	})
-
+	// Redis
+	cache, appErr := initCache(ctx, a.config)
 	if appErr != nil {
 		return appErr
 	}
-
 	a.infra.cache = cache
-	return nil
-}
 
-func (a *Application) initNATS(ctx context.Context) *apperror.AppError {
-	client, appErr := nats.Connect(ctx, nats.Config{
-		URL:        a.config.NATSURL,
-		ClientName: a.config.NATSClientName,
-	})
+	// NATS
+	nats, appErr := initNATS(ctx, a.config)
 	if appErr != nil {
 		return appErr
 	}
+	a.infra.nats = nats
 
-	a.infra.nats = client
+	// Mailer
+	mailer, appErr := initMailer(ctx, a.config)
+	if appErr != nil {
+		return appErr
+	}
+	mailerConfig = getMailerConfig(a.config)
+	a.infra.mailer = mailer
+
 	return nil
 }
 
-// initUtils is the first step of initializing the application (after env is loaded)
 func (a *Application) initUtils() *apperror.AppError {
 	logger, appErr := initLogger(a.config)
 	if appErr != nil {
 		return appErr
 	}
-
 	a.utils.logger = logger
 
 	tm, appErr := initTemplateManager(a.config)
 	if appErr != nil {
 		return appErr
 	}
-
 	a.utils.tm = tm
 
 	return nil
 }
 
+func (a *Application) initServices() *apperror.AppError {
+	if mailerConfig == (mailer.Config{}) {
+		return apperror.ErrInternal.WithMessage("app infra is not initialized")
+	}
+
+	subsciberService, appErr := subscriber.New(a.infra.nats, "verification", a.utils.logger, mailerConfig)
+	if appErr != nil {
+		return appErr
+	}
+	a.services.subscriberService = subsciberService
+
+	return nil
+}
+
 func (a *Application) initHandler() *apperror.AppError {
-	cfg := mailer.Config{
-		Host:        a.config.SMTPHost,
-		Port:        a.config.SMTPPort,
-		Username:    a.config.SMTPUsername,
-		Password:    a.config.SMTPPassword,
-		FromEmail:   a.config.SMTPFromEmail,
-		FromName:    a.config.SMTPFromName,
-		UseStartTLS: a.config.SMTPUseStartTLS,
-		UseTLS:      a.config.SMTPUseTLS,
-		Retries:     a.config.SMTPRetries,
-		Timeout:     time.Minute,
-	}
-
-	subsciberService, appErr := subscriber.New(a.infra.nats, "verification", a.utils.logger, cfg)
+	subscriberHandler, appErr := broker.New(a.services.subscriberService, a.infra.nats, &mailerConfig)
 	if appErr != nil {
 		return appErr
 	}
 
-	subscriberHandler, appErr := broker.New(subsciberService, a.infra.nats, &cfg)
-	if appErr != nil {
-		return appErr
-	}
+	go func(handler *broker.SubscribeHandler) {
+		handler.Subscribe()
+	}(subscriberHandler)
 
-	return subscriberHandler.Subscribe()
+	return nil
 }
 
 func (a *Application) initGRPCServer() *apperror.AppError {

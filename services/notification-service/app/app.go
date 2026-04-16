@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -29,7 +30,7 @@ type ApplicationUtils struct {
 }
 
 type ApplicationServices struct {
-	subscriberService *subscriber.Service
+	subscriberService subscriber.Service
 }
 
 type Application struct {
@@ -56,27 +57,28 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Initialize Dependencies
+	if appErr = app.initInfra(ctx); appErr != nil {
+		fmt.Println(appErr.Details)
+		return nil, appErr
+	}
+
 	if appErr = app.initUtils(); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
-	if appErr = app.initDB(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initCache(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initNATS(ctx); appErr != nil {
+	if appErr = app.initServices(); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
 	if appErr = app.initHandler(); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
 	if appErr = app.initGRPCServer(); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
