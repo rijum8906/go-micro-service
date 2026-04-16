@@ -20,6 +20,10 @@ type Config struct {
 	UserServiceAddr    string `env:"USER_SERVICE_ADDR" envDefault:"user-service:8081"`
 	GraphQLGatewayAddr string `env:"GRAPHQL_GATEWAY_ADDR" envDefault:"graphql-gateway:8080"`
 
+	// NATS
+	NATSURL        string `env:"NATS_URL" envDefault:"nats://localhost:4222"`
+	NATSClientName string `env:"NATS_CLIENT_NAME" envDefault:"user-service"`
+
 	// Postgres
 	DBHost     string `env:"DB_HOST,required"`
 	DBPort     int    `env:"DB_PORT" envDefault:"5432"`
@@ -33,9 +37,28 @@ type Config struct {
 	RedisPort int    `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPass string `env:"REDIS_PASS"`
 
+	// SMTP
+	SMTPHost        string `env:"SMTP_HOST,required"`
+	SMTPPort        int    `env:"SMTP_PORT" envDefault:"587"`
+	SMTPUsername    string `env:"SMTP_USERNAME,required"`
+	SMTPPassword    string `env:"SMTP_PASSWORD,required"`
+	SMTPFromEmail   string `env:"SMTP_FROM_EMAIL,required"`
+	SMTPFromName    string `env:"SMTP_FROM_NAME,required"`
+	SMTPUseTLS      bool   `env:"SMTP_USE_TLS" envDefault:"true"`
+	SMTPUseStartTLS bool   `env:"SMTP_USE_STARTTLS" envDefault:"false"`
+	SMTPTimeout     int    `env:"SMTP_TIMEOUT" envDefault:"10"`
+	SMTPRetries     int    `env:"SMTP_RETRIES" envDefault:"3"`
+
 	// JWT
 	JWTSecret    string `env:"JWT_SECRET,required"`
 	ScopedSecret string `env:"SCOPED_SECRET,required"` // For scoped tokens
+
+	// Logger
+	LogLevel     string `env:"LOG_LEVEL" envDefault:"debug"`
+	EnableJSON   bool   `env:"ENABLE_JSON" envDefault:"false"`
+	EnableCaller bool   `env:"ENABLE_CALLER" envDefault:"false"`
+	EnableStack  bool   `env:"ENABLE_STACK" envDefault:"false"`
+	LogFile      string `env:"LOG_FILE" envDefault:"-"`
 
 	// TTL
 	SessionTTL      time.Duration `env:"SESSION_TTL" envDefault:"15m"`

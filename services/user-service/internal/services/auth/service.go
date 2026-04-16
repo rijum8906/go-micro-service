@@ -122,6 +122,9 @@ func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest
 		return nil, appErr
 	}
 
+	s.RequestEmailVerification(ctx, &authv1.RequestEmailVerificationRequest{
+		Email: user.Email,
+	})
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
 
@@ -182,14 +185,28 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
+	prof, appErr := s.repos.Profile.GetProfileByUserID(ctx, user.ID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	if user.IsEmailVerified {
 		return &corev1.SuccessResponse{Success: true}, nil
 	}
 
-	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeVerifyEmail); appErr != nil {
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeVerifyEmail)
+	if appErr != nil {
 		return nil, appErr
 	}
-	// TODO: Send the verification email or notification containing the scoped token.
+
+	if appErr = s.publisher.PublishJSON(dto.JobEmailVerification.String(), dto.EmailVerificationDTO{
+		ClientName:        prof.FirstName + " " + prof.LastName,
+		ClientEmail:       user.Email,
+		VerificationToken: scopedToken,
+		Validity:          "10 minutes",
+	}); appErr != nil {
+		return nil, appErr
+	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
 }
@@ -201,16 +218,30 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 
 	user, appErr := s.repos.User.GetUserByEmail(ctx, req.GetEmail())
 	if appErr != nil {
-		if appErr.Code == apperror.CodeInternal {
+		if appErr.Code == apperror.CodeNotFound {
 			return &corev1.SuccessResponse{Success: true}, nil
 		}
 		return nil, appErr
 	}
 
-	if _, appErr = s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword); appErr != nil {
+	prof, appErr := s.repos.Profile.GetProfileByUserID(ctx, user.ID)
+	if appErr != nil {
 		return nil, appErr
 	}
-	// TODO: Send the password reset email or notification containing the scoped token.
+
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if appErr = s.publisher.PublishJSON(dto.JobEmailPasswordReset.String(), dto.PasswordResetDTO{
+		ClientName:  prof.FirstName + " " + prof.LastName,
+		ClientEmail: user.Email,
+		ResetToken:  scopedToken,
+		Validity:    "10 minutes",
+	}); appErr != nil {
+		return nil, appErr
+	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
 }

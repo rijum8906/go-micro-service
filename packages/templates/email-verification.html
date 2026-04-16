@@ -1,0 +1,26 @@
+{{define "email-verification.html"}}
+{{template "email-header" .}}
+                                            <h2 style="margin: 0 0 14px; font-size: 24px; line-height: 1.3; color: #0f172a;">
+                                                Verify your email address
+                                            </h2>
+                                            <p class="body-copy" style="margin: 0 0 16px;">
+                                                Hello {{if .ClientName}}{{.ClientName}}{{else}}there{{end}},
+                                            </p>
+                                            <p class="body-copy" style="margin: 0 0 16px;">
+                                                Thank you for creating your account. To confirm that this email address belongs to you, please use the verification code below.
+                                            </p>
+                                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0;">
+                                                <tr>
+                                                    <td class="token-box">
+                                                        <p class="token-text">{{.VerificationToken}}</p>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <p class="body-copy" style="margin: 0 0 16px;">
+                                                This verification code will remain valid for {{.Validity}}. For security reasons, do not share it with anyone.
+                                            </p>
+                                            <p class="body-copy" style="margin: 0;">
+                                                If you did not request this verification, no further action is required.
+                                            </p>
+{{template "email-footer" .}}
+{{end}}

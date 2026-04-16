@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
+	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/hash"
+	corenats "github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
@@ -22,9 +26,71 @@ import (
 	"github.com/rijum8906/relay/services/user/internal/services/session"
 	"github.com/rijum8906/relay/services/user/internal/services/user"
 	"github.com/rijum8906/relay/services/user/internal/utils"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+func (a *Application) initLogger() *apperror.AppError {
+	var zapConfig zap.Config
+
+	if a.config.AppEnv == "production" {
+		zapConfig = zap.NewProductionConfig()
+		zapConfig.EncoderConfig.TimeKey = "timestamp"
+		zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	} else {
+		zapConfig = zap.NewDevelopmentConfig()
+		zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		zapConfig.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
+	}
+
+	if a.config.EnableJSON {
+		zapConfig.Encoding = "json"
+	}
+
+	if a.config.LogLevel != "" {
+		level, err := zapcore.ParseLevel(a.config.LogLevel)
+		if err != nil {
+			level = zapcore.InfoLevel
+		}
+		zapConfig.Level = zap.NewAtomicLevelAt(level)
+	}
+
+	zapConfig.DisableCaller = !a.config.EnableCaller
+	zapConfig.DisableStacktrace = !a.config.EnableStack
+
+	// Configure output paths
+	if a.config.LogFile != "" {
+		// Ensure log directory exists
+		if err := os.MkdirAll(filepath.Dir(a.config.LogFile), 0o755); err != nil {
+			return apperror.ErrInternal.
+				WithMessage("failed to create log directory").
+				WithDetail("error", err.Error())
+		}
+
+		zapConfig.OutputPaths = []string{"stdout", a.config.LogFile}
+		zapConfig.ErrorOutputPaths = []string{"stderr", a.config.LogFile}
+	} else {
+		zapConfig.OutputPaths = []string{"stdout"}
+		zapConfig.ErrorOutputPaths = []string{"stderr"}
+	}
+
+	// Build the logger
+	logger, err := zapConfig.Build(
+		zap.AddCallerSkip(1),
+		zap.AddStacktrace(zapcore.ErrorLevel),
+	)
+	if err != nil {
+		return apperror.ErrInternal.
+			WithMessage("failed to create zap logger").
+			WithDetail("error", err.Error())
+	}
+
+	a.utils.logger = logger
+
+	return nil
+}
 
 func (a *Application) initDB(ctx context.Context) *apperror.AppError {
 	pool, appErr := db.Connect(ctx, db.Config{
@@ -61,6 +127,19 @@ func (a *Application) initCache(ctx context.Context) *apperror.AppError {
 	return nil
 }
 
+func (a *Application) initNATS(ctx context.Context) *apperror.AppError {
+	client, appErr := corenats.Connect(ctx, corenats.Config{
+		URL:        a.config.NATSURL,
+		ClientName: a.config.NATSClientName,
+	})
+	if appErr != nil {
+		return appErr
+	}
+
+	a.infra.nats = client
+	return nil
+}
+
 func (a *Application) initUtils() *apperror.AppError {
 	tokenManager := token.NewTokenManager(token.Config{
 		JwtSecret:      []byte(a.config.JWTSecret),
@@ -86,7 +165,7 @@ func (a *Application) initHandler() *apperror.AppError {
 		Session: sessionrepo.NewSessionRepository(queries),
 	}
 
-	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config)
+	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config, a.infra.nats)
 	if appErr != nil {
 		return appErr
 	}
@@ -158,4 +237,16 @@ func (a *Application) Shutdown() {
 	if a.infra != nil && a.infra.cache != nil {
 		a.infra.cache.Close()
 	}
+
+	if a.infra != nil && a.infra.nats != nil {
+		_ = a.infra.nats.Drain()
+	}
+}
+
+func (a *Application) GetLogger() *zap.Logger {
+	return a.utils.logger
+}
+
+func (a *Application) GetConfig() *env.Config {
+	return a.config
 }
