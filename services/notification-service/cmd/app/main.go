@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -23,7 +24,9 @@ func main() {
 		if logger == nil {
 			log.Fatalf("failed to create application: %v", appErr)
 		}
-		logger.Fatal("failed to create application", zap.Error(appErr))
+		logger.Fatal("failed to create application",
+			zap.String("details",
+				fmt.Sprintf("%s:- %s", appErr.Details[0].Field, appErr.Details[0].Message)))
 	}
 
 	runErrCh := make(chan *apperror.AppError, 1)

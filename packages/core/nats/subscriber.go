@@ -6,13 +6,24 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 )
 
-func (c *Client) Subscribe(subject dto.JobSubject, handler func([]byte)) (*nats.Subscription, *apperror.AppError) {
-	if c == nil || c.Conn == nil {
-		return nil, apperror.New(apperror.CodeInternal, "nats client is not initialized")
+func (c *Client) PullSubscribe(subject dto.JobSubject, durable, stream string) (*nats.Subscription, *apperror.AppError) {
+	appErr := validateClient(c)
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	if !c.IsConnected() {
-		return nil, apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
+	sub, err := c.JS.PullSubscribe(string(subject), durable, nats.BindStream(stream), nats.ManualAck())
+	if err != nil {
+		apperror.ErrThirdParty.WithDetail("error", err.Error())
+	}
+
+	return sub, nil
+}
+
+func (c *Client) Subscribe(subject dto.JobSubject, handler func([]byte)) (*nats.Subscription, *apperror.AppError) {
+	appErr := validateClient(c)
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	if handler == nil {
@@ -37,12 +48,9 @@ func (c *Client) Subscribe(subject dto.JobSubject, handler func([]byte)) (*nats.
 
 // SubscribeWithOpts allows custom JetStream options
 func (c *Client) SubscribeWithOpts(subject dto.JobSubject, handler func(*nats.Msg), opts ...nats.SubOpt) (*nats.Subscription, *apperror.AppError) {
-	if c == nil || c.Conn == nil {
-		return nil, apperror.New(apperror.CodeInternal, "nats client is not initialized")
-	}
-
-	if !c.IsConnected() {
-		return nil, apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
+	appErr := validateClient(c)
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	if handler == nil {
@@ -67,12 +75,9 @@ func (c *Client) SubscribeWithOpts(subject dto.JobSubject, handler func(*nats.Ms
 
 // SubscribeDurable creates a durable subscription (survives client restarts)
 func (c *Client) SubscribeDurable(subject dto.JobSubject, durableName string, handler func([]byte)) (*nats.Subscription, *apperror.AppError) {
-	if c == nil || c.Conn == nil {
-		return nil, apperror.New(apperror.CodeInternal, "nats client is not initialized")
-	}
-
-	if !c.IsConnected() {
-		return nil, apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
+	appErr := validateClient(c)
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	if handler == nil {
@@ -96,4 +101,16 @@ func (c *Client) SubscribeDurable(subject dto.JobSubject, durableName string, ha
 	}
 
 	return sub, nil
+}
+
+func validateClient(c *Client) *apperror.AppError {
+	if c == nil || c.Conn == nil {
+		return apperror.New(apperror.CodeInternal, "nats client is not initialized")
+	}
+
+	if !c.IsConnected() {
+		return apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
+	}
+
+	return nil
 }

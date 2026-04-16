@@ -165,7 +165,7 @@ func (a *Application) initHandler() *apperror.AppError {
 		Session: sessionrepo.NewSessionRepository(queries),
 	}
 
-	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config, auth.JobPublisher)
+	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config, a.infra.nats)
 	if appErr != nil {
 		return appErr
 	}

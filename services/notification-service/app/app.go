@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"net"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -10,6 +9,9 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/nats"
+	"github.com/rijum8906/relay/packages/core/template"
+	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
+	"github.com/wneessen/go-mail"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -18,13 +20,17 @@ type ApplicationInfra struct {
 	cache    *redis.Client
 	database *pgxpool.Pool
 	nats     *nats.Client
+	mailer   *mail.Client
 }
 
 type ApplicationUtils struct {
 	logger *zap.Logger
+	tm     template.TemplateManager
 }
 
-type ApplicationServices struct{}
+type ApplicationServices struct {
+	subscriberService *subscriber.Service
+}
 
 type Application struct {
 	config   *env.Config
@@ -50,7 +56,7 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Initialize Dependencies
-	if appErr = app.initLogger(); appErr != nil {
+	if appErr = app.initUtils(); appErr != nil {
 		return nil, appErr
 	}
 
@@ -66,12 +72,7 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 		return nil, appErr
 	}
 
-	if appErr = app.initUtils(); appErr != nil {
-		return nil, appErr
-	}
-
 	if appErr = app.initHandler(); appErr != nil {
-		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
