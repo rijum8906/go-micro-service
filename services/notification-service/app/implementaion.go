@@ -15,8 +15,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/mailer"
 	"github.com/rijum8906/relay/packages/core/nats"
-	"github.com/rijum8906/relay/services/notification-service/internal/handler/broker"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/email"
+	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
@@ -149,11 +149,11 @@ func (a *Application) initHandler() *apperror.AppError {
 		Retries:     a.config.SMTPRetries,
 		Timeout:     time.Minute,
 	}
-	subscriberHandler, appErr := broker.New(emailService, a.infra.nats, &cfg)
+	subscriberService, appErr := subscriber.New(emailService, a.infra.nats, &cfg)
 	if appErr != nil {
 		panic(appErr)
 	}
-	return subscriberHandler.Subscribe()
+	return subscriberService.Subscribe()
 }
 
 func (a *Application) initGRPCServer() *apperror.AppError {
