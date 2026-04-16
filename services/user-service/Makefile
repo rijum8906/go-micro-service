@@ -1,7 +1,6 @@
 SHELL := /bin/sh
 
 CLI_RUN := go run ./cmd/cli/main.go
-LEGACY_RUN := go run ./cmd/test-cli/main.go
 GO_TEST := go test -v ./...
 
 .DEFAULT_GOAL := help
@@ -53,7 +52,7 @@ run:
 	@go run ./cmd/main.go
 
 setup:
-	@$(LEGACY_RUN) setup
+	@$(CLI_RUN) setup
 
 test:
 	@$(GO_TEST)
