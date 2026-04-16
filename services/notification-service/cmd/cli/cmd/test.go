@@ -50,44 +50,9 @@ var testRunCmd = &cobra.Command{
 	},
 }
 
-var startCmd = &cobra.Command{
-	Use:   "start",
-	Short: "Start test dependencies",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Starting test containers...")
-		err := testContainerManager.RunAll()
-		if err != nil {
-			fmt.Printf("failed to start test containers: %v", err)
-		}
-		fmt.Println("Test containers started.")
-	},
-}
-
-var stopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "Stop test dependencies",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Stopping test containers...")
-		err := testContainerManager.StopAll()
-		if err != nil {
-			fmt.Printf("failed to stop test containers: %v", err)
-		}
-		fmt.Println("Test containers stopped.")
-	},
-}
-
-var allCmd = &cobra.Command{
-	Use:   "all",
-	Short: "Run all test actions",
-	Run:   command.NotImplemented,
-}
-
 func init() {
 	rootCmd.AddCommand(testCmd)
 
 	testCmd.AddCommand(testSetupCmd)
 	testCmd.AddCommand(testRunCmd)
-	testCmd.AddCommand(startCmd)
-	testCmd.AddCommand(stopCmd)
-	testCmd.AddCommand(allCmd)
 }
