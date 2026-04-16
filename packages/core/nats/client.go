@@ -1,3 +1,4 @@
+// Package nats
 package nats
 
 import (
@@ -17,6 +18,7 @@ type Config struct {
 
 type Client struct {
 	Conn *nats.Conn
+	JS   nats.JetStreamContext
 }
 
 func Connect(ctx context.Context, cfg Config) (*Client, *apperror.AppError) {
@@ -48,8 +50,15 @@ func Connect(ctx context.Context, cfg Config) (*Client, *apperror.AppError) {
 		return nil, apperror.New(apperror.CodeThirdParty, "failed to connect to nats").WithDetail("error", err.Error())
 	}
 
+	js, err := conn.JetStream()
+	if err != nil {
+		conn.Close()
+		return nil, apperror.New(apperror.CodeThirdParty, "failed to initialize jetstream").WithDetail("error", err.Error())
+	}
+
 	return &Client{
 		Conn: conn,
+		JS:   js,
 	}, nil
 }
 
@@ -75,4 +84,12 @@ func (c *Client) Close() {
 
 func (c *Client) IsConnected() bool {
 	return c != nil && c.Conn != nil && c.Conn.IsConnected()
+}
+
+func (c *Client) JetStream() nats.JetStreamContext {
+	return c.JS
+}
+
+func (c *Client) Connection() *nats.Conn {
+	return c.Conn
 }

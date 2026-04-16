@@ -199,7 +199,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.PublishJSON(dto.JobEmailVerification.String(), dto.EmailVerificationDTO{
+	if appErr = s.publisher.PublishJSON(dto.JobEmailVerification, dto.EmailVerificationDTO{
 		ClientName:        prof.FirstName + " " + prof.LastName,
 		ClientEmail:       user.Email,
 		VerificationToken: scopedToken,
@@ -234,7 +234,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.PublishJSON(dto.JobEmailPasswordReset.String(), dto.PasswordResetDTO{
+	if appErr = s.publisher.PublishJSON(dto.JobEmailPasswordReset, dto.PasswordResetDTO{
 		ClientName:  prof.FirstName + " " + prof.LastName,
 		ClientEmail: user.Email,
 		ResetToken:  scopedToken,
