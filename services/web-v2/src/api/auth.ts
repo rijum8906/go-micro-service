@@ -1,52 +1,72 @@
-import { gqlRequest } from '#/lib/gql-client'
-import { generateDeviceId } from '#/lib/device'
+import type {
+  RequestPasswordResetSchemaType,
+  SigninSchemaType,
+  SignupSchemaType,
+} from '#/schemas/auth'
+import type { AuthResponse, BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
 import { useAuthStore } from '#/store/auth'
-import type { AuthSuccessPayload } from '#/types/response'
-import type { SigninSchemaType, SignupSchemaType } from '#/schemas/auth'
+import { generateDeviceId } from '#/lib/device'
 
-const AUTH_FIELDS = `
-  tokens {
-    accessToken { value expiresAt }
-    refreshToken { value expiresAt }
-  }
-  user {
-    id
-    email
-    isEmailVerified
-    emailVerifiedAt
-    twoFactorEnabled
-    twoFactorEnabledAt
-    createdAt
-    updatedAt
-  }
-  profile {
-    id
-    userId
-    firstName
-    lastName
-    createdAt
-    updatedAt
-    avatarUrl
-  }
-`
+function getGraphQLUrl(): string {
+  return (window as any).__CONFIG__?.GRAPHQL_URL ?? 'http://localhost:8080/query'
+}
 
-const LOGIN_MUTATION = `
+function getAccessToken(): string | undefined {
+  return useAuthStore.getState().token?.access_token
+}
+
+async function gqlRequest<T>(query: string, variables?: Record<string, unknown>, authenticated = false): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  if (authenticated) {
+    const token = getAccessToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const res = await fetch(getGraphQLUrl(), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ query, variables }),
+  })
+
+  const json = await res.json()
+
+  if (json.errors?.length) {
+    return { success: false, message: json.errors[0].message } as T
+  }
+
+  return { success: true, data: json.data, message: '' } as T
+}
+
+const SIGNIN_MUTATION = `
   mutation Login($input: LoginInput!) {
     Login(input: $input) {
-      ${AUTH_FIELDS}
+      user { id email }
+      profile { id userId firstName lastName avatarUrl }
+      tokens {
+        accessToken { value expiresAt }
+        refreshToken { value expiresAt }
+      }
     }
   }
 `
 
-const REGISTER_MUTATION = `
+const SIGNUP_MUTATION = `
   mutation Register($input: RegisterInput!) {
     Register(input: $input) {
-      ${AUTH_FIELDS}
+      user { id email }
+      profile { id userId firstName lastName avatarUrl }
+      tokens {
+        accessToken { value expiresAt }
+        refreshToken { value expiresAt }
+      }
     }
   }
 `
 
-const LOGOUT_MUTATION = `
+const SIGNOUT_MUTATION = `
   mutation Logout($input: LogoutInput!) {
     Logout(input: $input) {
       success
@@ -55,76 +75,99 @@ const LOGOUT_MUTATION = `
   }
 `
 
-function meta() {
-  return { deviceId: generateDeviceId() }
-}
+const REQUEST_PASSWORD_RESET_MUTATION = `
+  mutation RequestPasswordReset($input: RequestPasswordResetInput!) {
+    RequestPasswordReset(input: $input) {
+      success
+      message
+    }
+  }
+`
 
-export async function login(
-  data: SigninSchemaType,
-): Promise<
-  | { success: true; data: AuthSuccessPayload }
-  | { success: false; message: string }
-> {
-  const result = await gqlRequest<{ Login: AuthSuccessPayload }>(LOGIN_MUTATION, {
+const RESET_PASSWORD_MUTATION = `
+  mutation ResetPassword($input: ResetPasswordInput!) {
+    ResetPassword(input: $input) {
+      success
+      message
+    }
+  }
+`
+
+export async function signin(data: SigninSchemaType): Promise<AuthResponse | BaseErrorResponse> {
+  return gqlRequest(SIGNIN_MUTATION, {
     input: {
       email: data.email,
       password: data.password,
-      meta: meta(),
+      meta: { deviceId: generateDeviceId() },
     },
   })
-
-  if (!result.success) return result
-  return { success: true, data: result.data.Login }
 }
 
-export async function signup(
-  data: SignupSchemaType,
-): Promise<
-  | { success: true; data: AuthSuccessPayload }
-  | { success: false; message: string }
-> {
-  const result = await gqlRequest<{ Register: AuthSuccessPayload }>(
-    REGISTER_MUTATION,
-    {
-      input: {
-        email: data.email,
-        password: data.password,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        meta: meta(),
-      },
+export async function signup(data: SignupSchemaType): Promise<AuthResponse | BaseErrorResponse> {
+  return gqlRequest(SIGNUP_MUTATION, {
+    input: {
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      meta: { deviceId: generateDeviceId() },
     },
-  )
-
-  if (!result.success) return result
-  return { success: true, data: result.data.Register }
+  })
 }
 
-export async function logout(): Promise<
-  | { success: true; message: string }
-  | { success: false; message: string }
-> {
-  const getAccessToken = () => useAuthStore.getState().getAccessTokenValue()
+export async function signout(): Promise<BaseSuccessResponse | BaseErrorResponse> {
+  return gqlRequest(SIGNOUT_MUTATION, {
+    input: { meta: { deviceId: generateDeviceId() } },
+  }, true)
+}
 
-  const result = await gqlRequest<{ Logout: { success: boolean; message: string } }>(
-    LOGOUT_MUTATION,
-    { input: { meta: meta() } },
-    { authenticated: true, getAccessToken },
-  )
-
+export async function requestPasswordReset(
+  data: RequestPasswordResetSchemaType,
+): Promise<{ success: boolean; message: string }> {
+  const result = await gqlRequest<{
+    success: boolean
+    message: string
+    data?: {
+      RequestPasswordReset: { success: boolean; message: string }
+    }
+  }>(REQUEST_PASSWORD_RESET_MUTATION, {
+    input: {
+      email: data.email,
+      meta: { deviceId: generateDeviceId() },
+    },
+  })
   if (!result.success) {
-    return result
+    return { success: false, message: result.message }
   }
-
-  const { success, message } = result.data.Logout
-  if (!success) {
-    return { success: false, message: message || 'Logout refused' }
+  const payload = result.data?.RequestPasswordReset
+  return {
+    success: payload?.success ?? false,
+    message: payload?.message ?? '',
   }
-
-  useAuthStore.getState().clearAuth()
-  return { success: true, message: message || '' }
 }
 
-/** Aliases for existing screens */
-export const signin = login
-export { logout as signout }
+export async function resetPassword(input: {
+  token: string
+  newPassword: string
+}): Promise<{ success: boolean; message: string }> {
+  const result = await gqlRequest<{
+    success: boolean
+    message: string
+    data?: {
+      ResetPassword: { success: boolean; message: string }
+    }
+  }>(RESET_PASSWORD_MUTATION, {
+    input: {
+      token: input.token,
+      newPassword: input.newPassword,
+    },
+  })
+  if (!result.success) {
+    return { success: false, message: result.message }
+  }
+  const payload = result.data?.ResetPassword
+  return {
+    success: payload?.success ?? false,
+    message: payload?.message ?? '',
+  }
+}

@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { useAuthStore } from '#/store/auth'
-import { login } from '#/api/auth'
+import { signin } from '#/api/auth'
 import { signinSchema, type SigninSchemaType } from '#/schemas/auth'
 import { ThemeToggle } from '#/components/ThemeToggle'
 import { useThemeStore } from '#/store/theme'
@@ -20,8 +20,7 @@ export const Route = createFileRoute('/auth/signin')({
 function SignInPage() {
   const router = useRouter()
   const { redirect } = Route.useSearch()
-  const applyAuthSuccess = useAuthStore((s) => s.applyAuthSuccess)
-  const isSignedIn = useAuthStore((s) => s.isSignedIn)
+  const { createToken, createAccount, createProfile, isSignedIn } = useAuthStore()
   const { theme } = useThemeStore()
   const isDark = theme === 'dark'
 
@@ -32,9 +31,26 @@ function SignInPage() {
   const form = useForm({
     defaultValues: { email: '', password: '' } as SigninSchemaType,
     onSubmit: async ({ value }) => {
-      const response = await login(value)
+      const response = await signin(value) as any
       if (response.success) {
-        applyAuthSuccess(response.data)
+        const payload = response.data.Login
+        const accountId = payload.user.id
+        createAccount({ id: accountId, email: payload.user.email, createdAt: '', updatedAt: '', passwordHash: '' })
+        const displayName = [payload.profile.firstName, payload.profile.lastName].filter(Boolean).join(' ') || null
+        createProfile({
+          id: payload.profile.id,
+          firstName: payload.profile.firstName,
+          lastName: payload.profile.lastName,
+          displayName,
+          avatarUrl: payload.profile.avatarUrl ?? null,
+          accountId,
+          createdAt: '',
+          updatedAt: '',
+        })
+        createToken({
+          access_token: payload.tokens.accessToken.value,
+          refresh_token: payload.tokens.refreshToken.value,
+        })
         toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {
@@ -115,6 +131,9 @@ function SignInPage() {
           </form>
 
           <p className={`text-xs text-center mt-5 ${isDark ? 'text-[#F2EDE4]/40' : 'text-[#262526]/40'}`}>
+            <Link to="/auth/forgot-password" style={{ color: '#C97D4E' }} className="hover:opacity-80 font-medium transition-opacity block mb-2">
+              Forgot password?
+            </Link>
             Don't have an account?{' '}
             <Link to="/auth/signup" style={{ color: '#C97D4E' }} className="hover:opacity-80 font-medium transition-opacity">
               Sign up
