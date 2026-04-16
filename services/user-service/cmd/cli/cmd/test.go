@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	migrations "github.com/rijum8906/relay/services/user/db"
 	"github.com/spf13/cobra"
@@ -19,12 +20,8 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Ensure the local test containers are running",
 	Long:  "Ensure the local PostgreSQL and Redis test containers are available and running.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if testContainerManager.ExistsAll() {
-			fmt.Println("Local test containers already exist. Starting them again to ensure a clean state.")
-		}
-
-		return startContainers()
+	Run: func(cmd *cobra.Command, args []string) {
+		command.RunCommand("go", "test", "./...")
 	},
 }
 
