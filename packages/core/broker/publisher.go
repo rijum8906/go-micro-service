@@ -1,4 +1,4 @@
-package nats
+package broker
 
 import (
 	"encoding/json"
@@ -8,11 +8,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 )
 
+// Publish blocks until the subscriber send a confirmation
 func (c *Client) Publish(subject dto.JobSubject, payload []byte) *apperror.AppError {
-	if c == nil || c.Conn == nil {
-		return apperror.New(apperror.CodeInternal, "nats client is not initialized")
-	}
-
 	if !c.IsConnected() {
 		return apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
 	}
@@ -21,9 +18,9 @@ func (c *Client) Publish(subject dto.JobSubject, payload []byte) *apperror.AppEr
 		return apperror.New(apperror.CodeValidation, "invalid job subject").WithDetail("subject", string(subject))
 	}
 
-	// Use JetStream for guaranteed delivery
-	if _, err := c.JS.Publish(string(subject), payload); err != nil {
-		return apperror.New(apperror.CodeThirdParty, "failed to publish nats message").WithDetail("error", err.Error())
+	_, err := c.JS.Publish(string(subject), payload)
+	if err != nil {
+		return apperror.New(apperror.CodeThirdParty, "failed to publish to nats subject").WithDetail("error", err.Error())
 	}
 
 	return nil
@@ -38,11 +35,7 @@ func (c *Client) PublishJSON(subject dto.JobSubject, payload any) *apperror.AppE
 	return c.Publish(subject, raw)
 }
 
-func (c *Client) PublishWithAck(subject dto.JobSubject, payload []byte) (*nats.PubAck, *apperror.AppError) {
-	if c == nil || c.Conn == nil {
-		return nil, apperror.New(apperror.CodeInternal, "nats client is not initialized")
-	}
-
+func (c *Client) PublishAsync(subject dto.JobSubject, payload []byte) (nats.PubAckFuture, *apperror.AppError) {
 	if !c.IsConnected() {
 		return nil, apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
 	}
@@ -51,9 +44,9 @@ func (c *Client) PublishWithAck(subject dto.JobSubject, payload []byte) (*nats.P
 		return nil, apperror.New(apperror.CodeValidation, "invalid job subject").WithDetail("subject", string(subject))
 	}
 
-	ack, err := c.JS.Publish(string(subject), payload)
+	ack, err := c.JS.PublishAsync(string(subject), payload)
 	if err != nil {
-		return nil, apperror.New(apperror.CodeThirdParty, "failed to publish nats message").WithDetail("error", err.Error())
+		return nil, apperror.New(apperror.CodeThirdParty, "failed to publish to nats subject").WithDetail("error", err.Error())
 	}
 
 	return ack, nil

@@ -1,19 +1,22 @@
-// Package nats
-package nats
+// Package broker
+package broker
 
 import (
 	"context"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/nats-io/nats.go"
 	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
+var validate = validator.New()
+
 type Config struct {
-	URL           string
-	ClientName    string
-	MaxReconnects int
-	ReconnectWait time.Duration
+	URL           string        `validate:"required,url"`
+	ClientName    string        `validate:"required"`
+	MaxReconnects int           `validate:"gte=0"`
+	ReconnectWait time.Duration `validate:"gte=0"`
 }
 
 type Client struct {
@@ -22,6 +25,10 @@ type Client struct {
 }
 
 func Connect(ctx context.Context, cfg Config) (*Client, *apperror.AppError) {
+	if err := validate.Struct(cfg); err != nil {
+		return nil, apperror.ErrValidation.WithDetail("error", err.Error())
+	}
+
 	if err := ctx.Err(); err != nil {
 		return nil, apperror.ErrInternal.WithMessage("nats connection cancelled by context")
 	}
@@ -67,6 +74,7 @@ func (c *Client) Drain() *apperror.AppError {
 		return nil
 	}
 
+	// This blocks until drain is complete
 	if err := c.Conn.Drain(); err != nil {
 		return apperror.New(apperror.CodeInternal, "failed to drain nats connection").WithDetail("error", err.Error())
 	}
