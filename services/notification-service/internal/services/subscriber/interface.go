@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/mailer"
-	"github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/template"
 	"github.com/rijum8906/relay/services/notification-service/internal/constants"
 	"github.com/wneessen/go-mail"
@@ -19,14 +19,14 @@ type Service interface {
 }
 
 type service struct {
-	NATSClient *nats.Client
+	NATSClient *broker.Client
 	AppLogger  *zap.Logger
 	TM         template.TemplateManager
 	Mailer     *mail.Client
 	MailerCfg  *mailer.Config
 }
 
-func New(client *nats.Client, stream string, logger *zap.Logger, mailerCfg mailer.Config) (Service, *apperror.AppError) {
+func New(client *broker.Client, stream string, logger *zap.Logger, mailerCfg mailer.Config) (Service, *apperror.AppError) {
 	mailer, appErr := mailer.Connect(mailerCfg)
 	if appErr != nil {
 		return nil, appErr

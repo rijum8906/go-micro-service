@@ -31,6 +31,6 @@ COPY --from=builder /app/service-notification .
 COPY packages/templates/ ./packages/templates/
 COPY services/notification-service/.env .
 
-EXPOSE 8081
+EXPOSE 8082
 
 CMD ["./service-notification"]

@@ -57,6 +57,8 @@ func (s *service) SubscribeEmailVerificationJob(durable constants.DurableName, s
 				s.AppLogger.Error("error sending email", zap.Error(err), zap.String("details", appErr.Details[0].Message))
 			}
 
+			msg.Ack()
+
 		}
 	}
 }

@@ -7,11 +7,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/mailer"
-	"github.com/rijum8906/relay/packages/core/nats"
 	"github.com/wneessen/go-mail"
 )
 
@@ -48,8 +48,8 @@ func initCache(ctx context.Context, config *env.Config) (*redis.Client, *apperro
 	return cache, nil
 }
 
-func initNATS(ctx context.Context, config *env.Config) (*nats.Client, *apperror.AppError) {
-	client, appErr := nats.Connect(ctx, nats.Config{
+func initNATS(ctx context.Context, config *env.Config) (*broker.Client, *apperror.AppError) {
+	client, appErr := broker.Connect(ctx, broker.Config{
 		URL:        config.NATSURL,
 		ClientName: config.NATSClientName,
 	})

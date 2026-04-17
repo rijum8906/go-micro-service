@@ -8,8 +8,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/env"
-	"github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/template"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
 	"github.com/wneessen/go-mail"
@@ -20,7 +20,7 @@ import (
 type ApplicationInfra struct {
 	cache    *redis.Client
 	database *pgxpool.Pool
-	nats     *nats.Client
+	nats     *broker.Client
 	mailer   *mail.Client
 }
 

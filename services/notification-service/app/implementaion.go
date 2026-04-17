@@ -84,8 +84,16 @@ func (a *Application) initServices() *apperror.AppError {
 }
 
 func (a *Application) initHandler() *apperror.AppError {
-	subscriberHandler, appErr := broker.New(a.services.subscriberService, a.infra.nats, &mailerConfig)
+	subscriberHandler, appErr := broker.New(a.services.subscriberService, a.infra.nats, &mailerConfig, a.utils.tm)
 	if appErr != nil {
+		return appErr
+	}
+
+	if appErr = subscriberHandler.CreateStreams(); appErr != nil {
+		return appErr
+	}
+
+	if appErr = subscriberHandler.CreateConsumers(); appErr != nil {
 		return appErr
 	}
 
