@@ -8,9 +8,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/hash"
-	corenats "github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/token"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	"go.uber.org/zap"
@@ -20,7 +20,7 @@ import (
 type ApplicationInfra struct {
 	cache    *redis.Client
 	database *pgxpool.Pool
-	nats     *corenats.Client
+	nats     *broker.Client
 }
 
 type ApplicationUtils struct {
