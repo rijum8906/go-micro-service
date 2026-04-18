@@ -14,7 +14,7 @@ env:
   TEST_SMTP_PORT: ${{ secrets.SMTP_PORT }}
 
 jobs:
-  test:
+  test-core:
     name: Run Tests
     runs-on: ubuntu-latest
 

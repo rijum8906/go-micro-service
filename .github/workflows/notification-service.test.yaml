@@ -10,7 +10,7 @@ env:
   TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
 
 jobs:
-  test:
+  test-notification-service:
     name: Run Tests
     runs-on: ubuntu-latest
 
