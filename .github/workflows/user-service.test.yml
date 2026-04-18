@@ -37,6 +37,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      nats:
+        image: nats
+        ports:
+          - "4223:4222"
+        options: >-
+          --health-cmd "nats status"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout Code
@@ -50,6 +59,11 @@ jobs:
 
       - name: Verify Go Version
         run: go version
+
+      - name: Start Test docker-compose
+        run: |
+          docker-compose -f docker-compose.test.yml up -d
+          docker-compose -f docker-compose.test.yml ps
 
       - name: Setup Workspace
         run: make setup

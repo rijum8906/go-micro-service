@@ -14,30 +14,6 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
-        ports:
-          - "5433:5432"
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis
-        ports:
-          - "6380:6379"
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -50,6 +26,11 @@ jobs:
 
       - name: Verify Go Version
         run: go version
+
+      - name: Start Test docker-compose
+        run: |
+          docker-compose -f docker-compose.test.yml up -d
+          docker-compose -f docker-compose.test.yml ps
 
       - name: Setup Workspace
         run: make setup
