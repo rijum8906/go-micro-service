@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/command"
-	"github.com/rijum8906/relay/packages/core/env"
+	"github.com/rijum8906/relay/packages/core/coreenv"
 	"github.com/spf13/cobra"
 )
 
-var config *env.Config
+var config *coreenv.CoreEnv
 
 var dbCmd = &cobra.Command{
 	Use:   "db",
@@ -137,7 +137,7 @@ var sqlApplyCmd = &cobra.Command{
 }
 
 func init() {
-	envConfig, appErr := env.Load()
+	envConfig, appErr := coreenv.Load()
 	if appErr != nil {
 		panic("failed to load env")
 	}

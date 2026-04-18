@@ -12,13 +12,13 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/packages/core/command"
-	"github.com/rijum8906/relay/packages/core/env"
+	"github.com/rijum8906/relay/packages/core/coreenv"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	migrations "github.com/rijum8906/relay/services/user/db"
 	"github.com/spf13/cobra"
 )
 
-var config *env.Config
+var config *coreenv.CoreEnv
 
 var dbCmd = &cobra.Command{
 	Use:   "db",
@@ -248,7 +248,7 @@ func newDBSQLApplyCmd() *cobra.Command {
 }
 
 func init() {
-	envConfig, appErr := env.Load()
+	envConfig, appErr := coreenv.Load()
 	if appErr != nil {
 		panic("failed to load env")
 	}
@@ -290,7 +290,7 @@ func runCommand(name string, args ...string) error {
 }
 
 func dbURL() string {
-	cfg := env.MustLoad()
+	cfg := coreenv.MustLoad()
 
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",

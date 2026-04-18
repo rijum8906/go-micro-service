@@ -10,12 +10,12 @@ import (
 	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
-	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/mailer"
+	"github.com/rijum8906/relay/services/notification-service/app/config"
 	"github.com/wneessen/go-mail"
 )
 
-func initDB(ctx context.Context, config *env.Config) (*pgxpool.Pool, *apperror.AppError) {
+func initDB(ctx context.Context, config *config.Env) (*pgxpool.Pool, *apperror.AppError) {
 	pool, appErr := db.Connect(ctx, db.Config{
 		Host:        config.DBHost,
 		Port:        config.DBPort,
@@ -32,7 +32,7 @@ func initDB(ctx context.Context, config *env.Config) (*pgxpool.Pool, *apperror.A
 	return pool, nil
 }
 
-func initCache(ctx context.Context, config *env.Config) (*redis.Client, *apperror.AppError) {
+func initCache(ctx context.Context, config *config.Env) (*redis.Client, *apperror.AppError) {
 	cache, appErr := cache.Connect(ctx, cache.Config{
 		Host:        config.RedisHost,
 		Port:        config.RedisPort,
@@ -48,7 +48,7 @@ func initCache(ctx context.Context, config *env.Config) (*redis.Client, *apperro
 	return cache, nil
 }
 
-func initNATS(ctx context.Context, config *env.Config) (*broker.Client, *apperror.AppError) {
+func initNATS(ctx context.Context, config *config.Env) (*broker.Client, *apperror.AppError) {
 	client, appErr := broker.Connect(ctx, broker.Config{
 		URL:        config.NATSURL,
 		ClientName: config.NATSClientName,
@@ -60,7 +60,7 @@ func initNATS(ctx context.Context, config *env.Config) (*broker.Client, *apperro
 	return client, nil
 }
 
-func initMailer(ctx context.Context, config *env.Config) (*mail.Client, *apperror.AppError) {
+func initMailer(ctx context.Context, config *config.Env) (*mail.Client, *apperror.AppError) {
 	mailer, appErr := mailer.Connect(getMailerConfig(config))
 
 	if appErr != nil {
@@ -70,7 +70,7 @@ func initMailer(ctx context.Context, config *env.Config) (*mail.Client, *apperro
 	return mailer, nil
 }
 
-func getMailerConfig(config *env.Config) mailer.Config {
+func getMailerConfig(config *config.Env) mailer.Config {
 	return mailer.Config{
 		Host:        config.SMTPHost,
 		Port:        config.SMTPPort,

@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	env "github.com/rijum8906/relay/packages/core/coreenv"
 	"github.com/rijum8906/relay/packages/core/db"
-	"github.com/rijum8906/relay/packages/core/env"
 )
 
-func CreateNewDatabase(cfg *env.Config, name string) *apperror.AppError {
+func CreateNewDatabase(cfg *env.CoreEnv, name string) *apperror.AppError {
 	ctx := context.Background()
 	pool, appErr := db.Connect(ctx, db.Config{
 		Host:     cfg.DBHost,
@@ -47,7 +47,7 @@ func CreateNewDatabase(cfg *env.Config, name string) *apperror.AppError {
 	return nil
 }
 
-func GetDBURL(cfg *env.Config) string {
+func GetDBURL(cfg *env.CoreEnv) string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
 		cfg.DBUser,
 		cfg.DBPassword,
@@ -58,7 +58,7 @@ func GetDBURL(cfg *env.Config) string {
 	)
 }
 
-func GetDevDBURL(cfg *env.Config) string {
+func GetDevDBURL(cfg *env.CoreEnv) string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
 		cfg.DBUser,
 		cfg.DBPassword,

@@ -11,11 +11,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/graphql-gateway/app/config"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/resolver"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/middleware"
@@ -40,7 +40,7 @@ type GrpcClients struct {
 }
 
 type Application struct {
-	config   *env.Config
+	config   *config.Env
 	infra    *ApplicationInfra
 	utils    *ApplicationUtils
 	clients  *GrpcClients
@@ -56,7 +56,7 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 
 	var appErr *apperror.AppError
 
-	app.config, appErr = env.Load()
+	app.config, appErr = config.LoadEnv()
 	if appErr != nil {
 		return nil, appErr
 	}

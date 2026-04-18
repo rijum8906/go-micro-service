@@ -11,11 +11,11 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/cache"
-	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/graphql-gateway/app/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
@@ -172,6 +172,6 @@ func (a *Application) GetLogger() *zap.Logger {
 	return a.utils.logger
 }
 
-func (a *Application) GetConfig() *env.Config {
+func (a *Application) GetConfig() *config.Env {
 	return a.config
 }

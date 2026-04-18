@@ -6,13 +6,13 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/template"
+	"github.com/rijum8906/relay/services/notification-service/app/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-func initLogger(config *env.Config) (*zap.Logger, *apperror.AppError) {
+func initLogger(config *config.Env) (*zap.Logger, *apperror.AppError) {
 	var zapConfig zap.Config
 
 	if config.AppEnv == "production" {
@@ -70,7 +70,7 @@ func initLogger(config *env.Config) (*zap.Logger, *apperror.AppError) {
 	return logger, nil
 }
 
-func initTemplateManager(config *env.Config) (template.TemplateManager, *apperror.AppError) {
+func initTemplateManager(config *config.Env) (template.TemplateManager, *apperror.AppError) {
 	tm, err := template.NewTemplateManagerWithCompanyInfo("packages/templates", &dto.CompanyInfo{
 		Name:       "Relay",
 		Emails:     []string{"UfNwO@example.com"},

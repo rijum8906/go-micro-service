@@ -7,8 +7,8 @@ import (
 	"net"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/mailer"
+	"github.com/rijum8906/relay/services/notification-service/app/config"
 	"github.com/rijum8906/relay/services/notification-service/internal/handler/broker"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
 	"go.uber.org/zap"
@@ -157,6 +157,6 @@ func (a *Application) GetLogger() *zap.Logger {
 	return a.utils.logger
 }
 
-func (a *Application) GetConfig() *env.Config {
+func (a *Application) GetConfig() *config.Env {
 	return a.config
 }

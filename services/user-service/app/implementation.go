@@ -11,12 +11,12 @@ import (
 	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
-	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/hash"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/user/app/config"
 	userdb "github.com/rijum8906/relay/services/user/internal/db"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	profilerepo "github.com/rijum8906/relay/services/user/internal/repository/profile"
@@ -165,17 +165,17 @@ func (a *Application) initHandler() *apperror.AppError {
 		Session: sessionrepo.NewSessionRepository(queries),
 	}
 
-	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config, a.infra.nats)
+	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv, a.infra.nats)
 	if appErr != nil {
 		return appErr
 	}
 
-	userService, appErr := user.NewUserService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config)
+	userService, appErr := user.NewUserService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv)
 	if appErr != nil {
 		return appErr
 	}
 
-	sessionService, appErr := session.NewSessionService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config)
+	sessionService, appErr := session.NewSessionService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv)
 	if appErr != nil {
 		return appErr
 	}
@@ -247,6 +247,6 @@ func (a *Application) GetLogger() *zap.Logger {
 	return a.utils.logger
 }
 
-func (a *Application) GetConfig() *env.Config {
+func (a *Application) GetConfig() *config.Env {
 	return a.config
 }

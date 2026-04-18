@@ -9,9 +9,9 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
-	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/hash"
 	"github.com/rijum8906/relay/packages/core/token"
+	"github.com/rijum8906/relay/services/user/app/config"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -36,7 +36,7 @@ type ApplicationServices struct {
 }
 
 type Application struct {
-	config   *env.Config
+	config   *config.Env
 	infra    *ApplicationInfra
 	utils    *ApplicationUtils
 	services *ApplicationServices
@@ -53,7 +53,7 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 
 	var appErr *apperror.AppError
 
-	app.config, appErr = env.Load()
+	app.config, appErr = config.Load()
 	if appErr != nil {
 		return nil, appErr
 	}

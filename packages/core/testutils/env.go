@@ -3,10 +3,10 @@ package testutils
 import (
 	"os"
 
-	"github.com/rijum8906/relay/packages/core/env"
+	"github.com/rijum8906/relay/packages/core/coreenv"
 )
 
-func NewTestEnv() *env.Config {
+func NewTestEnv() *coreenv.CoreEnv {
 	os.Setenv("APP_NAME", "Test App")
 	os.Setenv("DB_HOST", "localhost")
 	os.Setenv("DB_USER", "test_user")
@@ -23,7 +23,7 @@ func NewTestEnv() *env.Config {
 	os.Setenv("SMTP_FROM_EMAIL", "test_from_email")
 	os.Setenv("SMTP_FROM_NAME", "Test From Name")
 
-	config, appErr := env.Load()
+	config, appErr := coreenv.Load()
 	if appErr != nil {
 		panic(appErr)
 	}
