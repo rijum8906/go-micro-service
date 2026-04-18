@@ -7,8 +7,8 @@ CREATE TABLE tasks (
     due_at timestamptz, 
     
     created_by_user_id uuid NOT NULL,
-    assigned_to_user_id uuid,
-    team_id uuid,
+    assigned_to_user_id uuid NOT NULL,
+    team_id uuid NOT NULL,
     status varchar(50) NOT NULL default 'todo',
     
      -- Timestamps
