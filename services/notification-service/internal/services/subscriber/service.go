@@ -43,7 +43,7 @@ func (s *service) SubscribeEmailVerificationJob(durable constants.DurableName, s
 				s.AppLogger.Error("error parsing mail envelop", zap.Error(err), zap.String("details", appErr.Details[0].Message))
 			}
 
-			appErr = mailer.Send(s.Mailer, mailer.Message{
+			appErr = mailer.SendWithConfig(*s.MailerCfg, mailer.Message{
 				Envelope: envelop,
 				Content: mailer.Content{
 					HTML:        emailTemplate,
