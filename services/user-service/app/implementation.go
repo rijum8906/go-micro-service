@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
 	"github.com/rijum8906/relay/packages/core/env"
 	"github.com/rijum8906/relay/packages/core/hash"
-	corenats "github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
@@ -128,7 +128,7 @@ func (a *Application) initCache(ctx context.Context) *apperror.AppError {
 }
 
 func (a *Application) initNATS(ctx context.Context) *apperror.AppError {
-	client, appErr := corenats.Connect(ctx, corenats.Config{
+	client, appErr := broker.Connect(ctx, broker.Config{
 		URL:        a.config.NATSURL,
 		ClientName: a.config.NATSClientName,
 	})

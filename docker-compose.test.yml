@@ -19,6 +19,15 @@ services:
     volumes:
       - redis_test:/var/lib/redis/data
 
+  nats:
+    image: nats:2.12-alpine
+    command: ["-js"]
+    ports:
+      - "4223:4222"
+    volumes:
+      - nats_test:/var/lib/nats/data
+
 volumes:
   redis_test:
   pg_test:
+  nats_test:

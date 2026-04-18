@@ -8,8 +8,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/env"
-	"github.com/rijum8906/relay/packages/core/nats"
+	"github.com/rijum8906/relay/packages/core/template"
+	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
+	"github.com/wneessen/go-mail"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -17,14 +20,18 @@ import (
 type ApplicationInfra struct {
 	cache    *redis.Client
 	database *pgxpool.Pool
-	nats     *nats.Client
+	nats     *broker.Client
+	mailer   *mail.Client
 }
 
 type ApplicationUtils struct {
 	logger *zap.Logger
+	tm     template.TemplateManager
 }
 
-type ApplicationServices struct{}
+type ApplicationServices struct {
+	subscriberService subscriber.Service
+}
 
 type Application struct {
 	config   *env.Config
@@ -50,23 +57,18 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Initialize Dependencies
-	if appErr = app.initLogger(); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initDB(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initCache(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initNATS(ctx); appErr != nil {
+	if appErr = app.initInfra(ctx); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
 	if appErr = app.initUtils(); appErr != nil {
+		fmt.Println(appErr.Details)
+		return nil, appErr
+	}
+
+	if appErr = app.initServices(); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
@@ -76,6 +78,7 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	if appErr = app.initGRPCServer(); appErr != nil {
+		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 

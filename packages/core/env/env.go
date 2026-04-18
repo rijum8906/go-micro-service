@@ -36,6 +36,7 @@ type Config struct {
 	RedisHost string `env:"REDIS_HOST,required"`
 	RedisPort int    `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPass string `env:"REDIS_PASS"`
+	RedisDB   int    `env:"REDIS_DB" envDefault:"0"`
 
 	// SMTP
 	SMTPHost        string `env:"SMTP_HOST,required"`
