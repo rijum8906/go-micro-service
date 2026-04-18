@@ -60,6 +60,10 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	if appErr = app.initGRPCServer(); appErr != nil {
 		return nil, appErr
 	}
+	if appErr = app.initDB(ctx); appErr != nil {
+		return nil, appErr
+	}
+	
 
 	apperror.SetConfig(apperror.Config{
 		AppEnv: app.config.AppEnv,

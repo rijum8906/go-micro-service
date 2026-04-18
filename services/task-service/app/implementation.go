@@ -1,12 +1,14 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
 	"path/filepath"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/db"
 	"github.com/rijum8906/relay/packages/core/env"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -89,6 +91,24 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 		reflection.Register(server)
 	}
 
+	return nil
+}
+
+func (a *Application) initDB(ctx context.Context) *apperror.AppError {
+	pool, appErr := db.Connect(ctx, db.Config{
+		Host:        a.config.DBHost,
+		Port:        a.config.DBPort,
+		User:        a.config.DBUser,
+		Password:    a.config.DBPassword,
+		DBName:      a.config.DBName,
+		SSLMode:     a.config.DBSSLMode,
+		RetryCounts: 5,
+	})
+	if appErr != nil {
+		return appErr
+	}
+
+	a.infra.database = pool
 	return nil
 }
 
