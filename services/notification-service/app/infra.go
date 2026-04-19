@@ -48,14 +48,9 @@ func initCache(ctx context.Context, config *config.Env) (*redis.Client, *apperro
 	return cache, nil
 }
 
-func initNATS(ctx context.Context, config *config.Env) (*broker.Client, *apperror.AppError) {
-	client, appErr := broker.Connect(ctx, broker.Config{
-		URL:        config.NATSURL,
-		ClientName: config.NATSClientName,
-	})
-	if appErr != nil {
-		return nil, appErr
-	}
+func initNATSClient(ctx context.Context, config *config.Env) (broker.Client, *apperror.AppError) {
+	client := broker.NewClient()
+	client.Connect(config.NATSURL)
 
 	return client, nil
 }

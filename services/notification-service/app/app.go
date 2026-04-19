@@ -18,10 +18,10 @@ import (
 )
 
 type ApplicationInfra struct {
-	cache    *redis.Client
-	database *pgxpool.Pool
-	nats     *broker.Client
-	mailer   *mail.Client
+	cache        *redis.Client
+	database     *pgxpool.Pool
+	brokerClient broker.Client
+	mailer       *mail.Client
 }
 
 type ApplicationUtils struct {

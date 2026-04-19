@@ -7,9 +7,10 @@ import (
 	"net"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/mailer"
 	"github.com/rijum8906/relay/services/notification-service/app/config"
-	"github.com/rijum8906/relay/services/notification-service/internal/handler/broker"
+	"github.com/rijum8906/relay/services/notification-service/internal/handler/handler"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -36,11 +37,11 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 	a.infra.cache = cache
 
 	// NATS
-	nats, appErr := initNATS(ctx, a.config)
+	nats, appErr := initNATSClient(ctx, a.config)
 	if appErr != nil {
 		return appErr
 	}
-	a.infra.nats = nats
+	a.infra.brokerClient = nats
 
 	// Mailer
 	mailer, appErr := initMailer(ctx, a.config)
@@ -74,17 +75,20 @@ func (a *Application) initServices() *apperror.AppError {
 		return apperror.ErrInternal.WithMessage("app infra is not initialized")
 	}
 
-	subsciberService, appErr := subscriber.New(a.infra.nats, "verification", a.utils.logger, mailerConfig)
+	brokerSubscriber := broker.NewSubscriber(a.infra.brokerClient.GetClient())
+
+	subsciberService, appErr := subscriber.New(brokerSubscriber, a.utils.logger, mailerConfig, a.utils.tm)
 	if appErr != nil {
 		return appErr
 	}
+
 	a.services.subscriberService = subsciberService
 
 	return nil
 }
 
 func (a *Application) initHandler() *apperror.AppError {
-	subscriberHandler, appErr := broker.New(a.services.subscriberService, a.infra.nats, &mailerConfig, a.utils.tm)
+	subscriberHandler, appErr := handler.New(a.services.subscriberService, a.infra.brokerClient, &mailerConfig, a.utils.tm)
 	if appErr != nil {
 		return appErr
 	}
@@ -92,14 +96,15 @@ func (a *Application) initHandler() *apperror.AppError {
 	if appErr = subscriberHandler.CreateStreams(); appErr != nil {
 		return appErr
 	}
-
 	if appErr = subscriberHandler.CreateConsumers(); appErr != nil {
 		return appErr
 	}
 
-	go func(handler *broker.SubscribeHandler) {
-		handler.Subscribe()
-	}(subscriberHandler)
+	go func(handler *handler.SubscribeHandler, logger *zap.Logger) {
+		if appErr := handler.Subscribe(); appErr != nil {
+			logger.Error("failed to subscribe to nats", zap.Error(appErr), zap.Any("detals", appErr.Details))
+		}
+	}(subscriberHandler, a.utils.logger)
 
 	return nil
 }
@@ -148,8 +153,8 @@ func (a *Application) Shutdown() {
 		a.infra.cache.Close()
 	}
 
-	if a.infra != nil && a.infra.nats != nil {
-		_ = a.infra.nats.Drain()
+	if a.infra != nil && a.infra.brokerClient != nil {
+		_ = a.infra.brokerClient.Drain()
 	}
 }
 

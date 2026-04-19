@@ -8,17 +8,30 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 )
 
+type publisher struct {
+	client *brokerClient
+}
+
+func NewPublisher(client *brokerClient) Publisher {
+	return &publisher{
+		client: client,
+	}
+}
+
+// Methods
+
 // Publish blocks until the subscriber send a confirmation
-func (c *Client) Publish(subject dto.JobSubject, payload []byte) *apperror.AppError {
-	if !c.IsConnected() {
-		return apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
+func (p *publisher) Publish(subject dto.JobSubject, data any) *apperror.AppError {
+	if p.client == nil {
+		return apperror.New(apperror.CodeValidation, "nats client is not set")
 	}
 
-	if !dto.IsValidJobSubject(string(subject)) {
-		return apperror.New(apperror.CodeValidation, "invalid job subject").WithDetail("subject", string(subject))
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		return apperror.New(apperror.CodeInternal, "failed to marshal nats payload").WithDetail("error", err.Error())
 	}
 
-	_, err := c.JS.Publish(string(subject), payload)
+	_, err = p.client.JS.Publish(string(subject), dataBytes)
 	if err != nil {
 		return apperror.New(apperror.CodeThirdParty, "failed to publish to nats subject").WithDetail("error", err.Error())
 	}
@@ -26,28 +39,29 @@ func (c *Client) Publish(subject dto.JobSubject, payload []byte) *apperror.AppEr
 	return nil
 }
 
-func (c *Client) PublishJSON(subject dto.JobSubject, payload any) *apperror.AppError {
-	raw, err := json.Marshal(payload)
+// PublishAsync doesn't block the code
+func (p *publisher) PublishAsync(subject dto.JobSubject, data any) (nats.PubAckFuture, *apperror.AppError) {
+	if p.client == nil {
+		return nil, apperror.New(apperror.CodeValidation, "nats client is not set")
+	}
+
+	dataBytes, err := json.Marshal(data)
 	if err != nil {
-		return apperror.New(apperror.CodeInternal, "failed to marshal nats payload").WithDetail("error", err.Error())
+		return nil, apperror.New(apperror.CodeInternal, "failed to marshal nats payload").WithDetail("error", err.Error())
 	}
 
-	return c.Publish(subject, raw)
-}
-
-func (c *Client) PublishAsync(subject dto.JobSubject, payload []byte) (nats.PubAckFuture, *apperror.AppError) {
-	if !c.IsConnected() {
-		return nil, apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
-	}
-
-	if !dto.IsValidJobSubject(string(subject)) {
-		return nil, apperror.New(apperror.CodeValidation, "invalid job subject").WithDetail("subject", string(subject))
-	}
-
-	ack, err := c.JS.PublishAsync(string(subject), payload)
+	ack, err := p.client.JS.PublishAsync(string(subject), dataBytes)
 	if err != nil {
 		return nil, apperror.New(apperror.CodeThirdParty, "failed to publish to nats subject").WithDetail("error", err.Error())
 	}
 
 	return ack, nil
+}
+
+func (p *publisher) PublishWithHeaders(subject dto.JobSubject, data any, headers nats.Header) *apperror.AppError {
+	// TODO: implement
+	if p.client == nil {
+		return apperror.New(apperror.CodeValidation, "nats client is not set")
+	}
+	return nil
 }
