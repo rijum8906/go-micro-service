@@ -19,10 +19,10 @@ type ApplicationInfra struct {
 	cache    *redis.Client
 	database *pgxpool.Pool
 	nats     *broker.Client
+	token    *token.TokenManager
 }
 
 type ApplicationUtils struct {
-	token  *token.TokenManager
 	hash   hash.HashService
 	logger *zap.Logger
 }
