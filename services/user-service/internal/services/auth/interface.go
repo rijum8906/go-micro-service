@@ -28,10 +28,10 @@ type authService struct {
 	env       *coreenv.CoreEnv
 	repos     *utils.Repos
 	utils     *utils.ServiceUtils
-	publisher *broker.Client
+	publisher broker.Publisher
 }
 
-func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *coreenv.CoreEnv, publisher *broker.Client) (AuthService, *apperror.AppError) {
+func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *coreenv.CoreEnv, publisher broker.Publisher) (AuthService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("repos", "auth repositories are not configured")
 	}

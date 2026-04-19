@@ -18,9 +18,9 @@ import (
 )
 
 type ApplicationInfra struct {
-	cache    *redis.Client
-	database *pgxpool.Pool
-	nats     *broker.Client
+	cache        *redis.Client
+	database     *pgxpool.Pool
+	brokerClient broker.Client
 }
 
 type ApplicationUtils struct {

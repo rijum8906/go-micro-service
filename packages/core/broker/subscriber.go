@@ -6,28 +6,27 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 )
 
-func (c *Client) PullSubscribe(subject dto.JobSubject, durable, stream string) (*nats.Subscription, *apperror.AppError) {
-	appErr := validateClient(c)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	sub, err := c.JS.PullSubscribe(string(subject), durable, nats.BindStream(stream), nats.ManualAck())
-	if err != nil {
-		apperror.ErrThirdParty.WithDetail("error", err.Error())
-	}
-
-	return sub, nil
+type subscriber struct {
+	client *brokerClient
 }
 
-func validateClient(c *Client) *apperror.AppError {
-	if c == nil || c.Conn == nil {
-		return apperror.New(apperror.CodeInternal, "nats client is not initialized")
+func NewSubscriber(client *brokerClient) Subscriber {
+	return &subscriber{
+		client: client,
+	}
+}
+
+// Methods
+
+func (s *subscriber) PullSubscribe(subject dto.JobSubject, consumerName string) (*nats.Subscription, *apperror.AppError) {
+	if s.client == nil {
+		return nil, apperror.New(apperror.CodeValidation, "nats client is not set")
 	}
 
-	if !c.IsConnected() {
-		return apperror.New(apperror.CodeThirdParty, "nats connection is not ready")
+	subscription, err := s.client.JS.PullSubscribe(string(subject), consumerName)
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithDetail("error", err.Error())
 	}
 
-	return nil
+	return subscription, nil
 }

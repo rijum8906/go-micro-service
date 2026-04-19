@@ -128,15 +128,12 @@ func (a *Application) initCache(ctx context.Context) *apperror.AppError {
 }
 
 func (a *Application) initNATS(ctx context.Context) *apperror.AppError {
-	client, appErr := broker.Connect(ctx, broker.Config{
-		URL:        a.config.NATSURL,
-		ClientName: a.config.NATSClientName,
-	})
-	if appErr != nil {
+	client := broker.NewClient()
+	if appErr := client.Connect(a.config.NATSURL); appErr != nil {
 		return appErr
 	}
 
-	a.infra.nats = client
+	a.infra.brokerClient = client
 	return nil
 }
 
@@ -165,7 +162,9 @@ func (a *Application) initHandler() *apperror.AppError {
 		Session: sessionrepo.NewSessionRepository(queries),
 	}
 
-	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv, a.infra.nats)
+	brokerPublisher := broker.NewPublisher(a.infra.brokerClient.GetClient())
+
+	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv, brokerPublisher)
 	if appErr != nil {
 		return appErr
 	}
@@ -238,8 +237,8 @@ func (a *Application) Shutdown() {
 		a.infra.cache.Close()
 	}
 
-	if a.infra != nil && a.infra.nats != nil {
-		_ = a.infra.nats.Drain()
+	if a.infra != nil && a.infra.brokerClient != nil {
+		_ = a.infra.brokerClient.Drain()
 	}
 }
 
