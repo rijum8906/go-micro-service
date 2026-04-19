@@ -14,7 +14,7 @@ type Env struct {
 	coreenv.CoreEnv
 }
 
-func Load() (*Env, *apperror.AppError) {
+func LoadEnv() (*Env, *apperror.AppError) {
 	// 1. Load .env file if it exists
 	_ = godotenv.Load()
 

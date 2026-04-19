@@ -8,6 +8,7 @@ require (
 	github.com/nats-io/nats.go v1.50.0
 	github.com/spf13/cobra v1.10.2
 	github.com/wneessen/go-mail v0.7.2
+	go.uber.org/zap v1.27.1
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
 )
@@ -26,7 +27,6 @@ require (
 	github.com/spf13/pflag v1.0.9 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.1 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 )
 

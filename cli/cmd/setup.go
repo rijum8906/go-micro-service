@@ -75,7 +75,7 @@ func copyEnvFiles() {
 	services := []string{"user-service", "graphql-gateway", "notification-service"}
 
 	for _, svc := range services {
-		copyFile(".env.example", filepath.Join("services", svc, ".env"))
+		copyFile(filepath.Join("services", svc, ".env.example"), filepath.Join("services", svc, ".env"))
 	}
 }
 
