@@ -1,15 +1,13 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"os"
 	"path/filepath"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/db"
-	"github.com/rijum8906/relay/packages/core/env"
+	"github.com/rijum8906/relay/services/task-service/app/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
@@ -94,24 +92,6 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 	return nil
 }
 
-func (a *Application) initDB(ctx context.Context) *apperror.AppError {
-	pool, appErr := db.Connect(ctx, db.Config{
-		Host:        a.config.DBHost,
-		Port:        a.config.DBPort,
-		User:        a.config.DBUser,
-		Password:    a.config.DBPassword,
-		DBName:      a.config.DBName,
-		SSLMode:     a.config.DBSSLMode,
-		RetryCounts: 5,
-	})
-	if appErr != nil {
-		return appErr
-	}
-
-	a.infra.database = pool
-	return nil
-}
-
 func (a *Application) Run() *apperror.AppError {
 	err := a.server.Serve(a.listener)
 	if err != nil {
@@ -129,24 +109,12 @@ func (a *Application) Shutdown() {
 	if a.server != nil {
 		a.server.GracefulStop()
 	}
-
-	if a.infra != nil && a.infra.database != nil {
-		a.infra.database.Close()
-	}
-
-	if a.infra != nil && a.infra.cache != nil {
-		a.infra.cache.Close()
-	}
-
-	if a.infra != nil && a.infra.nats != nil {
-		_ = a.infra.nats.Drain()
-	}
 }
 
 func (a *Application) GetLogger() *zap.Logger {
 	return a.utils.logger
 }
 
-func (a *Application) GetConfig() *env.Config {
+func (a *Application) GetConfig() *config.Config {
 	return a.config
 }
