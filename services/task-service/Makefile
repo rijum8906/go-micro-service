@@ -1,6 +1,6 @@
 SHELL := /bin/sh
 
-RUN_CMD := go run ./cmd/main.go
+CLI_RUN := go run ./cmd/cli/main.go
 GO_TEST := go test ./...
 
 .DEFAULT_GOAL := help
@@ -8,15 +8,25 @@ GO_TEST := go test ./...
 .PHONY: \
 	help \
 	run \
-	test
+	test \
+	setup \
+	db-apply \
 
 help:
 	@echo "Available targets:"
 	@echo "  make run                        - Run the task service"
 	@echo "  make test                       - Run Go tests"
+	@echo "  make setup                      - Run setup CLI stub"
+	@echo "  make db-apply                   - Apply pending Atlas migrations"
 
 run:
-	@$(RUN_CMD)
+	@$(CLI_RUN) run
 
 test:
-	@$(GO_TEST)
+	@$(CLI_RUN) test run
+
+setup:
+	@$(CLI_RUN) setup
+
+db-apply:
+	@$(CLI_RUN) db atlas apply
