@@ -9,7 +9,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/db"
-	"github.com/rijum8906/relay/services/notification-service/app/config"
+	"github.com/rijum8906/relay/services/task-service/app/config"
 )
 
 func initDB(ctx context.Context, config *config.Env) (*pgxpool.Pool, *apperror.AppError) {

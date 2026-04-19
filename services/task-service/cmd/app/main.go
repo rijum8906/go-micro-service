@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/services/notification-service/app"
+	"github.com/rijum8906/relay/services/task-service/app"
 	"go.uber.org/zap"
 )
 

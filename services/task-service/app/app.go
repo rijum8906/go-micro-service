@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
-	"github.com/rijum8906/relay/services/notification-service/app/config"
+	"github.com/rijum8906/relay/services/task-service/app/config"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )

@@ -55,6 +55,21 @@ services:
       - "postgres"
       - "redis"
 
+    # notifaction-service
+  task-service:
+    build:
+      context: .
+      dockerfile: ./services/task-service/Dockerfile
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      NATS_URL: "nats://nats:4222"
+    ports:
+      - "8083:8083"
+    depends_on:
+      - "nats"
+      - "postgres"
+      - "redis"
+
   # graphql-gateway
   graphql-gateway:
     build:

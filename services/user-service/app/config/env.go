@@ -12,18 +12,6 @@ import (
 
 type Env struct {
 	coreenv.CoreEnv
-
-	// SMTP
-	SMTPHost        string `env:"SMTP_HOST,required"`
-	SMTPPort        int    `env:"SMTP_PORT" envDefault:"587"`
-	SMTPUsername    string `env:"SMTP_USERNAME,required"`
-	SMTPPassword    string `env:"SMTP_PASSWORD,required"`
-	SMTPFromEmail   string `env:"SMTP_FROM_EMAIL,required"`
-	SMTPFromName    string `env:"SMTP_FROM_NAME,required"`
-	SMTPUseTLS      bool   `env:"SMTP_USE_TLS" envDefault:"true"`
-	SMTPUseStartTLS bool   `env:"SMTP_USE_STARTTLS" envDefault:"false"`
-	SMTPTimeout     int    `env:"SMTP_TIMEOUT" envDefault:"10"`
-	SMTPRetries     int    `env:"SMTP_RETRIES" envDefault:"3"`
 }
 
 func Load() (*Env, *apperror.AppError) {

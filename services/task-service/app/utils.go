@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/services/notification-service/app/config"
+	"github.com/rijum8906/relay/services/task-service/app/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
