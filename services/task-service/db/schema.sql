@@ -6,8 +6,8 @@ CREATE TABLE tasks (
     priority varchar(50),
     due_at timestamptz, 
     
-    created_by_user_id uuid NOT NULL,
-    assigned_to_user_id uuid NOT NULL,
+    created_by uuid NOT NULL,
+    assigned_to uuid NOT NULL,
     team_id uuid NOT NULL,
     status varchar(50) NOT NULL default 'todo',
     
