@@ -25,6 +25,18 @@ services:
     volumes:
       - redis:/var/lib/redis/data
 
+  # graphql-gateway
+  graphql-gateway:
+    build:
+      context: .
+      dockerfile: ./services/graphql-gateway/Dockerfile
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "user-service"
+
   # user-service
   user-service:
     build:
@@ -55,7 +67,7 @@ services:
       - "postgres"
       - "redis"
 
-    # notifaction-service
+    # task-service
   task-service:
     build:
       context: .
@@ -70,17 +82,20 @@ services:
       - "postgres"
       - "redis"
 
-  # graphql-gateway
-  graphql-gateway:
+  # organization-service
+  organization-service:
     build:
       context: .
-      dockerfile: ./services/graphql-gateway/Dockerfile
+      dockerfile: ./services/organization-service/Dockerfile
     environment:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      NATS_URL: "nats://nats:4222"
     ports:
-      - "8080:8080"
+      - "8084:8084"
     depends_on:
-      - "user-service"
+      - "nats"
+      - "postgres"
+      - "redis"
 
   # web-v2
   web-v2:
