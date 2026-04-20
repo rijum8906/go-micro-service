@@ -109,7 +109,7 @@ func TestTemplateManager_ValidateData(t *testing.T) {
 			data: dto.PasswordResetDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
-				ResetToken:  "token123",
+				ResetURL:    "https://relay.dev/reset-password?token=token123",
 				Validity:    "15 minutes",
 			},
 		},
@@ -171,7 +171,7 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 			data: dto.PasswordResetDTO{
 				ClientName:  "John Doe",
 				ClientEmail: "john@example.com",
-				ResetToken:  "token123",
+				ResetURL:    "https://relay.dev/reset-password?token=token123",
 				Validity:    "15 minutes",
 			},
 			wantContains: []string{
@@ -247,7 +247,7 @@ func TestTemplateManager_RenderToBytes(t *testing.T) {
 	data := dto.PasswordResetDTO{
 		ClientName:  "John Doe",
 		ClientEmail: "john@example.com",
-		ResetToken:  "token123",
+		ResetURL:    "https://relay.dev/reset-password?token=token123",
 		Validity:    "15 minutes",
 	}
 

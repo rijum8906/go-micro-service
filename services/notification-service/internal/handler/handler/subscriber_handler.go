@@ -1,4 +1,4 @@
-// Package broker
+// Package handler
 package handler
 
 import (
@@ -40,7 +40,9 @@ func (h *SubscribeHandler) CreateStreams() *apperror.AppError {
 
 	// Verification Stream Config
 	config := broker.NewStreamConfig(constants.StreamVerification).
-		AddSubjects(string(dto.JobEmailVerification), string(dto.JobEmailPasswordReset))
+		AddSubjects(string(dto.JobEmailVerification), string(dto.JobEmailPasswordReset)).
+		AddMaxConsumer(5)
+	fmt.Println("stream config: ", config.StreamConfig.MaxConsumers)
 	_, appErr := streamManager.Create(config)
 	if appErr != nil {
 		return appErr
@@ -53,9 +55,17 @@ func (h *SubscribeHandler) CreateConsumers() *apperror.AppError {
 	consumerManager := broker.NewConsumerManager(h.BrokerClient.GetClient())
 
 	// Verification Comsumer
-	config := broker.NewConsumerConfig(constants.ConsumerVerification)
+	config1 := broker.NewConsumerConfig(constants.ConsumerVerification)
+	config1.WithFilterSubject(string(dto.JobEmailVerification))
 
-	_, appErr := consumerManager.Create(constants.StreamVerification, config)
+	_, appErr := consumerManager.Create(constants.StreamVerification, config1)
+	if appErr != nil {
+		return appErr
+	}
+
+	config2 := broker.NewConsumerConfig(constants.ConsumerPasswordReset)
+	config2.WithFilterSubject(string(dto.JobEmailPasswordReset))
+	_, appErr = consumerManager.Create(constants.StreamVerification, config2)
 	if appErr != nil {
 		return appErr
 	}
@@ -86,7 +96,7 @@ func (h *SubscribeHandler) Subscribe() *apperror.AppError {
 		}
 	}(h.SubscriberService)
 	go func(service subscriber.Service) {
-		if appErr := service.SubscribeJobPasswordReset(constants.ConsumerVerification); appErr != nil {
+		if appErr := service.SubscribeJobPasswordReset(constants.ConsumerPasswordReset); appErr != nil {
 			fmt.Println(appErr.Details)
 		}
 	}(h.SubscriberService)

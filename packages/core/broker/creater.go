@@ -99,3 +99,18 @@ func (c *ConsumerConfig) AddReplayPolicy(policy nats.ReplayPolicy) *ConsumerConf
 	c.ConsumerConfig.ReplayPolicy = policy
 	return c
 }
+
+func (c *ConsumerConfig) AddMaxAckPending(maxPending int) *ConsumerConfig {
+	c.ConsumerConfig.MaxAckPending = maxPending
+	return c
+}
+
+func (c *ConsumerConfig) AddMaxDelivery(maxDelivery int) *ConsumerConfig {
+	c.ConsumerConfig.MaxDeliver = maxDelivery
+	return c
+}
+
+func (c *ConsumerConfig) WithFilterSubject(subject string) *ConsumerConfig {
+	c.ConsumerConfig.FilterSubject = subject
+	return c
+}

@@ -12,6 +12,11 @@ import (
 
 type Env struct {
 	coreenv.CoreEnv
+
+	// Frontend URL
+	FrontendURL           string `env:"FRONTEND_URL" envDefault:"http://localhost:3000"`
+	EmailVerificationPath string `env:"EMAIL_VERIFICATION_PATH" envDefault:"/verify-email"`
+	ResetPasswordPath     string `env:"RESET_PASSWORD_PATH" envDefault:"/reset-password"`
 }
 
 func Load() (*Env, *apperror.AppError) {

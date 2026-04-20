@@ -21,7 +21,11 @@ func NewStreamManager(client *brokerClient) StreamManager {
 func (c *streamManager) Create(cfg *StreamConfig) (*nats.StreamInfo, *apperror.AppError) {
 	stream, err := c.client.JS.StreamInfo(cfg.StreamConfig.Name)
 	if err == nil {
-		return stream, nil // Stream exists
+		appErr := c.Update(cfg.StreamConfig.Name, cfg)
+		if appErr != nil {
+			return nil, appErr
+		}
+		return stream, nil
 	}
 
 	stream, err = c.client.JS.AddStream(cfg.StreamConfig)

@@ -1,26 +1,48 @@
 {{define "email-verification.html"}}
 {{template "email-header" .}}
-                                            <h2 style="margin: 0 0 14px; font-size: 24px; line-height: 1.3; color: #0f172a;">
-                                                Verify your email address
-                                            </h2>
-                                            <p class="body-copy" style="margin: 0 0 16px;">
-                                                Hello {{if .ClientName}}{{.ClientName}}{{else}}there{{end}},
-                                            </p>
-                                            <p class="body-copy" style="margin: 0 0 16px;">
-                                                Thank you for creating your account. To confirm that this email address belongs to you, please use the verification code below.
-                                            </p>
-                                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0;">
-                                                <tr>
-                                                    <td class="token-box">
-                                                        <p class="token-text">{{.VerificationToken}}</p>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            <p class="body-copy" style="margin: 0 0 16px;">
-                                                This verification code will remain valid for {{.Validity}}. For security reasons, do not share it with anyone.
-                                            </p>
-                                            <p class="body-copy" style="margin: 0;">
-                                                If you did not request this verification, no further action is required.
-                                            </p>
+<h2 style="margin: 0 0 14px; font-size: 24px; line-height: 1.3; color: #0f172a;">
+    Verify your email address
+</h2>
+<p class="body-copy" style="margin: 0 0 16px;">
+    Hello {{if .ClientName}}{{.ClientName}}{{else}}there{{end}},
+</p>
+<p class="body-copy" style="margin: 0 0 16px;">
+    Thank you for creating your account. To confirm that this email address belongs to you, please click the
+    verification button below.
+</p>
+
+<!-- CTA Button for URL -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td class="button" style="background-color: #3b82f6; border-radius: 6px; padding: 12px 24px;">
+                        <a href="{{.VerificationURL}}"
+                            style="color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-block;">
+                            Verify Email Address
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<!-- Fallback: Show URL as text for email clients that block images/buttons -->
+<p class="body-copy" style="margin: 0 0 16px; font-size: 14px; color: #64748b;">
+    Or copy and paste this link into your browser:
+    <br />
+    <a href="{{.VerificationURL}}" style="color: #3b82f6; word-break: break-all;">
+        {{.VerificationURL}}
+    </a>
+</p>
+
+<p class="body-copy" style="margin: 0 0 16px; font-size: 14px; color: #64748b;">
+    This verification link will remain valid for {{.Validity}}. For security reasons, do not share it with anyone.
+</p>
+<p class="body-copy" style="margin: 0;">
+    If you did not request this verification, no further action is required.
+</p>
 {{template "email-footer" .}}
 {{end}}
