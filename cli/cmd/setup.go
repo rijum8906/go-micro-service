@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var services = []string{"user-service", "graphql-gateway", "notification-service", "task-service"}
+
 // setupCmd represents the setup command
 var setupCmd = &cobra.Command{
 	Use:   "setup",
@@ -72,8 +74,6 @@ func addWorkspaceDirectories() {
 }
 
 func copyEnvFiles() {
-	services := []string{"user-service", "graphql-gateway", "notification-service"}
-
 	for _, svc := range services {
 		copyFile(filepath.Join("services", svc, ".env.example"), filepath.Join("services", svc, ".env"))
 	}

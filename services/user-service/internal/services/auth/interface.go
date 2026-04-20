@@ -6,10 +6,10 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
-	"github.com/rijum8906/relay/packages/core/coreenv"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	"github.com/rijum8906/relay/services/user/app/config"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
@@ -25,13 +25,13 @@ type AuthService interface {
 }
 
 type authService struct {
-	env       *coreenv.CoreEnv
+	env       *config.Env
 	repos     *utils.Repos
 	utils     *utils.ServiceUtils
 	publisher broker.Publisher
 }
 
-func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *coreenv.CoreEnv, publisher broker.Publisher) (AuthService, *apperror.AppError) {
+func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *config.Env, publisher broker.Publisher) (AuthService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("repos", "auth repositories are not configured")
 	}

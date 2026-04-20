@@ -17,8 +17,7 @@ import (
 func createTestAuthService() (auth.AuthService, *utils.Repos, *utils.ServiceUtils) {
 	repos := utils.NewTestRepos()
 	serviceUtils := utils.NewTestServiceUtils()
-	config := testutils.NewTestEnv()
-	service, appErr := auth.NewAuthService(repos, serviceUtils, config, nil)
+	service, appErr := auth.NewAuthService(repos, serviceUtils, nil, nil)
 	if appErr != nil {
 		panic(appErr)
 	}

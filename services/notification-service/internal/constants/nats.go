@@ -6,5 +6,6 @@ const (
 )
 
 const (
-	ConsumerVerification = "verification"
+	ConsumerVerification  = "verification"
+	ConsumerPasswordReset = "password-reset"
 )

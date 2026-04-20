@@ -234,10 +234,15 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 		return nil, appErr
 	}
 
+	resetURL, appErr := utils.NewTokenURL(scopedToken, s.env.FrontendURL, s.env.ResetPasswordPath)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	if appErr = s.publisher.Publish(dto.JobEmailPasswordReset, dto.PasswordResetDTO{
 		ClientName:  prof.FirstName + " " + prof.LastName,
 		ClientEmail: user.Email,
-		ResetToken:  scopedToken,
+		ResetURL:    resetURL,
 		Validity:    "10 minutes",
 	}); appErr != nil {
 		return nil, appErr

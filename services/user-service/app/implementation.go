@@ -164,7 +164,7 @@ func (a *Application) initHandler() *apperror.AppError {
 
 	brokerPublisher := broker.NewPublisher(a.infra.brokerClient.GetClient())
 
-	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv, brokerPublisher)
+	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config, brokerPublisher)
 	if appErr != nil {
 		return appErr
 	}
