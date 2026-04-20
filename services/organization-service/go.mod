@@ -1,4 +1,4 @@
-module github.com/rijum8906/relay/services/task-service
+module github.com/rijum8906/relay/services/organization-service
 
 go 1.26.1
 

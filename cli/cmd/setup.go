@@ -1,6 +1,3 @@
-/*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -10,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var services = []string{"user-service", "graphql-gateway", "notification-service", "task-service"}
+var services = []string{"user-service", "graphql-gateway", "notification-service", "task-service", "organization-service"}
 
 // setupCmd represents the setup command
 var setupCmd = &cobra.Command{
