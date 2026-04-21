@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 func runCommand(name string, args ...string) {
@@ -17,31 +18,31 @@ func runCommand(name string, args ...string) {
 	}
 }
 
-func isDirectory(path string) bool {
-	info, err := os.Stat(path)
-	return err == nil && info.IsDir()
+func isCommandAvailable(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
 }
 
-func copyFile(source, destination string) {
-	sourceFilename := filepath.Base(source)
-	destFilename := filepath.Base(destination)
+func notImplemented(_ *cobra.Command, _ []string) {
+	fmt.Println("🚧 This command is not implemented yet.")
+}
 
-	fmt.Printf("\n📦 Copying %s file to %s...\n", sourceFilename, destFilename)
-
-	sourceBytes, err := os.ReadFile(source)
-	if err != nil {
-		panic(fmt.Errorf("failed to read %s: %w", sourceFilename, err))
+func installGoPackage(name, url string) {
+	if !isCommandAvailable(name) {
+		fmt.Printf("🛠️  Building %s with Go...\n", name)
+		runCommand("go", "install", url)
+		fmt.Printf("✅ Successfully installed %s\n", name)
+	} else {
+		fmt.Printf("⏭️  %s already installed\n", name)
 	}
+}
 
-	destDir := filepath.Dir(destination)
-	// Skip if file already exists
-	if _, err := os.Stat(destination); err == nil {
-		fmt.Printf("  ⚠️  %s already exists in %s, skipping\n", destFilename, destDir)
-		return
+func installCurlBinary(name, url string) {
+	if !isCommandAvailable(name) {
+		fmt.Printf("📥 Downloading %s...\n", name)
+		runCommand("sh", "-c", "curl -sSf "+url+" | sh")
+		fmt.Printf("✅ Successfully installed %s\n", name)
+	} else {
+		fmt.Printf("⏭️  %s already installed\n", name)
 	}
-
-	if err := os.WriteFile(destination, sourceBytes, 0o644); err != nil {
-		panic(fmt.Errorf("failed to write %s to %s: %w", destFilename, destDir, err))
-	}
-	fmt.Printf("  ✅ Copied %s to %s\n", destFilename, destDir)
 }

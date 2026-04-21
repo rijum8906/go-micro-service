@@ -2,12 +2,38 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
+	"github.com/rijum8906/relay/cli/utils"
 	"github.com/spf13/cobra"
 )
 
-var services = []string{"user-service", "graphql-gateway", "notification-service", "task-service", "organization-service"}
+func getServices() ([]string, error) {
+	entries, err := os.ReadDir("services")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read services directory: %w", err)
+	}
+
+	services := []string{}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			services = append(services, entry.Name())
+		}
+	}
+
+	return services, nil
+}
+
+// ############################################
+//              ROOT COMMANDS
+// ############################################
+
+var rootCmd = &cobra.Command{
+	Use:   "root",
+	Short: "Root commands",
+	Run:   notImplemented,
+}
 
 // setupCmd represents the setup command
 var setupCmd = &cobra.Command{
@@ -51,7 +77,7 @@ func addWorkspaceDirectories() {
 		fmt.Printf("  ⚠️  Failed to find packages: %v\n", err)
 	} else {
 		for _, pkg := range packages {
-			if isDirectory(pkg) {
+			if utils.IsDirectory(pkg) {
 				runCommand("go", "work", "use", pkg)
 			}
 		}
@@ -63,7 +89,7 @@ func addWorkspaceDirectories() {
 		fmt.Printf("  ⚠️  Failed to find services: %v\n", err)
 	} else {
 		for _, svc := range services {
-			if isDirectory(svc) {
+			if utils.IsDirectory(svc) {
 				runCommand("go", "work", "use", svc)
 			}
 		}
@@ -71,11 +97,18 @@ func addWorkspaceDirectories() {
 }
 
 func copyEnvFiles() {
+	services, err := getServices()
+	if err != nil {
+		panic(err)
+	}
+
 	for _, svc := range services {
-		copyFile(filepath.Join("services", svc, ".env.example"), filepath.Join("services", svc, ".env"))
+		utils.CopyFile(filepath.Join("services", svc, ".env.example"), filepath.Join("services", svc, ".env"))
 	}
 }
 
 func init() {
 	rootCmd.AddCommand(setupCmd)
+
+	mainCmd.AddCommand(rootCmd)
 }
