@@ -19,6 +19,7 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE organizations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name varchar(255) NOT NULL,
+    status varchar(30) NOT NULL DEFAULT 'active',
     slug varchar(80) UNIQUE NOT NULL,
     description text,
     logo_url text,
