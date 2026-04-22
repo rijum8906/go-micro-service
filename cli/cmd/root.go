@@ -4,11 +4,15 @@ package cmd
 import (
 	"os"
 
+	dbcmd "github.com/rijum8906/relay/cli/cmd/db"
+	devcmd "github.com/rijum8906/relay/cli/cmd/dev"
+	initcmd "github.com/rijum8906/relay/cli/cmd/init"
+	testcmd "github.com/rijum8906/relay/cli/cmd/test"
 	"github.com/spf13/cobra"
 )
 
-// mainCmd represents the base command when called without any subcommands
-var mainCmd = &cobra.Command{
+// rootCmd represents the base command when called without any subcommands
+var rootCmd = &cobra.Command{
 	Use:   "my-cli",
 	Short: "Manage local Relay development workflows",
 	Long: `my-cli provides a small command surface for common Relay project tasks.
@@ -18,11 +22,15 @@ development services without repeating the underlying Go and Docker commands.`,
 }
 
 func Execute() {
-	err := mainCmd.Execute()
+	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
+	rootCmd.AddCommand(initcmd.InitCmd)
+	rootCmd.AddCommand(devcmd.DevCmd)
+	rootCmd.AddCommand(dbcmd.DBCMd)
+	rootCmd.AddCommand(testcmd.TestCmd)
 }

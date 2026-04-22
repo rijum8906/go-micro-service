@@ -1,4 +1,4 @@
-package cmd
+package utils
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func runCommand(name string, args ...string) {
+func RunCommand(name string, args ...string) {
 	fmt.Printf("  → Running: %s %v\n", name, args)
 	cmd := exec.Command(name, args...)
 	cmd.Stdout = os.Stdout
@@ -18,29 +18,29 @@ func runCommand(name string, args ...string) {
 	}
 }
 
-func isCommandAvailable(name string) bool {
+func IsCommandAvailable(name string) bool {
 	_, err := exec.LookPath(name)
 	return err == nil
 }
 
-func notImplemented(_ *cobra.Command, _ []string) {
+func NotImplemented(_ *cobra.Command, _ []string) {
 	fmt.Println("🚧 This command is not implemented yet.")
 }
 
-func installGoPackage(name, url string) {
-	if !isCommandAvailable(name) {
+func InstallGoPackage(name, url string) {
+	if !IsCommandAvailable(name) {
 		fmt.Printf("🛠️  Building %s with Go...\n", name)
-		runCommand("go", "install", url)
+		RunCommand("go", "install", url)
 		fmt.Printf("✅ Successfully installed %s\n", name)
 	} else {
 		fmt.Printf("⏭️  %s already installed\n", name)
 	}
 }
 
-func installCurlBinary(name, url string) {
-	if !isCommandAvailable(name) {
+func InstallCurlBinary(name, url string) {
+	if !IsCommandAvailable(name) {
 		fmt.Printf("📥 Downloading %s...\n", name)
-		runCommand("sh", "-c", "curl -sSf "+url+" | sh")
+		RunCommand("sh", "-c", "curl -sSf "+url+" | sh")
 		fmt.Printf("✅ Successfully installed %s\n", name)
 	} else {
 		fmt.Printf("⏭️  %s already installed\n", name)

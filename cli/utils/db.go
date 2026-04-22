@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
 // MustConnectDB connects to database with default config
-func MustConnectDB() *pgxpool.Pool {
-	dsn := "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable"
+func MustConnectDB(host string, port int, user, pass, db, sslMode string) *pgxpool.Pool {
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		user, pass, host, port, db, sslMode)
 
 	poolConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
@@ -39,4 +41,30 @@ func MustConnectDB() *pgxpool.Pool {
 	}
 
 	return pool
+}
+
+func CreateDatabase(pool *pgxpool.Pool, name string) error {
+	ctx := context.Background()
+
+	var exists bool
+	err := pool.QueryRow(ctx,
+		"SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)",
+		name,
+	).Scan(&exists)
+	if err != nil {
+		return apperror.ErrInternal.WithDetail("error", err.Error())
+	}
+
+	if exists {
+		return nil // Already exists
+	}
+
+	// Create database (can't use parameters for database names)
+	sql := "CREATE DATABASE " + name
+	_, err = pool.Exec(ctx, sql)
+	if err != nil {
+		return apperror.ErrInternal.WithDetail("error", err.Error())
+	}
+
+	return nil
 }
