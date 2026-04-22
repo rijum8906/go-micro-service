@@ -1,7 +1,9 @@
 package dbcmd
 
 import (
+	"context"
 	"fmt"
+	"os"
 
 	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
@@ -26,6 +28,31 @@ var migrateApplyCmd = &cobra.Command{
 		utils.RunCommand("atlas", "migrate", "apply",
 			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir())
+	},
+}
+
+var migrateSQLApply = &cobra.Command{
+	Use:   "sql-apply",
+	Short: "Apply SQL migrations",
+	Run: func(cmd *cobra.Command, args []string) {
+		if !utils.IsServiceDir() {
+			fmt.Println("Not in a service directory")
+			return
+		}
+		content, err := os.ReadFile("db/schema.sql")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		pool := utils.MustConnectDB(config.DBHost, config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
+		_, err = pool.Exec(context.Background(), string(content))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println("✅ Applied SQL migrations")
 	},
 }
 
@@ -105,6 +132,7 @@ func init() {
 
 	migrateCmd.AddCommand(migrateApplyCmd)
 	migrateCmd.AddCommand(migrateSchemaCmd)
+	migrateCmd.AddCommand(migrateSQLApply)
 	migrateCmd.AddCommand(migrateStatusCmd)
 	migrateCmd.AddCommand(migrateCreateCmd)
 	migrateCmd.AddCommand(migrateRehashCmd)
