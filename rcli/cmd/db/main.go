@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,10 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the database",
 	Run: func(cmd *cobra.Command, args []string) {
+		if !utils.IsRootDir() {
+			fmt.Println("❌ Must be run from root directory")
+			return
+		}
 		// Find all schema.sql files
 		services, err := filepath.Glob("services/*/db/schema.sql")
 		if err != nil {
@@ -39,9 +44,6 @@ var initCmd = &cobra.Command{
 		var failedServices []string
 
 		for _, schemaPath := range services {
-			// Extract service directory
-			// schemaPath: services/auth/db/schema.sql
-			// serviceDir: services/auth
 			serviceDir := filepath.Dir(filepath.Dir(schemaPath))
 			serviceName := filepath.Base(serviceDir)
 

@@ -25,6 +25,16 @@ var migrateApplyCmd = &cobra.Command{
 	Aliases: []string{"up"},
 	Short:   "Apply atlas migrations",
 	Run: func(cmd *cobra.Command, args []string) {
+		pool := utils.MustConnectDB(config.DBHost, config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
+		if err := utils.CreateDatabase(pool, config.DBName); err != nil {
+			fmt.Println(err)
+			return
+		}
+		if err := utils.CreateDatabase(pool, "dev_"+config.DBName); err != nil {
+			fmt.Println(err)
+			return
+		}
+
 		utils.RunCommand("atlas", "migrate", "apply",
 			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir())
@@ -46,6 +56,15 @@ var migrateSQLApply = &cobra.Command{
 		}
 
 		pool := utils.MustConnectDB(config.DBHost, config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
+		if err = utils.CreateDatabase(pool, config.DBName); err != nil {
+			fmt.Println(err)
+			return
+		}
+		if err = utils.CreateDatabase(pool, "dev_"+config.DBName); err != nil {
+			fmt.Println(err)
+			return
+		}
+
 		_, err = pool.Exec(context.Background(), string(content))
 		if err != nil {
 			fmt.Println(err)

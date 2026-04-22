@@ -83,11 +83,17 @@ func GetRootDir() (string, error) {
 }
 
 func IsRootDir() bool {
-	root, err := GetRootDir()
+	if _, err := os.Stat("go.mod"); err != nil {
+		return false
+	}
+	content, err := os.ReadFile("go.mod")
 	if err != nil {
 		return false
 	}
 
-	cwd, _ := os.Getwd()
-	return cwd == root
+	if strings.Contains(string(content), "module github.com/rijum8906/relay/") {
+		return false
+	}
+
+	return strings.Contains(string(content), "module github.com/rijum8906/relay")
 }
