@@ -1,11 +1,13 @@
-/*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-*/
+// Package cmd
 package cmd
 
 import (
 	"os"
 
+	dbcmd "github.com/rijum8906/relay/cli/cmd/db"
+	devcmd "github.com/rijum8906/relay/cli/cmd/dev"
+	initcmd "github.com/rijum8906/relay/cli/cmd/init"
+	testcmd "github.com/rijum8906/relay/cli/cmd/test"
 	"github.com/spf13/cobra"
 )
 
@@ -17,13 +19,8 @@ var rootCmd = &cobra.Command{
 
 Use it to set up the workspace, prepare local environment files, and run
 development services without repeating the underlying Go and Docker commands.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -32,4 +29,8 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.AddCommand(initcmd.InitCmd)
+	rootCmd.AddCommand(devcmd.DevCmd)
+	rootCmd.AddCommand(dbcmd.DBCMd)
+	rootCmd.AddCommand(testcmd.TestCmd)
 }
