@@ -4,10 +4,10 @@ package cmd
 import (
 	"os"
 
-	dbcmd "github.com/rijum8906/relay/cli/cmd/db"
-	devcmd "github.com/rijum8906/relay/cli/cmd/dev"
-	initcmd "github.com/rijum8906/relay/cli/cmd/init"
-	testcmd "github.com/rijum8906/relay/cli/cmd/test"
+	dbcmd "github.com/rijum8906/relay/rcli/cmd/db"
+	devcmd "github.com/rijum8906/relay/rcli/cmd/dev"
+	initcmd "github.com/rijum8906/relay/rcli/cmd/init"
+	testcmd "github.com/rijum8906/relay/rcli/cmd/test"
 	"github.com/spf13/cobra"
 )
 

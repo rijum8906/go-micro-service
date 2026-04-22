@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/rijum8906/relay/packages/core/testutils"
-	migrations "github.com/rijum8906/relay/services/notification-service/db"
 	"github.com/spf13/cobra"
 )
 
@@ -26,16 +26,14 @@ var testSetupCmd = &cobra.Command{
 
 		pool := testutils.MustConnectDB()
 
-		migrations, err := migrations.All()
+		content, err := os.ReadFile("db/schema.sql")
 		if err != nil {
 			panic(err)
 		}
 
-		for _, m := range migrations {
-			_, err = pool.Exec(context.Background(), m.Content)
-			if err != nil {
-				fmt.Printf("failed to apply migration %s: %v", m.Name, err)
-			}
+		_, err = pool.Exec(context.Background(), string(content))
+		if err != nil {
+			fmt.Printf("failed to apply migration %s: %v", "db/schema.sql", err)
 		}
 
 		fmt.Println("Test environment setup complete.")

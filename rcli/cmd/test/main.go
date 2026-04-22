@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rijum8906/relay/cli/utils"
+	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
 )
 

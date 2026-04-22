@@ -3,11 +3,11 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
 // MustConnectDB connects to database with default config
@@ -52,7 +52,7 @@ func CreateDatabase(pool *pgxpool.Pool, name string) error {
 		name,
 	).Scan(&exists)
 	if err != nil {
-		return apperror.ErrInternal.WithDetail("error", err.Error())
+		return errors.New("error checking if database exists")
 	}
 
 	if exists {
@@ -63,7 +63,7 @@ func CreateDatabase(pool *pgxpool.Pool, name string) error {
 	sql := "CREATE DATABASE " + name
 	_, err = pool.Exec(ctx, sql)
 	if err != nil {
-		return apperror.ErrInternal.WithDetail("error", err.Error())
+		return errors.New("error creating database")
 	}
 
 	return nil
