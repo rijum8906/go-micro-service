@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	Config  *utils.Environment
+	config  *utils.Environment
 	nameVar string
 	count   int
 )
@@ -24,8 +24,21 @@ var migrateApplyCmd = &cobra.Command{
 	Short:   "Apply atlas migrations",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.RunCommand("atlas", "migrate", "apply",
-			"--url", utils.GetDBURL(Config),
+			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir())
+	},
+}
+
+var migrateSchemaCmd = &cobra.Command{
+	Use:   "schema",
+	Short: "Sync database schema",
+	Run: func(cmd *cobra.Command, args []string) {
+		utils.RunCommand("atlas",
+			"schema", "apply",
+			"--url", utils.GetDBURL(config),
+			"--dev-url", utils.GetDevDBURL(config),
+			"--file", utils.GetSchemaDir(),
+			"--auto-approve")
 	},
 }
 
@@ -35,7 +48,7 @@ var migrateStatusCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.RunCommand("atlas",
 			"migrate", "status",
-			"--url", utils.GetDBURL(Config),
+			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir())
 	},
 }
@@ -48,7 +61,7 @@ var migrateCreateCmd = &cobra.Command{
 		utils.RunCommand("atlas", "migrate", "diff", nameVar,
 			"--dir", utils.GetMigrationDir(),
 			"--to", utils.GetSchemaDir(),
-			"--dev-url", utils.GetDevDBURL(Config))
+			"--dev-url", utils.GetDevDBURL(config))
 	},
 }
 
@@ -72,15 +85,15 @@ var migrateRollbackCmd = &cobra.Command{
 	Short: "Rollback atlas migrations",
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.RunCommand("atlas", "migrate", "down", fmt.Sprint(count),
-			"--url", utils.GetDBURL(Config),
+			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir(),
-			"--dev-url", utils.GetDevDBURL(Config))
+			"--dev-url", utils.GetDevDBURL(config))
 	},
 }
 
 func init() {
 	if utils.IsServiceDir() {
-		Config = utils.MustLoadEnv()
+		config = utils.MustLoadEnv()
 	}
 
 	migrateCreateCmd.Flags().StringVarP(&nameVar, "name", "n", "", "Migration name")
@@ -91,6 +104,7 @@ func init() {
 	migrateRollbackCmd.MarkFlagRequired("count")
 
 	migrateCmd.AddCommand(migrateApplyCmd)
+	migrateCmd.AddCommand(migrateSchemaCmd)
 	migrateCmd.AddCommand(migrateStatusCmd)
 	migrateCmd.AddCommand(migrateCreateCmd)
 	migrateCmd.AddCommand(migrateRehashCmd)
