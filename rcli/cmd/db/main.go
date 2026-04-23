@@ -22,24 +22,22 @@ var DBCMd = &cobra.Command{
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the database",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !utils.IsRootDir() {
-			fmt.Println("❌ Must be run from root directory")
-			return
+			return fmt.Errorf("must be run from the project root directory")
 		}
 		// Find all schema.sql files
 		services, err := filepath.Glob("services/*/db/schema.sql")
 		if err != nil {
-			fmt.Printf("❌ Failed to find services: %v\n", err)
-			return
+			return fmt.Errorf("find service schemas: %w", err)
 		}
 
 		if len(services) == 0 {
-			fmt.Println("⚠️  No services found with db/schema.sql")
-			return
+			fmt.Println("\n⚠️  No services found with db/schema.sql")
+			return nil
 		}
 
-		fmt.Printf("🔧 Setting up database for %d service(s)...\n", len(services))
+		fmt.Printf("\n🗄️  Setting up databases for %d service(s)\n", len(services))
 
 		var failedServices []string
 
@@ -69,17 +67,18 @@ var initCmd = &cobra.Command{
 				continue
 			}
 
-			fmt.Printf("✅ Service %s initialized\n", serviceName)
+			fmt.Printf("✅ Initialized service: %s\n", serviceName)
 		}
 
 		// Summary
-		fmt.Println("\n" + strings.Repeat("=", 50))
+		fmt.Printf("\n%s\n", strings.Repeat("=", 50))
 		if len(failedServices) > 0 {
-			fmt.Printf("❌ Failed services: %s\n", strings.Join(failedServices, ", "))
-			fmt.Println("⚠️  Database initialization completed with errors")
+			return fmt.Errorf("database initialization failed for: %s", strings.Join(failedServices, ", "))
 		} else {
 			fmt.Println("✅ All databases initialized successfully")
 		}
+
+		return nil
 	},
 }
 

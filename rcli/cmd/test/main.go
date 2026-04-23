@@ -10,8 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var config *utils.Environment
-
 var TestCmd = &cobra.Command{
 	Use:   "test",
 	Short: "Test commands",
@@ -20,41 +18,42 @@ var TestCmd = &cobra.Command{
 var testSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Setup test environment",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !utils.IsServiceDir() {
-			panic("Not in a service directory")
+			return fmt.Errorf("must be run from a service directory")
 		}
-		fmt.Println("🔧 Setting up test environment...")
+		fmt.Println("\n🧪 Setting up test environment")
 
-		pool := utils.MustConnectDB("localhost", 5433, "test_user", "test_password", "test_db", "disable")
+		pool, err := utils.ConnectDB(5433, "test_user", "test_password", "test_db", "disable")
+		if err != nil {
+			return err
+		}
+		defer pool.Close()
 
 		content, err := os.ReadFile("db/schema.sql")
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("read db/schema.sql: %w", err)
 		}
 
 		_, err = pool.Exec(context.Background(), string(content))
 		if err != nil {
-			fmt.Printf("failed to apply migration %s: %v", "db/schema.sql", err)
+			return fmt.Errorf("apply db/schema.sql: %w", err)
 		}
 
-		fmt.Println("Test environment setup complete.")
+		fmt.Println("\n✅ Test environment setup complete")
+		return nil
 	},
 }
 
 var testUpCmd = &cobra.Command{
 	Use:   "up",
 	Short: "Migrate database",
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.RunCommand("docker", "compose", "-f", "docker-compose.test.yml", "up", "--build")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return utils.RunCommand("docker", "compose", "-f", "docker-compose.test.yml", "up", "--build")
 	},
 }
 
 func init() {
-	if utils.IsServiceDir() {
-		config = utils.MustLoadEnv()
-	}
-
 	TestCmd.AddCommand(testSetupCmd)
 	TestCmd.AddCommand(testRunCmd)
 	TestCmd.AddCommand(testUpCmd)

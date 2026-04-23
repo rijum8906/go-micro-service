@@ -11,22 +11,27 @@ import (
 var devInstallCommand = &cobra.Command{
 	Use:   "install",
 	Short: "Install dependencies",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		currentOS := runtime.GOOS
-		fmt.Printf("⚙️ Running setup for %s\n", currentOS)
+		fmt.Printf("\n🔧 Running setup for %s\n", currentOS)
 
 		// Step 1: Install sqlc
-		utils.InstallGoPackage("sqlc", "github.com/sqlc-dev/sqlc/cmd/sqlc@latest")
+		if err := utils.InstallGoPackage("sqlc", "github.com/sqlc-dev/sqlc/cmd/sqlc@latest"); err != nil {
+			return err
+		}
 
 		// Step 2: Install Atlas
 		if currentOS == "linux" || currentOS == "darwin" {
-			utils.InstallCurlBinary("atlas", "https://atlasgo.sh")
+			if err := utils.InstallCurlBinary("atlas", "https://atlasgo.sh"); err != nil {
+				return err
+			}
 		} else {
-			fmt.Printf("⚠️ No installation command for %s, install manually\n", currentOS)
+			fmt.Printf("\n⚠️  No installation command for %s; install Atlas manually\n", currentOS)
 		}
 
 		// Done
-		fmt.Println("🎉 Setup complete")
+		fmt.Println("\n✅ Setup complete")
+		return nil
 	},
 }
 

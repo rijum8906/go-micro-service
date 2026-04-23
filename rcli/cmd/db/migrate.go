@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	config  *utils.Environment
 	nameVar string
 	count   int
 )
@@ -24,18 +23,26 @@ var migrateApplyCmd = &cobra.Command{
 	Use:     "apply",
 	Aliases: []string{"up"},
 	Short:   "Apply atlas migrations",
-	Run: func(cmd *cobra.Command, args []string) {
-		pool := utils.MustConnectDB(config.DBHost, config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
-		if err := utils.CreateDatabase(pool, config.DBName); err != nil {
-			fmt.Println(err)
-			return
-		}
-		if err := utils.CreateDatabase(pool, "dev_"+config.DBName); err != nil {
-			fmt.Println(err)
-			return
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := loadServiceConfig()
+		if err != nil {
+			return err
 		}
 
-		utils.RunCommand("atlas", "migrate", "apply",
+		pool, err := utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
+		if err != nil {
+			return err
+		}
+		defer pool.Close()
+
+		if err := utils.CreateDatabase(pool, config.DBName); err != nil {
+			return err
+		}
+		if err := utils.CreateDatabase(pool, utils.DevDBName); err != nil {
+			return err
+		}
+
+		return utils.RunCommand("atlas", "migrate", "apply",
 			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir())
 	},
@@ -44,42 +51,49 @@ var migrateApplyCmd = &cobra.Command{
 var migrateSQLApply = &cobra.Command{
 	Use:   "sql-apply",
 	Short: "Apply SQL migrations",
-	Run: func(cmd *cobra.Command, args []string) {
-		if !utils.IsServiceDir() {
-			fmt.Println("Not in a service directory")
-			return
-		}
-		content, err := os.ReadFile("db/schema.sql")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := loadServiceConfig()
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 
-		pool := utils.MustConnectDB(config.DBHost, config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
-		if err = utils.CreateDatabase(pool, config.DBName); err != nil {
-			fmt.Println(err)
-			return
+		content, err := os.ReadFile("db/schema.sql")
+		if err != nil {
+			return fmt.Errorf("read db/schema.sql: %w", err)
 		}
-		if err = utils.CreateDatabase(pool, "dev_"+config.DBName); err != nil {
-			fmt.Println(err)
-			return
+
+		pool, err := utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
+		if err != nil {
+			return err
+		}
+		defer pool.Close()
+		if err = utils.CreateDatabase(pool, config.DBName); err != nil {
+			return err
+		}
+		if err = utils.CreateDatabase(pool, utils.DevDBName); err != nil {
+			return err
 		}
 
 		_, err = pool.Exec(context.Background(), string(content))
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("apply db/schema.sql: %w", err)
 		}
 
-		fmt.Println("✅ Applied SQL migrations")
+		fmt.Println("\n✅ Applied SQL migrations")
+		return nil
 	},
 }
 
 var migrateSchemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "Sync database schema",
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.RunCommand("atlas",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := loadServiceConfig()
+		if err != nil {
+			return err
+		}
+
+		return utils.RunCommand("atlas",
 			"schema", "apply",
 			"--url", utils.GetDBURL(config),
 			"--dev-url", utils.GetDevDBURL(config),
@@ -88,11 +102,30 @@ var migrateSchemaCmd = &cobra.Command{
 	},
 }
 
+var migrateCleanCmd = &cobra.Command{
+	Use:   "clean",
+	Short: "Clean atlas migrations",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := loadServiceConfig()
+		if err != nil {
+			return err
+		}
+
+		return utils.RunCommand("atlas", "schema", "clean",
+			"--url", utils.GetDBURL(config))
+	},
+}
+
 var migrateStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show atlas status",
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.RunCommand("atlas",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := loadServiceConfig()
+		if err != nil {
+			return err
+		}
+
+		return utils.RunCommand("atlas",
 			"migrate", "status",
 			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir())
@@ -103,8 +136,13 @@ var migrateCreateCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"new"},
 	Short:   "Create a new atlas migration",
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.RunCommand("atlas", "migrate", "diff", nameVar,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := loadServiceConfig()
+		if err != nil {
+			return err
+		}
+
+		return utils.RunCommand("atlas", "migrate", "diff", nameVar,
 			"--dir", utils.GetMigrationDir(),
 			"--to", utils.GetSchemaDir(),
 			"--dev-url", utils.GetDevDBURL(config))
@@ -114,8 +152,12 @@ var migrateCreateCmd = &cobra.Command{
 var migrateRehashCmd = &cobra.Command{
 	Use:   "rehash",
 	Short: "Rehash atlas migrations",
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.RunCommand("atlas", "migrate", "rehash",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !utils.IsServiceDir() {
+			return fmt.Errorf("must be run from a service directory")
+		}
+
+		return utils.RunCommand("atlas", "migrate", "rehash",
 			"--dir", utils.GetMigrationDir())
 	},
 }
@@ -129,29 +171,39 @@ var migrateResetCommand = &cobra.Command{
 var migrateRollbackCmd = &cobra.Command{
 	Use:   "rollback",
 	Short: "Rollback atlas migrations",
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.RunCommand("atlas", "migrate", "down", fmt.Sprint(count),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		config, err := loadServiceConfig()
+		if err != nil {
+			return err
+		}
+
+		return utils.RunCommand("atlas", "migrate", "down", fmt.Sprint(count),
 			"--url", utils.GetDBURL(config),
 			"--dir", utils.GetMigrationDir(),
 			"--dev-url", utils.GetDevDBURL(config))
 	},
 }
 
-func init() {
-	if utils.IsServiceDir() {
-		config = utils.MustLoadEnv()
+func loadServiceConfig() (*utils.Environment, error) {
+	if !utils.IsServiceDir() {
+		return nil, fmt.Errorf("must be run from a service directory")
 	}
 
+	return utils.LoadEnv()
+}
+
+func init() {
 	migrateCreateCmd.Flags().StringVarP(&nameVar, "name", "n", "", "Migration name")
 	migrateRollbackCmd.Flags().IntVarP(&count, "count", "c", 1, "Number of migrations to rollback")
 
 	// Mark as required
-	migrateCreateCmd.MarkFlagRequired("name")
-	migrateRollbackCmd.MarkFlagRequired("count")
+	_ = migrateCreateCmd.MarkFlagRequired("name")
+	_ = migrateRollbackCmd.MarkFlagRequired("count")
 
 	migrateCmd.AddCommand(migrateApplyCmd)
 	migrateCmd.AddCommand(migrateSchemaCmd)
 	migrateCmd.AddCommand(migrateSQLApply)
+	migrateCmd.AddCommand(migrateCleanCmd)
 	migrateCmd.AddCommand(migrateStatusCmd)
 	migrateCmd.AddCommand(migrateCreateCmd)
 	migrateCmd.AddCommand(migrateRehashCmd)

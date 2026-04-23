@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/caarlos0/env"
 	"github.com/joho/godotenv"
 )
@@ -18,16 +20,13 @@ type Environment struct {
 	DBSSLMode  string `env:"DB_SSL_MODE" envDefault:"disable"`
 }
 
-func MustLoadEnv() *Environment {
-	// 1. Load .env file if it exists
+func LoadEnv() (*Environment, error) {
 	_ = godotenv.Load()
 
 	cfg := &Environment{}
-
-	// 2. Parse variables into the struct
 	if err := env.Parse(cfg); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("load environment: %w", err)
 	}
 
-	return cfg
+	return cfg, nil
 }

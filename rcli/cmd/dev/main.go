@@ -14,8 +14,8 @@ var DevCmd = &cobra.Command{
 var devUpCommand = &cobra.Command{
 	Use:     "start",
 	Aliases: []string{"run", "up"},
-	Run: func(cmd *cobra.Command, args []string) {
-		utils.RunCommand("docker", "compose", "up", "--build")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return utils.RunCommand("docker", "compose", "up", "--build")
 	},
 }
 

@@ -3,21 +3,22 @@ package utils
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// MustConnectDB connects to database with default config
-func MustConnectDB(host string, port int, user, pass, db, sslMode string) *pgxpool.Pool {
+const DevDBName = "dev_db"
+
+// ConnectDB connects to the database and verifies that it is reachable.
+func ConnectDB(port int, user, pass, db, sslMode string) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		user, pass, host, port, db, sslMode)
+		user, pass, "localhost", port, db, sslMode)
 
 	poolConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to parse DSN: %v", err))
+		return nil, fmt.Errorf("parse database config: %w", err)
 	}
 
 	poolConfig.MaxConns = 25
@@ -28,7 +29,7 @@ func MustConnectDB(host string, port int, user, pass, db, sslMode string) *pgxpo
 	ctx := context.Background()
 	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to create pool: %v", err))
+		return nil, fmt.Errorf("create database pool: %w", err)
 	}
 
 	// Test connection
@@ -37,10 +38,10 @@ func MustConnectDB(host string, port int, user, pass, db, sslMode string) *pgxpo
 
 	if err := pool.Ping(pingCtx); err != nil {
 		pool.Close()
-		panic(fmt.Sprintf("Database unreachable: %v", err))
+		return nil, fmt.Errorf("database is unreachable: %w", err)
 	}
 
-	return pool
+	return pool, nil
 }
 
 func CreateDatabase(pool *pgxpool.Pool, name string) error {
@@ -52,7 +53,7 @@ func CreateDatabase(pool *pgxpool.Pool, name string) error {
 		name,
 	).Scan(&exists)
 	if err != nil {
-		return errors.New("error checking if database exists")
+		return fmt.Errorf("check whether database %q exists: %w", name, err)
 	}
 
 	if exists {
@@ -63,7 +64,7 @@ func CreateDatabase(pool *pgxpool.Pool, name string) error {
 	sql := "CREATE DATABASE " + name
 	_, err = pool.Exec(ctx, sql)
 	if err != nil {
-		return errors.New("error creating database")
+		return fmt.Errorf("create database %q: %w", name, err)
 	}
 
 	return nil
