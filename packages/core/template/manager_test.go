@@ -122,10 +122,10 @@ func TestTemplateManager_ValidateData(t *testing.T) {
 		{
 			name: "invalid email verification dto",
 			data: dto.EmailVerificationDTO{
-				ClientName:        "John Doe",
-				ClientEmail:       "invalid-email",
-				VerificationToken: "",
-				Validity:          "",
+				ClientName:      "John Doe",
+				ClientEmail:     "invalid-email",
+				VerificationURL: "",
+				Validity:        "",
 			},
 			wantErr:  true,
 			wantCode: apperror.CodeValidation,
@@ -202,10 +202,10 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 			name:         "email verification",
 			templateType: template.TemplateTypeEmailVerification,
 			data: dto.EmailVerificationDTO{
-				ClientName:        "John Doe",
-				ClientEmail:       "john@example.com",
-				VerificationToken: "verify-123",
-				Validity:          "15 minutes",
+				ClientName:      "John Doe",
+				ClientEmail:     "john@example.com",
+				VerificationURL: "verify-123",
+				Validity:        "15 minutes",
 			},
 			wantContains: []string{
 				"John Doe",
@@ -219,7 +219,6 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
