@@ -7,7 +7,13 @@ import (
 	"net"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/app/config"
+	taskdb "github.com/rijum8906/relay/services/task-service/internal/db"
+	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
+	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
+	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
+	taskutils "github.com/rijum8906/relay/services/task-service/internal/utils"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -51,10 +57,21 @@ func (a *Application) initUtils() *apperror.AppError {
 }
 
 func (a *Application) initServices() *apperror.AppError {
+	queries := taskdb.New(a.infra.database)
+	repose := &taskutils.Repos{
+		Task: taskrepo.NewTaskRepository(queries),
+	}
+
+	taskService, appErr := taskservice.NewTaskService(repose)
+	if appErr != nil {
+		return appErr
+	}
+	a.services.task = taskService
 	return nil
 }
 
 func (a *Application) initHandler() *apperror.AppError {
+	a.services.taskHandler = handler.NewTaskHandler(a.services.task)
 	return nil
 }
 
@@ -72,6 +89,8 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 	if a.config.AppEnv == "development" {
 		reflection.Register(server)
 	}
+
+	taskv1.RegisterTaskServiceServer(server, a.services.taskHandler)
 
 	return nil
 }

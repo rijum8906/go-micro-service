@@ -10,6 +10,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/services/task-service/app/config"
+	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
+	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -24,7 +26,10 @@ type ApplicationUtils struct {
 	logger *zap.Logger
 }
 
-type ApplicationServices struct{}
+type ApplicationServices struct {
+	task        taskservice.TaskService
+	taskHandler *handler.TaskHandler
+}
 
 type Application struct {
 	config   *config.Env
