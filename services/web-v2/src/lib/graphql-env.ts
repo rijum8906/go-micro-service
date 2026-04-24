@@ -12,10 +12,10 @@ function runtimeGraphqlUrlFromWindow(): string | undefined {
 }
 
 /**
- * URL du endpoint GraphQL, ordre de précédence :
- * 1. `window.__CONFIG__.GRAPHQL_URL` (injecté via `public/config.js` ou l’entrypoint Docker)
- * 2. `import.meta.env.VITE_GRAPHQL_URL` (build Vite / dev local)
- * 3. défaut localhost
+ * GraphQL endpoint URL, order of precedence:
+ * 1. `window.__CONFIG__.GRAPHQL_URL` (injected via `public/config.js` or the Docker entrypoint)
+ * 2. `import.meta.env.VITE_GRAPHQL_URL` (Vite build / local dev)
+ * 3. default: localhost
  */
 export function getGraphQLUrl(): string {
   const fromRuntime = runtimeGraphqlUrlFromWindow()
