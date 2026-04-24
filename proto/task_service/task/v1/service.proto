@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package task_service.task.v1;
+
+import "task_service/models/v1/model.proto";
+import "task_service/task/v1/request.proto";
+import "task_service/task/v1/response.proto";
+
+service TaskService {
+  rpc CreateTask(CreateTaskRequest) returns (task_service.models.v1.Task);
+  rpc GetTask(GetTaskRequest) returns (task_service.models.v1.Task);
+  rpc ListTasksByProject(ListTasksByProjectRequest) returns (ListTasksByProjectResponse);
+}
