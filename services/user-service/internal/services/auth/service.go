@@ -199,11 +199,16 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
+	verificationURL, appErr := utils.NewTokenURL(scopedToken, s.env.FrontendURL, s.env.EmailVerificationPath)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	if appErr = s.publisher.Publish(dto.JobEmailVerification, dto.EmailVerificationDTO{
-		ClientName:        prof.FirstName + " " + prof.LastName,
-		ClientEmail:       user.Email,
-		VerificationToken: scopedToken,
-		Validity:          "10 minutes",
+		ClientName:      prof.FirstName + " " + prof.LastName,
+		ClientEmail:     user.Email,
+		VerificationURL: verificationURL,
+		Validity:        "10 minutes",
 	}); appErr != nil {
 		return nil, appErr
 	}

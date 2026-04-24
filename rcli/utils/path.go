@@ -12,28 +12,27 @@ func IsDirectory(path string) bool {
 	return err == nil && info.IsDir()
 }
 
-func CopyFile(source, destination string) {
+func CopyFile(source, destination string) error {
 	sourceFilename := filepath.Base(source)
 	destFilename := filepath.Base(destination)
 
-	fmt.Printf("\n📦 Copying %s file to %s...\n", sourceFilename, destFilename)
-
 	sourceBytes, err := os.ReadFile(source)
 	if err != nil {
-		panic(fmt.Errorf("failed to read %s: %w", sourceFilename, err))
+		return fmt.Errorf("read %s: %w", sourceFilename, err)
 	}
 
 	destDir := filepath.Dir(destination)
 	// Skip if file already exists
 	if _, err := os.Stat(destination); err == nil {
-		fmt.Printf("  ⚠️  %s already exists in %s, skipping\n", destFilename, destDir)
-		return
+		fmt.Printf("⏭️  Skipping %s; it already exists in %s\n", destFilename, destDir)
+		return nil
 	}
 
 	if err := os.WriteFile(destination, sourceBytes, 0o644); err != nil {
-		panic(fmt.Errorf("failed to write %s to %s: %w", destFilename, destDir, err))
+		return fmt.Errorf("write %s to %s: %w", destFilename, destDir, err)
 	}
-	fmt.Printf("  ✅ Copied %s to %s\n", destFilename, destDir)
+
+	return nil
 }
 
 func IsServiceDir() bool {
@@ -83,11 +82,17 @@ func GetRootDir() (string, error) {
 }
 
 func IsRootDir() bool {
-	root, err := GetRootDir()
+	if _, err := os.Stat("go.mod"); err != nil {
+		return false
+	}
+	content, err := os.ReadFile("go.mod")
 	if err != nil {
 		return false
 	}
 
-	cwd, _ := os.Getwd()
-	return cwd == root
+	if strings.Contains(string(content), "module github.com/rijum8906/relay/") {
+		return false
+	}
+
+	return strings.Contains(string(content), "module github.com/rijum8906/relay")
 }

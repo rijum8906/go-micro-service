@@ -5,19 +5,26 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/rijum8906/relay/packages/core/broker/mocks"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
+	"github.com/rijum8906/relay/services/user/app/config"
 	"github.com/rijum8906/relay/services/user/internal/services/auth"
 	"github.com/rijum8906/relay/services/user/internal/services/session"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
+var (
+	mockPublisher = &mocks.MockPublisher{}
+	mockConfig    = &config.Env{}
+)
+
 func createTestAuthService() (auth.AuthService, *utils.Repos, *utils.ServiceUtils) {
 	repos := utils.NewTestRepos()
 	serviceUtils := utils.NewTestServiceUtils()
-	service, appErr := auth.NewAuthService(repos, serviceUtils, nil, nil)
+	service, appErr := auth.NewAuthService(repos, serviceUtils, mockConfig, mockPublisher)
 	if appErr != nil {
 		panic(appErr)
 	}

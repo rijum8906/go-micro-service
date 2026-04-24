@@ -1,0 +1,18 @@
+outpkg: mocks
+
+with-expecter: true
+all: false
+recursive: true
+inpackage: false
+
+packages:
+  github.com/rijum8906/relay/packages/core/broker:
+    config:
+      dir: ./broker/mocks
+      outpkg: mocks
+      with-expecter: true
+
+    interfaces:
+      Publisher:
+        config:
+          filename: mock_publisher.go

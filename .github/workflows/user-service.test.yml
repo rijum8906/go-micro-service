@@ -33,15 +33,12 @@ jobs:
           docker compose -f docker-compose.test.yml ps
 
       - name: Setup Workspace
-        run: make setup
-
-      - name: Install Dependencies
-        run: go mod download
+        run: |
+          go install ./rcli
+          rcli init project
 
       - name: Setup Atlas
         uses: ariga/setup-atlas@v0
-        with:
-          cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
 
       - name: Run Migration
         working-directory: services/user-service

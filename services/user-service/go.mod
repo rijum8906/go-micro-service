@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.9.0
+	github.com/jackc/pgx/v5 v5.9.2
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/rijum8906/relay/packages/core v0.0.0-20260324082703-6286eea9b4f5
 	github.com/rijum8906/relay/packages/pb v0.0.0-00010101000000-000000000000
@@ -19,11 +19,13 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.30.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/pgx v3.6.2+incompatible // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/nats-io/nats.go v1.50.0 // indirect
 	github.com/nats-io/nkeys v0.4.15 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/wneessen/go-mail v0.7.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
