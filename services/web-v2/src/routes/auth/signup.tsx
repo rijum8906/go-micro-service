@@ -45,6 +45,7 @@ function SignUpPage() {
         const displayName = [payload.profile.firstName, payload.profile.lastName].filter(Boolean).join(' ') || null
         createProfile({
           id: payload.profile.id,
+          userId: accountId,
           firstName: payload.profile.firstName,
           lastName: payload.profile.lastName,
           displayName,
@@ -54,8 +55,8 @@ function SignUpPage() {
           updatedAt: '',
         })
         createToken({
-          access_token: payload.tokens.accessToken.value,
-          refresh_token: payload.tokens.refreshToken.value,
+          accessToken: payload.tokens.accessToken,
+          refreshToken: payload.tokens.refreshToken,
         })
         toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
