@@ -6,7 +6,7 @@ import { useAuthStore } from '#/store/auth'
 import { signin } from '#/api/auth'
 import { signinSchema, type SigninSchemaType } from '#/schemas/auth'
 import { ThemeToggle } from '#/components/ThemeToggle'
-import { useThemeStore } from '#/store/theme'
+import { useIsDarkTheme } from '#/store/theme'
 import z from 'zod'
 
 const searchSchema = z.object({
@@ -22,8 +22,7 @@ function SignInPage() {
   const router = useRouter()
   const { redirect } = Route.useSearch()
   const { createToken, createAccount, createProfile, isSignedIn } = useAuthStore()
-  const { theme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const isDark = useIsDarkTheme()
 
   useEffect(() => {
     if (isSignedIn) {

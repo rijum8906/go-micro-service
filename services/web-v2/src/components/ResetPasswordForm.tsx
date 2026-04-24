@@ -3,7 +3,7 @@ import { useForm } from '@tanstack/react-form'
 import { toast } from 'sonner'
 import { resetPassword } from '#/api/auth'
 import { resetPasswordSchema } from '#/schemas/auth'
-import { useThemeStore } from '#/store/theme'
+import { useIsDarkTheme } from '#/store/theme'
 
 type Props = {
   /** Scoped token from URL path `/token/{scopedToken}` */
@@ -12,8 +12,7 @@ type Props = {
 
 export function ResetPasswordForm({ scopedToken }: Props) {
   const router = useRouter()
-  const { theme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const isDark = useIsDarkTheme()
 
   const form = useForm({
     defaultValues: {

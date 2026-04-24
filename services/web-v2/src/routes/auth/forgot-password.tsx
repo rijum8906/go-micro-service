@@ -4,15 +4,14 @@ import { toast } from 'sonner'
 import { requestPasswordReset } from '#/api/auth'
 import { requestPasswordResetSchema, type RequestPasswordResetSchemaType } from '#/schemas/auth'
 import { ThemeToggle } from '#/components/ThemeToggle'
-import { useThemeStore } from '#/store/theme'
+import { useIsDarkTheme } from '#/store/theme'
 
 export const Route = createFileRoute('/auth/forgot-password')({
   component: ForgotPasswordPage,
 })
 
 function ForgotPasswordPage() {
-  const { theme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const isDark = useIsDarkTheme()
 
   const form = useForm({
     defaultValues: { email: '' } as RequestPasswordResetSchemaType,
