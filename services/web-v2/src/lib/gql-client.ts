@@ -36,7 +36,7 @@ export async function gqlRequest<TData>(
     const base = e instanceof Error ? e.message : 'Network error'
     const message =
       /failed to fetch|networkerror|load failed/i.test(base)
-        ? `Cannot reach GraphQL at ${url}. Start graphql-gateway (e.g. \`make dev\` / docker compose) or set VITE_GRAPHQL_URL.`
+        ? `Cannot reach GraphQL at ${url}. Start graphql-gateway (e.g. \`make dev\` / docker compose), set VITE_GRAPHQL_URL for dev/build, or GRAPHQL_URL in the container so config.js exposes it.`
         : base
     return {
       success: false,
