@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAuthStore } from '#/store/auth'
 import { signup } from '#/api/auth'
@@ -24,9 +25,11 @@ function SignUpPage() {
   const { theme } = useThemeStore()
   const isDark = theme === 'dark'
 
-  if (isSignedIn) {
-    router.navigate({ to: redirect || '/' })
-  }
+  useEffect(() => {
+    if (isSignedIn) {
+      router.navigate({ to: redirect || '/' })
+    }
+  }, [isSignedIn, redirect, router])
 
   const form = useForm({
     defaultValues: {
