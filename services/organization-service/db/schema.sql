@@ -19,12 +19,16 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE organizations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name varchar(255) NOT NULL,
+    status varchar(30) NOT NULL DEFAULT 'active'
+        CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
     slug varchar(80) UNIQUE NOT NULL,
     description text,
     logo_url text,
     created_by uuid NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
+    deleted_at timestamptz,
+    deleted_by uuid NOT NULL,
 
     -- Ensures slugs are consistently lowercase to prevent case-sensitive duplicates
     CONSTRAINT chk_organizations_slug_lowercase CHECK (slug = lower(slug)),
@@ -52,11 +56,13 @@ CREATE TABLE organization_memberships (
         CHECK (role IN ('owner', 'admin', 'member')),
     status varchar(30) NOT NULL DEFAULT 'active'
         CHECK (status IN ('active', 'suspended', 'left')),
-    invited_by uuid,
+    invited_by uuid NOT NULL REFERENCES organization_memberships(id),
     joined_at timestamptz NOT NULL DEFAULT now(),
     left_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
+    deleted_at timestamptz,
+    deleted_by uuid NOT NULL REFERENCES organization_memberships(id),
 
     -- Prevents duplicate memberships for the same user in an organization
     CONSTRAINT uq_organization_memberships_org_user UNIQUE (organization_id, user_id)
@@ -90,7 +96,7 @@ CREATE TABLE organization_teams (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid,
+    deleted_by uuid NOT NULL REFERENCES organization_memberships(id),
 
     -- Team names must be unique within an organization (can't have two "Engineering" teams)
     CONSTRAINT uq_organization_teams_org_name UNIQUE (organization_id, name)
@@ -114,13 +120,13 @@ CREATE TRIGGER trg_organization_teams_updated_at
 CREATE TABLE organization_team_memberships (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    team_id uuid NOT NULL,
-    membership_id uuid NOT NULL,  -- References organization_memberships, not users directly
+    team_id uuid NOT NULL REFERENCES organization_teams(id),
+    membership_id uuid NOT NULL REFERENCES organization_memberships(id),  -- References organization_memberships, not users directly
     role varchar(30) NOT NULL DEFAULT 'member',
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,  -- Soft delete: when a member leaves a team
-    deleted_by uuid REFERENCES organization_memberships(id),
+    deleted_by uuid REFERENCES organization_team_memberships(id),
 
     CONSTRAINT fk_organization_team_memberships_team
         FOREIGN KEY (team_id)
@@ -168,11 +174,10 @@ CREATE TABLE organization_invitations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     email varchar(320) NOT NULL,
-    role varchar(30) NOT NULL DEFAULT 'member'
-        CHECK (role IN ('owner', 'admin', 'member')),
+    role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
-    invited_by uuid NOT NULL,
+    invited_by uuid NOT NULL REFERENCES organization_memberships(id),
     token_hash varchar(255) UNIQUE NOT NULL,  -- Store hash, not raw token for security
     expires_at timestamptz NOT NULL,           -- Tokens expire after N days
     accepted_by uuid,

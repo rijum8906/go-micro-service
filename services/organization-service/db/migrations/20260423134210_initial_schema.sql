@@ -9,16 +9,20 @@ $$;
 CREATE TABLE "organizations" (
   "id" uuid NOT NULL DEFAULT gen_random_uuid(),
   "name" character varying(255) NOT NULL,
+  "status" character varying(30) NOT NULL DEFAULT 'active',
   "slug" character varying(80) NOT NULL,
   "description" text NULL,
   "logo_url" text NULL,
   "created_by" uuid NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
+  "deleted_at" timestamptz NULL,
+  "deleted_by" uuid NOT NULL,
   PRIMARY KEY ("id"),
   CONSTRAINT "organizations_slug_key" UNIQUE ("slug"),
   CONSTRAINT "chk_organizations_slug_format" CHECK ((slug)::text ~ '^[a-z0-9-]+$'::text),
-  CONSTRAINT "chk_organizations_slug_lowercase" CHECK ((slug)::text = lower((slug)::text))
+  CONSTRAINT "chk_organizations_slug_lowercase" CHECK ((slug)::text = lower((slug)::text)),
+  CONSTRAINT "organizations_status_check" CHECK ((status)::text = ANY ((ARRAY['pending'::character varying, 'accepted'::character varying, 'revoked'::character varying, 'expired'::character varying])::text[]))
 );
 -- Set comment to table: "organizations"
 COMMENT ON TABLE "organizations" IS 'Core tenant/workspace entity that contains teams and members';
@@ -33,13 +37,17 @@ CREATE TABLE "organization_memberships" (
   "user_id" uuid NOT NULL,
   "role" character varying(30) NOT NULL DEFAULT 'member',
   "status" character varying(30) NOT NULL DEFAULT 'active',
-  "invited_by" uuid NULL,
+  "invited_by" uuid NOT NULL,
   "joined_at" timestamptz NOT NULL DEFAULT now(),
   "left_at" timestamptz NULL,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
+  "deleted_at" timestamptz NULL,
+  "deleted_by" uuid NOT NULL,
   PRIMARY KEY ("id"),
   CONSTRAINT "uq_organization_memberships_org_user" UNIQUE ("organization_id", "user_id"),
+  CONSTRAINT "organization_memberships_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "organization_memberships_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_memberships_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "organization_memberships_role_check" CHECK ((role)::text = ANY ((ARRAY['owner'::character varying, 'admin'::character varying, 'member'::character varying])::text[])),
   CONSTRAINT "organization_memberships_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying, 'left'::character varying])::text[]))
@@ -66,9 +74,10 @@ CREATE TABLE "organization_teams" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   "deleted_at" timestamptz NULL,
-  "deleted_by" uuid NULL,
+  "deleted_by" uuid NOT NULL,
   PRIMARY KEY ("id"),
   CONSTRAINT "uq_organization_teams_org_name" UNIQUE ("organization_id", "name"),
+  CONSTRAINT "organization_teams_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_teams_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- Create index "idx_organization_teams_organization_id" to table: "organization_teams"
@@ -91,8 +100,10 @@ CREATE TABLE "organization_team_memberships" (
   PRIMARY KEY ("id"),
   CONSTRAINT "fk_organization_team_memberships_membership" FOREIGN KEY ("membership_id") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "fk_organization_team_memberships_team" FOREIGN KEY ("team_id") REFERENCES "organization_teams" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "organization_team_memberships_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT "organization_team_memberships_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
+  CONSTRAINT "organization_team_memberships_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "organization_team_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "organization_team_memberships_membership_id_fkey" FOREIGN KEY ("membership_id") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "organization_team_memberships_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "organization_team_memberships_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "organization_teams" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 -- Create index "idx_organization_team_memberships_team_lookup" to table: "organization_team_memberships"
 CREATE INDEX "idx_organization_team_memberships_team_lookup" ON "organization_team_memberships" ("organization_id", "team_id") INCLUDE ("membership_id", "role") WHERE (deleted_at IS NULL);
@@ -154,8 +165,8 @@ CREATE TABLE "organization_invitations" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY ("id"),
   CONSTRAINT "organization_invitations_token_hash_key" UNIQUE ("token_hash"),
+  CONSTRAINT "organization_invitations_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_invitations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "organization_invitations_role_check" CHECK ((role)::text = ANY ((ARRAY['owner'::character varying, 'admin'::character varying, 'member'::character varying])::text[])),
   CONSTRAINT "organization_invitations_status_check" CHECK ((status)::text = ANY ((ARRAY['pending'::character varying, 'accepted'::character varying, 'revoked'::character varying, 'expired'::character varying])::text[]))
 );
 -- Create index "idx_organization_invitations_email" to table: "organization_invitations"

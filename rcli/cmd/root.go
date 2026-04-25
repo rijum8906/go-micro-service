@@ -37,6 +37,6 @@ func init() {
 	rootCmd.AddCommand(projectcmd.ProjectCmd)
 	rootCmd.AddCommand(initcmd.InitCmd)
 	rootCmd.AddCommand(devcmd.DevCmd)
-	rootCmd.AddCommand(dbcmd.DBCMd)
+	rootCmd.AddCommand(dbcmd.DBCmd)
 	rootCmd.AddCommand(testcmd.TestCmd)
 }
