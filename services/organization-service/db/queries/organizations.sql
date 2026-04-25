@@ -32,7 +32,7 @@ RETURNING *;
 
 -- name: DeleteOrganization :exec
 UPDATE organizations
-SET status = 'deleted', deleted_at = now()
+SET status = 'deleted', deleted_by = $2, deleted_at = now()
 WHERE id = $1;
 
 -- name: DeleteOrganizationHard :exec

@@ -22,7 +22,7 @@ CREATE TABLE "organizations" (
   CONSTRAINT "organizations_slug_key" UNIQUE ("slug"),
   CONSTRAINT "chk_organizations_slug_format" CHECK ((slug)::text ~ '^[a-z0-9-]+$'::text),
   CONSTRAINT "chk_organizations_slug_lowercase" CHECK ((slug)::text = lower((slug)::text)),
-  CONSTRAINT "organizations_status_check" CHECK ((status)::text = ANY ((ARRAY['pending'::character varying, 'accepted'::character varying, 'revoked'::character varying, 'expired'::character varying])::text[]))
+  CONSTRAINT "organizations_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'archived'::character varying, 'deleted'::character varying])::text[]))
 );
 -- Set comment to table: "organizations"
 COMMENT ON TABLE "organizations" IS 'Core tenant/workspace entity that contains teams and members';

@@ -20,7 +20,7 @@ CREATE TABLE organizations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name varchar(255) NOT NULL,
     status varchar(30) NOT NULL DEFAULT 'active'
-        CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
+        CHECK (status IN ('active', 'archived', 'deleted')),
     slug varchar(80) UNIQUE NOT NULL,
     description text,
     logo_url text,
@@ -28,7 +28,7 @@ CREATE TABLE organizations (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid NOT NULL,
+    deleted_by uuid,
 
     -- Ensures slugs are consistently lowercase to prevent case-sensitive duplicates
     CONSTRAINT chk_organizations_slug_lowercase CHECK (slug = lower(slug)),
