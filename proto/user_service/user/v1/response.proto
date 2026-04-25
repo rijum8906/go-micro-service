@@ -7,3 +7,7 @@ import "user_service/models/v1/model.proto";
 message GenerateScopedTokenResponse {
   user_service.models.v1.Token token = 1;
 }
+
+message CheckExistsResponse {
+  bool exists = 1;
+}
