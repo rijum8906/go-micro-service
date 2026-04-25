@@ -1,0 +1,3 @@
+syntax = "proto3";
+
+package organization_service.organization.v1;
