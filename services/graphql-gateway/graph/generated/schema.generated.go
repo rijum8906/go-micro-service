@@ -11,6 +11,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	taskdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/taskdto/task"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -33,7 +34,7 @@ type MutationResolver interface {
 	UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error)
 	UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error)
 	ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error)
-	CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.Task, error)
+	CreateTask(ctx context.Context, input taskdto.CreateTaskInput) (*model.Task, error)
 }
 type QueryResolver interface {
 	Empty(ctx context.Context) (*string, error)
@@ -42,8 +43,8 @@ type QueryResolver interface {
 	GetCurrentSession(ctx context.Context) (*model.Session, error)
 	MyProfile(ctx context.Context) (*model.Profile, error)
 	Me(ctx context.Context) (*model.User, error)
-	GetTask(ctx context.Context, input model.GetTaskInput) (*model.Task, error)
-	ListTasksByProject(ctx context.Context, input model.ListTasksByProjectInput) ([]*model.Task, error)
+	GetTask(ctx context.Context, input taskdto.GetTaskInput) (*model.Task, error)
+	ListTasksByProject(ctx context.Context, input taskdto.ListTasksByProjectInput) ([]*model.Task, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -64,7 +65,7 @@ func (ec *executionContext) field_Mutation_ChangePassword_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_CreateTask_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTaskInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐCreateTaskInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTaskInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋtaskdtoᚋtaskᚐCreateTaskInput)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +241,7 @@ func (ec *executionContext) field_Query_GetSessions_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_GetTask_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGetTaskInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGetTaskInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNGetTaskInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋtaskdtoᚋtaskᚐGetTaskInput)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +252,7 @@ func (ec *executionContext) field_Query_GetTask_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_ListTasksByProject_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNListTasksByProjectInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐListTasksByProjectInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNListTasksByProjectInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋtaskdtoᚋtaskᚐListTasksByProjectInput)
 	if err != nil {
 		return nil, err
 	}
@@ -995,7 +996,7 @@ func (ec *executionContext) _Mutation_CreateTask(ctx context.Context, field grap
 		ec.fieldContext_Mutation_CreateTask,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().CreateTask(ctx, fc.Args["input"].(model.CreateTaskInput))
+			return ec.Resolvers.Mutation().CreateTask(ctx, fc.Args["input"].(taskdto.CreateTaskInput))
 		},
 		nil,
 		ec.marshalNTask2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTask,
@@ -1356,7 +1357,7 @@ func (ec *executionContext) _Query_GetTask(ctx context.Context, field graphql.Co
 		ec.fieldContext_Query_GetTask,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().GetTask(ctx, fc.Args["input"].(model.GetTaskInput))
+			return ec.Resolvers.Query().GetTask(ctx, fc.Args["input"].(taskdto.GetTaskInput))
 		},
 		nil,
 		ec.marshalNTask2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTask,
@@ -1437,7 +1438,7 @@ func (ec *executionContext) _Query_ListTasksByProject(ctx context.Context, field
 		ec.fieldContext_Query_ListTasksByProject,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().ListTasksByProject(ctx, fc.Args["input"].(model.ListTasksByProjectInput))
+			return ec.Resolvers.Query().ListTasksByProject(ctx, fc.Args["input"].(taskdto.ListTasksByProjectInput))
 		},
 		nil,
 		ec.marshalNTask2ᚕᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTaskᚄ,

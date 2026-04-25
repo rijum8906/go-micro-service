@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	taskdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/taskdto/task"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -43,7 +44,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		ChangePassword           func(childComplexity int, input userdto.ChangePasswordInput) int
-		CreateTask               func(childComplexity int, input model.CreateTaskInput) int
+		CreateTask               func(childComplexity int, input taskdto.CreateTaskInput) int
 		Empty                    func(childComplexity int) int
 		GenerateScopedToken      func(childComplexity int, input userdto.GenerateScopedTokenInput) int
 		Login                    func(childComplexity int, input userdto.LoginInput) int
@@ -80,8 +81,8 @@ type ComplexityRoot struct {
 		GetActiveSessions  func(childComplexity int, input model.ScopedTokenInput) int
 		GetCurrentSession  func(childComplexity int) int
 		GetSessions        func(childComplexity int, input *model.GetSessionsInput) int
-		GetTask            func(childComplexity int, input model.GetTaskInput) int
-		ListTasksByProject func(childComplexity int, input model.ListTasksByProjectInput) int
+		GetTask            func(childComplexity int, input taskdto.GetTaskInput) int
+		ListTasksByProject func(childComplexity int, input taskdto.ListTasksByProjectInput) int
 		Me                 func(childComplexity int) int
 		MyProfile          func(childComplexity int) int
 	}
@@ -210,7 +211,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.CreateTask(childComplexity, args["input"].(model.CreateTaskInput)), true
+		return e.ComplexityRoot.Mutation.CreateTask(childComplexity, args["input"].(taskdto.CreateTaskInput)), true
 
 	case "Mutation._empty":
 		if e.ComplexityRoot.Mutation.Empty == nil {
@@ -486,7 +487,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.GetTask(childComplexity, args["input"].(model.GetTaskInput)), true
+		return e.ComplexityRoot.Query.GetTask(childComplexity, args["input"].(taskdto.GetTaskInput)), true
 
 	case "Query.ListTasksByProject":
 		if e.ComplexityRoot.Query.ListTasksByProject == nil {
@@ -498,7 +499,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.ListTasksByProject(childComplexity, args["input"].(model.ListTasksByProjectInput)), true
+		return e.ComplexityRoot.Query.ListTasksByProject(childComplexity, args["input"].(taskdto.ListTasksByProjectInput)), true
 
 	case "Query.Me":
 		if e.ComplexityRoot.Query.Me == nil {

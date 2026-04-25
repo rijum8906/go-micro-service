@@ -12,6 +12,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/token"
+	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
@@ -33,10 +34,12 @@ type ApplicationUtils struct {
 }
 
 type GrpcClients struct {
-	Conn          *grpc.ClientConn
+	UserConn      *grpc.ClientConn
+	TaskConn      *grpc.ClientConn
 	AuthClient    authv1.AuthServiceClient
 	UserClient    userv1.UserServiceClient
 	SessionClient sessionv1.SessionServiceClient
+	TaskClient    taskv1.TaskServiceClient
 }
 
 type Application struct {
@@ -104,6 +107,7 @@ func (a *Application) initHTTPServer() *apperror.AppError {
 		AuthClient:    a.clients.AuthClient,
 		SessionClient: a.clients.SessionClient,
 		UserClient:    a.clients.UserClient,
+		TaskClient:    a.clients.TaskClient,
 	}, a.utils.token)
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: res}))
 

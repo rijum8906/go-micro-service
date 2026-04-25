@@ -17,16 +17,6 @@ type AuthTokens struct {
 	RefreshToken *Token `json:"refreshToken"`
 }
 
-type CreateTaskInput struct {
-	Title          string  `json:"title"`
-	OrganizationID *string `json:"organizationId,omitempty"`
-	ProjectID      *string `json:"projectId,omitempty"`
-	ParentTaskID   *string `json:"parentTaskId,omitempty"`
-	Description    *string `json:"description,omitempty"`
-	Priority       *string `json:"priority,omitempty"`
-	DueAt          *string `json:"dueAt,omitempty"`
-}
-
 type EmailInput struct {
 	Email string               `json:"email"`
 	Meta  *coredto.RequestMeta `json:"meta"`
@@ -34,14 +24,6 @@ type EmailInput struct {
 
 type GetSessionsInput struct {
 	PaginationRequest *PaginationInput `json:"paginationRequest"`
-}
-
-type GetTaskInput struct {
-	ID string `json:"id"`
-}
-
-type ListTasksByProjectInput struct {
-	ProjectID string `json:"projectId"`
 }
 
 type Mutation struct {

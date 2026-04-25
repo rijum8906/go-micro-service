@@ -12,6 +12,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/cache"
 	"github.com/rijum8906/relay/packages/core/token"
+	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
@@ -112,20 +113,28 @@ func (a *Application) initUtils() *apperror.AppError {
 }
 
 func (a *Application) initGRPCClients() *apperror.AppError {
-	conn, err := grpc.NewClient(a.config.UserServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userConn, err := grpc.NewClient(a.config.UserServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return apperror.ErrThirdParty.WithMessage("failed to connect to user service").WithDetail("error", err.Error())
 	}
 
-	// Initialize gRPC clients
-	authClient := authv1.NewAuthServiceClient(conn)
-	userClinet := userv1.NewUserServiceClient(conn)
-	sessionClient := sessionv1.NewSessionServiceClient(conn)
+	taskConn, err := grpc.NewClient(a.config.TaskServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		_ = userConn.Close()
+		return apperror.ErrThirdParty.WithMessage("failed to connect to task service").WithDetail("error", err.Error())
+	}
+
+	authClient := authv1.NewAuthServiceClient(userConn)
+	userClient := userv1.NewUserServiceClient(userConn)
+	sessionClient := sessionv1.NewSessionServiceClient(userConn)
+	taskClient := taskv1.NewTaskServiceClient(taskConn)
 	a.clients = &GrpcClients{
-		Conn:          conn,
+		UserConn:      userConn,
+		TaskConn:      taskConn,
 		AuthClient:    authClient,
-		UserClient:    userClinet,
+		UserClient:    userClient,
 		SessionClient: sessionClient,
+		TaskClient:    taskClient,
 	}
 
 	return nil
@@ -147,8 +156,12 @@ func (a *Application) Shutdown(ctx context.Context) {
 		_ = a.server.Shutdown(shutdownCtx)
 	}
 
-	if a.clients != nil && a.clients.Conn != nil {
-		_ = a.clients.Conn.Close()
+	if a.clients != nil && a.clients.UserConn != nil {
+		_ = a.clients.UserConn.Close()
+	}
+
+	if a.clients != nil && a.clients.TaskConn != nil {
+		_ = a.clients.TaskConn.Close()
 	}
 
 	if a.infra != nil && a.infra.cache != nil {
