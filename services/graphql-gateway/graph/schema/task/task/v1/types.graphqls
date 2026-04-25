@@ -1,0 +1,21 @@
+type Task {
+    id: ID!
+    organizationId: ID
+    projectId: ID
+    parentTaskId: ID
+    createdBy: ID!
+    updatedBy: ID
+    title: String!
+    description: String!
+    status: String!
+    priority: String!
+    progressPercent: Int!
+    startedAt: DateTime
+    dueAt: DateTime
+    completedAt: DateTime
+    archivedAt: DateTime
+    deletedAt: DateTime
+    deletedBy: ID
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}

@@ -1,0 +1,4 @@
+extend type Query {
+    GetTask(input: GetTaskInput!): Task!
+    ListTasksByProject(input: ListTasksByProjectInput!): [Task!]!
+}

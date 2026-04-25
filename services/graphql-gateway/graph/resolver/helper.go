@@ -2,6 +2,8 @@ package resolver
 
 import (
 	"context"
+	"strings"
+	"time"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
@@ -10,6 +12,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // attachClientInfo attach client info to context
@@ -57,4 +60,25 @@ func parseScopedToken(method token.AuthMethod, scope token.TokenScope) (corev1.A
 	}
 
 	return authMethod, tokenScope, nil
+}
+
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+
+	return strings.TrimSpace(*value)
+}
+
+func parseOptionalDateTime(value *string, field string) (*timestamppb.Timestamp, *apperror.AppError) {
+	if value == nil || strings.TrimSpace(*value) == "" {
+		return nil, nil
+	}
+
+	parsed, err := time.Parse(time.RFC3339, strings.TrimSpace(*value))
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid datetime").WithDetail("field", field).WithDetail("error", err.Error())
+	}
+
+	return timestamppb.New(parsed), nil
 }

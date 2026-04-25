@@ -81,6 +81,28 @@ type Session struct {
 	UpdatedAt    string `json:"updatedAt"`
 }
 
+type Task struct {
+	ID              string  `json:"id"`
+	OrganizationID  *string `json:"organizationId,omitempty"`
+	ProjectID       *string `json:"projectId,omitempty"`
+	ParentTaskID    *string `json:"parentTaskId,omitempty"`
+	CreatedBy       string  `json:"createdBy"`
+	UpdatedBy       *string `json:"updatedBy,omitempty"`
+	Title           string  `json:"title"`
+	Description     string  `json:"description"`
+	Status          string  `json:"status"`
+	Priority        string  `json:"priority"`
+	ProgressPercent int32   `json:"progressPercent"`
+	StartedAt       *string `json:"startedAt,omitempty"`
+	DueAt           *string `json:"dueAt,omitempty"`
+	CompletedAt     *string `json:"completedAt,omitempty"`
+	ArchivedAt      *string `json:"archivedAt,omitempty"`
+	DeletedAt       *string `json:"deletedAt,omitempty"`
+	DeletedBy       *string `json:"deletedBy,omitempty"`
+	CreatedAt       string  `json:"createdAt"`
+	UpdatedAt       string  `json:"updatedAt"`
+}
+
 type Token struct {
 	Value     string `json:"value"`
 	ExpiresAt string `json:"expiresAt"`

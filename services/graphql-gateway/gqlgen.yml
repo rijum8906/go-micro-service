@@ -1,6 +1,7 @@
 schema:
   - ./graph/schema/core/**/*.graphqls
   - ./graph/schema/user/**/*.graphqls
+  - ./graph/schema/task/**/*.graphqls
 
 exec:
   package: generated
@@ -23,6 +24,7 @@ call_argument_directives_with_null: true
 autobind:
   - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
   - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
+  - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/taskdto/task"
   - "github.com/rijum8906/relay/packages/core/token"
 
 models:

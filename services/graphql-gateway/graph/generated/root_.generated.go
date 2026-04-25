@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	taskdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/taskdto/task"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -43,6 +44,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		ChangePassword           func(childComplexity int, input userdto.ChangePasswordInput) int
+		CreateTask               func(childComplexity int, input taskdto.CreateTaskInput) int
 		Empty                    func(childComplexity int) int
 		GenerateScopedToken      func(childComplexity int, input userdto.GenerateScopedTokenInput) int
 		Login                    func(childComplexity int, input userdto.LoginInput) int
@@ -75,12 +77,14 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Empty             func(childComplexity int) int
-		GetActiveSessions func(childComplexity int, input model.ScopedTokenInput) int
-		GetCurrentSession func(childComplexity int) int
-		GetSessions       func(childComplexity int, input *model.GetSessionsInput) int
-		Me                func(childComplexity int) int
-		MyProfile         func(childComplexity int) int
+		Empty              func(childComplexity int) int
+		GetActiveSessions  func(childComplexity int, input model.ScopedTokenInput) int
+		GetCurrentSession  func(childComplexity int) int
+		GetSessions        func(childComplexity int, input *model.GetSessionsInput) int
+		GetTask            func(childComplexity int, input taskdto.GetTaskInput) int
+		ListTasksByProject func(childComplexity int, input taskdto.ListTasksByProjectInput) int
+		Me                 func(childComplexity int) int
+		MyProfile          func(childComplexity int) int
 	}
 
 	ScopedTokenResponse struct {
@@ -95,6 +99,28 @@ type ComplexityRoot struct {
 		RefreshToken func(childComplexity int) int
 		UpdatedAt    func(childComplexity int) int
 		UserID       func(childComplexity int) int
+	}
+
+	Task struct {
+		ArchivedAt      func(childComplexity int) int
+		CompletedAt     func(childComplexity int) int
+		CreatedAt       func(childComplexity int) int
+		CreatedBy       func(childComplexity int) int
+		DeletedAt       func(childComplexity int) int
+		DeletedBy       func(childComplexity int) int
+		Description     func(childComplexity int) int
+		DueAt           func(childComplexity int) int
+		ID              func(childComplexity int) int
+		OrganizationID  func(childComplexity int) int
+		ParentTaskID    func(childComplexity int) int
+		Priority        func(childComplexity int) int
+		ProgressPercent func(childComplexity int) int
+		ProjectID       func(childComplexity int) int
+		StartedAt       func(childComplexity int) int
+		Status          func(childComplexity int) int
+		Title           func(childComplexity int) int
+		UpdatedAt       func(childComplexity int) int
+		UpdatedBy       func(childComplexity int) int
 	}
 
 	Token struct {
@@ -174,6 +200,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.ChangePassword(childComplexity, args["input"].(userdto.ChangePasswordInput)), true
+
+	case "Mutation.CreateTask":
+		if e.ComplexityRoot.Mutation.CreateTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_CreateTask_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CreateTask(childComplexity, args["input"].(taskdto.CreateTaskInput)), true
 
 	case "Mutation._empty":
 		if e.ComplexityRoot.Mutation.Empty == nil {
@@ -439,6 +477,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.GetSessions(childComplexity, args["input"].(*model.GetSessionsInput)), true
 
+	case "Query.GetTask":
+		if e.ComplexityRoot.Query.GetTask == nil {
+			break
+		}
+
+		args, err := ec.field_Query_GetTask_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GetTask(childComplexity, args["input"].(taskdto.GetTaskInput)), true
+
+	case "Query.ListTasksByProject":
+		if e.ComplexityRoot.Query.ListTasksByProject == nil {
+			break
+		}
+
+		args, err := ec.field_Query_ListTasksByProject_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.ListTasksByProject(childComplexity, args["input"].(taskdto.ListTasksByProjectInput)), true
+
 	case "Query.Me":
 		if e.ComplexityRoot.Query.Me == nil {
 			break
@@ -508,6 +570,139 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Session.UserID(childComplexity), true
+
+	case "Task.archivedAt":
+		if e.ComplexityRoot.Task.ArchivedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.ArchivedAt(childComplexity), true
+
+	case "Task.completedAt":
+		if e.ComplexityRoot.Task.CompletedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.CompletedAt(childComplexity), true
+
+	case "Task.createdAt":
+		if e.ComplexityRoot.Task.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.CreatedAt(childComplexity), true
+
+	case "Task.createdBy":
+		if e.ComplexityRoot.Task.CreatedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.CreatedBy(childComplexity), true
+
+	case "Task.deletedAt":
+		if e.ComplexityRoot.Task.DeletedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.DeletedAt(childComplexity), true
+
+	case "Task.deletedBy":
+		if e.ComplexityRoot.Task.DeletedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.DeletedBy(childComplexity), true
+
+	case "Task.description":
+		if e.ComplexityRoot.Task.Description == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.Description(childComplexity), true
+
+	case "Task.dueAt":
+		if e.ComplexityRoot.Task.DueAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.DueAt(childComplexity), true
+
+	case "Task.id":
+		if e.ComplexityRoot.Task.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.ID(childComplexity), true
+
+	case "Task.organizationId":
+		if e.ComplexityRoot.Task.OrganizationID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.OrganizationID(childComplexity), true
+
+	case "Task.parentTaskId":
+		if e.ComplexityRoot.Task.ParentTaskID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.ParentTaskID(childComplexity), true
+
+	case "Task.priority":
+		if e.ComplexityRoot.Task.Priority == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.Priority(childComplexity), true
+
+	case "Task.progressPercent":
+		if e.ComplexityRoot.Task.ProgressPercent == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.ProgressPercent(childComplexity), true
+
+	case "Task.projectId":
+		if e.ComplexityRoot.Task.ProjectID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.ProjectID(childComplexity), true
+
+	case "Task.startedAt":
+		if e.ComplexityRoot.Task.StartedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.StartedAt(childComplexity), true
+
+	case "Task.status":
+		if e.ComplexityRoot.Task.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.Status(childComplexity), true
+
+	case "Task.title":
+		if e.ComplexityRoot.Task.Title == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.Title(childComplexity), true
+
+	case "Task.updatedAt":
+		if e.ComplexityRoot.Task.UpdatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.UpdatedAt(childComplexity), true
+
+	case "Task.updatedBy":
+		if e.ComplexityRoot.Task.UpdatedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Task.UpdatedBy(childComplexity), true
 
 	case "Token.expiresAt":
 		if e.ComplexityRoot.Token.ExpiresAt == nil {
@@ -588,9 +783,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputChangePasswordInput,
+		ec.unmarshalInputCreateTaskInput,
 		ec.unmarshalInputEmailInput,
 		ec.unmarshalInputGenerateScopedTokenInput,
 		ec.unmarshalInputGetSessionsInput,
+		ec.unmarshalInputGetTaskInput,
+		ec.unmarshalInputListTasksByProjectInput,
 		ec.unmarshalInputLoginInput,
 		ec.unmarshalInputLogoutInput,
 		ec.unmarshalInputPaginationInput,
@@ -910,5 +1108,54 @@ input ChangePasswordInput {
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/user/v1/types.graphqls", Input: ``, BuiltIn: false},
+	{Name: "../schema/task/task/v1/inputs.graphqls", Input: `input CreateTaskInput {
+    title: String!
+    organizationId: ID
+    projectId: ID
+    parentTaskId: ID
+    description: String
+    priority: String
+    dueAt: DateTime
+}
+
+input GetTaskInput {
+    id: ID!
+}
+
+input ListTasksByProjectInput {
+    projectId: ID!
+}
+`, BuiltIn: false},
+	{Name: "../schema/task/task/v1/mutations.graphqls", Input: `extend type Mutation {
+    CreateTask(input: CreateTaskInput!): Task!
+}
+`, BuiltIn: false},
+	{Name: "../schema/task/task/v1/queries.graphqls", Input: `extend type Query {
+    GetTask(input: GetTaskInput!): Task!
+    ListTasksByProject(input: ListTasksByProjectInput!): [Task!]!
+}
+`, BuiltIn: false},
+	{Name: "../schema/task/task/v1/types.graphqls", Input: `type Task {
+    id: ID!
+    organizationId: ID
+    projectId: ID
+    parentTaskId: ID
+    createdBy: ID!
+    updatedBy: ID
+    title: String!
+    description: String!
+    status: String!
+    priority: String!
+    progressPercent: Int!
+    startedAt: DateTime
+    dueAt: DateTime
+    completedAt: DateTime
+    archivedAt: DateTime
+    deletedAt: DateTime
+    deletedBy: ID
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

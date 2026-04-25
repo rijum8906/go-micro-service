@@ -10,8 +10,10 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	taskdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/taskdto/task"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 )
 
@@ -101,4 +103,46 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	}
 
 	return utils.MapUser(res), nil
+}
+
+// GetTask is the resolver for the GetTask field.
+func (r *queryResolver) GetTask(ctx context.Context, input taskdto.GetTaskInput) (*model.Task, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.TaskClient.GetTask(ctx, &taskv1.GetTaskRequest{
+		Id: input.ID,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapTask(res), nil
+}
+
+// ListTasksByProject is the resolver for the ListTasksByProject field.
+func (r *queryResolver) ListTasksByProject(ctx context.Context, input taskdto.ListTasksByProjectInput) ([]*model.Task, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.TaskClient.ListTasksByProject(ctx, &taskv1.ListTasksByProjectRequest{
+		ProjectId: input.ProjectID,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapTasks(res.Tasks), nil
 }

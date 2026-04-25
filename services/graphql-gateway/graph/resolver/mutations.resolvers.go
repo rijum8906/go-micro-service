@@ -10,11 +10,13 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	taskdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/taskdto/task"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
 )
@@ -343,4 +345,36 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.Cha
 	}
 
 	return &model.MutationResponse{Success: res.Success, Message: "password updated"}, nil
+}
+
+// CreateTask is the resolver for the CreateTask field.
+func (r *mutationResolver) CreateTask(ctx context.Context, input taskdto.CreateTaskInput) (*model.Task, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	dueAt, appErr := parseOptionalDateTime(input.DueAt, "dueAt")
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.TaskClient.CreateTask(ctx, &taskv1.CreateTaskRequest{
+		OrganizationId: stringValue(input.OrganizationID),
+		ProjectId:      stringValue(input.ProjectID),
+		ParentTaskId:   stringValue(input.ParentTaskID),
+		Title:          input.Title,
+		Description:    stringValue(input.Description),
+		Priority:       stringValue(input.Priority),
+		DueAt:          dueAt,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return utils.MapTask(res), nil
 }
