@@ -26,3 +26,7 @@ message ChangePasswordRequest {
   user_service.models.v1.Token scoped_token = 1;
   string new_password = 2;
 }
+
+message CheckExistsRequest {
+  string email = 1;
+}
