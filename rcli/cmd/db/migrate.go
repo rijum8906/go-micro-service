@@ -24,22 +24,9 @@ var migrateApplyCmd = &cobra.Command{
 	Aliases: []string{"up"},
 	Short:   "Apply atlas migrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
-			return err
-		}
-
-		pool, err := utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
-		if err != nil {
-			return err
-		}
-		defer pool.Close()
-
-		if err := utils.CreateDatabase(pool, config.DBName); err != nil {
-			return err
-		}
-		if err := utils.CreateDatabase(pool, utils.DevDBName); err != nil {
-			return err
+			return fmt.Errorf("failed to load config: %w", err)
 		}
 
 		return utils.RunCommand("atlas", "migrate", "apply",
@@ -52,7 +39,7 @@ var migrateSQLApply = &cobra.Command{
 	Use:   "sql-apply",
 	Short: "Apply SQL migrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
@@ -88,7 +75,7 @@ var migrateSchemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "Sync database schema",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
@@ -106,7 +93,7 @@ var migrateCleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean atlas migrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
@@ -120,7 +107,7 @@ var migrateStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show atlas status",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
@@ -137,7 +124,7 @@ var migrateCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new atlas migration",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
@@ -172,7 +159,7 @@ var migrateRollbackCmd = &cobra.Command{
 	Use:   "rollback",
 	Short: "Rollback atlas migrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
@@ -182,14 +169,6 @@ var migrateRollbackCmd = &cobra.Command{
 			"--dir", utils.GetMigrationDir(),
 			"--dev-url", utils.GetDevDBURL(config))
 	},
-}
-
-func loadServiceConfig() (*utils.Environment, error) {
-	if !utils.IsServiceDir() {
-		return nil, fmt.Errorf("must be run from a service directory")
-	}
-
-	return utils.LoadEnv()
 }
 
 func init() {
@@ -210,5 +189,5 @@ func init() {
 	migrateCmd.AddCommand(migrateRollbackCmd)
 	migrateCmd.AddCommand(migrateResetCommand)
 
-	DBCMd.AddCommand(migrateCmd)
+	DBCmd.AddCommand(migrateCmd)
 }
