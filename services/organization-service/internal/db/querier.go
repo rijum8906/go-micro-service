@@ -12,7 +12,7 @@ import (
 
 type Querier interface {
 	CreateOrganization(ctx context.Context, arg CreateOrganizationParams) (Organization, error)
-	DeleteOrganization(ctx context.Context, id uuid.UUID) error
+	DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error
 	DeleteOrganizationHard(ctx context.Context, id uuid.UUID) error
 	GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
 	GetOrganizationBySlug(ctx context.Context, slug string) (Organization, error)
