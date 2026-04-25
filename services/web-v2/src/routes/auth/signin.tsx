@@ -21,7 +21,7 @@ export const Route = createFileRoute('/auth/signin')({
 function SignInPage() {
   const router = useRouter()
   const { redirect } = Route.useSearch()
-  const { createToken, createAccount, createProfile, isSignedIn } = useAuthStore()
+  const { applyAuthSuccess, isSignedIn } = useAuthStore()
   const isDark = useIsDarkTheme()
 
   useEffect(() => {
@@ -35,25 +35,7 @@ function SignInPage() {
     onSubmit: async ({ value }) => {
       const response = await signin(value) as any
       if (response.success) {
-        const payload = response.data.Login
-        const accountId = payload.user.id
-        createAccount({ id: accountId, email: payload.user.email, createdAt: '', updatedAt: '', passwordHash: '' })
-        const displayName = [payload.profile.firstName, payload.profile.lastName].filter(Boolean).join(' ') || null
-        createProfile({
-          id: payload.profile.id,
-          userId: accountId,
-          firstName: payload.profile.firstName,
-          lastName: payload.profile.lastName,
-          displayName,
-          avatarUrl: payload.profile.avatarUrl ?? null,
-          accountId,
-          createdAt: '',
-          updatedAt: '',
-        })
-        createToken({
-          accessToken: payload.tokens.accessToken,
-          refreshToken: payload.tokens.refreshToken,
-        })
+        applyAuthSuccess(response.data.Login)
         toast.success('Logged in successfully')
         router.navigate({ to: redirect || '/' })
       } else {

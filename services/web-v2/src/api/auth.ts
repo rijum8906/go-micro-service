@@ -3,7 +3,7 @@ import type {
   SigninSchemaType,
   SignupSchemaType,
 } from '#/schemas/auth'
-import type { BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
+import type { AuthSuccessPayload, BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
 import { useAuthStore } from '#/store/auth'
 import { generateDeviceId } from '#/lib/device'
 import { gqlRequest } from '#/lib/gql-client'
@@ -13,8 +13,25 @@ const getAccessToken = () => useAuthStore.getState().getAccessTokenValue()
 const SIGNIN_MUTATION = `
   mutation Login($input: LoginInput!) {
     Login(input: $input) {
-      user { id email }
-      profile { id userId firstName lastName avatarUrl }
+      user {
+        id
+        email
+        isEmailVerified
+        emailVerifiedAt
+        twoFactorEnabled
+        twoFactorEnabledAt
+        createdAt
+        updatedAt
+      }
+      profile {
+        id
+        userId
+        firstName
+        lastName
+        createdAt
+        updatedAt
+        avatarUrl
+      }
       tokens {
         accessToken { value expiresAt }
         refreshToken { value expiresAt }
@@ -26,8 +43,25 @@ const SIGNIN_MUTATION = `
 const SIGNUP_MUTATION = `
   mutation Register($input: RegisterInput!) {
     Register(input: $input) {
-      user { id email }
-      profile { id userId firstName lastName avatarUrl }
+      user {
+        id
+        email
+        isEmailVerified
+        emailVerifiedAt
+        twoFactorEnabled
+        twoFactorEnabledAt
+        createdAt
+        updatedAt
+      }
+      profile {
+        id
+        userId
+        firstName
+        lastName
+        createdAt
+        updatedAt
+        avatarUrl
+      }
       tokens {
         accessToken { value expiresAt }
         refreshToken { value expiresAt }
@@ -63,26 +97,10 @@ const RESET_PASSWORD_MUTATION = `
   }
 `
 
-/** GraphQL `Login` / `Register` mutation payload (field names from schema) */
-type AuthMutationPayload = {
-  user: { id: string; email: string }
-  profile: {
-    id: string
-    userId: string
-    firstName: string
-    lastName: string
-    avatarUrl: string | null
-  }
-  tokens: {
-    accessToken: { value: string; expiresAt: string }
-    refreshToken: { value: string; expiresAt: string }
-  }
-}
-
 export async function signin(
   data: SigninSchemaType,
-): Promise<BaseSuccessResponse<{ Login: AuthMutationPayload }> | BaseErrorResponse> {
-  const result = await gqlRequest<{ Login: AuthMutationPayload }>(SIGNIN_MUTATION, {
+): Promise<BaseSuccessResponse<{ Login: AuthSuccessPayload }> | BaseErrorResponse> {
+  const result = await gqlRequest<{ Login: AuthSuccessPayload }>(SIGNIN_MUTATION, {
     input: {
       email: data.email,
       password: data.password,
@@ -95,8 +113,8 @@ export async function signin(
 
 export async function signup(
   data: SignupSchemaType,
-): Promise<BaseSuccessResponse<{ Register: AuthMutationPayload }> | BaseErrorResponse> {
-  const result = await gqlRequest<{ Register: AuthMutationPayload }>(SIGNUP_MUTATION, {
+): Promise<BaseSuccessResponse<{ Register: AuthSuccessPayload }> | BaseErrorResponse> {
+  const result = await gqlRequest<{ Register: AuthSuccessPayload }>(SIGNUP_MUTATION, {
     input: {
       email: data.email,
       password: data.password,
