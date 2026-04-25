@@ -7,6 +7,7 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -343,4 +344,9 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.Cha
 	}
 
 	return &model.MutationResponse{Success: res.Success, Message: "password updated"}, nil
+}
+
+// CreateTask is the resolver for the CreateTask field.
+func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.Task, error) {
+	panic(fmt.Errorf("not implemented: CreateTask - CreateTask"))
 }

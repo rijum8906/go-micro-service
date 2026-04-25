@@ -17,6 +17,16 @@ type AuthTokens struct {
 	RefreshToken *Token `json:"refreshToken"`
 }
 
+type CreateTaskInput struct {
+	Title          string  `json:"title"`
+	OrganizationID *string `json:"organizationId,omitempty"`
+	ProjectID      *string `json:"projectId,omitempty"`
+	ParentTaskID   *string `json:"parentTaskId,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	Priority       *string `json:"priority,omitempty"`
+	DueAt          *string `json:"dueAt,omitempty"`
+}
+
 type EmailInput struct {
 	Email string               `json:"email"`
 	Meta  *coredto.RequestMeta `json:"meta"`
@@ -24,6 +34,14 @@ type EmailInput struct {
 
 type GetSessionsInput struct {
 	PaginationRequest *PaginationInput `json:"paginationRequest"`
+}
+
+type GetTaskInput struct {
+	ID string `json:"id"`
+}
+
+type ListTasksByProjectInput struct {
+	ProjectID string `json:"projectId"`
 }
 
 type Mutation struct {
@@ -79,6 +97,28 @@ type Session struct {
 	IPAddr       string `json:"ipAddr"`
 	CreatedAt    string `json:"createdAt"`
 	UpdatedAt    string `json:"updatedAt"`
+}
+
+type Task struct {
+	ID              string  `json:"id"`
+	OrganizationID  *string `json:"organizationId,omitempty"`
+	ProjectID       *string `json:"projectId,omitempty"`
+	ParentTaskID    *string `json:"parentTaskId,omitempty"`
+	CreatedBy       string  `json:"createdBy"`
+	UpdatedBy       *string `json:"updatedBy,omitempty"`
+	Title           string  `json:"title"`
+	Description     string  `json:"description"`
+	Status          string  `json:"status"`
+	Priority        string  `json:"priority"`
+	ProgressPercent int32   `json:"progressPercent"`
+	StartedAt       *string `json:"startedAt,omitempty"`
+	DueAt           *string `json:"dueAt,omitempty"`
+	CompletedAt     *string `json:"completedAt,omitempty"`
+	ArchivedAt      *string `json:"archivedAt,omitempty"`
+	DeletedAt       *string `json:"deletedAt,omitempty"`
+	DeletedBy       *string `json:"deletedBy,omitempty"`
+	CreatedAt       string  `json:"createdAt"`
+	UpdatedAt       string  `json:"updatedAt"`
 }
 
 type Token struct {

@@ -7,6 +7,7 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -101,4 +102,14 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	}
 
 	return utils.MapUser(res), nil
+}
+
+// GetTask is the resolver for the GetTask field.
+func (r *queryResolver) GetTask(ctx context.Context, input model.GetTaskInput) (*model.Task, error) {
+	panic(fmt.Errorf("not implemented: GetTask - GetTask"))
+}
+
+// ListTasksByProject is the resolver for the ListTasksByProject field.
+func (r *queryResolver) ListTasksByProject(ctx context.Context, input model.ListTasksByProjectInput) ([]*model.Task, error) {
+	panic(fmt.Errorf("not implemented: ListTasksByProject - ListTasksByProject"))
 }

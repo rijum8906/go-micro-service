@@ -1,6 +1,7 @@
 schema:
   - ./graph/schema/core/**/*.graphqls
   - ./graph/schema/user/**/*.graphqls
+  - ./graph/schema/task/**/*.graphqls
 
 exec:
   package: generated
