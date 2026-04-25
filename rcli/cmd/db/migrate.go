@@ -144,7 +144,7 @@ var migrateRehashCmd = &cobra.Command{
 			return fmt.Errorf("must be run from a service directory")
 		}
 
-		return utils.RunCommand("atlas", "migrate", "rehash",
+		return utils.RunCommand("atlas", "migrate", "hash",
 			"--dir", utils.GetMigrationDir())
 	},
 }
