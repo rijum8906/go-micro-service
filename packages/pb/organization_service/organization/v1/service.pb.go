@@ -7,6 +7,7 @@
 package organizationv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -24,14 +25,20 @@ var File_organization_service_organization_v1_service_proto protoreflect.FileDes
 
 const file_organization_service_organization_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"2organization_service/organization/v1/service.proto\x12$organization_service.organization.v12\x15\n" +
-	"\x13OrganizationServiceB\xc2\x02\n" +
+	"2organization_service/organization/v1/service.proto\x12$organization_service.organization.v1\x1a*organization_service/models/v1/model.proto\x1a2organization_service/organization/v1/request.proto2\x9b\x01\n" +
+	"\x13OrganizationService\x12\x83\x01\n" +
+	"\x12CreateOrganization\x12?.organization_service.organization.v1.CreateOrganizationRequest\x1a,.organization_service.models.v1.OrganizationB\xc2\x02\n" +
 	"(com.organization_service.organization.v1B\fServiceProtoP\x01ZZgithub.com/rijum8906/relay/packages/pb/organization_service/organization/v1;organizationv1\xa2\x02\x03OOX\xaa\x02#OrganizationService.Organization.V1\xca\x02#OrganizationService\\Organization\\V1\xe2\x02/OrganizationService\\Organization\\V1\\GPBMetadata\xea\x02%OrganizationService::Organization::V1b\x06proto3"
 
-var file_organization_service_organization_v1_service_proto_goTypes = []any{}
+var file_organization_service_organization_v1_service_proto_goTypes = []any{
+	(*CreateOrganizationRequest)(nil), // 0: organization_service.organization.v1.CreateOrganizationRequest
+	(*v1.Organization)(nil),           // 1: organization_service.models.v1.Organization
+}
 var file_organization_service_organization_v1_service_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
+	0, // 0: organization_service.organization.v1.OrganizationService.CreateOrganization:input_type -> organization_service.organization.v1.CreateOrganizationRequest
+	1, // 1: organization_service.organization.v1.OrganizationService.CreateOrganization:output_type -> organization_service.models.v1.Organization
+	1, // [1:2] is the sub-list for method output_type
+	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -42,6 +49,7 @@ func file_organization_service_organization_v1_service_proto_init() {
 	if File_organization_service_organization_v1_service_proto != nil {
 		return
 	}
+	file_organization_service_organization_v1_request_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

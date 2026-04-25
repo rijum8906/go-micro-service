@@ -7,7 +7,11 @@
 package organizationv1
 
 import (
+	context "context"
+	v1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -15,10 +19,15 @@ import (
 // Requires gRPC-Go v1.64.0 or later.
 const _ = grpc.SupportPackageIsVersion9
 
+const (
+	OrganizationService_CreateOrganization_FullMethodName = "/organization_service.organization.v1.OrganizationService/CreateOrganization"
+)
+
 // OrganizationServiceClient is the client API for OrganizationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrganizationServiceClient interface {
+	CreateOrganization(ctx context.Context, in *CreateOrganizationRequest, opts ...grpc.CallOption) (*v1.Organization, error)
 }
 
 type organizationServiceClient struct {
@@ -29,10 +38,21 @@ func NewOrganizationServiceClient(cc grpc.ClientConnInterface) OrganizationServi
 	return &organizationServiceClient{cc}
 }
 
+func (c *organizationServiceClient) CreateOrganization(ctx context.Context, in *CreateOrganizationRequest, opts ...grpc.CallOption) (*v1.Organization, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Organization)
+	err := c.cc.Invoke(ctx, OrganizationService_CreateOrganization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrganizationServiceServer is the server API for OrganizationService service.
 // All implementations should embed UnimplementedOrganizationServiceServer
 // for forward compatibility.
 type OrganizationServiceServer interface {
+	CreateOrganization(context.Context, *CreateOrganizationRequest) (*v1.Organization, error)
 }
 
 // UnimplementedOrganizationServiceServer should be embedded to have
@@ -42,6 +62,9 @@ type OrganizationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedOrganizationServiceServer struct{}
 
+func (UnimplementedOrganizationServiceServer) CreateOrganization(context.Context, *CreateOrganizationRequest) (*v1.Organization, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateOrganization not implemented")
+}
 func (UnimplementedOrganizationServiceServer) testEmbeddedByValue() {}
 
 // UnsafeOrganizationServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -62,13 +85,36 @@ func RegisterOrganizationServiceServer(s grpc.ServiceRegistrar, srv Organization
 	s.RegisterService(&OrganizationService_ServiceDesc, srv)
 }
 
+func _OrganizationService_CreateOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationServiceServer).CreateOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrganizationService_CreateOrganization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationServiceServer).CreateOrganization(ctx, req.(*CreateOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrganizationService_ServiceDesc is the grpc.ServiceDesc for OrganizationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var OrganizationService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "organization_service.organization.v1.OrganizationService",
 	HandlerType: (*OrganizationServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "organization_service/organization/v1/service.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateOrganization",
+			Handler:    _OrganizationService_CreateOrganization_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "organization_service/organization/v1/service.proto",
 }
