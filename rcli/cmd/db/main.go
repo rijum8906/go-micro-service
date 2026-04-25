@@ -2,7 +2,6 @@
 package dbcmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/rijum8906/relay/rcli/utils"
@@ -29,19 +28,10 @@ var initCmd = &cobra.Command{
 		}
 		defer pool.Close()
 
-		var exists bool
-		err = pool.QueryRow(context.Background(),
-			"SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = $1)",
-			config.DBName).Scan(&exists)
-		if err != nil {
+		if err = utils.CreateDatabase(pool, config.DBName); err != nil {
 			return err
 		}
-
-		if !exists {
-			// Create database
-			sql := fmt.Sprintf("CREATE DATABASE %s OWNER = %s ENCODING = 'UTF8'",
-				config.DBName, config.DBUser)
-			_, err = pool.Exec(context.Background(), sql)
+		if err = utils.CreateDatabase(pool, utils.DevDBName); err != nil {
 			return err
 		}
 

@@ -1,6 +1,8 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func GetDBURL(cfg *Environment) string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
@@ -19,7 +21,7 @@ func GetDevDBURL(cfg *Environment) string {
 		cfg.DBPassword,
 		"localhost",
 		cfg.DBPort,
-		"dev_"+cfg.DBName,
+		DevDBName,
 		cfg.DBSSLMode,
 	)
 }
