@@ -61,7 +61,7 @@ CREATE TABLE organization_memberships (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid NOT NULL REFERENCES organization_memberships(id),
+    deleted_by uuid REFERENCES organization_memberships(id),
 
     -- Prevents duplicate memberships for the same user in an organization
     CONSTRAINT uq_organization_memberships_org_user UNIQUE (organization_id, user_id)
@@ -95,7 +95,7 @@ CREATE TABLE organization_teams (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid NOT NULL REFERENCES organization_memberships(id),
+    deleted_by uuid REFERENCES organization_memberships(id),
 
     -- Team names must be unique within an organization (can't have two "Engineering" teams)
     CONSTRAINT uq_organization_teams_org_name UNIQUE (organization_id, name)
