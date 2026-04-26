@@ -52,11 +52,10 @@ CREATE TABLE organization_memberships (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     user_id uuid NOT NULL,
-    role varchar(30) NOT NULL DEFAULT 'member'
-        CHECK (role IN ('owner', 'admin', 'member')),
+    role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'active'
         CHECK (status IN ('active', 'suspended', 'left')),
-    invited_by uuid NOT NULL REFERENCES organization_memberships(id),
+    invited_by uuid REFERENCES organization_memberships(id),
     joined_at timestamptz NOT NULL DEFAULT now(),
     left_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
