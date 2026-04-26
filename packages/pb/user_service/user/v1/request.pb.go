@@ -249,7 +249,7 @@ func (x *ChangePasswordRequest) GetNewPassword() string {
 
 type CheckExistsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -284,9 +284,9 @@ func (*CheckExistsRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_user_v1_request_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *CheckExistsRequest) GetEmail() string {
+func (x *CheckExistsRequest) GetId() string {
 	if x != nil {
-		return x.Email
+		return x.Id
 	}
 	return ""
 }
@@ -315,9 +315,9 @@ const file_user_service_user_v1_request_proto_rawDesc = "" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\"|\n" +
 	"\x15ChangePasswordRequest\x12@\n" +
 	"\fscoped_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vscopedToken\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"*\n" +
-	"\x12CheckExistsRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05emailB\xda\x01\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"$\n" +
+	"\x12CheckExistsRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02idB\xda\x01\n" +
 	"\x18com.user_service.user.v1B\fRequestProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/user/v1;userv1\xa2\x02\x03UUX\xaa\x02\x13UserService.User.V1\xca\x02\x13UserService\\User\\V1\xe2\x02\x1fUserService\\User\\V1\\GPBMetadata\xea\x02\x15UserService::User::V1b\x06proto3"
 
 var (

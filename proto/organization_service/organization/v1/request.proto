@@ -8,3 +8,16 @@ message CreateOrganizationRequest {
   string slug = 3;
   string created_by = 4;
 }
+
+message GetOrganizationsByCreatedAtRequest {
+  string id = 1;
+}
+
+message UpdateOrganizationNameRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message GetOrganizationBySlugRequest {
+  string slug = 1;
+}

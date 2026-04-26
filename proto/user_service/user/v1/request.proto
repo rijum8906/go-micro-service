@@ -28,5 +28,5 @@ message ChangePasswordRequest {
 }
 
 message CheckExistsRequest {
-  string email = 1;
+  string id = 1;
 }
