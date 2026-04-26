@@ -16,6 +16,10 @@ message EmailInput {
   string email = 1;
 }
 
+message IDRequest {
+  string id = 1;
+}
+
 message PaginationRequest {
   int32 page = 1;
   int32 limit = 2;

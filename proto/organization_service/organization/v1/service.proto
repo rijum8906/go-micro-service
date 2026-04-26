@@ -2,9 +2,21 @@ syntax = "proto3";
 
 package organization_service.organization.v1;
 
+import "core/v1/common.proto";
 import "organization_service/models/v1/model.proto";
+import "organization_service/organization/v1/reponse.proto";
 import "organization_service/organization/v1/request.proto";
 
 service OrganizationService {
   rpc CreateOrganization(CreateOrganizationRequest) returns (organization_service.models.v1.Organization);
+
+  rpc GetOrganization(core.v1.IDRequest) returns (organization_service.models.v1.Organization);
+  rpc GetOrganizationsListByCreatedBy(core.v1.EmptyRequest) returns (OrganizationsList);
+  rpc GetOrganizationBySlug(GetOrganizationBySlugRequest) returns (organization_service.models.v1.Organization);
+
+  rpc UpdateOrganizationName(UpdateOrganizationNameRequest) returns (organization_service.models.v1.Organization);
+  rpc ChangeOrganizationOwnership(core.v1.IDRequest) returns (organization_service.models.v1.Organization);
+
+  rpc DeleteOrganization(core.v1.IDRequest) returns (core.v1.SuccessResponse);
+  rpc ArchiveOrganization(core.v1.IDRequest) returns (core.v1.SuccessResponse);
 }

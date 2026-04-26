@@ -189,6 +189,50 @@ func (x *EmailInput) GetEmail() string {
 	return ""
 }
 
+type IDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IDRequest) Reset() {
+	*x = IDRequest{}
+	mi := &file_core_v1_common_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IDRequest) ProtoMessage() {}
+
+func (x *IDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_common_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IDRequest.ProtoReflect.Descriptor instead.
+func (*IDRequest) Descriptor() ([]byte, []int) {
+	return file_core_v1_common_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *IDRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 type PaginationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
@@ -199,7 +243,7 @@ type PaginationRequest struct {
 
 func (x *PaginationRequest) Reset() {
 	*x = PaginationRequest{}
-	mi := &file_core_v1_common_proto_msgTypes[4]
+	mi := &file_core_v1_common_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -211,7 +255,7 @@ func (x *PaginationRequest) String() string {
 func (*PaginationRequest) ProtoMessage() {}
 
 func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[4]
+	mi := &file_core_v1_common_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -224,7 +268,7 @@ func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaginationRequest.ProtoReflect.Descriptor instead.
 func (*PaginationRequest) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{4}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PaginationRequest) GetPage() int32 {
@@ -253,7 +297,9 @@ const file_core_v1_common_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\"\n" +
 	"\n" +
 	"EmailInput\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\"=\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"\x1b\n" +
+	"\tIDRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"=\n" +
 	"\x11PaginationRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limitB\x8e\x01\n" +
@@ -271,13 +317,14 @@ func file_core_v1_common_proto_rawDescGZIP() []byte {
 	return file_core_v1_common_proto_rawDescData
 }
 
-var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_core_v1_common_proto_goTypes = []any{
 	(*RequestMetadata)(nil),   // 0: core.v1.RequestMetadata
 	(*EmptyRequest)(nil),      // 1: core.v1.EmptyRequest
 	(*SuccessResponse)(nil),   // 2: core.v1.SuccessResponse
 	(*EmailInput)(nil),        // 3: core.v1.EmailInput
-	(*PaginationRequest)(nil), // 4: core.v1.PaginationRequest
+	(*IDRequest)(nil),         // 4: core.v1.IDRequest
+	(*PaginationRequest)(nil), // 5: core.v1.PaginationRequest
 }
 var file_core_v1_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -298,7 +345,7 @@ func file_core_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_v1_common_proto_rawDesc), len(file_core_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
