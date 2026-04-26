@@ -10,6 +10,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
+	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -29,11 +30,16 @@ type ApplicationServices struct {
 	OrganizationService organizationv1.OrganizationServiceServer
 }
 
+type GrpcClients struct {
+	UserClient userv1.UserServiceClient
+}
+
 type Application struct {
 	config   *config.Env
 	infra    *ApplicationInfra
 	utils    *ApplicationUtils
 	services *ApplicationServices
+	clients  *GrpcClients
 	listener net.Listener
 	server   *grpc.Server
 }
@@ -59,6 +65,11 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	if appErr = app.initUtils(); appErr != nil {
+		fmt.Println(appErr.Details)
+		return nil, appErr
+	}
+
+	if appErr = app.initGRPCClients(); appErr != nil {
 		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
