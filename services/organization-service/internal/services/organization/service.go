@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
@@ -60,4 +61,32 @@ func (s *OrganizationService) CreateOrganization(ctx context.Context, req *organ
 	// TODO: Step 5. Containerize everything in a db transaction
 
 	return utils.MapOrganization(&org), nil
+}
+
+func (s *OrganizationService) GetOrganization(ctx context.Context, req *corev1.IDRequest) (*modelsv1.Organization, error) {
+	return nil, nil
+}
+
+func (s *OrganizationService) GetOrganizationBySlug(ctx context.Context, req *organizationv1.GetOrganizationBySlugRequest) (*modelsv1.Organization, error) {
+	return nil, nil
+}
+
+func (s *OrganizationService) GetOrganizationsListByCreatedBy(ctx context.Context, req *corev1.EmptyRequest) (*organizationv1.OrganizationsList, error) {
+	return nil, nil
+}
+
+func (s *OrganizationService) UpdateOrganizationName(context.Context, *organizationv1.UpdateOrganizationNameRequest) (*modelsv1.Organization, error) {
+	return nil, nil
+}
+
+func (s *OrganizationService) ChangeOrganizationOwnership(context.Context, *corev1.IDRequest) (*modelsv1.Organization, error) {
+	return nil, nil
+}
+
+func (s *OrganizationService) DeleteOrganization(context.Context, *corev1.IDRequest) (*corev1.SuccessResponse, error) {
+	return nil, nil
+}
+
+func (s *OrganizationService) ArchiveOrganization(context.Context, *corev1.IDRequest) (*corev1.SuccessResponse, error) {
+	return nil, nil
 }
