@@ -7,6 +7,7 @@
 package taskv1
 
 import (
+	v11 "github.com/rijum8906/relay/packages/pb/core/v1"
 	v1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -25,33 +26,157 @@ var File_task_service_task_v1_service_proto protoreflect.FileDescriptor
 
 const file_task_service_task_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"task_service/task/v1/service.proto\x12\x14task_service.task.v1\x1a\"task_service/models/v1/model.proto\x1a\"task_service/task/v1/request.proto\x1a#task_service/task/v1/response.proto2\xaa\x02\n" +
+	"\"task_service/task/v1/service.proto\x12\x14task_service.task.v1\x1a\"task_service/models/v1/model.proto\x1a\"task_service/task/v1/request.proto\x1a#task_service/task/v1/response.proto\x1a\x14core/v1/common.proto2\xf8\x17\n" +
 	"\vTaskService\x12S\n" +
 	"\n" +
 	"CreateTask\x12'.task_service.task.v1.CreateTaskRequest\x1a\x1c.task_service.models.v1.Task\x12M\n" +
 	"\aGetTask\x12$.task_service.task.v1.GetTaskRequest\x1a\x1c.task_service.models.v1.Task\x12w\n" +
-	"\x12ListTasksByProject\x12/.task_service.task.v1.ListTasksByProjectRequest\x1a0.task_service.task.v1.ListTasksByProjectResponseB\xda\x01\n" +
+	"\x12ListTasksByProject\x12/.task_service.task.v1.ListTasksByProjectRequest\x1a0.task_service.task.v1.ListTasksByProjectResponse\x12\\\n" +
+	"\rCreateProject\x12*.task_service.task.v1.CreateProjectRequest\x1a\x1f.task_service.models.v1.Project\x12V\n" +
+	"\n" +
+	"GetProject\x12'.task_service.task.v1.GetProjectRequest\x1a\x1f.task_service.models.v1.Project\x12\\\n" +
+	"\rUpdateProject\x12*.task_service.task.v1.UpdateProjectRequest\x1a\x1f.task_service.models.v1.Project\x12`\n" +
+	"\x0fCompleteProject\x12,.task_service.task.v1.CompleteProjectRequest\x1a\x1f.task_service.models.v1.Project\x12^\n" +
+	"\x0eArchiveProject\x12+.task_service.task.v1.ArchiveProjectRequest\x1a\x1f.task_service.models.v1.Project\x12U\n" +
+	"\rDeleteProject\x12*.task_service.task.v1.DeleteProjectRequest\x1a\x18.core.v1.SuccessResponse\x12e\n" +
+	"\fListProjects\x12).task_service.task.v1.ListProjectsRequest\x1a*.task_service.task.v1.ListProjectsResponse\x12l\n" +
+	"\x10AddProjectMember\x12-.task_service.task.v1.AddProjectMemberRequest\x1a).task_service.models.v1.ProjectMembership\x12a\n" +
+	"\x13RemoveProjectMember\x120.task_service.task.v1.RemoveProjectMemberRequest\x1a\x18.core.v1.SuccessResponse\x12z\n" +
+	"\x17UpdateProjectMemberRole\x124.task_service.task.v1.UpdateProjectMemberRoleRequest\x1a).task_service.models.v1.ProjectMembership\x12w\n" +
+	"\x12ListProjectMembers\x12/.task_service.task.v1.ListProjectMembersRequest\x1a0.task_service.task.v1.ListProjectMembersResponse\x12S\n" +
+	"\n" +
+	"UpdateTask\x12'.task_service.task.v1.UpdateTaskRequest\x1a\x1c.task_service.models.v1.Task\x12O\n" +
+	"\n" +
+	"DeleteTask\x12'.task_service.task.v1.DeleteTaskRequest\x1a\x18.core.v1.SuccessResponse\x12U\n" +
+	"\vArchiveTask\x12(.task_service.task.v1.ArchiveTaskRequest\x1a\x1c.task_service.models.v1.Task\x12_\n" +
+	"\x10UpdateTaskStatus\x12-.task_service.task.v1.UpdateTaskStatusRequest\x1a\x1c.task_service.models.v1.Task\x12c\n" +
+	"\x12UpdateTaskProgress\x12/.task_service.task.v1.UpdateTaskProgressRequest\x1a\x1c.task_service.models.v1.Task\x12\x86\x01\n" +
+	"\x17ListTasksByOrganization\x124.task_service.task.v1.ListTasksByOrganizationRequest\x1a5.task_service.task.v1.ListTasksByOrganizationResponse\x12t\n" +
+	"\x11ListTasksByParent\x12..task_service.task.v1.ListTasksByParentRequest\x1a/.task_service.task.v1.ListTasksByParentResponse\x12w\n" +
+	"\x12ListTasksByCreator\x12/.task_service.task.v1.ListTasksByCreatorRequest\x1a0.task_service.task.v1.ListTasksByCreatorResponse\x12]\n" +
+	"\n" +
+	"AssignTask\x12'.task_service.task.v1.AssignTaskRequest\x1a&.task_service.models.v1.TaskAssignment\x12S\n" +
+	"\fUnassignTask\x12).task_service.task.v1.UnassignTaskRequest\x1a\x18.core.v1.SuccessResponse\x12a\n" +
+	"\fReassignTask\x12).task_service.task.v1.ReassignTaskRequest\x1a&.task_service.models.v1.TaskAssignment\x12z\n" +
+	"\x13ListTaskAssignments\x120.task_service.task.v1.ListTaskAssignmentsRequest\x1a1.task_service.task.v1.ListTaskAssignmentsResponse\x12h\n" +
+	"\x11CreateTaskComment\x12..task_service.task.v1.CreateTaskCommentRequest\x1a#.task_service.models.v1.TaskComment\x12h\n" +
+	"\x11UpdateTaskComment\x12..task_service.task.v1.UpdateTaskCommentRequest\x1a#.task_service.models.v1.TaskComment\x12]\n" +
+	"\x11DeleteTaskComment\x12..task_service.task.v1.DeleteTaskCommentRequest\x1a\x18.core.v1.SuccessResponse\x12q\n" +
+	"\x10ListTaskComments\x12-.task_service.task.v1.ListTaskCommentsRequest\x1a..task_service.task.v1.ListTaskCommentsResponseB\xda\x01\n" +
 	"\x18com.task_service.task.v1B\fServiceProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/task_service/task/v1;taskv1\xa2\x02\x03TTX\xaa\x02\x13TaskService.Task.V1\xca\x02\x13TaskService\\Task\\V1\xe2\x02\x1fTaskService\\Task\\V1\\GPBMetadata\xea\x02\x15TaskService::Task::V1b\x06proto3"
 
 var file_task_service_task_v1_service_proto_goTypes = []any{
-	(*CreateTaskRequest)(nil),          // 0: task_service.task.v1.CreateTaskRequest
-	(*GetTaskRequest)(nil),             // 1: task_service.task.v1.GetTaskRequest
-	(*ListTasksByProjectRequest)(nil),  // 2: task_service.task.v1.ListTasksByProjectRequest
-	(*v1.Task)(nil),                    // 3: task_service.models.v1.Task
-	(*ListTasksByProjectResponse)(nil), // 4: task_service.task.v1.ListTasksByProjectResponse
+	(*CreateTaskRequest)(nil),               // 0: task_service.task.v1.CreateTaskRequest
+	(*GetTaskRequest)(nil),                  // 1: task_service.task.v1.GetTaskRequest
+	(*ListTasksByProjectRequest)(nil),       // 2: task_service.task.v1.ListTasksByProjectRequest
+	(*CreateProjectRequest)(nil),            // 3: task_service.task.v1.CreateProjectRequest
+	(*GetProjectRequest)(nil),               // 4: task_service.task.v1.GetProjectRequest
+	(*UpdateProjectRequest)(nil),            // 5: task_service.task.v1.UpdateProjectRequest
+	(*CompleteProjectRequest)(nil),          // 6: task_service.task.v1.CompleteProjectRequest
+	(*ArchiveProjectRequest)(nil),           // 7: task_service.task.v1.ArchiveProjectRequest
+	(*DeleteProjectRequest)(nil),            // 8: task_service.task.v1.DeleteProjectRequest
+	(*ListProjectsRequest)(nil),             // 9: task_service.task.v1.ListProjectsRequest
+	(*AddProjectMemberRequest)(nil),         // 10: task_service.task.v1.AddProjectMemberRequest
+	(*RemoveProjectMemberRequest)(nil),      // 11: task_service.task.v1.RemoveProjectMemberRequest
+	(*UpdateProjectMemberRoleRequest)(nil),  // 12: task_service.task.v1.UpdateProjectMemberRoleRequest
+	(*ListProjectMembersRequest)(nil),       // 13: task_service.task.v1.ListProjectMembersRequest
+	(*UpdateTaskRequest)(nil),               // 14: task_service.task.v1.UpdateTaskRequest
+	(*DeleteTaskRequest)(nil),               // 15: task_service.task.v1.DeleteTaskRequest
+	(*ArchiveTaskRequest)(nil),              // 16: task_service.task.v1.ArchiveTaskRequest
+	(*UpdateTaskStatusRequest)(nil),         // 17: task_service.task.v1.UpdateTaskStatusRequest
+	(*UpdateTaskProgressRequest)(nil),       // 18: task_service.task.v1.UpdateTaskProgressRequest
+	(*ListTasksByOrganizationRequest)(nil),  // 19: task_service.task.v1.ListTasksByOrganizationRequest
+	(*ListTasksByParentRequest)(nil),        // 20: task_service.task.v1.ListTasksByParentRequest
+	(*ListTasksByCreatorRequest)(nil),       // 21: task_service.task.v1.ListTasksByCreatorRequest
+	(*AssignTaskRequest)(nil),               // 22: task_service.task.v1.AssignTaskRequest
+	(*UnassignTaskRequest)(nil),             // 23: task_service.task.v1.UnassignTaskRequest
+	(*ReassignTaskRequest)(nil),             // 24: task_service.task.v1.ReassignTaskRequest
+	(*ListTaskAssignmentsRequest)(nil),      // 25: task_service.task.v1.ListTaskAssignmentsRequest
+	(*CreateTaskCommentRequest)(nil),        // 26: task_service.task.v1.CreateTaskCommentRequest
+	(*UpdateTaskCommentRequest)(nil),        // 27: task_service.task.v1.UpdateTaskCommentRequest
+	(*DeleteTaskCommentRequest)(nil),        // 28: task_service.task.v1.DeleteTaskCommentRequest
+	(*ListTaskCommentsRequest)(nil),         // 29: task_service.task.v1.ListTaskCommentsRequest
+	(*v1.Task)(nil),                         // 30: task_service.models.v1.Task
+	(*ListTasksByProjectResponse)(nil),      // 31: task_service.task.v1.ListTasksByProjectResponse
+	(*v1.Project)(nil),                      // 32: task_service.models.v1.Project
+	(*v11.SuccessResponse)(nil),             // 33: core.v1.SuccessResponse
+	(*ListProjectsResponse)(nil),            // 34: task_service.task.v1.ListProjectsResponse
+	(*v1.ProjectMembership)(nil),            // 35: task_service.models.v1.ProjectMembership
+	(*ListProjectMembersResponse)(nil),      // 36: task_service.task.v1.ListProjectMembersResponse
+	(*ListTasksByOrganizationResponse)(nil), // 37: task_service.task.v1.ListTasksByOrganizationResponse
+	(*ListTasksByParentResponse)(nil),       // 38: task_service.task.v1.ListTasksByParentResponse
+	(*ListTasksByCreatorResponse)(nil),      // 39: task_service.task.v1.ListTasksByCreatorResponse
+	(*v1.TaskAssignment)(nil),               // 40: task_service.models.v1.TaskAssignment
+	(*ListTaskAssignmentsResponse)(nil),     // 41: task_service.task.v1.ListTaskAssignmentsResponse
+	(*v1.TaskComment)(nil),                  // 42: task_service.models.v1.TaskComment
+	(*ListTaskCommentsResponse)(nil),        // 43: task_service.task.v1.ListTaskCommentsResponse
 }
 var file_task_service_task_v1_service_proto_depIdxs = []int32{
-	0, // 0: task_service.task.v1.TaskService.CreateTask:input_type -> task_service.task.v1.CreateTaskRequest
-	1, // 1: task_service.task.v1.TaskService.GetTask:input_type -> task_service.task.v1.GetTaskRequest
-	2, // 2: task_service.task.v1.TaskService.ListTasksByProject:input_type -> task_service.task.v1.ListTasksByProjectRequest
-	3, // 3: task_service.task.v1.TaskService.CreateTask:output_type -> task_service.models.v1.Task
-	3, // 4: task_service.task.v1.TaskService.GetTask:output_type -> task_service.models.v1.Task
-	4, // 5: task_service.task.v1.TaskService.ListTasksByProject:output_type -> task_service.task.v1.ListTasksByProjectResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: task_service.task.v1.TaskService.CreateTask:input_type -> task_service.task.v1.CreateTaskRequest
+	1,  // 1: task_service.task.v1.TaskService.GetTask:input_type -> task_service.task.v1.GetTaskRequest
+	2,  // 2: task_service.task.v1.TaskService.ListTasksByProject:input_type -> task_service.task.v1.ListTasksByProjectRequest
+	3,  // 3: task_service.task.v1.TaskService.CreateProject:input_type -> task_service.task.v1.CreateProjectRequest
+	4,  // 4: task_service.task.v1.TaskService.GetProject:input_type -> task_service.task.v1.GetProjectRequest
+	5,  // 5: task_service.task.v1.TaskService.UpdateProject:input_type -> task_service.task.v1.UpdateProjectRequest
+	6,  // 6: task_service.task.v1.TaskService.CompleteProject:input_type -> task_service.task.v1.CompleteProjectRequest
+	7,  // 7: task_service.task.v1.TaskService.ArchiveProject:input_type -> task_service.task.v1.ArchiveProjectRequest
+	8,  // 8: task_service.task.v1.TaskService.DeleteProject:input_type -> task_service.task.v1.DeleteProjectRequest
+	9,  // 9: task_service.task.v1.TaskService.ListProjects:input_type -> task_service.task.v1.ListProjectsRequest
+	10, // 10: task_service.task.v1.TaskService.AddProjectMember:input_type -> task_service.task.v1.AddProjectMemberRequest
+	11, // 11: task_service.task.v1.TaskService.RemoveProjectMember:input_type -> task_service.task.v1.RemoveProjectMemberRequest
+	12, // 12: task_service.task.v1.TaskService.UpdateProjectMemberRole:input_type -> task_service.task.v1.UpdateProjectMemberRoleRequest
+	13, // 13: task_service.task.v1.TaskService.ListProjectMembers:input_type -> task_service.task.v1.ListProjectMembersRequest
+	14, // 14: task_service.task.v1.TaskService.UpdateTask:input_type -> task_service.task.v1.UpdateTaskRequest
+	15, // 15: task_service.task.v1.TaskService.DeleteTask:input_type -> task_service.task.v1.DeleteTaskRequest
+	16, // 16: task_service.task.v1.TaskService.ArchiveTask:input_type -> task_service.task.v1.ArchiveTaskRequest
+	17, // 17: task_service.task.v1.TaskService.UpdateTaskStatus:input_type -> task_service.task.v1.UpdateTaskStatusRequest
+	18, // 18: task_service.task.v1.TaskService.UpdateTaskProgress:input_type -> task_service.task.v1.UpdateTaskProgressRequest
+	19, // 19: task_service.task.v1.TaskService.ListTasksByOrganization:input_type -> task_service.task.v1.ListTasksByOrganizationRequest
+	20, // 20: task_service.task.v1.TaskService.ListTasksByParent:input_type -> task_service.task.v1.ListTasksByParentRequest
+	21, // 21: task_service.task.v1.TaskService.ListTasksByCreator:input_type -> task_service.task.v1.ListTasksByCreatorRequest
+	22, // 22: task_service.task.v1.TaskService.AssignTask:input_type -> task_service.task.v1.AssignTaskRequest
+	23, // 23: task_service.task.v1.TaskService.UnassignTask:input_type -> task_service.task.v1.UnassignTaskRequest
+	24, // 24: task_service.task.v1.TaskService.ReassignTask:input_type -> task_service.task.v1.ReassignTaskRequest
+	25, // 25: task_service.task.v1.TaskService.ListTaskAssignments:input_type -> task_service.task.v1.ListTaskAssignmentsRequest
+	26, // 26: task_service.task.v1.TaskService.CreateTaskComment:input_type -> task_service.task.v1.CreateTaskCommentRequest
+	27, // 27: task_service.task.v1.TaskService.UpdateTaskComment:input_type -> task_service.task.v1.UpdateTaskCommentRequest
+	28, // 28: task_service.task.v1.TaskService.DeleteTaskComment:input_type -> task_service.task.v1.DeleteTaskCommentRequest
+	29, // 29: task_service.task.v1.TaskService.ListTaskComments:input_type -> task_service.task.v1.ListTaskCommentsRequest
+	30, // 30: task_service.task.v1.TaskService.CreateTask:output_type -> task_service.models.v1.Task
+	30, // 31: task_service.task.v1.TaskService.GetTask:output_type -> task_service.models.v1.Task
+	31, // 32: task_service.task.v1.TaskService.ListTasksByProject:output_type -> task_service.task.v1.ListTasksByProjectResponse
+	32, // 33: task_service.task.v1.TaskService.CreateProject:output_type -> task_service.models.v1.Project
+	32, // 34: task_service.task.v1.TaskService.GetProject:output_type -> task_service.models.v1.Project
+	32, // 35: task_service.task.v1.TaskService.UpdateProject:output_type -> task_service.models.v1.Project
+	32, // 36: task_service.task.v1.TaskService.CompleteProject:output_type -> task_service.models.v1.Project
+	32, // 37: task_service.task.v1.TaskService.ArchiveProject:output_type -> task_service.models.v1.Project
+	33, // 38: task_service.task.v1.TaskService.DeleteProject:output_type -> core.v1.SuccessResponse
+	34, // 39: task_service.task.v1.TaskService.ListProjects:output_type -> task_service.task.v1.ListProjectsResponse
+	35, // 40: task_service.task.v1.TaskService.AddProjectMember:output_type -> task_service.models.v1.ProjectMembership
+	33, // 41: task_service.task.v1.TaskService.RemoveProjectMember:output_type -> core.v1.SuccessResponse
+	35, // 42: task_service.task.v1.TaskService.UpdateProjectMemberRole:output_type -> task_service.models.v1.ProjectMembership
+	36, // 43: task_service.task.v1.TaskService.ListProjectMembers:output_type -> task_service.task.v1.ListProjectMembersResponse
+	30, // 44: task_service.task.v1.TaskService.UpdateTask:output_type -> task_service.models.v1.Task
+	33, // 45: task_service.task.v1.TaskService.DeleteTask:output_type -> core.v1.SuccessResponse
+	30, // 46: task_service.task.v1.TaskService.ArchiveTask:output_type -> task_service.models.v1.Task
+	30, // 47: task_service.task.v1.TaskService.UpdateTaskStatus:output_type -> task_service.models.v1.Task
+	30, // 48: task_service.task.v1.TaskService.UpdateTaskProgress:output_type -> task_service.models.v1.Task
+	37, // 49: task_service.task.v1.TaskService.ListTasksByOrganization:output_type -> task_service.task.v1.ListTasksByOrganizationResponse
+	38, // 50: task_service.task.v1.TaskService.ListTasksByParent:output_type -> task_service.task.v1.ListTasksByParentResponse
+	39, // 51: task_service.task.v1.TaskService.ListTasksByCreator:output_type -> task_service.task.v1.ListTasksByCreatorResponse
+	40, // 52: task_service.task.v1.TaskService.AssignTask:output_type -> task_service.models.v1.TaskAssignment
+	33, // 53: task_service.task.v1.TaskService.UnassignTask:output_type -> core.v1.SuccessResponse
+	40, // 54: task_service.task.v1.TaskService.ReassignTask:output_type -> task_service.models.v1.TaskAssignment
+	41, // 55: task_service.task.v1.TaskService.ListTaskAssignments:output_type -> task_service.task.v1.ListTaskAssignmentsResponse
+	42, // 56: task_service.task.v1.TaskService.CreateTaskComment:output_type -> task_service.models.v1.TaskComment
+	42, // 57: task_service.task.v1.TaskService.UpdateTaskComment:output_type -> task_service.models.v1.TaskComment
+	33, // 58: task_service.task.v1.TaskService.DeleteTaskComment:output_type -> core.v1.SuccessResponse
+	43, // 59: task_service.task.v1.TaskService.ListTaskComments:output_type -> task_service.task.v1.ListTaskCommentsResponse
+	30, // [30:60] is the sub-list for method output_type
+	0,  // [0:30] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_task_service_task_v1_service_proto_init() }

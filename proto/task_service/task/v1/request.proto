@@ -20,4 +20,141 @@ message GetTaskRequest {
 
 message ListTasksByProjectRequest {
   string project_id = 1;
+  string status = 2;
+}
+
+message CreateProjectRequest {
+    string organization_id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message GetProjectRequest {
+    string id = 1;
+}
+
+message UpdateProjectRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message CompleteProjectRequest {
+    string id = 1;
+}
+
+message ArchiveProjectRequest {
+    string id = 1;
+}
+
+message DeleteProjectRequest {
+    string id = 1;
+}
+
+message ListProjectsRequest {
+    string organization_id = 1;
+    string status = 2;
+}
+
+message AddProjectMemberRequest {
+    string project_id = 1;
+    string user_id = 2;
+    string role = 3;
+}
+
+message RemoveProjectMemberRequest {
+    string project_id = 1;
+    string user_id = 2;
+}
+
+message UpdateProjectMemberRoleRequest {
+    string project_id = 1;
+    string user_id = 2;
+    string role = 3;
+}
+
+message ListProjectMembersRequest {
+    string project_id = 1;
+}
+
+message UpdateTaskRequest {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+    string priority = 4;
+    google.protobuf.Timestamp due_at = 5;
+}
+
+message DeleteTaskRequest {
+    string id = 1;
+}
+
+message ArchiveTaskRequest {
+    string id = 1;
+}
+
+message UpdateTaskStatusRequest {
+    string id = 1;
+    string status = 2;
+}
+
+message UpdateTaskProgressRequest {
+    string id = 1;
+    int32 progress_percent = 2;
+}
+
+message ListTasksByOrganizationRequest {
+    string organization_id = 1;
+    string status = 2;
+}
+
+message ListTasksByParentRequest {
+    string parent_task_id = 1;
+}
+
+message ListTasksByCreatorRequest {
+    string created_by = 1;
+    string status = 2;
+}
+
+message AssignTaskRequest {
+    string task_id = 1;
+    string assignee_type = 2;
+    string assignee_id = 3;
+}
+
+message UnassignTaskRequest {
+    string task_id = 1;
+    string assignee_type = 2;
+    string assignee_id = 3;
+}
+
+message ReassignTaskRequest {
+    string task_id = 1;
+    string from_assignee_type = 2;
+    string from_assignee_id = 3;
+    string to_assignee_type = 4;
+    string to_assignee_id = 5;
+}
+
+message ListTaskAssignmentsRequest {
+    string task_id = 1;
+}
+
+message CreateTaskCommentRequest {
+    string task_id = 1;
+    string body = 2;
+}
+
+message UpdateTaskCommentRequest {
+    string id = 1;
+    string body = 2;
+}
+
+message DeleteTaskCommentRequest {
+    string id = 1;
+}
+
+message ListTaskCommentsRequest {
+    string task_id = 1;
 }

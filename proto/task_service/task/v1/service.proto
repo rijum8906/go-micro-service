@@ -5,9 +5,37 @@ package task_service.task.v1;
 import "task_service/models/v1/model.proto";
 import "task_service/task/v1/request.proto";
 import "task_service/task/v1/response.proto";
+import "core/v1/common.proto";
 
 service TaskService {
   rpc CreateTask(CreateTaskRequest) returns (task_service.models.v1.Task);
   rpc GetTask(GetTaskRequest) returns (task_service.models.v1.Task);
   rpc ListTasksByProject(ListTasksByProjectRequest) returns (ListTasksByProjectResponse);
+  rpc CreateProject(CreateProjectRequest) returns (task_service.models.v1.Project);
+  rpc GetProject(GetProjectRequest) returns (task_service.models.v1.Project);
+  rpc UpdateProject(UpdateProjectRequest) returns (task_service.models.v1.Project);
+  rpc CompleteProject(CompleteProjectRequest) returns (task_service.models.v1.Project);
+  rpc ArchiveProject(ArchiveProjectRequest) returns (task_service.models.v1.Project);
+  rpc DeleteProject(DeleteProjectRequest) returns (core.v1.SuccessResponse);
+  rpc ListProjects (ListProjectsRequest) returns (ListProjectsResponse);
+  rpc AddProjectMember(AddProjectMemberRequest) returns(task_service.models.v1.ProjectMembership);
+  rpc RemoveProjectMember(RemoveProjectMemberRequest) returns(core.v1.SuccessResponse);
+  rpc UpdateProjectMemberRole(UpdateProjectMemberRoleRequest) returns(task_service.models.v1.ProjectMembership);
+  rpc ListProjectMembers(ListProjectMembersRequest) returns(ListProjectMembersResponse);
+  rpc UpdateTask(UpdateTaskRequest) returns(task_service.models.v1.Task);
+  rpc DeleteTask(DeleteTaskRequest) returns(core.v1.SuccessResponse);
+  rpc ArchiveTask(ArchiveTaskRequest) returns(task_service.models.v1.Task);
+  rpc UpdateTaskStatus(UpdateTaskStatusRequest) returns(task_service.models.v1.Task);
+  rpc UpdateTaskProgress(UpdateTaskProgressRequest) returns(task_service.models.v1.Task);
+  rpc ListTasksByOrganization(ListTasksByOrganizationRequest) returns (ListTasksByOrganizationResponse);
+  rpc ListTasksByParent(ListTasksByParentRequest) returns (ListTasksByParentResponse);
+  rpc ListTasksByCreator(ListTasksByCreatorRequest) returns(ListTasksByCreatorResponse);
+  rpc AssignTask(AssignTaskRequest) returns (task_service.models.v1.TaskAssignment);
+  rpc UnassignTask(UnassignTaskRequest) returns (core.v1.SuccessResponse);
+  rpc ReassignTask(ReassignTaskRequest) returns (task_service.models.v1.TaskAssignment);
+  rpc ListTaskAssignments(ListTaskAssignmentsRequest) returns (ListTaskAssignmentsResponse);
+  rpc CreateTaskComment(CreateTaskCommentRequest) returns (task_service.models.v1.TaskComment);
+  rpc UpdateTaskComment(UpdateTaskCommentRequest) returns (task_service.models.v1.TaskComment);
+  rpc DeleteTaskComment(DeleteTaskCommentRequest) returns (core.v1.SuccessResponse);
+  rpc ListTaskComments(ListTaskCommentsRequest) returns (ListTaskCommentsResponse);
 }

@@ -161,6 +161,7 @@ func (x *GetTaskRequest) GetId() string {
 type ListTasksByProjectRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -202,6 +203,1425 @@ func (x *ListTasksByProjectRequest) GetProjectId() string {
 	return ""
 }
 
+func (x *ListTasksByProjectRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type CreateProjectRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *CreateProjectRequest) Reset() {
+	*x = CreateProjectRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateProjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateProjectRequest) ProtoMessage() {}
+
+func (x *CreateProjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateProjectRequest.ProtoReflect.Descriptor instead.
+func (*CreateProjectRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CreateProjectRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type GetProjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetProjectRequest) Reset() {
+	*x = GetProjectRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetProjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetProjectRequest) ProtoMessage() {}
+
+func (x *GetProjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetProjectRequest.ProtoReflect.Descriptor instead.
+func (*GetProjectRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetProjectRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type UpdateProjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateProjectRequest) Reset() {
+	*x = UpdateProjectRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateProjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateProjectRequest) ProtoMessage() {}
+
+func (x *UpdateProjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateProjectRequest.ProtoReflect.Descriptor instead.
+func (*UpdateProjectRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateProjectRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateProjectRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateProjectRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type CompleteProjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompleteProjectRequest) Reset() {
+	*x = CompleteProjectRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompleteProjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteProjectRequest) ProtoMessage() {}
+
+func (x *CompleteProjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteProjectRequest.ProtoReflect.Descriptor instead.
+func (*CompleteProjectRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CompleteProjectRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ArchiveProjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ArchiveProjectRequest) Reset() {
+	*x = ArchiveProjectRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ArchiveProjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ArchiveProjectRequest) ProtoMessage() {}
+
+func (x *ArchiveProjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ArchiveProjectRequest.ProtoReflect.Descriptor instead.
+func (*ArchiveProjectRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ArchiveProjectRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteProjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteProjectRequest) Reset() {
+	*x = DeleteProjectRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteProjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteProjectRequest) ProtoMessage() {}
+
+func (x *DeleteProjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteProjectRequest.ProtoReflect.Descriptor instead.
+func (*DeleteProjectRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DeleteProjectRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ListProjectsRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Status         string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ListProjectsRequest) Reset() {
+	*x = ListProjectsRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListProjectsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListProjectsRequest) ProtoMessage() {}
+
+func (x *ListProjectsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListProjectsRequest.ProtoReflect.Descriptor instead.
+func (*ListProjectsRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListProjectsRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *ListProjectsRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type AddProjectMemberRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddProjectMemberRequest) Reset() {
+	*x = AddProjectMemberRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddProjectMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddProjectMemberRequest) ProtoMessage() {}
+
+func (x *AddProjectMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddProjectMemberRequest.ProtoReflect.Descriptor instead.
+func (*AddProjectMemberRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *AddProjectMemberRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *AddProjectMemberRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *AddProjectMemberRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+type RemoveProjectMemberRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveProjectMemberRequest) Reset() {
+	*x = RemoveProjectMemberRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveProjectMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveProjectMemberRequest) ProtoMessage() {}
+
+func (x *RemoveProjectMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveProjectMemberRequest.ProtoReflect.Descriptor instead.
+func (*RemoveProjectMemberRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RemoveProjectMemberRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *RemoveProjectMemberRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type UpdateProjectMemberRoleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateProjectMemberRoleRequest) Reset() {
+	*x = UpdateProjectMemberRoleRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateProjectMemberRoleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateProjectMemberRoleRequest) ProtoMessage() {}
+
+func (x *UpdateProjectMemberRoleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateProjectMemberRoleRequest.ProtoReflect.Descriptor instead.
+func (*UpdateProjectMemberRoleRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *UpdateProjectMemberRoleRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *UpdateProjectMemberRoleRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpdateProjectMemberRoleRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+type ListProjectMembersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListProjectMembersRequest) Reset() {
+	*x = ListProjectMembersRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListProjectMembersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListProjectMembersRequest) ProtoMessage() {}
+
+func (x *ListProjectMembersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListProjectMembersRequest.ProtoReflect.Descriptor instead.
+func (*ListProjectMembersRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListProjectMembersRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+type UpdateTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Priority      string                 `protobuf:"bytes,4,opt,name=priority,proto3" json:"priority,omitempty"`
+	DueAt         *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=due_at,json=dueAt,proto3" json:"due_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTaskRequest) Reset() {
+	*x = UpdateTaskRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTaskRequest) ProtoMessage() {}
+
+func (x *UpdateTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTaskRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTaskRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UpdateTaskRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateTaskRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *UpdateTaskRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateTaskRequest) GetPriority() string {
+	if x != nil {
+		return x.Priority
+	}
+	return ""
+}
+
+func (x *UpdateTaskRequest) GetDueAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DueAt
+	}
+	return nil
+}
+
+type DeleteTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTaskRequest) Reset() {
+	*x = DeleteTaskRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTaskRequest) ProtoMessage() {}
+
+func (x *DeleteTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTaskRequest.ProtoReflect.Descriptor instead.
+func (*DeleteTaskRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *DeleteTaskRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ArchiveTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ArchiveTaskRequest) Reset() {
+	*x = ArchiveTaskRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ArchiveTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ArchiveTaskRequest) ProtoMessage() {}
+
+func (x *ArchiveTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ArchiveTaskRequest.ProtoReflect.Descriptor instead.
+func (*ArchiveTaskRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ArchiveTaskRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type UpdateTaskStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTaskStatusRequest) Reset() {
+	*x = UpdateTaskStatusRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTaskStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTaskStatusRequest) ProtoMessage() {}
+
+func (x *UpdateTaskStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTaskStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTaskStatusRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UpdateTaskStatusRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateTaskStatusRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type UpdateTaskProgressRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProgressPercent int32                  `protobuf:"varint,2,opt,name=progress_percent,json=progressPercent,proto3" json:"progress_percent,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *UpdateTaskProgressRequest) Reset() {
+	*x = UpdateTaskProgressRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTaskProgressRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTaskProgressRequest) ProtoMessage() {}
+
+func (x *UpdateTaskProgressRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTaskProgressRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTaskProgressRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *UpdateTaskProgressRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateTaskProgressRequest) GetProgressPercent() int32 {
+	if x != nil {
+		return x.ProgressPercent
+	}
+	return 0
+}
+
+type ListTasksByOrganizationRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Status         string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ListTasksByOrganizationRequest) Reset() {
+	*x = ListTasksByOrganizationRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksByOrganizationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksByOrganizationRequest) ProtoMessage() {}
+
+func (x *ListTasksByOrganizationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksByOrganizationRequest.ProtoReflect.Descriptor instead.
+func (*ListTasksByOrganizationRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ListTasksByOrganizationRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *ListTasksByOrganizationRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type ListTasksByParentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ParentTaskId  string                 `protobuf:"bytes,1,opt,name=parent_task_id,json=parentTaskId,proto3" json:"parent_task_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTasksByParentRequest) Reset() {
+	*x = ListTasksByParentRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksByParentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksByParentRequest) ProtoMessage() {}
+
+func (x *ListTasksByParentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksByParentRequest.ProtoReflect.Descriptor instead.
+func (*ListTasksByParentRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListTasksByParentRequest) GetParentTaskId() string {
+	if x != nil {
+		return x.ParentTaskId
+	}
+	return ""
+}
+
+type ListTasksByCreatorRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CreatedBy     string                 `protobuf:"bytes,1,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTasksByCreatorRequest) Reset() {
+	*x = ListTasksByCreatorRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksByCreatorRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksByCreatorRequest) ProtoMessage() {}
+
+func (x *ListTasksByCreatorRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksByCreatorRequest.ProtoReflect.Descriptor instead.
+func (*ListTasksByCreatorRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ListTasksByCreatorRequest) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+func (x *ListTasksByCreatorRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type AssignTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	AssigneeType  string                 `protobuf:"bytes,2,opt,name=assignee_type,json=assigneeType,proto3" json:"assignee_type,omitempty"`
+	AssigneeId    string                 `protobuf:"bytes,3,opt,name=assignee_id,json=assigneeId,proto3" json:"assignee_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AssignTaskRequest) Reset() {
+	*x = AssignTaskRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AssignTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AssignTaskRequest) ProtoMessage() {}
+
+func (x *AssignTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AssignTaskRequest.ProtoReflect.Descriptor instead.
+func (*AssignTaskRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *AssignTaskRequest) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *AssignTaskRequest) GetAssigneeType() string {
+	if x != nil {
+		return x.AssigneeType
+	}
+	return ""
+}
+
+func (x *AssignTaskRequest) GetAssigneeId() string {
+	if x != nil {
+		return x.AssigneeId
+	}
+	return ""
+}
+
+type UnassignTaskRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	AssigneeType  string                 `protobuf:"bytes,2,opt,name=assignee_type,json=assigneeType,proto3" json:"assignee_type,omitempty"`
+	AssigneeId    string                 `protobuf:"bytes,3,opt,name=assignee_id,json=assigneeId,proto3" json:"assignee_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnassignTaskRequest) Reset() {
+	*x = UnassignTaskRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnassignTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnassignTaskRequest) ProtoMessage() {}
+
+func (x *UnassignTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnassignTaskRequest.ProtoReflect.Descriptor instead.
+func (*UnassignTaskRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *UnassignTaskRequest) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *UnassignTaskRequest) GetAssigneeType() string {
+	if x != nil {
+		return x.AssigneeType
+	}
+	return ""
+}
+
+func (x *UnassignTaskRequest) GetAssigneeId() string {
+	if x != nil {
+		return x.AssigneeId
+	}
+	return ""
+}
+
+type ReassignTaskRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	TaskId           string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	FromAssigneeType string                 `protobuf:"bytes,2,opt,name=from_assignee_type,json=fromAssigneeType,proto3" json:"from_assignee_type,omitempty"`
+	FromAssigneeId   string                 `protobuf:"bytes,3,opt,name=from_assignee_id,json=fromAssigneeId,proto3" json:"from_assignee_id,omitempty"`
+	ToAssigneeType   string                 `protobuf:"bytes,4,opt,name=to_assignee_type,json=toAssigneeType,proto3" json:"to_assignee_type,omitempty"`
+	ToAssigneeId     string                 `protobuf:"bytes,5,opt,name=to_assignee_id,json=toAssigneeId,proto3" json:"to_assignee_id,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ReassignTaskRequest) Reset() {
+	*x = ReassignTaskRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReassignTaskRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReassignTaskRequest) ProtoMessage() {}
+
+func (x *ReassignTaskRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReassignTaskRequest.ProtoReflect.Descriptor instead.
+func (*ReassignTaskRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ReassignTaskRequest) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *ReassignTaskRequest) GetFromAssigneeType() string {
+	if x != nil {
+		return x.FromAssigneeType
+	}
+	return ""
+}
+
+func (x *ReassignTaskRequest) GetFromAssigneeId() string {
+	if x != nil {
+		return x.FromAssigneeId
+	}
+	return ""
+}
+
+func (x *ReassignTaskRequest) GetToAssigneeType() string {
+	if x != nil {
+		return x.ToAssigneeType
+	}
+	return ""
+}
+
+func (x *ReassignTaskRequest) GetToAssigneeId() string {
+	if x != nil {
+		return x.ToAssigneeId
+	}
+	return ""
+}
+
+type ListTaskAssignmentsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTaskAssignmentsRequest) Reset() {
+	*x = ListTaskAssignmentsRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTaskAssignmentsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTaskAssignmentsRequest) ProtoMessage() {}
+
+func (x *ListTaskAssignmentsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTaskAssignmentsRequest.ProtoReflect.Descriptor instead.
+func (*ListTaskAssignmentsRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ListTaskAssignmentsRequest) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+type CreateTaskCommentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	Body          string                 `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateTaskCommentRequest) Reset() {
+	*x = CreateTaskCommentRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateTaskCommentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateTaskCommentRequest) ProtoMessage() {}
+
+func (x *CreateTaskCommentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateTaskCommentRequest.ProtoReflect.Descriptor instead.
+func (*CreateTaskCommentRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *CreateTaskCommentRequest) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *CreateTaskCommentRequest) GetBody() string {
+	if x != nil {
+		return x.Body
+	}
+	return ""
+}
+
+type UpdateTaskCommentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Body          string                 `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTaskCommentRequest) Reset() {
+	*x = UpdateTaskCommentRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTaskCommentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTaskCommentRequest) ProtoMessage() {}
+
+func (x *UpdateTaskCommentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTaskCommentRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTaskCommentRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *UpdateTaskCommentRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateTaskCommentRequest) GetBody() string {
+	if x != nil {
+		return x.Body
+	}
+	return ""
+}
+
+type DeleteTaskCommentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTaskCommentRequest) Reset() {
+	*x = DeleteTaskCommentRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTaskCommentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTaskCommentRequest) ProtoMessage() {}
+
+func (x *DeleteTaskCommentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTaskCommentRequest.ProtoReflect.Descriptor instead.
+func (*DeleteTaskCommentRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *DeleteTaskCommentRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ListTaskCommentsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TaskId        string                 `protobuf:"bytes,1,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTaskCommentsRequest) Reset() {
+	*x = ListTaskCommentsRequest{}
+	mi := &file_task_service_task_v1_request_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTaskCommentsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTaskCommentsRequest) ProtoMessage() {}
+
+func (x *ListTaskCommentsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_request_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTaskCommentsRequest.ProtoReflect.Descriptor instead.
+func (*ListTaskCommentsRequest) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_request_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ListTaskCommentsRequest) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
 var File_task_service_task_v1_request_proto protoreflect.FileDescriptor
 
 const file_task_service_task_v1_request_proto_rawDesc = "" +
@@ -217,10 +1637,100 @@ const file_task_service_task_v1_request_proto_rawDesc = "" +
 	"\bpriority\x18\x06 \x01(\tR\bpriority\x121\n" +
 	"\x06due_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x05dueAt\" \n" +
 	"\x0eGetTaskRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\":\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"R\n" +
 	"\x19ListTasksByProjectRequest\x12\x1d\n" +
 	"\n" +
-	"project_id\x18\x01 \x01(\tR\tprojectIdB\xda\x01\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"u\n" +
+	"\x14CreateProjectRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"#\n" +
+	"\x11GetProjectRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\\\n" +
+	"\x14UpdateProjectRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"(\n" +
+	"\x16CompleteProjectRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"'\n" +
+	"\x15ArchiveProjectRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"&\n" +
+	"\x14DeleteProjectRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"V\n" +
+	"\x13ListProjectsRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"e\n" +
+	"\x17AddProjectMemberRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\"T\n" +
+	"\x1aRemoveProjectMemberRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"l\n" +
+	"\x1eUpdateProjectMemberRoleRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\":\n" +
+	"\x19ListProjectMembersRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\"\xaa\x01\n" +
+	"\x11UpdateTaskRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1a\n" +
+	"\bpriority\x18\x04 \x01(\tR\bpriority\x121\n" +
+	"\x06due_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x05dueAt\"#\n" +
+	"\x11DeleteTaskRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"$\n" +
+	"\x12ArchiveTaskRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
+	"\x17UpdateTaskStatusRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"V\n" +
+	"\x19UpdateTaskProgressRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12)\n" +
+	"\x10progress_percent\x18\x02 \x01(\x05R\x0fprogressPercent\"a\n" +
+	"\x1eListTasksByOrganizationRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"@\n" +
+	"\x18ListTasksByParentRequest\x12$\n" +
+	"\x0eparent_task_id\x18\x01 \x01(\tR\fparentTaskId\"R\n" +
+	"\x19ListTasksByCreatorRequest\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x01 \x01(\tR\tcreatedBy\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"r\n" +
+	"\x11AssignTaskRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12#\n" +
+	"\rassignee_type\x18\x02 \x01(\tR\fassigneeType\x12\x1f\n" +
+	"\vassignee_id\x18\x03 \x01(\tR\n" +
+	"assigneeId\"t\n" +
+	"\x13UnassignTaskRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12#\n" +
+	"\rassignee_type\x18\x02 \x01(\tR\fassigneeType\x12\x1f\n" +
+	"\vassignee_id\x18\x03 \x01(\tR\n" +
+	"assigneeId\"\xd6\x01\n" +
+	"\x13ReassignTaskRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12,\n" +
+	"\x12from_assignee_type\x18\x02 \x01(\tR\x10fromAssigneeType\x12(\n" +
+	"\x10from_assignee_id\x18\x03 \x01(\tR\x0efromAssigneeId\x12(\n" +
+	"\x10to_assignee_type\x18\x04 \x01(\tR\x0etoAssigneeType\x12$\n" +
+	"\x0eto_assignee_id\x18\x05 \x01(\tR\ftoAssigneeId\"5\n" +
+	"\x1aListTaskAssignmentsRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskId\"G\n" +
+	"\x18CreateTaskCommentRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskId\x12\x12\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\">\n" +
+	"\x18UpdateTaskCommentRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\"*\n" +
+	"\x18DeleteTaskCommentRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"2\n" +
+	"\x17ListTaskCommentsRequest\x12\x17\n" +
+	"\atask_id\x18\x01 \x01(\tR\x06taskIdB\xda\x01\n" +
 	"\x18com.task_service.task.v1B\fRequestProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/task_service/task/v1;taskv1\xa2\x02\x03TTX\xaa\x02\x13TaskService.Task.V1\xca\x02\x13TaskService\\Task\\V1\xe2\x02\x1fTaskService\\Task\\V1\\GPBMetadata\xea\x02\x15TaskService::Task::V1b\x06proto3"
 
 var (
@@ -235,20 +1745,48 @@ func file_task_service_task_v1_request_proto_rawDescGZIP() []byte {
 	return file_task_service_task_v1_request_proto_rawDescData
 }
 
-var file_task_service_task_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_task_service_task_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_task_service_task_v1_request_proto_goTypes = []any{
-	(*CreateTaskRequest)(nil),         // 0: task_service.task.v1.CreateTaskRequest
-	(*GetTaskRequest)(nil),            // 1: task_service.task.v1.GetTaskRequest
-	(*ListTasksByProjectRequest)(nil), // 2: task_service.task.v1.ListTasksByProjectRequest
-	(*timestamppb.Timestamp)(nil),     // 3: google.protobuf.Timestamp
+	(*CreateTaskRequest)(nil),              // 0: task_service.task.v1.CreateTaskRequest
+	(*GetTaskRequest)(nil),                 // 1: task_service.task.v1.GetTaskRequest
+	(*ListTasksByProjectRequest)(nil),      // 2: task_service.task.v1.ListTasksByProjectRequest
+	(*CreateProjectRequest)(nil),           // 3: task_service.task.v1.CreateProjectRequest
+	(*GetProjectRequest)(nil),              // 4: task_service.task.v1.GetProjectRequest
+	(*UpdateProjectRequest)(nil),           // 5: task_service.task.v1.UpdateProjectRequest
+	(*CompleteProjectRequest)(nil),         // 6: task_service.task.v1.CompleteProjectRequest
+	(*ArchiveProjectRequest)(nil),          // 7: task_service.task.v1.ArchiveProjectRequest
+	(*DeleteProjectRequest)(nil),           // 8: task_service.task.v1.DeleteProjectRequest
+	(*ListProjectsRequest)(nil),            // 9: task_service.task.v1.ListProjectsRequest
+	(*AddProjectMemberRequest)(nil),        // 10: task_service.task.v1.AddProjectMemberRequest
+	(*RemoveProjectMemberRequest)(nil),     // 11: task_service.task.v1.RemoveProjectMemberRequest
+	(*UpdateProjectMemberRoleRequest)(nil), // 12: task_service.task.v1.UpdateProjectMemberRoleRequest
+	(*ListProjectMembersRequest)(nil),      // 13: task_service.task.v1.ListProjectMembersRequest
+	(*UpdateTaskRequest)(nil),              // 14: task_service.task.v1.UpdateTaskRequest
+	(*DeleteTaskRequest)(nil),              // 15: task_service.task.v1.DeleteTaskRequest
+	(*ArchiveTaskRequest)(nil),             // 16: task_service.task.v1.ArchiveTaskRequest
+	(*UpdateTaskStatusRequest)(nil),        // 17: task_service.task.v1.UpdateTaskStatusRequest
+	(*UpdateTaskProgressRequest)(nil),      // 18: task_service.task.v1.UpdateTaskProgressRequest
+	(*ListTasksByOrganizationRequest)(nil), // 19: task_service.task.v1.ListTasksByOrganizationRequest
+	(*ListTasksByParentRequest)(nil),       // 20: task_service.task.v1.ListTasksByParentRequest
+	(*ListTasksByCreatorRequest)(nil),      // 21: task_service.task.v1.ListTasksByCreatorRequest
+	(*AssignTaskRequest)(nil),              // 22: task_service.task.v1.AssignTaskRequest
+	(*UnassignTaskRequest)(nil),            // 23: task_service.task.v1.UnassignTaskRequest
+	(*ReassignTaskRequest)(nil),            // 24: task_service.task.v1.ReassignTaskRequest
+	(*ListTaskAssignmentsRequest)(nil),     // 25: task_service.task.v1.ListTaskAssignmentsRequest
+	(*CreateTaskCommentRequest)(nil),       // 26: task_service.task.v1.CreateTaskCommentRequest
+	(*UpdateTaskCommentRequest)(nil),       // 27: task_service.task.v1.UpdateTaskCommentRequest
+	(*DeleteTaskCommentRequest)(nil),       // 28: task_service.task.v1.DeleteTaskCommentRequest
+	(*ListTaskCommentsRequest)(nil),        // 29: task_service.task.v1.ListTaskCommentsRequest
+	(*timestamppb.Timestamp)(nil),          // 30: google.protobuf.Timestamp
 }
 var file_task_service_task_v1_request_proto_depIdxs = []int32{
-	3, // 0: task_service.task.v1.CreateTaskRequest.due_at:type_name -> google.protobuf.Timestamp
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	30, // 0: task_service.task.v1.CreateTaskRequest.due_at:type_name -> google.protobuf.Timestamp
+	30, // 1: task_service.task.v1.UpdateTaskRequest.due_at:type_name -> google.protobuf.Timestamp
+	2,  // [2:2] is the sub-list for method output_type
+	2,  // [2:2] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_task_service_task_v1_request_proto_init() }
@@ -262,7 +1800,7 @@ func file_task_service_task_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_task_service_task_v1_request_proto_rawDesc), len(file_task_service_task_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
