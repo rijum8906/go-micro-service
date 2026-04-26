@@ -55,6 +55,14 @@ func (s *OrganizationService) CreateOrganization(ctx context.Context, req *organ
 	}
 
 	// TODO: Step 3. Add user as owner in membership
+	_, err = s.q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
+		UserID:         createdBy,
+		OrganizationID: org.ID,
+		Role:           "owner",
+	})
+	if err != nil {
+		return nil, errors.New("failed to create organization" + err.Error())
+	}
 
 	// TODO: Step 4. Add info to audit log
 
