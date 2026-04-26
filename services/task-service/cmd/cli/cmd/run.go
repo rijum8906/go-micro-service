@@ -8,7 +8,7 @@ import (
 // serviceRunCmd represents the run command
 var serviceRunCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Run notification service actions",
+	Short: "Run task service actions",
 	Run:   command.NotImplemented,
 }
 

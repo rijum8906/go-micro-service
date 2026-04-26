@@ -9,10 +9,10 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "ns-cli",
-	Short: "notification service command line interface",
+	Use:   "task-cli",
+	Short: "task service command line interface",
 	Long: `
-ns-cli is a command line interface for notification service.
+task-cli is a command line interface for task service.
 `,
 }
 

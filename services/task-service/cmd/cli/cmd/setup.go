@@ -11,7 +11,7 @@ import (
 // setupCmd represents the setup command
 var setupCmd = &cobra.Command{
 	Use:   "setup",
-	Short: "Run notification service setup actions",
+	Short: "Run task service setup actions",
 	Run: func(cmd *cobra.Command, args []string) {
 		currentOS := runtime.GOOS
 		fmt.Printf("⚙️ Running setup for %s\n", currentOS)

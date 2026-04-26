@@ -9,9 +9,9 @@ CLI_RUN := go run ./cmd/cli/main.go
 	run \
 	setup \
 	test \
+	db-init \
 	db-apply \
 	db-migrate \
-	db-sql-apply \
 	db-status \
 	db-new \
 	db-schema \
@@ -23,25 +23,24 @@ CLI_RUN := go run ./cmd/cli/main.go
 
 help:
 	@echo "Available targets:"
-	@echo "  make run                        - Run the notification service CLI stub"
-	@echo "  make setup                      - Run setup CLI stub"
-	@echo "  make test                       - Run test CLI stub"
+	@echo "  make run                        - Run the task service CLI"
+	@echo "  make setup                      - Install development dependencies"
+	@echo "  make test                       - Run task-service tests"
+	@echo "  make db-init                    - Initialize database (create DBs)"
 	@echo "  make db-apply                   - Apply pending Atlas migrations"
 	@echo "  make db-migrate                 - Alias for db-apply"
-	@echo "  make db-sql-apply               - Apply embedded SQL migrations without Atlas"
 	@echo "  make db-status                  - Show Atlas migration status"
 	@echo "  make db-new NAME=xxx            - Generate an Atlas migration from schema changes"
 	@echo "  make db-schema                  - Apply schema directly with Atlas"
 	@echo "  make db-rehash                  - Recalculate atlas.sum"
 	@echo "  make db-rollback COUNT=1        - Roll back Atlas migrations"
 	@echo "  make db-reset                   - Clean database and reapply Atlas migrations"
-	@echo "  make test-setup                 - Prepare the test environment"
-	@echo "  make test-run                   - Run test command stub"
+	@echo "  make test-setup                 - Reset and migrate the test database"
+	@echo "  make test-run                   - Run task-service tests"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make db-new NAME=add_users_table"
 	@echo "  make db-rollback COUNT=2"
-	@echo "  make db-sql-apply"
 	@echo "  make test-setup"
 
 run:
@@ -58,9 +57,6 @@ db-apply:
 
 db-migrate: db-apply
 
-db-sql-apply:
-	@$(CLI_RUN) db sql apply
-
 db-status:
 	@$(CLI_RUN) db atlas status
 
@@ -68,7 +64,7 @@ db-init:
 	@$(CLI_RUN) db atlas init
 
 db-new:
-	@$(CLI_RUN) db atlas new "$(NAME)"
+	@$(CLI_RUN) db atlas new --name "$(NAME)"
 
 db-schema:
 	@$(CLI_RUN) db atlas schema
@@ -77,7 +73,7 @@ db-rehash:
 	@$(CLI_RUN) db atlas rehash
 
 db-rollback:
-	@$(CLI_RUN) db atlas rollback $(or $(COUNT),1)
+	@$(CLI_RUN) db atlas rollback --count $(or $(COUNT),1)
 
 db-reset:
 	@$(CLI_RUN) db atlas reset
@@ -88,5 +84,4 @@ test-setup:
 test-run:
 	@$(CLI_RUN) test run
 
-init-test: test-start
-
+init-test: test-setup

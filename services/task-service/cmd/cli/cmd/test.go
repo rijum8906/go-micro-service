@@ -1,44 +1,45 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/rijum8906/relay/packages/core/testutils"
-	migrations "github.com/rijum8906/relay/services/notification-service/db"
 	"github.com/spf13/cobra"
 )
 
 var testCmd = &cobra.Command{
 	Use:   "test",
-	Short: "Test commands",
-	Run:   command.NotImplemented,
+	Short: "Manage the local test environment",
+	Long:  "Manage the local PostgreSQL-backed test environment for the task service.",
 }
 
 var testSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Prepare test environment",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Setting up test environment...")
 
-		fmt.Println("Migrating test database...")
-
-		pool := testutils.MustConnectDB()
-
-		migrations, err := migrations.All()
-		if err != nil {
-			panic(err)
+		fmt.Println("Cleaning test database...")
+		if err := runCommand(
+			"atlas", "schema", "clean",
+			"--url", testDBURL(),
+			"--auto-approve",
+		); err != nil {
+			return fmt.Errorf("clean test database: %w", err)
 		}
 
-		for _, m := range migrations {
-			_, err = pool.Exec(context.Background(), m.Content)
-			if err != nil {
-				fmt.Printf("failed to apply migration %s: %v", m.Name, err)
-			}
+		fmt.Println("Applying test migrations...")
+		if err := runCommand(
+			"atlas", "migrate", "apply",
+			"--url", testDBURL(),
+			"--dir", migrationDir(),
+		); err != nil {
+			return fmt.Errorf("apply test migrations: %w", err)
 		}
 
 		fmt.Println("Test environment setup complete.")
+		return nil
 	},
 }
 
@@ -55,4 +56,16 @@ func init() {
 
 	testCmd.AddCommand(testSetupCmd)
 	testCmd.AddCommand(testRunCmd)
+}
+
+func testDBURL() string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
+		testutils.DBUser,
+		testutils.DBPassword,
+		testutils.DBHost,
+		testutils.DBPort,
+		testutils.DBName,
+		testutils.DBSSLMode,
+	)
 }

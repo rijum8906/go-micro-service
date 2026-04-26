@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 
 	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/rijum8906/relay/packages/core/coreenv"
+	"github.com/rijum8906/relay/packages/core/testutils"
 	"github.com/spf13/cobra"
 )
 
@@ -12,15 +15,14 @@ var config *coreenv.CoreEnv
 
 var dbCmd = &cobra.Command{
 	Use:   "db",
-	Short: "Database commands",
-	Run:   command.NotImplemented,
+	Short: "Manage the task service database schema and migrations",
+	Long:  "Manage Atlas-based migrations for the task service database.",
 }
 
-var atlasCmd = &cobra.Command{
+var dbAtlasCmd = &cobra.Command{
 	Use:   "atlas",
-	Short: "Atlas database commands",
-	Run: func(cmd *cobra.Command, args []string) {
-	},
+	Short: "Manage Atlas-based migrations",
+	Long:  "Run Atlas migration and schema operations against the configured database.",
 }
 
 var atlasDBInitCmd = &cobra.Command{
@@ -46,94 +48,172 @@ var atlasDBInitCmd = &cobra.Command{
 	},
 }
 
-var atlasApplyCmd = &cobra.Command{
-	Use:   "apply",
-	Short: "Apply atlas migrations",
-	Run: func(cmd *cobra.Command, args []string) {
-		command.RunCommand("atlas",
-			"migrate", "apply",
-			"--url", command.GetDBURL(config),
-			"--dir", command.GetMigrationDir())
-	},
+func newDBAtlasApplyCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "apply",
+		Aliases: []string{"migrate"},
+		Short:   "Apply pending migrations",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("Applying migrations...")
+			if err := runCommand(
+				"atlas", "migrate", "apply",
+				"--url", dbURL(),
+				"--dir", migrationDir(),
+			); err != nil {
+				return fmt.Errorf("apply migrations: %w", err)
+			}
+
+			fmt.Println("Migrations applied.")
+			return nil
+		},
+	}
 }
 
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Show atlas status",
-	Run: func(cmd *cobra.Command, args []string) {
-		command.RunCommand("atlas",
-			"migrate", "status",
-			"--url", command.GetDBURL(config),
-			"--dir", command.GetMigrationDir())
-	},
+func newDBAtlasStatusCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "status",
+		Short: "Show migration status",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("Checking migration status...")
+			if err := runCommand(
+				"atlas", "migrate", "status",
+				"--url", dbURL(),
+				"--dir", migrationDir(),
+			); err != nil {
+				return fmt.Errorf("check migration status: %w", err)
+			}
+
+			return nil
+		},
+	}
 }
 
-var newCmd = &cobra.Command{
-	Use:   "new",
-	Short: "Create a new atlas migration",
-	Run: func(cmd *cobra.Command, args []string) {
-		migrationName := args[0]
-		command.RunCommand("atlas", "migrate", "diff", migrationName,
-			"--dir", command.GetMigrationDir(),
-			"--to", command.GetSchemaDir(),
-			"--dev-url", command.GetDevDBURL(config))
-	},
+func newDBAtlasNewCmd() *cobra.Command {
+	var migrationName string
+
+	cmd := &cobra.Command{
+		Use:   "new",
+		Short: "Generate a new migration from schema changes",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if migrationName == "" {
+				return fmt.Errorf("migration name is required")
+			}
+
+			fmt.Printf("Generating migration: %s\n", migrationName)
+			if err := runCommand(
+				"atlas", "migrate", "diff", migrationName,
+				"--dir", migrationDir(),
+				"--to", schemaURL(),
+				"--dev-url", devDBURL(),
+			); err != nil {
+				return fmt.Errorf("generate migration: %w", err)
+			}
+
+			fmt.Println("Migration generated.")
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVar(&migrationName, "name", "", "migration name")
+	return cmd
 }
 
-var schemaCmd = &cobra.Command{
-	Use:   "schema",
-	Short: "Apply schema actions",
-	Run: func(cmd *cobra.Command, args []string) {
-		err := command.CreateNewDatabase(config, "dev_"+config.DBName)
-		if err != nil {
-			panic(err)
-		}
-		command.RunCommand("atlas",
-			"schema", "apply",
-			"--url", command.GetDBURL(config),
-			"--dev-url", command.GetDevDBURL(config),
-			"--file", command.GetSchemaDir(),
-			"--auto-approve")
-	},
+func newDBAtlasSchemaCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "schema",
+		Short: "Apply schema directly",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("Applying schema...")
+			if err := runCommand(
+				"atlas", "schema", "apply",
+				"--url", dbURL(),
+				"--to", schemaURL(),
+				"--dev-url", devDBURL(),
+				"--auto-approve",
+			); err != nil {
+				return fmt.Errorf("apply schema: %w", err)
+			}
+
+			fmt.Println("Schema applied.")
+			return nil
+		},
+	}
 }
 
-var rehashCmd = &cobra.Command{
-	Use:   "rehash",
-	Short: "Rehash atlas migration checksums",
-	Run: func(cmd *cobra.Command, args []string) {
-		command.RunCommand("atlas", "migrate", "hash",
-			"--dir", command.GetMigrationDir())
-	},
+func newDBAtlasRehashCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "rehash",
+		Short: "Recalculate atlas.sum",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("Rehashing migration directory...")
+			if err := runCommand("atlas", "migrate", "hash", "--dir", migrationDir()); err != nil {
+				return fmt.Errorf("rehash migrations: %w", err)
+			}
+
+			fmt.Println("atlas.sum updated.")
+			return nil
+		},
+	}
 }
 
-var rollbackCmd = &cobra.Command{
-	Use:   "rollback",
-	Short: "Rollback atlas migrations",
-	Run: func(cmd *cobra.Command, args []string) {
-		count := args[0]
-		command.RunCommand("atlas", "migrate", "down", count,
-			"--url", command.GetDBURL(config),
-			"--dir", command.GetMigrationDir(),
-			"--dev-url", command.GetDevDBURL(config))
-	},
+func newDBAtlasRollbackCmd() *cobra.Command {
+	var rollbackCount int
+
+	cmd := &cobra.Command{
+		Use:   "rollback",
+		Short: "Roll back applied migrations",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if rollbackCount < 1 {
+				return fmt.Errorf("rollback count must be at least 1")
+			}
+
+			fmt.Printf("Rolling back %d migration(s)...\n", rollbackCount)
+			if err := runCommand(
+				"atlas", "migrate", "down", fmt.Sprint(rollbackCount),
+				"--url", dbURL(),
+				"--dir", migrationDir(),
+				"--dev-url", devDBURL(),
+			); err != nil {
+				return fmt.Errorf("rollback migrations: %w", err)
+			}
+
+			fmt.Println("Rollback complete.")
+			return nil
+		},
+	}
+
+	cmd.Flags().IntVar(&rollbackCount, "count", 1, "number of migrations to roll back")
+	return cmd
 }
 
-var resetCmd = &cobra.Command{
-	Use:   "reset",
-	Short: "Reset atlas migrations",
-	Run:   command.NotImplemented,
-}
+func newDBAtlasResetCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "reset",
+		Short: "Reset the database and reapply migrations",
+		Long:  "Drop all objects from the configured database and reapply the current migration set.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("Cleaning database...")
+			if err := runCommand(
+				"atlas", "schema", "clean",
+				"--url", dbURL(),
+				"--auto-approve",
+			); err != nil {
+				return fmt.Errorf("clean database: %w", err)
+			}
 
-var sqlCmd = &cobra.Command{
-	Use:   "sql",
-	Short: "SQL database commands",
-	Run:   command.NotImplemented,
-}
+			fmt.Println("Reapplying migrations...")
+			if err := runCommand(
+				"atlas", "migrate", "apply",
+				"--url", dbURL(),
+				"--dir", migrationDir(),
+			); err != nil {
+				return fmt.Errorf("reapply migrations: %w", err)
+			}
 
-var sqlApplyCmd = &cobra.Command{
-	Use:   "apply",
-	Short: "Apply SQL migrations",
-	Run:   command.NotImplemented,
+			fmt.Println("Database reset complete.")
+			return nil
+		},
+	}
 }
 
 func init() {
@@ -144,19 +224,57 @@ func init() {
 
 	config = envConfig
 
+	dbAtlasCmd.AddCommand(atlasDBInitCmd)
+	dbAtlasCmd.AddCommand(newDBAtlasApplyCmd())
+	dbAtlasCmd.AddCommand(newDBAtlasStatusCmd())
+	dbAtlasCmd.AddCommand(newDBAtlasNewCmd())
+	dbAtlasCmd.AddCommand(newDBAtlasSchemaCmd())
+	dbAtlasCmd.AddCommand(newDBAtlasRehashCmd())
+	dbAtlasCmd.AddCommand(newDBAtlasRollbackCmd())
+	dbAtlasCmd.AddCommand(newDBAtlasResetCmd())
+
+	dbCmd.AddCommand(dbAtlasCmd)
+
+	// Keep Atlas commands at the top level as compatibility aliases for the Makefile.
+	dbCmd.AddCommand(newDBAtlasApplyCmd())
+	dbCmd.AddCommand(newDBAtlasStatusCmd())
+	dbCmd.AddCommand(newDBAtlasNewCmd())
+	dbCmd.AddCommand(newDBAtlasSchemaCmd())
+	dbCmd.AddCommand(newDBAtlasRehashCmd())
+	dbCmd.AddCommand(newDBAtlasRollbackCmd())
+	dbCmd.AddCommand(newDBAtlasResetCmd())
+
 	rootCmd.AddCommand(dbCmd)
+}
 
-	dbCmd.AddCommand(atlasCmd)
-	dbCmd.AddCommand(sqlCmd)
+func runCommand(name string, args ...string) error {
+	command := exec.Command(name, args...)
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	command.Stdin = os.Stdin
+	return command.Run()
+}
 
-	atlasCmd.AddCommand(atlasDBInitCmd)
-	atlasCmd.AddCommand(atlasApplyCmd)
-	atlasCmd.AddCommand(statusCmd)
-	atlasCmd.AddCommand(newCmd)
-	atlasCmd.AddCommand(schemaCmd)
-	atlasCmd.AddCommand(rehashCmd)
-	atlasCmd.AddCommand(rollbackCmd)
-	atlasCmd.AddCommand(resetCmd)
+func dbURL() string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
+		config.DBUser,
+		config.DBPassword,
+		"localhost",
+		config.DBPort,
+		config.DBName,
+		config.DBSSLMode,
+	)
+}
 
-	sqlCmd.AddCommand(sqlApplyCmd)
+func migrationDir() string {
+	return "file://db/migrations"
+}
+
+func schemaURL() string {
+	return "file://db/schema.sql"
+}
+
+func devDBURL() string {
+	return testutils.DevDBURL
 }
