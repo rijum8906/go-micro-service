@@ -8,11 +8,13 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
+	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/organization"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -53,6 +55,19 @@ func (a *Application) initUtils() *apperror.AppError {
 	return nil
 }
 
+func (a *Application) initGRPCClients() *apperror.AppError {
+	conn, err := grpc.NewClient(a.config.UserServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return apperror.ErrThirdParty.WithMessage("failed to connect to user service").WithDetail("error", err.Error())
+	}
+
+	// connect to clients
+	a.clients = &GrpcClients{
+		UserClient: userv1.NewUserServiceClient(conn),
+	}
+	return nil
+}
+
 func (a *Application) initGRPCServer() *apperror.AppError {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", a.config.Port))
 	if err != nil {
@@ -74,7 +89,7 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 
 func (a *Application) initServices() *apperror.AppError {
 	q := db.New(a.infra.database)
-	a.services.OrganizationService = organization.New(q)
+	a.services.OrganizationService = organization.New(q, a.clients.UserClient)
 
 	return nil
 }
