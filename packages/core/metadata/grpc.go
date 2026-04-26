@@ -34,11 +34,6 @@ func SendClientInfo(ctx context.Context, info dto.ClientInfo) context.Context {
 	)
 }
 
-// SendClinetInfo preserves backward compatibility with the previous typoed API.
-func SendClinetInfo(ctx context.Context, info dto.ClientInfo) context.Context {
-	return SendClientInfo(ctx, info)
-}
-
 // ReceiveClientInfo extracts client info from incoming gRPC metadata.
 func ReceiveClientInfo(ctx context.Context) (dto.ClientInfo, bool) {
 	md, ok := metadata.FromIncomingContext(ctx)
