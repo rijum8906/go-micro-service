@@ -12,6 +12,8 @@ import (
 
 type Querier interface {
 	CreateOrganization(ctx context.Context, arg CreateOrganizationParams) (Organization, error)
+	CreateOrganizationMembership(ctx context.Context, arg CreateOrganizationMembershipParams) (OrganizationMembership, error)
+	CreateOrganizationMembershipOwner(ctx context.Context, arg CreateOrganizationMembershipOwnerParams) (OrganizationMembership, error)
 	DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error
 	DeleteOrganizationHard(ctx context.Context, id uuid.UUID) error
 	GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
