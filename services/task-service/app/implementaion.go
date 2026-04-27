@@ -11,11 +11,12 @@ import (
 	"github.com/rijum8906/relay/services/task-service/app/config"
 	taskdb "github.com/rijum8906/relay/services/task-service/internal/db"
 	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
-	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
-	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
+	projectRepo "github.com/rijum8906/relay/services/task-service/internal/repository/project"
 	projectMembershipRepo "github.com/rijum8906/relay/services/task-service/internal/repository/project_membership"
+	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
 	taskAssignmentRepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_assignment"
 	taskCommentRepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_comment"
+	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
 	taskutils "github.com/rijum8906/relay/services/task-service/internal/utils"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -62,10 +63,11 @@ func (a *Application) initUtils() *apperror.AppError {
 func (a *Application) initServices() *apperror.AppError {
 	queries := taskdb.New(a.infra.database)
 	repose := &taskutils.Repos{
-		Task: taskrepo.NewTaskRepository(queries),
+		Project:           projectRepo.NewProjectRepository(queries),
+		Task:              taskrepo.NewTaskRepository(queries),
 		ProjectMembership: projectMembershipRepo.NewProjectMembershipRepository(queries),
-		TaskAssignment: taskAssignmentRepo.NewTaskAssignmentRepository(queries),
-		TaskComment: taskCommentRepo.NewTaskCommentRepository(queries),
+		TaskAssignment:    taskAssignmentRepo.NewTaskAssignmentRepository(queries),
+		TaskComment:       taskCommentRepo.NewTaskCommentRepository(queries),
 	}
 
 	taskService, appErr := taskservice.NewTaskService(repose)
