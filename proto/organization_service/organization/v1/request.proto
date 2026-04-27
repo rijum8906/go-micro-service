@@ -14,7 +14,7 @@ message GetOrganizationsByCreatedAtRequest {
 }
 
 message UpdateOrganizationNameRequest {
-  string scoped_token = 1;
+  string token_scope = 1;
   string organization_id = 2;
   string name = 3;
   string description = 4;
@@ -25,6 +25,6 @@ message GetOrganizationBySlugRequest {
 }
 
 message ChangeOrganizationOwnershipRequest {
-  string scoped_token = 1;
+  string token_scope = 1;
   string new_organization_id = 2;
 }

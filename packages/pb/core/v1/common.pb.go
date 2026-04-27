@@ -235,7 +235,7 @@ func (x *IDRequest) GetId() string {
 
 type IDAndScopedTokenRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ScopedToken   string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	TokenScope    string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
 	Id            string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -271,9 +271,9 @@ func (*IDAndScopedTokenRequest) Descriptor() ([]byte, []int) {
 	return file_core_v1_common_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *IDAndScopedTokenRequest) GetScopedToken() string {
+func (x *IDAndScopedTokenRequest) GetTokenScope() string {
 	if x != nil {
-		return x.ScopedToken
+		return x.TokenScope
 	}
 	return ""
 }
@@ -351,9 +351,10 @@ const file_core_v1_common_proto_rawDesc = "" +
 	"EmailInput\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"\x1b\n" +
 	"\tIDRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"L\n" +
-	"\x17IDAndScopedTokenRequest\x12!\n" +
-	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"J\n" +
+	"\x17IDAndScopedTokenRequest\x12\x1f\n" +
+	"\vtoken_scope\x18\x01 \x01(\tR\n" +
+	"tokenScope\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\"=\n" +
 	"\x11PaginationRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +

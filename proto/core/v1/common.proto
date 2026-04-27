@@ -21,7 +21,7 @@ message IDRequest {
 }
 
 message IDAndScopedTokenRequest {
-  string scoped_token = 1;
+  string token_scope = 1;
   string id = 2;
 }
 
