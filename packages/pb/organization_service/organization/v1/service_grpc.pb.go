@@ -39,10 +39,11 @@ type OrganizationServiceClient interface {
 	GetOrganization(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*v1.Organization, error)
 	GetOrganizationsListByCreatedBy(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*OrganizationsList, error)
 	GetOrganizationBySlug(ctx context.Context, in *GetOrganizationBySlugRequest, opts ...grpc.CallOption) (*v1.Organization, error)
+	// Scoped Token Required RPCs
 	UpdateOrganizationName(ctx context.Context, in *UpdateOrganizationNameRequest, opts ...grpc.CallOption) (*v1.Organization, error)
-	ChangeOrganizationOwnership(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*v1.Organization, error)
-	DeleteOrganization(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
-	ArchiveOrganization(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	ChangeOrganizationOwnership(ctx context.Context, in *ChangeOrganizationOwnershipRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	DeleteOrganization(ctx context.Context, in *v11.IDAndScopedTokenRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	ArchiveOrganization(ctx context.Context, in *v11.IDAndScopedTokenRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
 }
 
 type organizationServiceClient struct {
@@ -103,9 +104,9 @@ func (c *organizationServiceClient) UpdateOrganizationName(ctx context.Context, 
 	return out, nil
 }
 
-func (c *organizationServiceClient) ChangeOrganizationOwnership(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*v1.Organization, error) {
+func (c *organizationServiceClient) ChangeOrganizationOwnership(ctx context.Context, in *ChangeOrganizationOwnershipRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.Organization)
+	out := new(v11.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationService_ChangeOrganizationOwnership_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -113,7 +114,7 @@ func (c *organizationServiceClient) ChangeOrganizationOwnership(ctx context.Cont
 	return out, nil
 }
 
-func (c *organizationServiceClient) DeleteOrganization(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
+func (c *organizationServiceClient) DeleteOrganization(ctx context.Context, in *v11.IDAndScopedTokenRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v11.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationService_DeleteOrganization_FullMethodName, in, out, cOpts...)
@@ -123,7 +124,7 @@ func (c *organizationServiceClient) DeleteOrganization(ctx context.Context, in *
 	return out, nil
 }
 
-func (c *organizationServiceClient) ArchiveOrganization(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
+func (c *organizationServiceClient) ArchiveOrganization(ctx context.Context, in *v11.IDAndScopedTokenRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v11.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationService_ArchiveOrganization_FullMethodName, in, out, cOpts...)
@@ -141,10 +142,11 @@ type OrganizationServiceServer interface {
 	GetOrganization(context.Context, *v11.IDRequest) (*v1.Organization, error)
 	GetOrganizationsListByCreatedBy(context.Context, *v11.EmptyRequest) (*OrganizationsList, error)
 	GetOrganizationBySlug(context.Context, *GetOrganizationBySlugRequest) (*v1.Organization, error)
+	// Scoped Token Required RPCs
 	UpdateOrganizationName(context.Context, *UpdateOrganizationNameRequest) (*v1.Organization, error)
-	ChangeOrganizationOwnership(context.Context, *v11.IDRequest) (*v1.Organization, error)
-	DeleteOrganization(context.Context, *v11.IDRequest) (*v11.SuccessResponse, error)
-	ArchiveOrganization(context.Context, *v11.IDRequest) (*v11.SuccessResponse, error)
+	ChangeOrganizationOwnership(context.Context, *ChangeOrganizationOwnershipRequest) (*v11.SuccessResponse, error)
+	DeleteOrganization(context.Context, *v11.IDAndScopedTokenRequest) (*v11.SuccessResponse, error)
+	ArchiveOrganization(context.Context, *v11.IDAndScopedTokenRequest) (*v11.SuccessResponse, error)
 }
 
 // UnimplementedOrganizationServiceServer should be embedded to have
@@ -169,13 +171,13 @@ func (UnimplementedOrganizationServiceServer) GetOrganizationBySlug(context.Cont
 func (UnimplementedOrganizationServiceServer) UpdateOrganizationName(context.Context, *UpdateOrganizationNameRequest) (*v1.Organization, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateOrganizationName not implemented")
 }
-func (UnimplementedOrganizationServiceServer) ChangeOrganizationOwnership(context.Context, *v11.IDRequest) (*v1.Organization, error) {
+func (UnimplementedOrganizationServiceServer) ChangeOrganizationOwnership(context.Context, *ChangeOrganizationOwnershipRequest) (*v11.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangeOrganizationOwnership not implemented")
 }
-func (UnimplementedOrganizationServiceServer) DeleteOrganization(context.Context, *v11.IDRequest) (*v11.SuccessResponse, error) {
+func (UnimplementedOrganizationServiceServer) DeleteOrganization(context.Context, *v11.IDAndScopedTokenRequest) (*v11.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteOrganization not implemented")
 }
-func (UnimplementedOrganizationServiceServer) ArchiveOrganization(context.Context, *v11.IDRequest) (*v11.SuccessResponse, error) {
+func (UnimplementedOrganizationServiceServer) ArchiveOrganization(context.Context, *v11.IDAndScopedTokenRequest) (*v11.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ArchiveOrganization not implemented")
 }
 func (UnimplementedOrganizationServiceServer) testEmbeddedByValue() {}
@@ -289,7 +291,7 @@ func _OrganizationService_UpdateOrganizationName_Handler(srv interface{}, ctx co
 }
 
 func _OrganizationService_ChangeOrganizationOwnership_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.IDRequest)
+	in := new(ChangeOrganizationOwnershipRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -301,13 +303,13 @@ func _OrganizationService_ChangeOrganizationOwnership_Handler(srv interface{}, c
 		FullMethod: OrganizationService_ChangeOrganizationOwnership_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationServiceServer).ChangeOrganizationOwnership(ctx, req.(*v11.IDRequest))
+		return srv.(OrganizationServiceServer).ChangeOrganizationOwnership(ctx, req.(*ChangeOrganizationOwnershipRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _OrganizationService_DeleteOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.IDRequest)
+	in := new(v11.IDAndScopedTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -319,13 +321,13 @@ func _OrganizationService_DeleteOrganization_Handler(srv interface{}, ctx contex
 		FullMethod: OrganizationService_DeleteOrganization_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationServiceServer).DeleteOrganization(ctx, req.(*v11.IDRequest))
+		return srv.(OrganizationServiceServer).DeleteOrganization(ctx, req.(*v11.IDAndScopedTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _OrganizationService_ArchiveOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.IDRequest)
+	in := new(v11.IDAndScopedTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -337,7 +339,7 @@ func _OrganizationService_ArchiveOrganization_Handler(srv interface{}, ctx conte
 		FullMethod: OrganizationService_ArchiveOrganization_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationServiceServer).ArchiveOrganization(ctx, req.(*v11.IDRequest))
+		return srv.(OrganizationServiceServer).ArchiveOrganization(ctx, req.(*v11.IDAndScopedTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

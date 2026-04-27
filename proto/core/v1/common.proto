@@ -20,6 +20,11 @@ message IDRequest {
   string id = 1;
 }
 
+message IDAndScopedTokenRequest {
+  string scoped_token = 1;
+  string id = 2;
+}
+
 message PaginationRequest {
   int32 page = 1;
   int32 limit = 2;

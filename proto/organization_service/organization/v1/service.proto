@@ -14,9 +14,10 @@ service OrganizationService {
   rpc GetOrganizationsListByCreatedBy(core.v1.EmptyRequest) returns (OrganizationsList);
   rpc GetOrganizationBySlug(GetOrganizationBySlugRequest) returns (organization_service.models.v1.Organization);
 
+  // Scoped Token Required RPCs
   rpc UpdateOrganizationName(UpdateOrganizationNameRequest) returns (organization_service.models.v1.Organization);
-  rpc ChangeOrganizationOwnership(core.v1.IDRequest) returns (organization_service.models.v1.Organization);
+  rpc ChangeOrganizationOwnership(ChangeOrganizationOwnershipRequest) returns (core.v1.SuccessResponse);
 
-  rpc DeleteOrganization(core.v1.IDRequest) returns (core.v1.SuccessResponse);
-  rpc ArchiveOrganization(core.v1.IDRequest) returns (core.v1.SuccessResponse);
+  rpc DeleteOrganization(core.v1.IDAndScopedTokenRequest) returns (core.v1.SuccessResponse);
+  rpc ArchiveOrganization(core.v1.IDAndScopedTokenRequest) returns (core.v1.SuccessResponse);
 }

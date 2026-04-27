@@ -26,27 +26,29 @@ var File_organization_service_organization_v1_service_proto protoreflect.FileDes
 
 const file_organization_service_organization_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"2organization_service/organization/v1/service.proto\x12$organization_service.organization.v1\x1a\x14core/v1/common.proto\x1a*organization_service/models/v1/model.proto\x1a2organization_service/organization/v1/reponse.proto\x1a2organization_service/organization/v1/request.proto2\xe7\x06\n" +
+	"2organization_service/organization/v1/service.proto\x12$organization_service.organization.v1\x1a\x14core/v1/common.proto\x1a*organization_service/models/v1/model.proto\x1a2organization_service/organization/v1/reponse.proto\x1a2organization_service/organization/v1/request.proto2\xa6\a\n" +
 	"\x13OrganizationService\x12\x83\x01\n" +
 	"\x12CreateOrganization\x12?.organization_service.organization.v1.CreateOrganizationRequest\x1a,.organization_service.models.v1.Organization\x12S\n" +
 	"\x0fGetOrganization\x12\x12.core.v1.IDRequest\x1a,.organization_service.models.v1.Organization\x12q\n" +
 	"\x1fGetOrganizationsListByCreatedBy\x12\x15.core.v1.EmptyRequest\x1a7.organization_service.organization.v1.OrganizationsList\x12\x89\x01\n" +
 	"\x15GetOrganizationBySlug\x12B.organization_service.organization.v1.GetOrganizationBySlugRequest\x1a,.organization_service.models.v1.Organization\x12\x8b\x01\n" +
-	"\x16UpdateOrganizationName\x12C.organization_service.organization.v1.UpdateOrganizationNameRequest\x1a,.organization_service.models.v1.Organization\x12_\n" +
-	"\x1bChangeOrganizationOwnership\x12\x12.core.v1.IDRequest\x1a,.organization_service.models.v1.Organization\x12B\n" +
-	"\x12DeleteOrganization\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12C\n" +
-	"\x13ArchiveOrganization\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponseB\xc2\x02\n" +
+	"\x16UpdateOrganizationName\x12C.organization_service.organization.v1.UpdateOrganizationNameRequest\x1a,.organization_service.models.v1.Organization\x12\x81\x01\n" +
+	"\x1bChangeOrganizationOwnership\x12H.organization_service.organization.v1.ChangeOrganizationOwnershipRequest\x1a\x18.core.v1.SuccessResponse\x12P\n" +
+	"\x12DeleteOrganization\x12 .core.v1.IDAndScopedTokenRequest\x1a\x18.core.v1.SuccessResponse\x12Q\n" +
+	"\x13ArchiveOrganization\x12 .core.v1.IDAndScopedTokenRequest\x1a\x18.core.v1.SuccessResponseB\xc2\x02\n" +
 	"(com.organization_service.organization.v1B\fServiceProtoP\x01ZZgithub.com/rijum8906/relay/packages/pb/organization_service/organization/v1;organizationv1\xa2\x02\x03OOX\xaa\x02#OrganizationService.Organization.V1\xca\x02#OrganizationService\\Organization\\V1\xe2\x02/OrganizationService\\Organization\\V1\\GPBMetadata\xea\x02%OrganizationService::Organization::V1b\x06proto3"
 
 var file_organization_service_organization_v1_service_proto_goTypes = []any{
-	(*CreateOrganizationRequest)(nil),     // 0: organization_service.organization.v1.CreateOrganizationRequest
-	(*v1.IDRequest)(nil),                  // 1: core.v1.IDRequest
-	(*v1.EmptyRequest)(nil),               // 2: core.v1.EmptyRequest
-	(*GetOrganizationBySlugRequest)(nil),  // 3: organization_service.organization.v1.GetOrganizationBySlugRequest
-	(*UpdateOrganizationNameRequest)(nil), // 4: organization_service.organization.v1.UpdateOrganizationNameRequest
-	(*v11.Organization)(nil),              // 5: organization_service.models.v1.Organization
-	(*OrganizationsList)(nil),             // 6: organization_service.organization.v1.OrganizationsList
-	(*v1.SuccessResponse)(nil),            // 7: core.v1.SuccessResponse
+	(*CreateOrganizationRequest)(nil),          // 0: organization_service.organization.v1.CreateOrganizationRequest
+	(*v1.IDRequest)(nil),                       // 1: core.v1.IDRequest
+	(*v1.EmptyRequest)(nil),                    // 2: core.v1.EmptyRequest
+	(*GetOrganizationBySlugRequest)(nil),       // 3: organization_service.organization.v1.GetOrganizationBySlugRequest
+	(*UpdateOrganizationNameRequest)(nil),      // 4: organization_service.organization.v1.UpdateOrganizationNameRequest
+	(*ChangeOrganizationOwnershipRequest)(nil), // 5: organization_service.organization.v1.ChangeOrganizationOwnershipRequest
+	(*v1.IDAndScopedTokenRequest)(nil),         // 6: core.v1.IDAndScopedTokenRequest
+	(*v11.Organization)(nil),                   // 7: organization_service.models.v1.Organization
+	(*OrganizationsList)(nil),                  // 8: organization_service.organization.v1.OrganizationsList
+	(*v1.SuccessResponse)(nil),                 // 9: core.v1.SuccessResponse
 }
 var file_organization_service_organization_v1_service_proto_depIdxs = []int32{
 	0, // 0: organization_service.organization.v1.OrganizationService.CreateOrganization:input_type -> organization_service.organization.v1.CreateOrganizationRequest
@@ -54,17 +56,17 @@ var file_organization_service_organization_v1_service_proto_depIdxs = []int32{
 	2, // 2: organization_service.organization.v1.OrganizationService.GetOrganizationsListByCreatedBy:input_type -> core.v1.EmptyRequest
 	3, // 3: organization_service.organization.v1.OrganizationService.GetOrganizationBySlug:input_type -> organization_service.organization.v1.GetOrganizationBySlugRequest
 	4, // 4: organization_service.organization.v1.OrganizationService.UpdateOrganizationName:input_type -> organization_service.organization.v1.UpdateOrganizationNameRequest
-	1, // 5: organization_service.organization.v1.OrganizationService.ChangeOrganizationOwnership:input_type -> core.v1.IDRequest
-	1, // 6: organization_service.organization.v1.OrganizationService.DeleteOrganization:input_type -> core.v1.IDRequest
-	1, // 7: organization_service.organization.v1.OrganizationService.ArchiveOrganization:input_type -> core.v1.IDRequest
-	5, // 8: organization_service.organization.v1.OrganizationService.CreateOrganization:output_type -> organization_service.models.v1.Organization
-	5, // 9: organization_service.organization.v1.OrganizationService.GetOrganization:output_type -> organization_service.models.v1.Organization
-	6, // 10: organization_service.organization.v1.OrganizationService.GetOrganizationsListByCreatedBy:output_type -> organization_service.organization.v1.OrganizationsList
-	5, // 11: organization_service.organization.v1.OrganizationService.GetOrganizationBySlug:output_type -> organization_service.models.v1.Organization
-	5, // 12: organization_service.organization.v1.OrganizationService.UpdateOrganizationName:output_type -> organization_service.models.v1.Organization
-	5, // 13: organization_service.organization.v1.OrganizationService.ChangeOrganizationOwnership:output_type -> organization_service.models.v1.Organization
-	7, // 14: organization_service.organization.v1.OrganizationService.DeleteOrganization:output_type -> core.v1.SuccessResponse
-	7, // 15: organization_service.organization.v1.OrganizationService.ArchiveOrganization:output_type -> core.v1.SuccessResponse
+	5, // 5: organization_service.organization.v1.OrganizationService.ChangeOrganizationOwnership:input_type -> organization_service.organization.v1.ChangeOrganizationOwnershipRequest
+	6, // 6: organization_service.organization.v1.OrganizationService.DeleteOrganization:input_type -> core.v1.IDAndScopedTokenRequest
+	6, // 7: organization_service.organization.v1.OrganizationService.ArchiveOrganization:input_type -> core.v1.IDAndScopedTokenRequest
+	7, // 8: organization_service.organization.v1.OrganizationService.CreateOrganization:output_type -> organization_service.models.v1.Organization
+	7, // 9: organization_service.organization.v1.OrganizationService.GetOrganization:output_type -> organization_service.models.v1.Organization
+	8, // 10: organization_service.organization.v1.OrganizationService.GetOrganizationsListByCreatedBy:output_type -> organization_service.organization.v1.OrganizationsList
+	7, // 11: organization_service.organization.v1.OrganizationService.GetOrganizationBySlug:output_type -> organization_service.models.v1.Organization
+	7, // 12: organization_service.organization.v1.OrganizationService.UpdateOrganizationName:output_type -> organization_service.models.v1.Organization
+	9, // 13: organization_service.organization.v1.OrganizationService.ChangeOrganizationOwnership:output_type -> core.v1.SuccessResponse
+	9, // 14: organization_service.organization.v1.OrganizationService.DeleteOrganization:output_type -> core.v1.SuccessResponse
+	9, // 15: organization_service.organization.v1.OrganizationService.ArchiveOrganization:output_type -> core.v1.SuccessResponse
 	8, // [8:16] is the sub-list for method output_type
 	0, // [0:8] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
