@@ -45,6 +45,10 @@ var tokenScopes = []TokenScope{
 	TokenScopeChangeOrganizationOwner,
 }
 
+func ValidateTokenScope(token string) bool {
+	return slices.Contains(tokenScopes, TokenScope(token))
+}
+
 func (t TokenScope) Validate() bool {
 	return slices.Contains(tokenScopes, t)
 }
