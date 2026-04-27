@@ -135,9 +135,10 @@ func (x *GetOrganizationsByCreatedAtRequest) GetId() string {
 
 type UpdateOrganizationNameRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ScopedToken    string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Name           string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -170,6 +171,13 @@ func (x *UpdateOrganizationNameRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateOrganizationNameRequest.ProtoReflect.Descriptor instead.
 func (*UpdateOrganizationNameRequest) Descriptor() ([]byte, []int) {
 	return file_organization_service_organization_v1_request_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateOrganizationNameRequest) GetScopedToken() string {
+	if x != nil {
+		return x.ScopedToken
+	}
+	return ""
 }
 
 func (x *UpdateOrganizationNameRequest) GetOrganizationId() string {
@@ -237,6 +245,58 @@ func (x *GetOrganizationBySlugRequest) GetSlug() string {
 	return ""
 }
 
+type ChangeOrganizationOwnershipRequest struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ScopedToken       string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	NewOrganizationId string                 `protobuf:"bytes,2,opt,name=new_organization_id,json=newOrganizationId,proto3" json:"new_organization_id,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ChangeOrganizationOwnershipRequest) Reset() {
+	*x = ChangeOrganizationOwnershipRequest{}
+	mi := &file_organization_service_organization_v1_request_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangeOrganizationOwnershipRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeOrganizationOwnershipRequest) ProtoMessage() {}
+
+func (x *ChangeOrganizationOwnershipRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_service_organization_v1_request_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeOrganizationOwnershipRequest.ProtoReflect.Descriptor instead.
+func (*ChangeOrganizationOwnershipRequest) Descriptor() ([]byte, []int) {
+	return file_organization_service_organization_v1_request_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ChangeOrganizationOwnershipRequest) GetScopedToken() string {
+	if x != nil {
+		return x.ScopedToken
+	}
+	return ""
+}
+
+func (x *ChangeOrganizationOwnershipRequest) GetNewOrganizationId() string {
+	if x != nil {
+		return x.NewOrganizationId
+	}
+	return ""
+}
+
 var File_organization_service_organization_v1_request_proto protoreflect.FileDescriptor
 
 const file_organization_service_organization_v1_request_proto_rawDesc = "" +
@@ -249,13 +309,17 @@ const file_organization_service_organization_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"created_by\x18\x04 \x01(\tR\tcreatedBy\"4\n" +
 	"\"GetOrganizationsByCreatedAtRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"~\n" +
-	"\x1dUpdateOrganizationNameRequest\x12'\n" +
-	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"2\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xa1\x01\n" +
+	"\x1dUpdateOrganizationNameRequest\x12!\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12'\n" +
+	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"2\n" +
 	"\x1cGetOrganizationBySlugRequest\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slugB\xc2\x02\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"w\n" +
+	"\"ChangeOrganizationOwnershipRequest\x12!\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12.\n" +
+	"\x13new_organization_id\x18\x02 \x01(\tR\x11newOrganizationIdB\xc2\x02\n" +
 	"(com.organization_service.organization.v1B\fRequestProtoP\x01ZZgithub.com/rijum8906/relay/packages/pb/organization_service/organization/v1;organizationv1\xa2\x02\x03OOX\xaa\x02#OrganizationService.Organization.V1\xca\x02#OrganizationService\\Organization\\V1\xe2\x02/OrganizationService\\Organization\\V1\\GPBMetadata\xea\x02%OrganizationService::Organization::V1b\x06proto3"
 
 var (
@@ -270,12 +334,13 @@ func file_organization_service_organization_v1_request_proto_rawDescGZIP() []byt
 	return file_organization_service_organization_v1_request_proto_rawDescData
 }
 
-var file_organization_service_organization_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_organization_service_organization_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_organization_service_organization_v1_request_proto_goTypes = []any{
 	(*CreateOrganizationRequest)(nil),          // 0: organization_service.organization.v1.CreateOrganizationRequest
 	(*GetOrganizationsByCreatedAtRequest)(nil), // 1: organization_service.organization.v1.GetOrganizationsByCreatedAtRequest
 	(*UpdateOrganizationNameRequest)(nil),      // 2: organization_service.organization.v1.UpdateOrganizationNameRequest
 	(*GetOrganizationBySlugRequest)(nil),       // 3: organization_service.organization.v1.GetOrganizationBySlugRequest
+	(*ChangeOrganizationOwnershipRequest)(nil), // 4: organization_service.organization.v1.ChangeOrganizationOwnershipRequest
 }
 var file_organization_service_organization_v1_request_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -296,7 +361,7 @@ func file_organization_service_organization_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_organization_service_organization_v1_request_proto_rawDesc), len(file_organization_service_organization_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

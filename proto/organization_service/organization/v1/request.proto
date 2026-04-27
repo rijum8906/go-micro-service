@@ -14,11 +14,17 @@ message GetOrganizationsByCreatedAtRequest {
 }
 
 message UpdateOrganizationNameRequest {
-  string organization_id = 1;
-  string name = 2;
-  string description = 3;
+  string scoped_token = 1;
+  string organization_id = 2;
+  string name = 3;
+  string description = 4;
 }
 
 message GetOrganizationBySlugRequest {
   string slug = 1;
+}
+
+message ChangeOrganizationOwnershipRequest {
+  string scoped_token = 1;
+  string new_organization_id = 2;
 }
