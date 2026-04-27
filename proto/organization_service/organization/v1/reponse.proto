@@ -6,6 +6,7 @@ message OrganizationResponse {
   string id = 1;
   string name = 2;
   string slug = 3;
+  string status = 4;
 }
 
 message OrganizationsList {
