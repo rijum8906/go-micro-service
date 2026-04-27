@@ -135,7 +135,7 @@ func (x *GetOrganizationsByCreatedAtRequest) GetId() string {
 
 type UpdateOrganizationNameRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	ScopedToken    string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	TokenScope     string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
 	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	Name           string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
@@ -173,9 +173,9 @@ func (*UpdateOrganizationNameRequest) Descriptor() ([]byte, []int) {
 	return file_organization_service_organization_v1_request_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *UpdateOrganizationNameRequest) GetScopedToken() string {
+func (x *UpdateOrganizationNameRequest) GetTokenScope() string {
 	if x != nil {
-		return x.ScopedToken
+		return x.TokenScope
 	}
 	return ""
 }
@@ -247,7 +247,7 @@ func (x *GetOrganizationBySlugRequest) GetSlug() string {
 
 type ChangeOrganizationOwnershipRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	ScopedToken       string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	TokenScope        string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
 	NewOrganizationId string                 `protobuf:"bytes,2,opt,name=new_organization_id,json=newOrganizationId,proto3" json:"new_organization_id,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
@@ -283,9 +283,9 @@ func (*ChangeOrganizationOwnershipRequest) Descriptor() ([]byte, []int) {
 	return file_organization_service_organization_v1_request_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ChangeOrganizationOwnershipRequest) GetScopedToken() string {
+func (x *ChangeOrganizationOwnershipRequest) GetTokenScope() string {
 	if x != nil {
-		return x.ScopedToken
+		return x.TokenScope
 	}
 	return ""
 }
@@ -309,16 +309,18 @@ const file_organization_service_organization_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"created_by\x18\x04 \x01(\tR\tcreatedBy\"4\n" +
 	"\"GetOrganizationsByCreatedAtRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xa1\x01\n" +
-	"\x1dUpdateOrganizationNameRequest\x12!\n" +
-	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12'\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x9f\x01\n" +
+	"\x1dUpdateOrganizationNameRequest\x12\x1f\n" +
+	"\vtoken_scope\x18\x01 \x01(\tR\n" +
+	"tokenScope\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\"2\n" +
 	"\x1cGetOrganizationBySlugRequest\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\"w\n" +
-	"\"ChangeOrganizationOwnershipRequest\x12!\n" +
-	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12.\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"u\n" +
+	"\"ChangeOrganizationOwnershipRequest\x12\x1f\n" +
+	"\vtoken_scope\x18\x01 \x01(\tR\n" +
+	"tokenScope\x12.\n" +
 	"\x13new_organization_id\x18\x02 \x01(\tR\x11newOrganizationIdB\xc2\x02\n" +
 	"(com.organization_service.organization.v1B\fRequestProtoP\x01ZZgithub.com/rijum8906/relay/packages/pb/organization_service/organization/v1;organizationv1\xa2\x02\x03OOX\xaa\x02#OrganizationService.Organization.V1\xca\x02#OrganizationService\\Organization\\V1\xe2\x02/OrganizationService\\Organization\\V1\\GPBMetadata\xea\x02%OrganizationService::Organization::V1b\x06proto3"
 
