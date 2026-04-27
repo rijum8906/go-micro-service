@@ -134,11 +134,12 @@ func (x *GetOrganizationsByCreatedAtRequest) GetId() string {
 }
 
 type UpdateOrganizationNameRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *UpdateOrganizationNameRequest) Reset() {
@@ -169,6 +170,13 @@ func (x *UpdateOrganizationNameRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use UpdateOrganizationNameRequest.ProtoReflect.Descriptor instead.
 func (*UpdateOrganizationNameRequest) Descriptor() ([]byte, []int) {
 	return file_organization_service_organization_v1_request_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpdateOrganizationNameRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
 }
 
 func (x *UpdateOrganizationNameRequest) GetName() string {
@@ -241,10 +249,11 @@ const file_organization_service_organization_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"created_by\x18\x04 \x01(\tR\tcreatedBy\"4\n" +
 	"\"GetOrganizationsByCreatedAtRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"U\n" +
-	"\x1dUpdateOrganizationNameRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\"2\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"~\n" +
+	"\x1dUpdateOrganizationNameRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"2\n" +
 	"\x1cGetOrganizationBySlugRequest\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slugB\xc2\x02\n" +
 	"(com.organization_service.organization.v1B\fRequestProtoP\x01ZZgithub.com/rijum8906/relay/packages/pb/organization_service/organization/v1;organizationv1\xa2\x02\x03OOX\xaa\x02#OrganizationService.Organization.V1\xca\x02#OrganizationService\\Organization\\V1\xe2\x02/OrganizationService\\Organization\\V1\\GPBMetadata\xea\x02%OrganizationService::Organization::V1b\x06proto3"

@@ -26,6 +26,7 @@ type OrganizationResponse struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Slug          string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -81,6 +82,13 @@ func (x *OrganizationResponse) GetSlug() string {
 	return ""
 }
 
+func (x *OrganizationResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
 type OrganizationsList struct {
 	state         protoimpl.MessageState  `protogen:"open.v1"`
 	Organizations []*OrganizationResponse `protobuf:"bytes,1,rep,name=organizations,proto3" json:"organizations,omitempty"`
@@ -129,11 +137,12 @@ var File_organization_service_organization_v1_reponse_proto protoreflect.FileDes
 
 const file_organization_service_organization_v1_reponse_proto_rawDesc = "" +
 	"\n" +
-	"2organization_service/organization/v1/reponse.proto\x12$organization_service.organization.v1\"N\n" +
+	"2organization_service/organization/v1/reponse.proto\x12$organization_service.organization.v1\"f\n" +
 	"\x14OrganizationResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
-	"\x04slug\x18\x03 \x01(\tR\x04slug\"u\n" +
+	"\x04slug\x18\x03 \x01(\tR\x04slug\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\"u\n" +
 	"\x11OrganizationsList\x12`\n" +
 	"\rorganizations\x18\x01 \x03(\v2:.organization_service.organization.v1.OrganizationResponseR\rorganizationsB\xc2\x02\n" +
 	"(com.organization_service.organization.v1B\fReponseProtoP\x01ZZgithub.com/rijum8906/relay/packages/pb/organization_service/organization/v1;organizationv1\xa2\x02\x03OOX\xaa\x02#OrganizationService.Organization.V1\xca\x02#OrganizationService\\Organization\\V1\xe2\x02/OrganizationService\\Organization\\V1\\GPBMetadata\xea\x02%OrganizationService::Organization::V1b\x06proto3"
