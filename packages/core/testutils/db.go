@@ -17,18 +17,63 @@ const (
 	DevDBURL   = "docker://postgres/17/dev?search_path=public"
 )
 
-var DBConf = db.Config{
-	Host:        DBHost,
-	Port:        DBPort,
-	User:        DBUser,
-	Password:    DBPassword,
-	DBName:      DBName,
-	SSLMode:     DBSSLMode,
-	RetryCounts: 5,
+type DBConfig = db.Config
+
+type Option func(*DBConfig)
+
+func WithHost(host string) Option {
+	return func(c *DBConfig) {
+		c.Host = host
+	}
 }
 
-func MustConnectDB() *pgxpool.Pool {
-	pool, appErr := db.Connect(context.Background(), DBConf)
+func WithPort(count int) Option {
+	return func(c *DBConfig) {
+		c.Port = count
+	}
+}
+
+func WithUser(user string) Option {
+	return func(c *DBConfig) {
+		c.User = user
+	}
+}
+
+func WithPassword(password string) Option {
+	return func(c *DBConfig) {
+		c.Password = password
+	}
+}
+
+func WithDBName(name string) Option {
+	return func(c *DBConfig) {
+		c.DBName = name
+	}
+}
+
+func WithSSLMode(mode string) Option {
+	return func(c *DBConfig) {
+		c.SSLMode = mode
+	}
+}
+
+func MustConnectDB(options ...Option) *pgxpool.Pool {
+	config := DBConfig{
+		Host:        DBHost,
+		Port:        DBPort,
+		User:        DBUser,
+		Password:    DBPassword,
+		DBName:      DBName,
+		SSLMode:     DBSSLMode,
+		RetryCounts: 5,
+	}
+
+	// Apply options
+	for _, opt := range options {
+		opt(&config)
+	}
+
+	pool, appErr := db.Connect(context.Background(), config)
 	if appErr != nil {
 		panic(appErr)
 	}
