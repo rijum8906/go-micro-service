@@ -7,7 +7,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
-	"github.com/rijum8906/relay/services/task-service/internal/utils"
+	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
 )
 
 type TaskService interface {
@@ -17,13 +17,13 @@ type TaskService interface {
 }
 
 type service struct {
-	repos *utils.Repos
+	repo taskrepo.TaskRepository
 }
 
-func NewTaskService(repos *utils.Repos) (TaskService, *apperror.AppError) {
-	if repos == nil || repos.Task == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize task service").WithDetail("repos", "task repository is not configured")
+func NewTaskService(repo taskrepo.TaskRepository) (TaskService, *apperror.AppError) {
+	if repo == nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to initialize task service").WithDetail("repo", "task repository must be configured")
 	}
 
-	return &service{repos: repos}, nil
+	return &service{repo: repo}, nil
 }

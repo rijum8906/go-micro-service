@@ -12,12 +12,9 @@ import (
 	taskdb "github.com/rijum8906/relay/services/task-service/internal/db"
 	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
 	projectRepo "github.com/rijum8906/relay/services/task-service/internal/repository/project"
-	projectMembershipRepo "github.com/rijum8906/relay/services/task-service/internal/repository/project_membership"
 	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
-	taskAssignmentRepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_assignment"
-	taskCommentRepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_comment"
+	projectservice "github.com/rijum8906/relay/services/task-service/internal/services/project"
 	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
-	taskutils "github.com/rijum8906/relay/services/task-service/internal/utils"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -62,15 +59,16 @@ func (a *Application) initUtils() *apperror.AppError {
 
 func (a *Application) initServices() *apperror.AppError {
 	queries := taskdb.New(a.infra.database)
-	repose := &taskutils.Repos{
-		Project:           projectRepo.NewProjectRepository(queries),
-		Task:              taskrepo.NewTaskRepository(queries),
-		ProjectMembership: projectMembershipRepo.NewProjectMembershipRepository(queries),
-		TaskAssignment:    taskAssignmentRepo.NewTaskAssignmentRepository(queries),
-		TaskComment:       taskCommentRepo.NewTaskCommentRepository(queries),
-	}
+	projectRepository := projectRepo.NewProjectRepository(queries)
+	taskRepository := taskrepo.NewTaskRepository(queries)
 
-	taskService, appErr := taskservice.NewTaskService(repose)
+	projectService, appErr := projectservice.NewProjectService(projectRepository)
+	if appErr != nil {
+		return appErr
+	}
+	a.services.project = projectService
+
+	taskService, appErr := taskservice.NewTaskService(taskRepository)
 	if appErr != nil {
 		return appErr
 	}
@@ -79,7 +77,7 @@ func (a *Application) initServices() *apperror.AppError {
 }
 
 func (a *Application) initHandler() *apperror.AppError {
-	a.services.taskHandler = handler.NewTaskHandler(a.services.task)
+	a.services.taskHandler = handler.NewTaskHandler(a.services.project, a.services.task)
 	return nil
 }
 

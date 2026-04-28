@@ -181,20 +181,20 @@ SELECT id, organization_id, created_by, name, description, status, archived_at, 
 FROM projects
 WHERE deleted_at IS NULL
   AND (
-    ($1::uuid IS NULL AND organization_id IS NULL)
-    OR organization_id = $1
+    $1::uuid IS NULL
+    OR organization_id = $1::uuid
   )
-  AND ($2::text = '' OR status = $2)
+  AND ($2::text = '' OR status = $2::text)
 ORDER BY created_at DESC
 `
 
 type ListProjectsParams struct {
-	Column1 uuid.UUID
-	Column2 string
+	OrganizationID pgtype.UUID
+	Status         string
 }
 
 func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]Project, error) {
-	rows, err := q.db.Query(ctx, ListProjects, arg.Column1, arg.Column2)
+	rows, err := q.db.Query(ctx, ListProjects, arg.OrganizationID, arg.Status)
 	if err != nil {
 		return nil, err
 	}

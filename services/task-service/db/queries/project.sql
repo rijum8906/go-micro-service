@@ -53,8 +53,8 @@ SELECT *
 FROM projects
 WHERE deleted_at IS NULL
   AND (
-    ($1::uuid IS NULL AND organization_id IS NULL)
-    OR organization_id = $1
+    sqlc.narg('organization_id')::uuid IS NULL
+    OR organization_id = sqlc.narg('organization_id')::uuid
   )
-  AND ($2::text = '' OR status = $2)
+  AND (sqlc.arg(status)::text = '' OR status = sqlc.arg(status)::text)
 ORDER BY created_at DESC;

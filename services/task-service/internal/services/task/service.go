@@ -11,7 +11,6 @@ import (
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
@@ -30,22 +29,22 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 		return nil, appErr
 	}
 
-	organizationID, appErr := parseOptionalUUID(req.GetOrganizationId(), "organization_id")
+	organizationID, appErr := utils.ParseOptionalUUID(req.GetOrganizationId(), "organization_id")
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	projectID, appErr := parseOptionalUUID(req.GetProjectId(), "project_id")
+	projectID, appErr := utils.ParseOptionalUUID(req.GetProjectId(), "project_id")
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	parentTaskID, appErr := parseOptionalUUID(req.GetParentTaskId(), "parent_task_id")
+	parentTaskID, appErr := utils.ParseOptionalUUID(req.GetParentTaskId(), "parent_task_id")
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	dueAt, appErr := parseOptionalTimestamp(req.GetDueAt(), "due_at")
+	dueAt, appErr := utils.ParseOptionalTimestamp(req.GetDueAt(), "due_at")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -55,7 +54,7 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 		priority = "medium"
 	}
 
-	task, appErr := s.repos.Task.CreateTask(ctx, db.CreateTaskParams{
+	task, appErr := s.repo.CreateTask(ctx, db.CreateTaskParams{
 		OrganizationID: organizationID,
 		ProjectID:      projectID,
 		ParentTaskID:   parentTaskID,
@@ -85,7 +84,7 @@ func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest) (*mod
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	task, appErr := s.repos.Task.GetTask(ctx, id)
+	task, appErr := s.repo.GetTask(ctx, id)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -106,7 +105,7 @@ func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksB
 		return nil, appErr.WithDetail("field", "project_id")
 	}
 
-	tasks, appErr := s.repos.Task.ListTasksByProject(ctx, pgtype.UUID{
+	tasks, appErr := s.repo.ListTasksByProject(ctx, pgtype.UUID{
 		Bytes: projectUUID,
 		Valid: true,
 	})
@@ -117,42 +116,4 @@ func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksB
 	return &taskv1.ListTasksByProjectResponse{
 		Tasks: mapTasks(tasks),
 	}, nil
-}
-
-func parseOptionalUUID(value, field string) (pgtype.UUID, *apperror.AppError) {
-	if strings.TrimSpace(value) == "" {
-		return pgtype.UUID{}, nil
-	}
-
-	id, appErr := utils.NewUUID(value)
-	if appErr != nil {
-		return pgtype.UUID{}, appErr.WithDetail("field", field)
-	}
-
-	return pgtype.UUID{
-		Bytes: id,
-		Valid: true,
-	}, nil
-}
-
-func parseOptionalTimestamp(value *timestamppb.Timestamp, field string) (pgtype.Timestamptz, *apperror.AppError) {
-	if value == nil {
-		return pgtype.Timestamptz{}, nil
-	}
-
-	if err := value.CheckValid(); err != nil {
-		return pgtype.Timestamptz{}, apperror.ErrValidation.WithMessage("invalid timestamp").WithDetail("field", field).WithDetail("error", err.Error())
-	}
-
-	return pgtype.Timestamptz{
-		Time:  value.AsTime(),
-		Valid: true,
-	}, nil
-}
-
-func timestamp(value pgtype.Timestamptz) *timestamppb.Timestamp {
-	if !value.Valid {
-		return nil
-	}
-	return timestamppb.New(value.Time)
 }

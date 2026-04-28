@@ -11,6 +11,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/services/task-service/app/config"
 	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
+	projectservice "github.com/rijum8906/relay/services/task-service/internal/services/project"
 	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -27,6 +28,7 @@ type ApplicationUtils struct {
 }
 
 type ApplicationServices struct {
+	project     projectservice.ProjectService
 	task        taskservice.TaskService
 	taskHandler *handler.TaskHandler
 }

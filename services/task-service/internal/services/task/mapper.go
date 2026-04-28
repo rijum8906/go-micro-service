@@ -1,10 +1,9 @@
 package task
 
 import (
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
+	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
 func mapTask(task *db.Task) *modelsv1.Task {
@@ -14,24 +13,24 @@ func mapTask(task *db.Task) *modelsv1.Task {
 
 	return &modelsv1.Task{
 		Id:              task.ID.String(),
-		OrganizationId:  uuidString(task.OrganizationID),
-		ProjectId:       uuidString(task.ProjectID),
-		ParentTaskId:    uuidString(task.ParentTaskID),
+		OrganizationId:  utils.UUIDString(task.OrganizationID),
+		ProjectId:       utils.UUIDString(task.ProjectID),
+		ParentTaskId:    utils.UUIDString(task.ParentTaskID),
 		CreatedBy:       task.CreatedBy.String(),
-		UpdatedBy:       uuidString(task.UpdatedBy),
+		UpdatedBy:       utils.UUIDString(task.UpdatedBy),
 		Title:           task.Title,
 		Description:     task.Description,
 		Status:          task.Status,
 		Priority:        task.Priority,
 		ProgressPercent: int32(task.ProgressPercent),
-		StartedAt:       timestamp(task.StartedAt),
-		DueAt:           timestamp(task.DueAt),
-		CompletedAt:     timestamp(task.CompletedAt),
-		ArchivedAt:      timestamp(task.ArchivedAt),
-		DeletedAt:       timestamp(task.DeletedAt),
-		DeletedBy:       uuidString(task.DeletedBy),
-		CreatedAt:       timestamp(task.CreatedAt),
-		UpdatedAt:       timestamp(task.UpdatedAt),
+		StartedAt:       utils.Timestamp(task.StartedAt),
+		DueAt:           utils.Timestamp(task.DueAt),
+		CompletedAt:     utils.Timestamp(task.CompletedAt),
+		ArchivedAt:      utils.Timestamp(task.ArchivedAt),
+		DeletedAt:       utils.Timestamp(task.DeletedAt),
+		DeletedBy:       utils.UUIDString(task.DeletedBy),
+		CreatedAt:       utils.Timestamp(task.CreatedAt),
+		UpdatedAt:       utils.Timestamp(task.UpdatedAt),
 	}
 }
 
@@ -41,11 +40,4 @@ func mapTasks(tasks []db.Task) []*modelsv1.Task {
 		items = append(items, mapTask(&tasks[i]))
 	}
 	return items
-}
-
-func uuidString(value pgtype.UUID) string {
-	if !value.Valid {
-		return ""
-	}
-	return uuid.UUID(value.Bytes).String()
 }
