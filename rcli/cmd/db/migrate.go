@@ -1,9 +1,7 @@
 package dbcmd
 
 import (
-	"context"
 	"fmt"
-	"os"
 
 	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
@@ -30,44 +28,8 @@ var migrateApplyCmd = &cobra.Command{
 		}
 
 		return utils.RunCommand("atlas", "migrate", "apply",
-			"--url", utils.GetDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
 			"--dir", utils.GetMigrationDir())
-	},
-}
-
-var migrateSQLApply = &cobra.Command{
-	Use:   "sql-apply",
-	Short: "Apply SQL migrations",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := utils.LoadEnv()
-		if err != nil {
-			return err
-		}
-
-		content, err := os.ReadFile("db/schema.sql")
-		if err != nil {
-			return fmt.Errorf("read db/schema.sql: %w", err)
-		}
-
-		pool, err := utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
-		if err != nil {
-			return err
-		}
-		defer pool.Close()
-		if err = utils.CreateDatabase(pool, config.DBName); err != nil {
-			return err
-		}
-		if err = utils.CreateDatabase(pool, utils.DevDBName); err != nil {
-			return err
-		}
-
-		_, err = pool.Exec(context.Background(), string(content))
-		if err != nil {
-			return fmt.Errorf("apply db/schema.sql: %w", err)
-		}
-
-		fmt.Println("\n✅ Applied SQL migrations")
-		return nil
 	},
 }
 
@@ -82,8 +44,8 @@ var migrateSchemaCmd = &cobra.Command{
 
 		return utils.RunCommand("atlas",
 			"schema", "apply",
-			"--url", utils.GetDBURL(config),
-			"--dev-url", utils.GetDevDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
+			"--dev-url", utils.GetDynamicDevDBURL(useTestDB, config),
 			"--file", utils.GetSchemaDir(),
 			"--auto-approve")
 	},
@@ -99,7 +61,7 @@ var migrateCleanCmd = &cobra.Command{
 		}
 
 		return utils.RunCommand("atlas", "schema", "clean",
-			"--url", utils.GetDBURL(config))
+			"--url", utils.GetDynamicDBURL(useTestDB, config))
 	},
 }
 
@@ -114,7 +76,7 @@ var migrateStatusCmd = &cobra.Command{
 
 		return utils.RunCommand("atlas",
 			"migrate", "status",
-			"--url", utils.GetDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
 			"--dir", utils.GetMigrationDir())
 	},
 }
@@ -132,7 +94,7 @@ var migrateCreateCmd = &cobra.Command{
 		return utils.RunCommand("atlas", "migrate", "diff", nameVar,
 			"--dir", utils.GetMigrationDir(),
 			"--to", utils.GetSchemaDir(),
-			"--dev-url", utils.GetDevDBURL(config))
+			"--dev-url", utils.GetDynamicDevDBURL(useTestDB, config))
 	},
 }
 
@@ -165,9 +127,9 @@ var migrateRollbackCmd = &cobra.Command{
 		}
 
 		return utils.RunCommand("atlas", "migrate", "down", fmt.Sprint(count),
-			"--url", utils.GetDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
 			"--dir", utils.GetMigrationDir(),
-			"--dev-url", utils.GetDevDBURL(config))
+			"--dev-url", utils.GetDynamicDevDBURL(useTestDB, config))
 	},
 }
 
@@ -179,9 +141,11 @@ func init() {
 	_ = migrateCreateCmd.MarkFlagRequired("name")
 	_ = migrateRollbackCmd.MarkFlagRequired("count")
 
+	// Add Test Flags
+	migrateCmd.PersistentFlags().BoolVarP(&useTestDB, "test", "t", false, "Run migrations for test environment database")
+
 	migrateCmd.AddCommand(migrateApplyCmd)
 	migrateCmd.AddCommand(migrateSchemaCmd)
-	migrateCmd.AddCommand(migrateSQLApply)
 	migrateCmd.AddCommand(migrateCleanCmd)
 	migrateCmd.AddCommand(migrateStatusCmd)
 	migrateCmd.AddCommand(migrateCreateCmd)

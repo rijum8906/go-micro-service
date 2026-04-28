@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +32,7 @@ var applyCmd = &cobra.Command{
 
 		fmt.Printf("\n🗄️  Setting up database for %s\n", config.DBName)
 
-		pool, err := getConnPool(config)
+		pool, err := utils.GetConnPool(useTestDB, config)
 		if err != nil {
 			return err
 		}
@@ -60,7 +59,7 @@ var cleanCmd = &cobra.Command{
 			return err
 		}
 
-		pool, err := getConnPool(config)
+		pool, err := utils.GetConnPool(useTestDB, config)
 		if err != nil {
 			return err
 		}
@@ -90,7 +89,7 @@ var truncateCmd = &cobra.Command{
 			return err
 		}
 
-		pool, err := getConnPool(config)
+		pool, err := utils.GetConnPool(useTestDB, config)
 		if err != nil {
 			return err
 		}
@@ -117,13 +116,6 @@ var truncateCmd = &cobra.Command{
 
 		return nil
 	},
-}
-
-func getConnPool(config *utils.Environment) (*pgxpool.Pool, error) {
-	if useTestDB {
-		return utils.ConnectDB(5433, "test_user", "test_password", "test_db", "disable")
-	}
-	return utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, config.DBName, config.DBSSLMode)
 }
 
 func init() {
