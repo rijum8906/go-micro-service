@@ -38,7 +38,7 @@ jobs:
           go install ./rcli
           rcli init project
 
-      - name: Run Migration
+      - name: Setup Database
         working-directory: services/organization-service
         run: |
           rcli db exec init -t

@@ -3,11 +3,12 @@ name: Notification Service Test
 on:
   push:
     branches: ["main", "develop"]
+    paths:
+      - "services/notification-service/**"
   pull_request:
     branches: ["main"]
-
-env:
-  TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
+    paths:
+      - "services/notification-service/**"
 
 jobs:
   test-notification-service:
@@ -37,13 +38,11 @@ jobs:
           go install ./rcli
           rcli init project
 
-      - name: Setup Atlas
-        uses: ariga/setup-atlas@v0
-
-      - name: Run Migration
+      - name: Setup Database
         working-directory: services/notification-service
         run: |
-          atlas migrate apply --url "${{ env.TEST_DB_URL }}" --dir "file://db/migrations" --allow-dirty
+          rcli db exec init -t
+          rcli db exec apply -t
 
       - name: Run unit tests
         working-directory: services/notification-service
