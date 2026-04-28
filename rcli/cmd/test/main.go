@@ -2,9 +2,7 @@
 package testcmd
 
 import (
-	"context"
 	"fmt"
-	"os"
 
 	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
@@ -24,23 +22,6 @@ var testSetupCmd = &cobra.Command{
 		}
 		fmt.Println("\n🧪 Setting up test environment")
 
-		pool, err := utils.ConnectDB(5433, "test_user", "test_password", "test_db", "disable")
-		if err != nil {
-			return err
-		}
-		defer pool.Close()
-
-		content, err := os.ReadFile("db/schema.sql")
-		if err != nil {
-			return fmt.Errorf("read db/schema.sql: %w", err)
-		}
-
-		_, err = pool.Exec(context.Background(), string(content))
-		if err != nil {
-			return fmt.Errorf("apply db/schema.sql: %w", err)
-		}
-
-		fmt.Println("\n✅ Test environment setup complete")
 		return nil
 	},
 }
