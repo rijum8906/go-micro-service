@@ -7,13 +7,13 @@ import (
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 )
 
-type OrganizationService struct {
+type organizationService struct {
 	q          db.Querier
 	userClient userv1.UserServiceClient
 }
 
 func New(q db.Querier, client userv1.UserServiceClient) organizationv1.OrganizationServiceServer {
-	return &OrganizationService{
+	return &organizationService{
 		q:          q,
 		userClient: client,
 	}

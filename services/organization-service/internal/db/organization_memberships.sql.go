@@ -82,3 +82,74 @@ func (q *Queries) CreateOrganizationMembershipOwner(ctx context.Context, arg Cre
 	)
 	return i, err
 }
+
+const DeleteOrganizationMembership = `-- name: DeleteOrganizationMembership :exec
+UPDATE organization_memberships
+SET status = 'deleted', deleted_by = $2, deleted_at = now()
+WHERE id = $1
+`
+
+type DeleteOrganizationMembershipParams struct {
+	ID        uuid.UUID
+	DeletedBy uuid.UUID
+}
+
+func (q *Queries) DeleteOrganizationMembership(ctx context.Context, arg DeleteOrganizationMembershipParams) error {
+	_, err := q.db.Exec(ctx, DeleteOrganizationMembership, arg.ID, arg.DeletedBy)
+	return err
+}
+
+const DeleteOrganizationMembershipHard = `-- name: DeleteOrganizationMembershipHard :exec
+DELETE FROM organization_memberships
+WHERE id = $1
+`
+
+func (q *Queries) DeleteOrganizationMembershipHard(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, DeleteOrganizationMembershipHard, id)
+	return err
+}
+
+const GetOrganizationMembershipsByUserID = `-- name: GetOrganizationMembershipsByUserID :many
+SELECT id, organization_id, user_id, role, status, invited_by, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+WHERE user_id = $1
+ORDER BY created_at DESC LIMIT $2 OFFSET $3
+`
+
+type GetOrganizationMembershipsByUserIDParams struct {
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error) {
+	rows, err := q.db.Query(ctx, GetOrganizationMembershipsByUserID, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []OrganizationMembership{}
+	for rows.Next() {
+		var i OrganizationMembership
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganizationID,
+			&i.UserID,
+			&i.Role,
+			&i.Status,
+			&i.InvitedBy,
+			&i.JoinedAt,
+			&i.LeftAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.DeletedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
