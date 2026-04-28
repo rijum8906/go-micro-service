@@ -7,6 +7,7 @@ import { signin } from '#/api/auth'
 import { signinSchema, type SigninSchemaType } from '#/schemas/auth'
 import { ThemeToggle } from '#/components/ThemeToggle'
 import { useIsDarkTheme } from '#/store/theme'
+import { safeInternalRedirect } from '#/lib/redirect'
 import z from 'zod'
 
 const searchSchema = z.object({
@@ -21,14 +22,15 @@ export const Route = createFileRoute('/auth/signin')({
 function SignInPage() {
   const router = useRouter()
   const { redirect } = Route.useSearch()
+  const redirectTo = safeInternalRedirect(redirect)
   const { applyAuthSuccess, isSignedIn } = useAuthStore()
   const isDark = useIsDarkTheme()
 
   useEffect(() => {
     if (isSignedIn) {
-      router.navigate({ to: redirect || '/' })
+      router.navigate({ to: redirectTo })
     }
-  }, [isSignedIn, redirect, router])
+  }, [isSignedIn, redirectTo, router])
 
   const form = useForm({
     defaultValues: { email: '', password: '' } as SigninSchemaType,
@@ -37,7 +39,7 @@ function SignInPage() {
       if (response.success) {
         applyAuthSuccess(response.data.Login)
         toast.success('Logged in successfully')
-        router.navigate({ to: redirect || '/' })
+        router.navigate({ to: redirectTo })
       } else {
         toast.error(response.message || 'Authentication failed')
       }
@@ -58,7 +60,7 @@ function SignInPage() {
 
         <div className={`w-full max-w-sm rounded-2xl p-8 transition-colors duration-300 ${isDark ? 'bg-[#30302E] shadow-[inset_0_0_0_0.2px_#F2EDE4]' : 'bg-white/40 shadow-[inset_0_0_0_0.3px_#9A9A9A] backdrop-blur-sm'}`}>
           <form
-            onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+            onSubmit={async (e) => { e.preventDefault(); await form.handleSubmit() }}
             className="flex flex-col gap-5"
           >
             <form.Field name="email" validators={{ onChange: signinSchema.shape.email }}>

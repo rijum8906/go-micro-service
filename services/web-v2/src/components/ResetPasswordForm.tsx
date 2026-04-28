@@ -39,7 +39,7 @@ export function ResetPasswordForm({ scopedToken }: Props) {
   return (
     <div className={`w-full max-w-sm rounded-2xl p-8 transition-colors duration-300 ${isDark ? 'bg-[#30302E] shadow-[inset_0_0_0_0.2px_#F2EDE4]' : 'bg-white/40 shadow-[inset_0_0_0_0.3px_#9A9A9A] backdrop-blur-sm'}`}>
       <form
-        onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+        onSubmit={async (e) => { e.preventDefault(); await form.handleSubmit() }}
         className="flex flex-col gap-5"
       >
         <p className={`text-xs ${isDark ? 'text-[#F2EDE4]/60' : 'text-[#262526]/60'}`}>

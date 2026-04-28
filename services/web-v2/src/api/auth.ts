@@ -4,11 +4,8 @@ import type {
   SignupSchemaType,
 } from '#/schemas/auth'
 import type { AuthSuccessPayload, BaseErrorResponse, BaseSuccessResponse } from '#/types/response'
-import { useAuthStore } from '#/store/auth'
 import { generateDeviceId } from '#/lib/device'
 import { gqlRequest } from '#/lib/gql-client'
-
-const getAccessToken = () => useAuthStore.getState().getAccessTokenValue()
 
 const SIGNIN_MUTATION = `
   mutation Login($input: LoginInput!) {
@@ -127,7 +124,9 @@ export async function signup(
   return { success: true, message: '', data: result.data }
 }
 
-export async function signout(): Promise<BaseSuccessResponse | BaseErrorResponse> {
+export async function signout(
+  getAccessToken: () => string | undefined,
+): Promise<BaseSuccessResponse | BaseErrorResponse> {
   const result = await gqlRequest<{ Logout: { success: boolean; message: string } }>(
     SIGNOUT_MUTATION,
     {

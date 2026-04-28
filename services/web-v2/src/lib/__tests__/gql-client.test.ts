@@ -28,7 +28,26 @@ describe('gqlRequest', () => {
       success: false,
       message:
         'Cannot reach GraphQL at http://localhost:8080/query. Start graphql-gateway (e.g. `make dev` / docker compose), set VITE_GRAPHQL_URL for dev/build, or GRAPHQL_URL in the container so config.js exposes it.',
+      networkError: true,
     })
+  })
+
+  it('does not send authenticated requests without a token', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await gqlRequest<{ Me: { id: string } }>(
+      'query { Me { id } }',
+      undefined,
+      { authenticated: true, getAccessToken: () => undefined },
+    )
+
+    expect(result).toEqual({
+      success: false,
+      message: 'Authentication token is missing',
+      status: 401,
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('returns the GraphQL error message for non-ok HTTP responses', async () => {
@@ -42,7 +61,7 @@ describe('gqlRequest', () => {
 
     const result = await gqlRequest<{ Me: { id: string } }>('query { Me { id } }')
 
-    expect(result).toEqual({ success: false, message: 'Unauthorized' })
+    expect(result).toEqual({ success: false, message: 'Unauthorized', status: 401 })
   })
 
   it('returns the HTTP status for non-ok responses without GraphQL errors', async () => {
@@ -56,7 +75,7 @@ describe('gqlRequest', () => {
 
     const result = await gqlRequest<{ Me: { id: string } }>('query { Me { id } }')
 
-    expect(result).toEqual({ success: false, message: 'HTTP 500' })
+    expect(result).toEqual({ success: false, message: 'HTTP 500', status: 500 })
   })
 
   it('returns a failure when the server response is not valid JSON', async () => {

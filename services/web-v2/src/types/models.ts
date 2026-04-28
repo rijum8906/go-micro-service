@@ -58,7 +58,6 @@ export interface Profile {
 export interface Session {
   id: string
   userId: string
-  refreshToken: string
   deviceId: string
   ipAddr: string
   createdAt: string

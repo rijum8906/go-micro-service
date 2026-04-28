@@ -1,9 +1,18 @@
 import type { AuthTokens } from '#/types/auth'
 import type { Account, Profile, Session, User } from '#/types/models'
 import type { AuthSuccessPayload, SessionBootstrapData } from '#/types/response'
+import { signout } from '#/api/auth'
 import { create } from 'zustand'
 
 const TOKEN_STORAGE_KEY = 'relay_auth_tokens'
+
+export function isTokenExpired(tokens: AuthTokens): boolean {
+  const expiresAt = tokens?.accessToken?.expiresAt
+  if (!expiresAt) return true
+  const expiresAtMs = new Date(expiresAt).getTime()
+  if (!Number.isFinite(expiresAtMs)) return true
+  return Date.now() >= expiresAtMs
+}
 
 function loadStoredTokens(): AuthTokens | null {
   try {
@@ -90,7 +99,7 @@ interface AuthActions {
 
   getAccessTokenValue(): string | undefined
 
-  logout(): void
+  logout(): Promise<void>
 }
 
 export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
@@ -196,17 +205,21 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
       }
     }),
 
-  applySessionBootstrap: (data) =>
-    set(() => {
-      const profile = profileFromGql(data.MyProfile)
-      return {
-        account: userToAccount(data.Me),
-        profiles: [profile],
-        activeProfileId: profile.id,
-        currentSession: data.GetCurrentSession,
-        isSignedIn: true,
-      }
-    }),
+  applySessionBootstrap: (data) => {
+    const currentToken = get().token
+    if (!currentToken || isTokenExpired(currentToken)) {
+      get().clearAuth()
+      return
+    }
+    const profile = profileFromGql(data.MyProfile)
+    set(() => ({
+      account: userToAccount(data.Me),
+      profiles: [profile],
+      activeProfileId: profile.id,
+      currentSession: data.GetCurrentSession,
+      isSignedIn: true,
+    }))
+  },
 
   clearAuth: () =>
     set(() => ({
@@ -222,8 +235,12 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
 
   getAccessTokenValue: () => get().token?.accessToken?.value,
 
-  logout: () => {
-    get().clearAuth()
+  logout: async () => {
+    try {
+      await signout(get().getAccessTokenValue)
+    } finally {
+      get().clearAuth()
+    }
   },
 }))
 

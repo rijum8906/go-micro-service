@@ -1,7 +1,12 @@
 import { getGraphQLUrl } from '#/lib/graphql-env'
 
 export type GqlSuccess<T> = { success: true; data: T }
-export type GqlFailure = { success: false; message: string }
+export type GqlFailure = {
+  success: false
+  message: string
+  status?: number
+  networkError?: boolean
+}
 export type GqlResult<T> = GqlSuccess<T> | GqlFailure
 
 type GqlRequestOptions = {
@@ -22,6 +27,13 @@ export async function gqlRequest<TData>(
 
   if (options?.authenticated) {
     const token = options.getAccessToken?.()
+    if (!token) {
+      return {
+        success: false,
+        message: 'Authentication token is missing',
+        status: 401,
+      }
+    }
     if (token) headers.Authorization = `Bearer ${token}`
   }
 
@@ -41,6 +53,7 @@ export async function gqlRequest<TData>(
     return {
       success: false,
       message,
+      networkError: true,
     }
   }
 
@@ -53,7 +66,7 @@ export async function gqlRequest<TData>(
 
   if (!res.ok) {
     const msg = json.errors?.[0]?.message ?? `HTTP ${res.status}`
-    return { success: false, message: msg }
+    return { success: false, message: msg, status: res.status }
   }
 
   if (json.errors?.length) {
