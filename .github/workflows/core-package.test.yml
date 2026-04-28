@@ -3,8 +3,12 @@ name: Core Package Test
 on:
   push:
     branches: ["main", "develop"]
+    paths:
+      - "packages/core/**"
   pull_request:
     branches: ["main"]
+    paths:
+      - "packages/core/**"
 
 env:
   TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
