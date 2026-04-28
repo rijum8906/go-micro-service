@@ -21,7 +21,7 @@ INSERT INTO organizations (
 ) VALUES (
     $1, $2, $3, $4
 )
-RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at
+RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by
 `
 
 type CreateOrganizationParams struct {
@@ -49,18 +49,25 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
 	)
 	return i, err
 }
 
 const DeleteOrganization = `-- name: DeleteOrganization :exec
 UPDATE organizations
-SET status = 'deleted', deleted_at = now()
+SET status = 'deleted', deleted_by = $2, deleted_at = now()
 WHERE id = $1
 `
 
-func (q *Queries) DeleteOrganization(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, DeleteOrganization, id)
+type DeleteOrganizationParams struct {
+	ID        uuid.UUID
+	DeletedBy uuid.UUID
+}
+
+func (q *Queries) DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error {
+	_, err := q.db.Exec(ctx, DeleteOrganization, arg.ID, arg.DeletedBy)
 	return err
 }
 
@@ -75,7 +82,7 @@ func (q *Queries) DeleteOrganizationHard(ctx context.Context, id uuid.UUID) erro
 }
 
 const GetOrganization = `-- name: GetOrganization :one
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at FROM organizations
+SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by FROM organizations
 WHERE id = $1
 LIMIT 1
 `
@@ -93,12 +100,14 @@ func (q *Queries) GetOrganization(ctx context.Context, id uuid.UUID) (Organizati
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
 	)
 	return i, err
 }
 
 const GetOrganizationBySlug = `-- name: GetOrganizationBySlug :one
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at FROM organizations
+SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by FROM organizations
 WHERE slug = $1
 LIMIT 1
 `
@@ -116,12 +125,14 @@ func (q *Queries) GetOrganizationBySlug(ctx context.Context, slug string) (Organ
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
 	)
 	return i, err
 }
 
 const GetOrganizationsByCreatedBy = `-- name: GetOrganizationsByCreatedBy :many
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at FROM organizations
+SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by FROM organizations
 WHERE created_by = $1
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
@@ -151,6 +162,8 @@ func (q *Queries) GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrgani
 			&i.CreatedBy,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.DeletedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -166,7 +179,7 @@ const UpdateOrganization = `-- name: UpdateOrganization :one
 UPDATE organizations
 SET name = $2, description = $3
 WHERE id = $1
-RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at
+RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by
 `
 
 type UpdateOrganizationParams struct {
@@ -188,6 +201,8 @@ func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganization
 		&i.CreatedBy,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
 	)
 	return i, err
 }

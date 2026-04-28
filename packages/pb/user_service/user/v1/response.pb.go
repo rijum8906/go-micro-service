@@ -66,13 +66,59 @@ func (x *GenerateScopedTokenResponse) GetToken() *v1.Token {
 	return nil
 }
 
+type CheckExistsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exists        bool                   `protobuf:"varint,1,opt,name=exists,proto3" json:"exists,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckExistsResponse) Reset() {
+	*x = CheckExistsResponse{}
+	mi := &file_user_service_user_v1_response_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckExistsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckExistsResponse) ProtoMessage() {}
+
+func (x *CheckExistsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_v1_response_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckExistsResponse.ProtoReflect.Descriptor instead.
+func (*CheckExistsResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_user_v1_response_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CheckExistsResponse) GetExists() bool {
+	if x != nil {
+		return x.Exists
+	}
+	return false
+}
+
 var File_user_service_user_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_service_user_v1_response_proto_rawDesc = "" +
 	"\n" +
 	"#user_service/user/v1/response.proto\x12\x14user_service.user.v1\x1a\"user_service/models/v1/model.proto\"R\n" +
 	"\x1bGenerateScopedTokenResponse\x123\n" +
-	"\x05token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\x05tokenB\xdb\x01\n" +
+	"\x05token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\x05token\"-\n" +
+	"\x13CheckExistsResponse\x12\x16\n" +
+	"\x06exists\x18\x01 \x01(\bR\x06existsB\xdb\x01\n" +
 	"\x18com.user_service.user.v1B\rResponseProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/user/v1;userv1\xa2\x02\x03UUX\xaa\x02\x13UserService.User.V1\xca\x02\x13UserService\\User\\V1\xe2\x02\x1fUserService\\User\\V1\\GPBMetadata\xea\x02\x15UserService::User::V1b\x06proto3"
 
 var (
@@ -87,13 +133,14 @@ func file_user_service_user_v1_response_proto_rawDescGZIP() []byte {
 	return file_user_service_user_v1_response_proto_rawDescData
 }
 
-var file_user_service_user_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_user_service_user_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_user_service_user_v1_response_proto_goTypes = []any{
 	(*GenerateScopedTokenResponse)(nil), // 0: user_service.user.v1.GenerateScopedTokenResponse
-	(*v1.Token)(nil),                    // 1: user_service.models.v1.Token
+	(*CheckExistsResponse)(nil),         // 1: user_service.user.v1.CheckExistsResponse
+	(*v1.Token)(nil),                    // 2: user_service.models.v1.Token
 }
 var file_user_service_user_v1_response_proto_depIdxs = []int32{
-	1, // 0: user_service.user.v1.GenerateScopedTokenResponse.token:type_name -> user_service.models.v1.Token
+	2, // 0: user_service.user.v1.GenerateScopedTokenResponse.token:type_name -> user_service.models.v1.Token
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -112,7 +159,7 @@ func file_user_service_user_v1_response_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_user_v1_response_proto_rawDesc), len(file_user_service_user_v1_response_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

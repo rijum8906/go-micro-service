@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/metadata"
@@ -19,7 +20,8 @@ import (
 func attachClientInfo(ctx context.Context, meta coredto.RequestMeta) context.Context {
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClinetInfo(ctx, dto.ClientInfo{
+	ctx = metadata.SendClientInfo(ctx, dto.ClientInfo{
+		TraceID:   uuid.NewString(),
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  meta.DeviceId,

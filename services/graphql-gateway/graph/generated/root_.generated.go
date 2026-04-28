@@ -892,6 +892,8 @@ enum TokenScope {
   ADMIN             # Administrative actions
   IMPERSONATE       # Impersonate another user
   RECOVERY          # Account recovery
+  UPDATE_ORG_NAME
+  CHANGE_ORG_OWNER
 }
 
 # AuthMethod defines how the user authenticated

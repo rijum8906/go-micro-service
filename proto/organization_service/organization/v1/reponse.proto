@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package organization_service.organization.v1;
+
+message OrganizationResponse {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string status = 4;
+}
+
+message OrganizationsList {
+  repeated OrganizationResponse organizations = 1;
+}

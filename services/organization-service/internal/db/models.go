@@ -22,6 +22,8 @@ type Organization struct {
 	CreatedBy uuid.UUID
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+	DeletedBy uuid.UUID
 }
 
 // Immutable audit trail for security, compliance, and debugging
@@ -50,11 +52,10 @@ type OrganizationInvitation struct {
 	// SHA256 hash of the invitation token. Never store raw tokens.
 	TokenHash string
 	// Invitations are invalid after this timestamp (typically 7 days)
-	ExpiresAt   pgtype.Timestamptz
-	RespondedBy uuid.UUID
-	RespondedAt pgtype.Timestamptz
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
+	ExpiresAt  pgtype.Timestamptz
+	AcceptedBy uuid.UUID
+	AcceptedAt pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
 }
 
 // Junction table linking users to organizations with role and status
@@ -67,6 +68,7 @@ type OrganizationMembership struct {
 	// active=current member, suspended=temporarily blocked, left=voluntarily departed
 	Status    string
 	InvitedBy uuid.UUID
+	JoinedAt  pgtype.Timestamptz
 	LeftAt    pgtype.Timestamptz
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
@@ -96,7 +98,6 @@ type OrganizationTeamMembership struct {
 	// References organization_memberships.id - a user must be an org member before joining a team
 	MembershipID uuid.UUID
 	Role         string
-	InvitedBy    uuid.UUID
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
 	// Soft delete timestamp. When non-NULL, the member is no longer in the team.

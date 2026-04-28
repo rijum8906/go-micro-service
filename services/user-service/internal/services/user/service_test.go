@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
+	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker/mocks"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/testutils"
@@ -201,4 +203,35 @@ func TestUserService_GetUser(t *testing.T) {
 	if getUser.Id != registerRes.User.Id {
 		t.Fatalf("expected user id %v, got %v", registerRes.User.Id, getUser.Id)
 	}
+}
+
+func TestUserService_CheckExists(t *testing.T) {
+	userService, repos, _ := createTestUserService()
+	authService, _, _ := createTestAuthService()
+
+	registerRes := MustCreateUserAndProfile(authService, "test1234")
+
+	exists, appErr := userService.CheckExists(context.Background(), registerRes.User.Id)
+	if appErr != nil {
+		t.Fatalf("expected nil, got: %v", appErr)
+	}
+
+	if !exists {
+		t.Fatal("expected true, got false")
+	}
+
+	exists, appErr = userService.CheckExists(context.Background(), uuid.NewString())
+	if appErr != nil {
+		if appErr.Code != apperror.CodeNotFound {
+			t.Fatalf("expected not found error, got: %v", appErr)
+		}
+	}
+	if exists {
+		t.Fatal("expected false, got true")
+	}
+
+	t.Cleanup(func() {
+		id, _ := uuid.Parse(registerRes.User.Id)
+		repos.User.DeleteUser(context.Background(), id)
+	})
 }
