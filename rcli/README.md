@@ -1,6 +1,8 @@
 # rcli
 
-`rcli` is the Relay workspace CLI. The Cobra root command is currently named `my-cli`, but the source also invokes the binary as `rcli`, so the examples below use `rcli`.
+`rcli` is the Relay workspace CLI. The Cobra root command is currently named
+`my-cli`, but the source also invokes the binary as `rcli`, so the examples
+below use `rcli`.
 
 ## Command Tree
 
@@ -22,9 +24,8 @@ rcli
 │   │   ├── apply
 │   │   ├── clean
 │   │   └── truncate
-│   └── migrate
+│   └── migrate [--test]
 │       ├── apply (alias: up)
-│       ├── sql-apply
 │       ├── schema
 │       ├── clean
 │       ├── status
@@ -44,11 +45,13 @@ rcli
 
 ## Root Command
 
-`rcli` manages local Relay development workflows. It wires together project setup, local development helpers, database commands, and test helpers.
+`rcli` manages local Relay development workflows. It wires together project
+setup, local development helpers, database commands, and test helpers.
 
 ## `project`
 
-These commands are intended to run from the repository root. `project` has a persistent pre-run check that errors unless the current directory is the Relay root.
+These commands are intended to run from the repository root. `project` has a
+persistent pre-run check that errors unless the current directory is the Relay root.
 
 ### `rcli project init`
 
@@ -89,7 +92,8 @@ This namespace overlaps with `project init`, but is implemented separately.
 
 ### `rcli init project`
 
-Initializes the project by creating a Go workspace, syncing modules, downloading dependencies, and copying service `.env.example` files to `.env`.
+Initializes the project by creating a Go workspace, syncing modules, downloading
+dependencies, and copying service `.env.example` files to `.env`.
 
 ### `rcli init service`
 
@@ -112,7 +116,8 @@ Installs local development dependencies:
 
 ## `db`
 
-Most `db` commands expect to be run from an individual service directory because they load service-local `.env` files and/or read `db/schema.sql`.
+Most `db` commands expect to be run from an individual service directory because
+they load service-local `.env` files and/or read `db/schema.sql`.
 
 ### `rcli db init`
 
@@ -124,23 +129,29 @@ Runs direct SQL/schema operations without Atlas.
 
 Persistent flag:
 
-- `--test`, `-t`: connect to the hard-coded test database (`test_db` on port `5433`) instead of the service database
+- `--test`, `-t`: connect to the hard-coded test database
+(`test_db` on port `5433`) instead of the service database
 
 Subcommands:
 
 - `rcli db exec apply`: executes `db/schema.sql` against the selected database
 - `rcli db exec clean`: drops and recreates the `public` schema
-- `rcli db exec truncate`: drops and recreates the `public` schema, then reapplies `db/schema.sql`
+- `rcli db exec truncate`: drops and recreates the `public` schema, then
+reapplies `db/schema.sql`
 
 ### `rcli db migrate`
 
 Runs Atlas-based migration workflows.
 
+Persistent flag:
+
+- `--test`, `-t`: connect to the hard-coded test database (on port `5433`)
+instead of the service database
+
 Subcommands:
 
 - `rcli db migrate apply`: runs `atlas migrate apply`
 - `rcli db migrate up`: alias for `apply`
-- `rcli db migrate sql-apply`: creates the configured app and dev databases if needed, then executes `db/schema.sql`
 - `rcli db migrate schema`: runs `atlas schema apply --auto-approve`
 - `rcli db migrate clean`: runs `atlas schema clean`
 - `rcli db migrate status`: runs `atlas migrate status`
@@ -178,7 +189,8 @@ Nested subcommands:
 
 ### `rcli test cover`
 
-Generates `coverage.out` and opens the HTML coverage report using `go tool cover -html=coverage.out`.
+Generates `coverage.out` and opens the HTML coverage report using
+`go tool cover -html=coverage.out`.
 
 ### `rcli test up`
 
