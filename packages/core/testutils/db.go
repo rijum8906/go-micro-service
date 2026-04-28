@@ -2,20 +2,22 @@ package testutils
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/packages/core/db"
 )
 
-const (
-	DBHost     = "localhost"
-	DBPort     = 5433
-	DBUser     = "test_user"
-	DBPassword = "test_password"
-	DBName     = "test_db"
-	DBSSLMode  = "disable"
-	DevDBURL   = "docker://postgres/17/dev?search_path=public"
-)
+// NOTE: test db naming convension
+// - test_{service_first_name}
+// - eg. test_user
+
+// GetTestDBName returns the test database name based on service
+func GetTestDBName(serviceName string) string {
+	// test_user, test_organization, test_auth
+	return fmt.Sprintf("test_%s", strings.ToLower(strings.TrimSpace(strings.Split(serviceName, " ")[0])))
+}
 
 type DBConfig = db.Config
 
@@ -59,12 +61,12 @@ func WithSSLMode(mode string) Option {
 
 func MustConnectDB(options ...Option) *pgxpool.Pool {
 	config := DBConfig{
-		Host:        DBHost,
-		Port:        DBPort,
-		User:        DBUser,
-		Password:    DBPassword,
-		DBName:      DBName,
-		SSLMode:     DBSSLMode,
+		Host:        "localhost",
+		Port:        5432,
+		User:        "test_user",
+		Password:    "test_password",
+		DBName:      "test_db",
+		SSLMode:     "disable",
 		RetryCounts: 5,
 	}
 
