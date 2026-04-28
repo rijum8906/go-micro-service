@@ -127,7 +127,7 @@ func copyEnvFiles() error {
 	}
 
 	for _, svc := range services {
-		if err := utils.CopyFile(filepath.Join(svc, ".env.example"), filepath.Join("services", svc, ".env")); err != nil {
+		if err := utils.CopyFile(filepath.Join(svc, ".env.example"), filepath.Join(svc, ".env")); err != nil {
 			return fmt.Errorf("copy environment file for %s: %w", svc, err)
 		}
 	}
