@@ -16,8 +16,11 @@ type Querier interface {
 	CreateOrganizationMembershipOwner(ctx context.Context, arg CreateOrganizationMembershipOwnerParams) (OrganizationMembership, error)
 	DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error
 	DeleteOrganizationHard(ctx context.Context, id uuid.UUID) error
+	DeleteOrganizationMembership(ctx context.Context, arg DeleteOrganizationMembershipParams) error
+	DeleteOrganizationMembershipHard(ctx context.Context, id uuid.UUID) error
 	GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
 	GetOrganizationBySlug(ctx context.Context, slug string) (Organization, error)
+	GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error)
 	GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrganizationsByCreatedByParams) ([]Organization, error)
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error)
 }
