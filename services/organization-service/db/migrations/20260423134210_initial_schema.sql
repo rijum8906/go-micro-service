@@ -17,12 +17,12 @@ CREATE TABLE "organizations" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   "deleted_at" timestamptz NULL,
-  "deleted_by" uuid NOT NULL,
+  "deleted_by" uuid,
   PRIMARY KEY ("id"),
   CONSTRAINT "organizations_slug_key" UNIQUE ("slug"),
   CONSTRAINT "chk_organizations_slug_format" CHECK ((slug)::text ~ '^[a-z0-9-]+$'::text),
   CONSTRAINT "chk_organizations_slug_lowercase" CHECK ((slug)::text = lower((slug)::text)),
-  CONSTRAINT "organizations_status_check" CHECK ((status)::text = ANY ((ARRAY['pending'::character varying, 'accepted'::character varying, 'revoked'::character varying, 'expired'::character varying])::text[]))
+  CONSTRAINT "organizations_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'archived'::character varying, 'deleted'::character varying])::text[]))
 );
 -- Set comment to table: "organizations"
 COMMENT ON TABLE "organizations" IS 'Core tenant/workspace entity that contains teams and members';
@@ -37,19 +37,18 @@ CREATE TABLE "organization_memberships" (
   "user_id" uuid NOT NULL,
   "role" character varying(30) NOT NULL DEFAULT 'member',
   "status" character varying(30) NOT NULL DEFAULT 'active',
-  "invited_by" uuid NOT NULL,
+  "invited_by" uuid,
   "joined_at" timestamptz NOT NULL DEFAULT now(),
   "left_at" timestamptz NULL,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   "deleted_at" timestamptz NULL,
-  "deleted_by" uuid NOT NULL,
+  "deleted_by" uuid,
   PRIMARY KEY ("id"),
   CONSTRAINT "uq_organization_memberships_org_user" UNIQUE ("organization_id", "user_id"),
   CONSTRAINT "organization_memberships_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_memberships_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_memberships_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "organization_memberships_role_check" CHECK ((role)::text = ANY ((ARRAY['owner'::character varying, 'admin'::character varying, 'member'::character varying])::text[])),
   CONSTRAINT "organization_memberships_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying, 'left'::character varying])::text[]))
 );
 -- Create index "idx_organization_memberships_organization_id" to table: "organization_memberships"
@@ -74,7 +73,7 @@ CREATE TABLE "organization_teams" (
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   "deleted_at" timestamptz NULL,
-  "deleted_by" uuid NOT NULL,
+  "deleted_by" uuid,
   PRIMARY KEY ("id"),
   CONSTRAINT "uq_organization_teams_org_name" UNIQUE ("organization_id", "name"),
   CONSTRAINT "organization_teams_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,

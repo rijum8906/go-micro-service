@@ -23,6 +23,21 @@ func NewUserHandler(service userservice.UserService) *UserHandler {
 	}
 }
 
+func (h *UserHandler) CheckExists(ctx context.Context, req *userv1.CheckExistsRequest) (*userv1.CheckExistsResponse, error) {
+	if req == nil {
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("check exists request is required"))
+	}
+
+	result, appErr := h.service.CheckExists(ctx, req.Id)
+	if appErr != nil {
+		return nil, utils.MapAppError(appErr)
+	}
+
+	return &userv1.CheckExistsResponse{
+		Exists: result,
+	}, nil
+}
+
 func (h *UserHandler) GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest) (*userv1.GenerateScopedTokenResponse, error) {
 	if req == nil {
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("generate scoped token request is required"))

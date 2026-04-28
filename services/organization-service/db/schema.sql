@@ -20,7 +20,7 @@ CREATE TABLE organizations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name varchar(255) NOT NULL,
     status varchar(30) NOT NULL DEFAULT 'active'
-        CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
+        CHECK (status IN ('active', 'archived', 'deleted')),
     slug varchar(80) UNIQUE NOT NULL,
     description text,
     logo_url text,
@@ -28,7 +28,7 @@ CREATE TABLE organizations (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid NOT NULL,
+    deleted_by uuid,
 
     -- Ensures slugs are consistently lowercase to prevent case-sensitive duplicates
     CONSTRAINT chk_organizations_slug_lowercase CHECK (slug = lower(slug)),
@@ -52,17 +52,16 @@ CREATE TABLE organization_memberships (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     user_id uuid NOT NULL,
-    role varchar(30) NOT NULL DEFAULT 'member'
-        CHECK (role IN ('owner', 'admin', 'member')),
+    role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'active'
         CHECK (status IN ('active', 'suspended', 'left')),
-    invited_by uuid NOT NULL REFERENCES organization_memberships(id),
+    invited_by uuid REFERENCES organization_memberships(id),
     joined_at timestamptz NOT NULL DEFAULT now(),
     left_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid NOT NULL REFERENCES organization_memberships(id),
+    deleted_by uuid REFERENCES organization_memberships(id),
 
     -- Prevents duplicate memberships for the same user in an organization
     CONSTRAINT uq_organization_memberships_org_user UNIQUE (organization_id, user_id)
@@ -96,7 +95,7 @@ CREATE TABLE organization_teams (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid NOT NULL REFERENCES organization_memberships(id),
+    deleted_by uuid REFERENCES organization_memberships(id),
 
     -- Team names must be unique within an organization (can't have two "Engineering" teams)
     CONSTRAINT uq_organization_teams_org_name UNIQUE (organization_id, name)

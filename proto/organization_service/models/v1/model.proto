@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package organization_service.models.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Organization {
+  string id = 1;
+  string name = 2;
+  string status = 3;
+  string slug = 4;
+  string description = 5;
+  string logo_url = 6;
+  string created_by = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  google.protobuf.Timestamp deleted_at = 10;
+  string deleted_by = 11;
+}
+
+message OrganizationMembership {
+  string id = 1;
+  string organization_id = 2;
+  string user_id = 3;
+  string role = 4;
+  string status = 5;
+  string invited_by = 6;
+  google.protobuf.Timestamp joined_at = 7;
+  google.protobuf.Timestamp left_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp deleted_at = 11;
+  string deleted_by = 12;
+}
+
+message OrganizationTeam {
+  string id = 1;
+  string organization_id = 2;
+  string name = 3;
+  string description = 4;
+  string created_by = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp deleted_at = 8;
+  string deleted_by = 9;
+}
+
+message OrganizationTeamMembership {
+  string id = 1;
+  string organization_team_id = 2;
+  string tesm_id = 3;
+  string membership_id = 4;
+  string role = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp deleted_at = 8;
+  string deleted_by = 9;
+}

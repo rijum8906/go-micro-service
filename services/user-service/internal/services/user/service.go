@@ -180,3 +180,19 @@ func (s *userService) validateProfileAccess(ctx context.Context, profileID uuid.
 
 	return nil
 }
+
+func (s *userService) CheckExists(ctx context.Context, id string) (bool, *apperror.AppError) {
+	useID, err := uuid.Parse(id)
+	if err != nil {
+		return false, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
+	}
+	user, appErr := s.repos.User.GetUser(ctx, useID)
+	if appErr != nil {
+		return false, appErr
+	}
+	if user == nil {
+		return false, nil
+	}
+
+	return true, nil
+}
