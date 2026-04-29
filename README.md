@@ -77,6 +77,7 @@ cli dev run
 - Setup Test Environment
 
 ```bash
+cd services/user-service
 cli test setup
 ```
 
