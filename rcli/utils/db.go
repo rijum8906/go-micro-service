@@ -107,8 +107,10 @@ func ConnectDB(options ...Option) (*pgxpool.Pool, error) {
 }
 
 func GetTestDBName(serviceName string) string {
-	// test_user, test_organization, test_auth
-	return fmt.Sprintf("test_%s", strings.ToLower(strings.TrimSpace(strings.Split(serviceName, "-")[0])))
+	serviceName = strings.Split(serviceName, "-")[0]
+	serviceName = strings.Split(serviceName, "_")[0]
+	serviceName = strings.Split(serviceName, " ")[0]
+	return fmt.Sprintf("test_%s", strings.ToLower(serviceName))
 }
 
 // GetConnPool returns the database connection pool

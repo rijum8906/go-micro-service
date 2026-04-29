@@ -22,7 +22,7 @@ import (
 var mockUserServiceClient = &mocks.MockUserServiceClient{}
 
 func Test_CreateOrganization_Failure_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
 	q := db.New(pool)
 	service := organization.New(q, mockUserServiceClient)
 
@@ -86,7 +86,7 @@ func Test_CreateOrganization_Failure_Integration(t *testing.T) {
 }
 
 func Test_CreateOrganization_Success_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
 	q := db.New(pool)
 	service := organization.New(q, mockUserServiceClient)
 
@@ -141,7 +141,7 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Success_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
 	q := db.New(pool)
 	service := organization.New(q, mockUserServiceClient)
 
@@ -194,7 +194,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Failure_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
 	q := db.New(pool)
 	service := organization.New(q, mockUserServiceClient)
 

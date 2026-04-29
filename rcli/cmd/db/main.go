@@ -35,15 +35,17 @@ var initCmd = &cobra.Command{
 				return err
 			}
 
-			if err = utils.CreateDatabase(pool, utils.GetTestDBName(config.AppName)); err != nil {
+			fmt.Println("\n🧪 Creating database" + utils.GetTestDBName(config.AppName))
+			if err = utils.CreateDatabase(pool, utils.GetTestDBName(config.AppName), utils.WithPort(5433)); err != nil {
 				return err
 			}
 		} else {
-			pool, err = utils.ConnectDB(utils.WithDBName(config.DBName))
+			pool, err = utils.ConnectDB()
 			if err != nil {
 				return err
 			}
 
+			fmt.Println("\n🧪 Creating database" + config.DBName)
 			if err := utils.CreateDatabase(pool, config.DBName); err != nil {
 				return err
 			}
