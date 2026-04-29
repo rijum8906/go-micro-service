@@ -37,6 +37,10 @@ var (
 		Code:    CodeForbidden,
 		Message: "Forbidden",
 	}
+	ErrConflict = &AppError{
+		Code:    CodeConflict,
+		Message: "Conflict",
+	}
 	ErrNotFound = &AppError{
 		Code:    CodeNotFound,
 		Message: "Not Found",

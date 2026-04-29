@@ -18,6 +18,8 @@ func MapAppError(appErr *apperror.AppError) error {
 		return status.Error(codes.Unauthenticated, appErr.Message)
 	case apperror.CodeForbidden:
 		return status.Error(codes.PermissionDenied, appErr.Message)
+	case apperror.CodeConflict:
+		return status.Error(codes.AlreadyExists, appErr.Message)
 	case apperror.CodeNotFound:
 		return status.Error(codes.NotFound, appErr.Message)
 	case apperror.CodeThirdParty:

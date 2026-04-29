@@ -12,7 +12,10 @@ import (
 	"github.com/rijum8906/relay/services/task-service/app/config"
 	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
 	projectservice "github.com/rijum8906/relay/services/task-service/internal/services/project"
+	projectmembershipservice "github.com/rijum8906/relay/services/task-service/internal/services/project_membership"
 	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
+	taskassigmentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_assigment"
+	taskcommentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_comment"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -28,9 +31,12 @@ type ApplicationUtils struct {
 }
 
 type ApplicationServices struct {
-	project     projectservice.ProjectService
-	task        taskservice.TaskService
-	taskHandler *handler.TaskHandler
+	project           projectservice.ProjectService
+	projectMembership projectmembershipservice.ProjectMembershipService
+	task              taskservice.TaskService
+	taskAssignment    taskassigmentservice.TaskAssignmentService
+	taskComment       taskcommentservice.TaskCommentService
+	taskHandler       *handler.TaskHandler
 }
 
 type Application struct {

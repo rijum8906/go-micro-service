@@ -53,18 +53,26 @@ func (r *taskRepository) ListTasksByProject(ctx context.Context, projectID pgtyp
 func (r *taskRepository) UpdateTask(ctx context.Context, params db.UpdateTaskParams) (*db.Task, *apperror.AppError) {
 	task, err := r.q.UpdateTask(ctx, params)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("task not found")
+		}
+
 		return nil, apperror.ErrInternal.WithMessage("failed to update task").WithDetail("error", err.Error())
 	}
-	
+
 	return &task, nil
 }
 
 func (r *taskRepository) DeleteTask(ctx context.Context, params db.DeleteTaskParams) (*db.Task, *apperror.AppError) {
 	task, err := r.q.DeleteTask(ctx, params)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("task not found")
+		}
+
 		return nil, apperror.ErrInternal.WithMessage("failed to delete task").WithDetail("error", err.Error())
 	}
-	
+
 	return &task, nil
 }
 
@@ -84,18 +92,26 @@ func (r *taskRepository) ArchiveTask(ctx context.Context, params db.ArchiveTaskP
 func (r *taskRepository) UpdateTaskStatus(ctx context.Context, params db.UpdateTaskStatusParams) (*db.Task, *apperror.AppError) {
 	task, err := r.q.UpdateTaskStatus(ctx, params)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("task not found")
+		}
+
 		return nil, apperror.ErrInternal.WithMessage("failed to update task status").WithDetail("error", err.Error())
 	}
-	
+
 	return &task, nil
 }
 
 func (r *taskRepository) UpdateTaskProgress(ctx context.Context, params db.UpdateTaskProgressParams) (*db.Task, *apperror.AppError) {
 	task, err := r.q.UpdateTaskProgress(ctx, params)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("task not found")
+		}
+
 		return nil, apperror.ErrInternal.WithMessage("failed to update task progress").WithDetail("error", err.Error())
 	}
-	
+
 	return &task, nil
 }
 
@@ -104,7 +120,7 @@ func (r *taskRepository) ListTasksByOrganization(ctx context.Context, params db.
 	if err != nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to list tasks by organization").WithDetail("error", err.Error())
 	}
-	
+
 	return tasks, nil
 }
 
@@ -113,7 +129,7 @@ func (r *taskRepository) ListTasksByParent(ctx context.Context, parentTaskID pgt
 	if err != nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to list tasks by parent").WithDetail("error", err.Error())
 	}
-	
+
 	return tasks, nil
 }
 
@@ -122,6 +138,6 @@ func (r *taskRepository) ListTasksByCreator(ctx context.Context, params db.ListT
 	if err != nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to list tasks by creator ").WithDetail("error", err.Error())
 	}
-	
+
 	return tasks, nil
 }

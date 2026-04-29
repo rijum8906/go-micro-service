@@ -12,9 +12,15 @@ import (
 	taskdb "github.com/rijum8906/relay/services/task-service/internal/db"
 	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
 	projectRepo "github.com/rijum8906/relay/services/task-service/internal/repository/project"
+	projectmembershiprepo "github.com/rijum8906/relay/services/task-service/internal/repository/project_membership"
 	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
+	taskassignmentrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_assignment"
+	taskcommentrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_comment"
 	projectservice "github.com/rijum8906/relay/services/task-service/internal/services/project"
+	projectmembershipservice "github.com/rijum8906/relay/services/task-service/internal/services/project_membership"
 	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
+	taskassigmentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_assigment"
+	taskcommentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_comment"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -60,7 +66,10 @@ func (a *Application) initUtils() *apperror.AppError {
 func (a *Application) initServices() *apperror.AppError {
 	queries := taskdb.New(a.infra.database)
 	projectRepository := projectRepo.NewProjectRepository(queries)
+	projectMembershipRepository := projectmembershiprepo.NewProjectMembershipRepository(queries)
 	taskRepository := taskrepo.NewTaskRepository(queries)
+	taskAssignmentRepository := taskassignmentrepo.NewTaskAssignmentRepository(queries)
+	taskCommentRepository := taskcommentrepo.NewTaskCommentRepository(queries)
 
 	projectService, appErr := projectservice.NewProjectService(projectRepository)
 	if appErr != nil {
@@ -68,16 +77,40 @@ func (a *Application) initServices() *apperror.AppError {
 	}
 	a.services.project = projectService
 
+	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository)
+	if appErr != nil {
+		return appErr
+	}
+	a.services.projectMembership = projectMembershipService
+
 	taskService, appErr := taskservice.NewTaskService(taskRepository)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.task = taskService
+
+	taskAssignmentService, appErr := taskassigmentservice.NewTaskAssignmentService(taskAssignmentRepository)
+	if appErr != nil {
+		return appErr
+	}
+	a.services.taskAssignment = taskAssignmentService
+
+	taskCommentService, appErr := taskcommentservice.NewTaskCommentService(taskCommentRepository)
+	if appErr != nil {
+		return appErr
+	}
+	a.services.taskComment = taskCommentService
 	return nil
 }
 
 func (a *Application) initHandler() *apperror.AppError {
-	a.services.taskHandler = handler.NewTaskHandler(a.services.project, a.services.task)
+	a.services.taskHandler = handler.NewTaskHandler(
+		a.services.project,
+		a.services.projectMembership,
+		a.services.task,
+		a.services.taskAssignment,
+		a.services.taskComment,
+	)
 	return nil
 }
 
