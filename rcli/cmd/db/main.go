@@ -4,6 +4,7 @@ package dbcmd
 import (
 	"fmt"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
 )
@@ -22,18 +23,33 @@ var initCmd = &cobra.Command{
 			return err
 		}
 
-		pool, err := utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
-		if err != nil {
-			return err
-		}
-		defer pool.Close()
+		pool := &pgxpool.Pool{}
 
-		if err = utils.CreateDatabase(pool, config.DBName); err != nil {
-			return err
+		if useTestDB {
+			fmt.Println("\n🧪 Setting up test database")
+			pool, err = utils.ConnectDB(utils.WithDBName("test_db"),
+				utils.WithPort(5433),
+				utils.WithUser("test_user"),
+				utils.WithPassword("test_password"))
+			if err != nil {
+				return err
+			}
+
+			if err = utils.CreateDatabase(pool, utils.GetTestDBName(config.AppName)); err != nil {
+				return err
+			}
+		} else {
+			pool, err = utils.ConnectDB(utils.WithDBName(config.DBName))
+			if err != nil {
+				return err
+			}
+
+			if err := utils.CreateDatabase(pool, config.DBName); err != nil {
+				return err
+			}
 		}
-		if err = utils.CreateDatabase(pool, utils.DevDBName); err != nil {
-			return err
-		}
+
+		defer pool.Close()
 
 		fmt.Println("\n✅  Database initialized successfully")
 
@@ -42,5 +58,6 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
+	initCmd.Flags().BoolVarP(&useTestDB, "test", "t", false, "Run migrations for test environment database")
 	DBCmd.AddCommand(initCmd)
 }
