@@ -14,7 +14,7 @@ import (
 )
 
 func Test_service_CreateNotification(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("notification-service")))
 	querier := db.New(pool)
 	repo := notification.New(querier)
 
@@ -75,7 +75,7 @@ func Test_service_CreateNotification(t *testing.T) {
 }
 
 func Test_service_GetNotification(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("notification-service")))
 	querier := db.New(pool)
 	repo := notification.New(querier)
 
@@ -102,7 +102,7 @@ func Test_service_GetNotification(t *testing.T) {
 }
 
 func Test_service_GetNotificationsByUserID(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("notification-service")))
 	querier := db.New(pool)
 	repo := notification.New(querier)
 
@@ -158,7 +158,7 @@ func Test_service_GetNotificationsByUserID(t *testing.T) {
 }
 
 func Test_service_UpdateNotificationStatus(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("notification-service")))
 	querier := db.New(pool)
 	repo := notification.New(querier)
 
@@ -194,7 +194,7 @@ func Test_service_UpdateNotificationStatus(t *testing.T) {
 }
 
 func Test_service_DeleteNotification(t *testing.T) {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("notification-service")))
 	querier := db.New(pool)
 	repo := notification.New(querier)
 
