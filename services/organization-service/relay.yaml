@@ -1,0 +1,7 @@
+name: Organization Service
+version: 1
+dependencies:
+  binary:
+    - url: https://atlasgo.sh
+  go:
+    - ulr: github.com/sqlc-dev/sqlc/cmd/sqlc@latest

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package task_service.task.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message CreateTaskRequest {
+  string organization_id = 1;
+  string project_id = 2;
+  string parent_task_id = 3;
+  string title = 4;
+  string description = 5;
+  string priority = 6;
+  google.protobuf.Timestamp due_at = 7;
+}
+
+message GetTaskRequest {
+  string id = 1;
+}
+
+message ListTasksByProjectRequest {
+  string project_id = 1;
+}

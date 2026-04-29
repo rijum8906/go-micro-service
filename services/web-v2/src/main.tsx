@@ -1,22 +1,13 @@
 import ReactDOM from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { routeTree } from './routeTree.gen'
+import { RouterProvider } from '@tanstack/react-router'
+import { bootstrapAuth } from '#/lib/auth-bootstrap'
+import { getRouter } from './router'
 
-const router = createRouter({
-  routeTree,
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-})
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router
-  }
-}
+const router = getRouter()
 
 const rootElement = document.getElementById('app')!
+const root = ReactDOM.createRoot(rootElement)
 
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
+void bootstrapAuth().then(() => {
   root.render(<RouterProvider router={router} />)
-}
+})

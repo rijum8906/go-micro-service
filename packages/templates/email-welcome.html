@@ -1,31 +1,32 @@
 {{define "email-welcome.html"}}
 {{template "email-header" .}}
-                                            <h2 style="margin: 0 0 14px; font-size: 24px; line-height: 1.3; color: #0f172a;">
-                                                Welcome aboard
-                                            </h2>
-                                            <p class="body-copy" style="margin: 0 0 16px;">
-                                                Hello {{if .ClientName}}{{.ClientName}}{{else}}there{{end}},
-                                            </p>
-                                            <p class="body-copy" style="margin: 0 0 16px;">
-                                                Your account has been successfully created and is ready to use.
-                                            </p>
-                                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0;">
-                                                <tr>
-                                                    <td style="padding: 18px 20px; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;">
-                                                        <p style="margin: 0 0 8px; font-size: 13px; line-height: 1.4; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #1d4ed8;">
-                                                            Account Details
-                                                        </p>
-                                                        <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #1e293b;">
-                                                            Email: <strong>{{if .ClientEmail}}{{.ClientEmail}}{{else}}Not provided{{end}}</strong>
-                                                        </p>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            <p class="body-copy" style="margin: 0 0 16px;">
-                                                You can now sign in, complete your profile, and start using the available features.
-                                            </p>
-                                            <p class="body-copy" style="margin: 0;">
-                                                We’re glad to have you with us and look forward to supporting your experience.
-                                            </p>
+<h2 style="margin: 0 0 14px; font-size: 24px; line-height: 1.3; color: #0f172a;">
+    Welcome aboard
+</h2>
+<p class="body-copy" style="margin: 0 0 16px;">
+    Hello {{if .ClientName}}{{.ClientName}}{{else}}there{{end}},
+</p>
+<p class="body-copy" style="margin: 0 0 16px;">
+    Your account has been successfully created and is ready to use.
+</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0;">
+    <tr>
+        <td style="padding: 18px 20px; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;">
+            <p
+                style="margin: 0 0 8px; font-size: 13px; line-height: 1.4; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #1d4ed8;">
+                Account Details
+            </p>
+            <p style="margin: 0; font-size: 16px; line-height: 1.7; color: #1e293b;">
+                Email: <strong>{{if .ClientEmail}}{{.ClientEmail}}{{else}}Not provided{{end}}</strong>
+            </p>
+        </td>
+    </tr>
+</table>
+<p class="body-copy" style="margin: 0 0 16px;">
+    You can now sign in, complete your profile, and start using the available features.
+</p>
+<p class="body-copy" style="margin: 0;">
+    We’re glad to have you with us and look forward to supporting your experience.
+</p>
 {{template "email-footer" .}}
 {{end}}

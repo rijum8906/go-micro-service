@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package task_service.models.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Task {
+  string id = 1;
+  string organization_id = 2;
+  string project_id = 3;
+  string parent_task_id = 4;
+  string created_by = 5;
+  string updated_by = 6;
+  string title = 7;
+  string description = 8;
+  string status = 9;
+  string priority = 10;
+  int32 progress_percent = 11;
+  google.protobuf.Timestamp started_at = 12;
+  google.protobuf.Timestamp due_at = 13;
+  google.protobuf.Timestamp completed_at = 14;
+  google.protobuf.Timestamp archived_at = 15;
+  google.protobuf.Timestamp deleted_at = 16;
+  string deleted_by = 17;
+  google.protobuf.Timestamp created_at = 18;
+  google.protobuf.Timestamp updated_at = 19;
+}

@@ -8,23 +8,25 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/env"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/hash"
-	corenats "github.com/rijum8906/relay/packages/core/nats"
 	"github.com/rijum8906/relay/packages/core/token"
+	"github.com/rijum8906/relay/services/user/app/config"
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 type ApplicationInfra struct {
-	cache    *redis.Client
-	database *pgxpool.Pool
-	nats     *corenats.Client
+	cache        *redis.Client
+	database     *pgxpool.Pool
+	brokerClient broker.Client
 }
 
 type ApplicationUtils struct {
-	token *token.TokenManager
-	hash  hash.HashService
+	token  *token.TokenManager
+	hash   hash.HashService
+	logger *zap.Logger
 }
 
 type ApplicationServices struct {
@@ -34,7 +36,7 @@ type ApplicationServices struct {
 }
 
 type Application struct {
-	config   *env.Config
+	config   *config.Env
 	infra    *ApplicationInfra
 	utils    *ApplicationUtils
 	services *ApplicationServices
@@ -51,12 +53,16 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 
 	var appErr *apperror.AppError
 
-	app.config, appErr = env.Load()
+	app.config, appErr = config.Load()
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	// Initialize Dependencies
+	if appErr = app.initLogger(); appErr != nil {
+		return nil, appErr
+	}
+
 	if appErr = app.initDB(ctx); appErr != nil {
 		return nil, appErr
 	}
@@ -80,6 +86,12 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	if appErr = app.initGRPCServer(); appErr != nil {
 		return nil, appErr
 	}
+
+	apperror.SetConfig(apperror.Config{
+		AppEnv: app.config.AppEnv,
+		Debug:  true,
+		Logger: app.utils.logger,
+	})
 
 	return app, nil
 }

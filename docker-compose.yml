@@ -1,6 +1,7 @@
 services:
   nats:
     image: nats:2.12-alpine
+    command: ["-js"]
     ports:
       - "4222:4222"
 
@@ -24,6 +25,18 @@ services:
     volumes:
       - redis:/var/lib/redis/data
 
+  # graphql-gateway
+  graphql-gateway:
+    build:
+      context: .
+      dockerfile: ./services/graphql-gateway/Dockerfile
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "user-service"
+
   # user-service
   user-service:
     build:
@@ -39,17 +52,50 @@ services:
       - "postgres"
       - "redis"
 
-  # graphql-gateway
-  graphql-gateway:
+    # notifaction-service
+  notification-service:
     build:
       context: .
-      dockerfile: ./services/graphql-gateway/Dockerfile
+      dockerfile: ./services/notification-service/Dockerfile
     environment:
       DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      NATS_URL: "nats://nats:4222"
     ports:
-      - "8080:8080"
+      - "8082:8082"
     depends_on:
-      - "user-service"
+      - "nats"
+      - "postgres"
+      - "redis"
+
+    # task-service
+  task-service:
+    build:
+      context: .
+      dockerfile: ./services/task-service/Dockerfile
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      NATS_URL: "nats://nats:4222"
+    ports:
+      - "8083:8083"
+    depends_on:
+      - "nats"
+      - "postgres"
+      - "redis"
+
+  # organization-service
+  organization-service:
+    build:
+      context: .
+      dockerfile: ./services/organization-service/Dockerfile
+    environment:
+      DB_URL: "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable"
+      NATS_URL: "nats://nats:4222"
+    ports:
+      - "8084:8084"
+    depends_on:
+      - "nats"
+      - "postgres"
+      - "redis"
 
   # web-v2
   web-v2:

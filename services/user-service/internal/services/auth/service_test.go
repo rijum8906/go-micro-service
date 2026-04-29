@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker/mocks"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	"github.com/rijum8906/relay/services/user/app/config"
 	"github.com/rijum8906/relay/services/user/internal/services/auth"
 	"github.com/rijum8906/relay/services/user/internal/utils"
+)
+
+var (
+	mockPublisher = &mocks.MockPublisher{}
+	mockConfig    = &config.Env{}
 )
 
 type TestCase struct {
@@ -18,17 +24,10 @@ type TestCase struct {
 	req  *authv1.LoginRequest
 }
 
-type noopPublisher struct{}
-
-func (noopPublisher) PublishJSON(string, any) *apperror.AppError {
-	return nil
-}
-
 func createTestAuthService() (auth.AuthService, *utils.Repos, *utils.ServiceUtils) {
 	repos := utils.NewTestRepos()
 	serviceUtils := utils.NewTestServiceUtils()
-	config := testutils.NewTestEnv()
-	service, appErr := auth.NewAuthService(repos, serviceUtils, config, noopPublisher{})
+	service, appErr := auth.NewAuthService(repos, serviceUtils, mockConfig, mockPublisher)
 	if appErr != nil {
 		panic(appErr)
 	}

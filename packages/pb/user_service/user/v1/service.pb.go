@@ -26,7 +26,7 @@ var File_user_service_user_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_user_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\xbe\x04\n" +
+	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\xa2\x05\n" +
 	"\vUserService\x12z\n" +
 	"\x13GenerateScopedToken\x120.user_service.user.v1.GenerateScopedTokenRequest\x1a1.user_service.user.v1.GenerateScopedTokenResponse\x12n\n" +
 	"\x16UpdateProfileAvatarUrl\x123.user_service.user.v1.UpdateProfileAvatarUrlRequest\x1a\x1f.user_service.models.v1.Profile\x12d\n" +
@@ -34,7 +34,8 @@ const file_user_service_user_v1_service_proto_rawDesc = "" +
 	"\x0eChangePassword\x12+.user_service.user.v1.ChangePasswordRequest\x1a\x18.core.v1.SuccessResponse\x12D\n" +
 	"\n" +
 	"GetProfile\x12\x15.core.v1.EmptyRequest\x1a\x1f.user_service.models.v1.Profile\x12>\n" +
-	"\aGetUser\x12\x15.core.v1.EmptyRequest\x1a\x1c.user_service.models.v1.UserB\xda\x01\n" +
+	"\aGetUser\x12\x15.core.v1.EmptyRequest\x1a\x1c.user_service.models.v1.User\x12b\n" +
+	"\vCheckExists\x12(.user_service.user.v1.CheckExistsRequest\x1a).user_service.user.v1.CheckExistsResponseB\xda\x01\n" +
 	"\x18com.user_service.user.v1B\fServiceProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/user/v1;userv1\xa2\x02\x03UUX\xaa\x02\x13UserService.User.V1\xca\x02\x13UserService\\User\\V1\xe2\x02\x1fUserService\\User\\V1\\GPBMetadata\xea\x02\x15UserService::User::V1b\x06proto3"
 
 var file_user_service_user_v1_service_proto_goTypes = []any{
@@ -43,29 +44,33 @@ var file_user_service_user_v1_service_proto_goTypes = []any{
 	(*UpdateProfileNameRequest)(nil),      // 2: user_service.user.v1.UpdateProfileNameRequest
 	(*ChangePasswordRequest)(nil),         // 3: user_service.user.v1.ChangePasswordRequest
 	(*v1.EmptyRequest)(nil),               // 4: core.v1.EmptyRequest
-	(*GenerateScopedTokenResponse)(nil),   // 5: user_service.user.v1.GenerateScopedTokenResponse
-	(*v11.Profile)(nil),                   // 6: user_service.models.v1.Profile
-	(*v1.SuccessResponse)(nil),            // 7: core.v1.SuccessResponse
-	(*v11.User)(nil),                      // 8: user_service.models.v1.User
+	(*CheckExistsRequest)(nil),            // 5: user_service.user.v1.CheckExistsRequest
+	(*GenerateScopedTokenResponse)(nil),   // 6: user_service.user.v1.GenerateScopedTokenResponse
+	(*v11.Profile)(nil),                   // 7: user_service.models.v1.Profile
+	(*v1.SuccessResponse)(nil),            // 8: core.v1.SuccessResponse
+	(*v11.User)(nil),                      // 9: user_service.models.v1.User
+	(*CheckExistsResponse)(nil),           // 10: user_service.user.v1.CheckExistsResponse
 }
 var file_user_service_user_v1_service_proto_depIdxs = []int32{
-	0, // 0: user_service.user.v1.UserService.GenerateScopedToken:input_type -> user_service.user.v1.GenerateScopedTokenRequest
-	1, // 1: user_service.user.v1.UserService.UpdateProfileAvatarUrl:input_type -> user_service.user.v1.UpdateProfileAvatarUrlRequest
-	2, // 2: user_service.user.v1.UserService.UpdateProfileName:input_type -> user_service.user.v1.UpdateProfileNameRequest
-	3, // 3: user_service.user.v1.UserService.ChangePassword:input_type -> user_service.user.v1.ChangePasswordRequest
-	4, // 4: user_service.user.v1.UserService.GetProfile:input_type -> core.v1.EmptyRequest
-	4, // 5: user_service.user.v1.UserService.GetUser:input_type -> core.v1.EmptyRequest
-	5, // 6: user_service.user.v1.UserService.GenerateScopedToken:output_type -> user_service.user.v1.GenerateScopedTokenResponse
-	6, // 7: user_service.user.v1.UserService.UpdateProfileAvatarUrl:output_type -> user_service.models.v1.Profile
-	6, // 8: user_service.user.v1.UserService.UpdateProfileName:output_type -> user_service.models.v1.Profile
-	7, // 9: user_service.user.v1.UserService.ChangePassword:output_type -> core.v1.SuccessResponse
-	6, // 10: user_service.user.v1.UserService.GetProfile:output_type -> user_service.models.v1.Profile
-	8, // 11: user_service.user.v1.UserService.GetUser:output_type -> user_service.models.v1.User
-	6, // [6:12] is the sub-list for method output_type
-	0, // [0:6] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: user_service.user.v1.UserService.GenerateScopedToken:input_type -> user_service.user.v1.GenerateScopedTokenRequest
+	1,  // 1: user_service.user.v1.UserService.UpdateProfileAvatarUrl:input_type -> user_service.user.v1.UpdateProfileAvatarUrlRequest
+	2,  // 2: user_service.user.v1.UserService.UpdateProfileName:input_type -> user_service.user.v1.UpdateProfileNameRequest
+	3,  // 3: user_service.user.v1.UserService.ChangePassword:input_type -> user_service.user.v1.ChangePasswordRequest
+	4,  // 4: user_service.user.v1.UserService.GetProfile:input_type -> core.v1.EmptyRequest
+	4,  // 5: user_service.user.v1.UserService.GetUser:input_type -> core.v1.EmptyRequest
+	5,  // 6: user_service.user.v1.UserService.CheckExists:input_type -> user_service.user.v1.CheckExistsRequest
+	6,  // 7: user_service.user.v1.UserService.GenerateScopedToken:output_type -> user_service.user.v1.GenerateScopedTokenResponse
+	7,  // 8: user_service.user.v1.UserService.UpdateProfileAvatarUrl:output_type -> user_service.models.v1.Profile
+	7,  // 9: user_service.user.v1.UserService.UpdateProfileName:output_type -> user_service.models.v1.Profile
+	8,  // 10: user_service.user.v1.UserService.ChangePassword:output_type -> core.v1.SuccessResponse
+	7,  // 11: user_service.user.v1.UserService.GetProfile:output_type -> user_service.models.v1.Profile
+	9,  // 12: user_service.user.v1.UserService.GetUser:output_type -> user_service.models.v1.User
+	10, // 13: user_service.user.v1.UserService.CheckExists:output_type -> user_service.user.v1.CheckExistsResponse
+	7,  // [7:14] is the sub-list for method output_type
+	0,  // [0:7] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_user_service_user_v1_service_proto_init() }

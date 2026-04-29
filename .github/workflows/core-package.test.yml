@@ -3,27 +3,24 @@ name: Core Package Test
 on:
   push:
     branches: ["main", "develop"]
+    paths:
+      - "packages/core/**"
   pull_request:
     branches: ["main"]
+    paths:
+      - "packages/core/**"
 
 env:
   TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
+  TEST_SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+  TEST_SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+  TEST_SMTP_HOST: ${{ secrets.SMTP_HOST }}
+  TEST_SMTP_PORT: ${{ secrets.SMTP_PORT }}
 
 jobs:
-  test:
+  test-core:
     name: Run Tests
     runs-on: ubuntu-latest
-
-    services:
-      redis:
-        image: redis
-        ports:
-          - "6380:6379"
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout Code
@@ -35,18 +32,16 @@ jobs:
           go-version: "1.26.1"
           cache: true
 
-      - name: Verify Go Version
-        run: go version
+      - name: Start Test docker-compose
+        run: |
+          docker compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml ps
 
       - name: Setup Workspace
         run: |
-          go work init
-          go work use services/*
-          go work use packages/*
-
-      - name: Install Dependencies
-        run: go mod download
+          go install ./rcli
+          rcli init project
 
       - name: Run unit tests
         working-directory: packages/core
-        run: go test -v ./...
+        run: go test -v ./... -timeout 30s

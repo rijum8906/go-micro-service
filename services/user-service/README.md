@@ -125,60 +125,58 @@ SCOPED_TOKEN_TTL=10m
 REFRESH_TOKEN_TTL=600h
 ```
 
-## Running Locally
+## Local Use
+
+For quick local setup and usage without requiring Atlas version tracking:
 
 1. Start PostgreSQL and Redis.
-2. Configure the required environment variables.
-3. Apply database migrations.
-4. Run the service.
+2. Configure the required environment variables in `.env`.
+3. Apply database migrations using embedded SQL:
 
-```bash
-make db-apply
-make run
-```
+   ```bash
+   make db-sql-apply
+   ```
 
-In `development`, gRPC reflection is enabled automatically.
+4. Run the service:
 
-## Database Workflow
+   ```bash
+   make run
+   ```
 
-This service now supports two migration flows:
+This flow applies the SQL files in `db/migrations/` directly to your database.
 
-- Atlas migrations for the normal versioned schema workflow
-- embedded SQL migrations for direct application without Atlas version tracking
+## Development
 
-Atlas workflow:
+For active development, schema changes, and migration management, use the Atlas-based workflow:
 
-```bash
-make db-status
-make db-apply
-make db-sql-apply
-make db-new NAME=add_some_change
-make db-rehash
-make db-reset
-```
+### Prerequisites
 
-Embedded SQL workflow without Atlas:
+Ensure you have [Atlas](https://atlasgo.io/) installed.
 
-```bash
-go run ./cmd/cli/main.go db sql apply
-```
+### Workflow
 
-CLI structure:
+1. **Initialize Database**: Create the main and development databases if they don't exist.
 
-```bash
-go run ./cmd/cli/main.go db atlas apply
-go run ./cmd/cli/main.go db atlas status
-go run ./cmd/cli/main.go db atlas new --name add_some_change
-go run ./cmd/cli/main.go db sql apply
-```
+   ```bash
+   make db-init
+   ```
 
-`db/schema.sql` is the source schema, `db/migrations/` stores Atlas migrations,
-`db/*.sql` is also embedded for the direct SQL migration flow, and `internal/db/`
-contains generated query code.
+2. **Apply Migrations**: Sync your database with the current migration set.
 
-The `make db-apply`, `make db-status`, `make db-new`, `make db-schema`,
-`make db-rehash`, `make db-rollback`, and `make db-reset` targets use the Atlas
-workflow. `make db-sql-apply` runs the embedded SQL flow without Atlas.
+   ```bash
+   make db-apply
+   ```
+
+3. **Generate New Migration**: After changing `db/schema.sql`, generate a new migration file.
+
+   ```bash
+   make db-new NAME=your_change_name
+   ```
+
+4. **Other Commands**:
+   - `make db-status`: Check migration status.
+   - `make db-rollback`: Roll back the last migration.
+   - `make db-reset`: Wipe the database and re-apply all migrations.
 
 ## Testing
 
@@ -191,78 +189,23 @@ make test
 For the local integration-style flow:
 
 ```bash
-make test-start
-make test-migrate
+make test-setup
 make test-run
-make test-stop
 ```
 
-`make test-migrate` uses the embedded SQL loader in `db/migration.go` and
-applies the SQL files directly to the test database. It does not require Atlas
-and does not use migration version tracking.
-
-Or run the full flow in one command:
-
-```bash
-make test-all
-```
+`make test-setup` uses the embedded SQL loader to apply migrations directly to the test database.
 
 ## Available Commands
 
-Primary Make targets:
-
-```bash
-make run
-make setup
-make test
-make test-run
-```
-
-Database commands:
-
-```bash
-make db-apply
-make db-migrate
-make db-sql-apply
-make db-status
-make db-new NAME=add_some_change
-make db-schema
-make db-rehash
-make db-rollback COUNT=1
-make db-reset
-```
-
-Direct CLI database commands:
-
-```bash
-go run ./cmd/cli/main.go db atlas apply
-go run ./cmd/cli/main.go db atlas migrate
-go run ./cmd/cli/main.go db atlas status
-go run ./cmd/cli/main.go db atlas new --name add_some_change
-go run ./cmd/cli/main.go db atlas schema
-go run ./cmd/cli/main.go db atlas rehash
-go run ./cmd/cli/main.go db atlas rollback --count 1
-go run ./cmd/cli/main.go db atlas reset
-go run ./cmd/cli/main.go db sql apply
-```
-
-Local test environment commands:
-
-```bash
-make test-setup
-make test-start
-make test-run      # runs go test
-make test-stop
-make test-migrate     # embedded SQL, no Atlas
-make test-all
-```
-
-Compatibility aliases:
-
-```bash
-make init-test
-make stop-test
-```
+| Command | Description | Flow |
+| --- | --- | --- |
+| `make run` | Run the user service | Both |
+| `make db-sql-apply` | Apply embedded SQL migrations | **Local Use** |
+| `make db-apply` | Apply Atlas-managed migrations | **Development** |
+| `make db-new NAME=xxx` | Generate a new migration | **Development** |
+| `make db-init` | Create necessary databases | **Development** |
+| `make test` | Run all Go tests | Both |
+| `make test-setup` | Prepare test environment | Both |
 
 ## Docker
 

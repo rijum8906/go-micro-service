@@ -5,10 +5,11 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/env"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	"github.com/rijum8906/relay/services/user/app/config"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
@@ -23,18 +24,14 @@ type AuthService interface {
 	ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*corev1.SuccessResponse, *apperror.AppError)
 }
 
-type JobPublisher interface {
-	PublishJSON(subject string, payload any) *apperror.AppError
-}
-
 type authService struct {
-	env       *env.Config
+	env       *config.Env
 	repos     *utils.Repos
 	utils     *utils.ServiceUtils
-	publisher JobPublisher
+	publisher broker.Publisher
 }
 
-func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Config, publisher JobPublisher) (AuthService, *apperror.AppError) {
+func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *config.Env, publisher broker.Publisher) (AuthService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("repos", "auth repositories are not configured")
 	}

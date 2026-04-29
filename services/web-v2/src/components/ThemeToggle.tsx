@@ -1,13 +1,14 @@
-import { useThemeStore } from '../store/theme'
+import { useIsDarkTheme, useThemeStore } from '../store/theme'
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const { toggleTheme } = useThemeStore()
+  const isDark = useIsDarkTheme()
+  const nextTheme = isDark ? 'light' : 'dark'
 
   return (
     <button
       onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={`Switch to ${nextTheme} mode`}
       className="relative flex items-center justify-center w-11 h-11 bg-[#C97D4E] rounded-[10px] cursor-pointer border-none"
     >
       {/* Moon */}

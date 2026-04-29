@@ -3,40 +3,17 @@ name: User Service Test
 on:
   push:
     branches: ["main", "develop"]
+    paths:
+      - "services/user-service/**"
   pull_request:
     branches: ["main"]
-
-env:
-  TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
+    paths:
+      - "services/user-service/**"
 
 jobs:
-  test:
+  test-user-service:
     name: Run Tests
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: test_db
-        ports:
-          - "5433:5432"
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis
-        ports:
-          - "6380:6379"
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout Code
@@ -51,24 +28,22 @@ jobs:
       - name: Verify Go Version
         run: go version
 
-      - name: Setup Workspace
+      - name: Start Test docker-compose
         run: |
-          go work init
-          go work use services/*
-          go work use packages/*
-
-      - name: Install Dependencies
-        run: go mod download
+          docker compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml ps
 
       - name: Setup Atlas
         uses: ariga/setup-atlas@v0
-        with:
-          cloud-token: ${{ secrets.ATLAS_CLOUD_TOKEN }}
 
-      - name: Run Migration
-        working-directory: services/user-service
+      - name: Setup Workspace
         run: |
-          atlas migrate apply --url "${{ env.TEST_DB_URL }}" --dir "file://db/migrations" --allow-dirty
+          go install ./rcli
+          rcli init project
+
+      - name: Setup Test Database
+        working-directory: services/user-service
+        run: rcli test setup
 
       - name: Run unit tests
         working-directory: services/user-service

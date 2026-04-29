@@ -1,0 +1,17 @@
+input CreateTaskInput {
+    title: String!
+    organizationId: ID
+    projectId: ID
+    parentTaskId: ID
+    description: String
+    priority: String
+    dueAt: DateTime
+}
+
+input GetTaskInput {
+    id: ID!
+}
+
+input ListTasksByProjectInput {
+    projectId: ID!
+}

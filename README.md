@@ -51,9 +51,38 @@ make -C services/web dev
 
 - Real-time updates and notifications  
 - Task dependencies and workflow automation  
-- Role-based access control (RBAC)  
+- Role-based access control (RBAC) and Attribute Based Access Control (ABAC)  
 - Analytics and reporting  
 
 ## License
 
 This project is licensed under the MIT License.
+
+## Quick Start
+
+```bash
+go install ./cli
+```
+
+```bash
+cli init project
+```
+
+```bash
+cli dev run
+```
+
+## Common Command
+
+- Setup Test Environment
+
+```bash
+cd services/user-service
+cli test setup
+```
+
+- Run Tests
+
+```bash
+cli test run
+```

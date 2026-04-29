@@ -122,6 +122,9 @@ func (s *authService) Register(ctx context.Context, data *authv1.RegisterRequest
 		return nil, appErr
 	}
 
+	s.RequestEmailVerification(ctx, &authv1.RequestEmailVerificationRequest{
+		Email: user.Email,
+	})
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
 }
 
@@ -182,6 +185,11 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
+	prof, appErr := s.repos.Profile.GetProfileByUserID(ctx, user.ID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	if user.IsEmailVerified {
 		return &corev1.SuccessResponse{Success: true}, nil
 	}
@@ -191,11 +199,16 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.PublishJSON(dto.JobEmailVerification.String(), dto.EmailVerificationJob{
-		UserID:      user.ID.String(),
-		Email:       user.Email,
-		ScopedToken: scopedToken,
-		ExpiresIn:   s.env.ScopedTokenTTL.String(),
+	verificationURL, appErr := utils.NewTokenURL(scopedToken, s.env.FrontendURL, s.env.EmailVerificationPath)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if appErr = s.publisher.Publish(dto.JobEmailVerification, dto.EmailVerificationDTO{
+		ClientName:      prof.FirstName + " " + prof.LastName,
+		ClientEmail:     user.Email,
+		VerificationURL: verificationURL,
+		Validity:        "10 minutes",
 	}); appErr != nil {
 		return nil, appErr
 	}
@@ -216,16 +229,26 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 		return nil, appErr
 	}
 
+	prof, appErr := s.repos.Profile.GetProfileByUserID(ctx, user.ID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.ID.String(), token.TokenScopeResetPassword)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.PublishJSON(dto.JobEmailPasswordReset.String(), dto.PasswordResetJob{
-		UserID:      user.ID.String(),
-		Email:       user.Email,
-		ScopedToken: scopedToken,
-		ExpiresIn:   s.env.ScopedTokenTTL.String(),
+	resetURL, appErr := utils.NewTokenURL(scopedToken, s.env.FrontendURL, s.env.ResetPasswordPath)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if appErr = s.publisher.Publish(dto.JobEmailPasswordReset, dto.PasswordResetDTO{
+		ClientName:  prof.FirstName + " " + prof.LastName,
+		ClientEmail: user.Email,
+		ResetURL:    resetURL,
+		Validity:    "10 minutes",
 	}); appErr != nil {
 		return nil, appErr
 	}

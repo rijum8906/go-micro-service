@@ -5,8 +5,8 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreenv"
 	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/env"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
@@ -24,12 +24,12 @@ type SessionService interface {
 }
 
 type sessionService struct {
-	env   *env.Config
+	env   *coreenv.CoreEnv
 	repos *utils.Repos
 	utils *utils.ServiceUtils
 }
 
-func NewSessionService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Config) (SessionService, *apperror.AppError) {
+func NewSessionService(repo *utils.Repos, utils *utils.ServiceUtils, env *coreenv.CoreEnv) (SessionService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize session service").WithDetail("repos", "session repositories are not configured")
 	}

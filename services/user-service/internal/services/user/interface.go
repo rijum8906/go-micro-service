@@ -5,8 +5,8 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreenv"
 	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/env"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
@@ -20,15 +20,16 @@ type UserService interface {
 	UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
 	GetProfile(ctx context.Context, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
 	GetUser(ctx context.Context, user *dto.UserInfo) (*modelsv1.User, *apperror.AppError)
+	CheckExists(ctx context.Context, id string) (bool, *apperror.AppError)
 }
 
 type userService struct {
-	env   *env.Config
+	env   *coreenv.CoreEnv
 	repos *utils.Repos
 	utils *utils.ServiceUtils
 }
 
-func NewUserService(repo *utils.Repos, utils *utils.ServiceUtils, env *env.Config) (UserService, *apperror.AppError) {
+func NewUserService(repo *utils.Repos, utils *utils.ServiceUtils, env *coreenv.CoreEnv) (UserService, *apperror.AppError) {
 	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize user service").WithDetail("repos", "user repositories are not configured")
 	}

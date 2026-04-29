@@ -1,0 +1,133 @@
+// Package initcmd
+package initcmd
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/rijum8906/relay/rcli/utils"
+	"github.com/spf13/cobra"
+)
+
+var InitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize the Relay project or service",
+}
+
+var initProjectCmd = &cobra.Command{
+	Use:   "project",
+	Short: "Initialize the Relay project",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println("\n🚀 Setting up project")
+
+		// Step 1: Initialize Go workspace
+		if err := utils.RunCommand("go", "work", "init"); err != nil {
+			return err
+		}
+
+		// Step 2: Add services and packages (cross-platform)
+		if err := addWorkspaceDirectories(); err != nil {
+			return err
+		}
+
+		// Step 3: Download dependencies
+		if err := utils.RunCommand("go", "work", "sync"); err != nil {
+			return err
+		}
+		if err := utils.RunCommand("go", "mod", "download"); err != nil {
+			return err
+		}
+
+		// Step 4: Copy .env files
+		fmt.Println("\n📄 Copying environment files to services")
+		if err := copyEnvFiles(); err != nil {
+			return err
+		}
+
+		fmt.Println("\n✅ Setup complete")
+		return nil
+	},
+}
+
+// addWorkspaceDirectories finds all packages and services and adds them to workspace
+func addWorkspaceDirectories() error {
+	fmt.Println("\n📦 Adding directories to workspace")
+
+	// Add root
+	if err := utils.RunCommand("go", "work", "use", "."); err != nil {
+		return err
+	}
+
+	// Add all packages
+	packages, err := filepath.Glob("packages/*")
+	if err != nil {
+		return fmt.Errorf("find packages: %w", err)
+	} else {
+		for _, pkg := range packages {
+			if utils.IsDirectory(pkg) {
+				if err := utils.RunCommand("go", "work", "use", pkg); err != nil {
+					return fmt.Errorf("add package %s to workspace: %w", pkg, err)
+				}
+			}
+		}
+	}
+
+	// Add all services
+	services, err := filepath.Glob("services/*")
+	if err != nil {
+		return fmt.Errorf("find services: %w", err)
+	} else {
+		for _, svc := range services {
+			if utils.IsDirectory(svc) {
+				if err := utils.RunCommand("go", "work", "use", svc); err != nil {
+					return fmt.Errorf("add service %s to workspace: %w", svc, err)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func copyEnvFiles() error {
+	services, err := getServices()
+	if err != nil {
+		return err
+	}
+
+	for _, svc := range services {
+		if err := utils.CopyFile(filepath.Join("services", svc, ".env.example"), filepath.Join("services", svc, ".env")); err != nil {
+			return fmt.Errorf("copy environment file for %s: %w", svc, err)
+		}
+	}
+
+	return nil
+}
+
+func getServices() ([]string, error) {
+	entries, err := os.ReadDir("services")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read services directory: %w", err)
+	}
+
+	services := []string{}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			services = append(services, entry.Name())
+		}
+	}
+
+	return services, nil
+}
+
+var initServiceCmd = &cobra.Command{
+	Use:   "service",
+	Short: "Initialize the Relay service",
+	Run:   utils.NotImplemented,
+}
+
+func init() {
+	InitCmd.AddCommand(initProjectCmd)
+	InitCmd.AddCommand(initServiceCmd)
+}

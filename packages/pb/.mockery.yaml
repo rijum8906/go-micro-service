@@ -1,0 +1,18 @@
+outpkg: mocks
+
+with-expecter: true
+all: false
+recursive: true
+inpackage: false
+
+packages:
+  github.com/rijum8906/relay/packages/pb/user_service/user/v1:
+    config:
+      dir: ./user_service/mocks
+      outpkg: mocks
+      with-expecter: true
+
+    interfaces:
+      UserServiceClient:
+        config:
+          filename: mock_user_service_client.go

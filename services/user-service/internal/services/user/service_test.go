@@ -5,27 +5,28 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker/mocks"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/user/app/config"
 	"github.com/rijum8906/relay/services/user/internal/services/auth"
 	"github.com/rijum8906/relay/services/user/internal/services/user"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
-type noopPublisher struct{}
-
-func (noopPublisher) PublishJSON(string, any) *apperror.AppError {
-	return nil
-}
+var (
+	mockPublisher = &mocks.MockPublisher{}
+	mockConfig    = &config.Env{}
+)
 
 func createTestAuthService() (auth.AuthService, *utils.Repos, *utils.ServiceUtils) {
 	repos := utils.NewTestRepos()
 	serviceUtils := utils.NewTestServiceUtils()
-	config := testutils.NewTestEnv()
-	service, appErr := auth.NewAuthService(repos, serviceUtils, config, noopPublisher{})
+	service, appErr := auth.NewAuthService(repos, serviceUtils, mockConfig, mockPublisher)
 	if appErr != nil {
 		panic(appErr)
 	}
@@ -202,4 +203,35 @@ func TestUserService_GetUser(t *testing.T) {
 	if getUser.Id != registerRes.User.Id {
 		t.Fatalf("expected user id %v, got %v", registerRes.User.Id, getUser.Id)
 	}
+}
+
+func TestUserService_CheckExists(t *testing.T) {
+	userService, repos, _ := createTestUserService()
+	authService, _, _ := createTestAuthService()
+
+	registerRes := MustCreateUserAndProfile(authService, "test1234")
+
+	exists, appErr := userService.CheckExists(context.Background(), registerRes.User.Id)
+	if appErr != nil {
+		t.Fatalf("expected nil, got: %v", appErr)
+	}
+
+	if !exists {
+		t.Fatal("expected true, got false")
+	}
+
+	exists, appErr = userService.CheckExists(context.Background(), uuid.NewString())
+	if appErr != nil {
+		if appErr.Code != apperror.CodeNotFound {
+			t.Fatalf("expected not found error, got: %v", appErr)
+		}
+	}
+	if exists {
+		t.Fatal("expected false, got true")
+	}
+
+	t.Cleanup(func() {
+		id, _ := uuid.Parse(registerRes.User.Id)
+		repos.User.DeleteUser(context.Background(), id)
+	})
 }
