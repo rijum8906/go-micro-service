@@ -22,6 +22,11 @@ var testSetupCmd = &cobra.Command{
 		}
 		fmt.Println("\n🧪 Setting up test environment")
 
+		utils.RunCommand("rcli", "db", "init", "-t")
+		utils.RunCommand("rcli", "db", "migrate", "apply", "-t")
+
+		fmt.Println("\n✅ Test environment setup complete")
+
 		return nil
 	},
 }

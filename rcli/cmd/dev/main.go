@@ -20,7 +20,7 @@ var devUpCommand = &cobra.Command{
 		if runInfra {
 			return utils.RunCommand("docker", "compose", "up", "nats", "postgres", "redis")
 		}
-		return utils.RunCommand("docker", "compose", "up")
+		return utils.RunCommand("docker", "compose", "up", "--build")
 	},
 }
 
