@@ -15,8 +15,10 @@ import (
 
 // GetTestDBName returns the test database name based on service
 func GetTestDBName(serviceName string) string {
-	// test_user, test_organization, test_auth
-	return fmt.Sprintf("test_%s", strings.ToLower(strings.TrimSpace(strings.Split(serviceName, " ")[0])))
+	serviceName = strings.Split(serviceName, "-")[0]
+	serviceName = strings.Split(serviceName, "_")[0]
+	serviceName = strings.Split(serviceName, " ")[0]
+	return fmt.Sprintf("test_%s", strings.ToLower(serviceName))
 }
 
 type DBConfig = db.Config
@@ -62,7 +64,7 @@ func WithSSLMode(mode string) Option {
 func MustConnectDB(options ...Option) *pgxpool.Pool {
 	config := DBConfig{
 		Host:        "localhost",
-		Port:        5432,
+		Port:        5433,
 		User:        "test_user",
 		Password:    "test_password",
 		DBName:      "test_db",
