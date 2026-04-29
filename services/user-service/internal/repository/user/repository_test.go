@@ -160,7 +160,7 @@ type Repos struct {
 }
 
 func createRepo() *Repos {
-	pool := testutils.MustConnectDB()
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("user-service")))
 	querier := db.New(pool)
 
 	return &Repos{
