@@ -33,16 +33,17 @@ jobs:
           docker compose -f docker-compose.test.yml up -d
           docker compose -f docker-compose.test.yml ps
 
+      - name: Setup Atlas
+        uses: ariga/setup-atlas@v0
+
       - name: Setup Workspace
         run: |
           go install ./rcli
           rcli init project
 
-      - name: Setup Database
+      - name: Setup Test Database
         working-directory: services/notification-service
-        run: |
-          rcli db exec init -t
-          rcli db exec apply -t
+        run: rcli test setup
 
       - name: Run unit tests
         working-directory: services/notification-service
