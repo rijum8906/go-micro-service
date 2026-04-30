@@ -26,6 +26,8 @@ const (
 const (
 	TokenScopeUpdateOrganizationName  TokenScope = "UPDATE_ORG_NAME"
 	TokenScopeChangeOrganizationOwner TokenScope = "CHANGE_ORG_OWNER"
+	TokenScopeDeleteOrganization      TokenScope = "DELETE_ORG"
+	TokenScopeArchiveOrganization     TokenScope = "ARCHIVE_ORG"
 )
 
 var tokenScopes = []TokenScope{
