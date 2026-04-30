@@ -68,7 +68,6 @@ type OrganizationMembership struct {
 	Role string
 	// active=current member, suspended=temporarily blocked, left=voluntarily departed
 	Status    string
-	InvitedBy uuid.UUID
 	JoinedAt  pgtype.Timestamptz
 	LeftAt    pgtype.Timestamptz
 	CreatedAt pgtype.Timestamptz
