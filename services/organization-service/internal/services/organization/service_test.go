@@ -147,9 +147,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-4",
-	})
+	org := mustCreateOrg(ctx, service)
 
 	fetchedOrg, err := service.GetOrganization(ctx, &corev1.IDRequest{
 		Id: org.Id,
@@ -200,9 +198,7 @@ func Test_GetOrganization_Failure_Integration(t *testing.T) {
 
 	ctx := context.Background()
 
-	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-5",
-	})
+	org := mustCreateOrg(ctx, service)
 	id, _ := uuid.Parse(org.Id)
 	err := q.DeleteOrganizationHard(ctx, id)
 	if err != nil {
@@ -309,7 +305,8 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if fetchedOrg.ID.String() != newOwner.String() {
+	if fetchedOrg.CreatedBy.String() != newOwner.String() {
+		t.Errorf("expected organization owner to be %s but got %s", newOwner.String(), fetchedOrg.ID.String())
 	}
 
 	t.Cleanup(func() {
@@ -317,9 +314,9 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	})
 }
 
-func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServiceServer, req *organizationv1.CreateOrganizationRequest) *modelsv1.Organization {
+func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServiceServer) *modelsv1.Organization {
 	// Normalize request with defaults
-	normalizedReq := normalizeCreateRequest(req)
+	normalizedReq := normalizeCreateRequest(nil)
 
 	// Setup user existence mock
 	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
@@ -329,7 +326,7 @@ func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServi
 	// Create organization
 	org, err := service.CreateOrganization(ctx, normalizedReq)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	return org
