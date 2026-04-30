@@ -162,6 +162,7 @@ CREATE TABLE "organization_invitations" (
   "accepted_by" uuid NULL,
   "accepted_at" timestamptz NULL,
   "created_at" timestamptz NOT NULL DEFAULT now(),
+  "archived_at" timestamptz NULL,
   PRIMARY KEY ("id"),
   CONSTRAINT "organization_invitations_token_hash_key" UNIQUE ("token_hash"),
   CONSTRAINT "organization_invitations_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
