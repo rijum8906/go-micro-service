@@ -6,9 +6,11 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/testutils"
+	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
@@ -62,8 +64,6 @@ func Test_CreateOrganization_Failure_Integration(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
-
 			_, err := service.CreateOrganization(ctx, &organizationv1.CreateOrganizationRequest{
 				Name:        testCase.req.Name,
 				Description: testCase.req.Description,
@@ -97,7 +97,7 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 	createOrg := &organizationv1.CreateOrganizationRequest{
 		Name:        testutils.GenerateRandomString(5),
 		Description: testutils.GenerateRandomString(20),
-		Slug:        "org-1",
+		Slug:        strings.ToLower(testutils.GenerateRandomString(5)),
 		CreatedBy:   createdBy.String(),
 	}
 
@@ -148,7 +148,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-2",
+		Slug: "org-4",
 	})
 
 	fetchedOrg, err := service.GetOrganization(ctx, &corev1.IDRequest{
@@ -201,7 +201,7 @@ func Test_GetOrganization_Failure_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-3",
+		Slug: "org-5",
 	})
 	id, _ := uuid.Parse(org.Id)
 	err := q.DeleteOrganizationHard(ctx, id)
@@ -220,6 +220,100 @@ func Test_GetOrganization_Failure_Integration(t *testing.T) {
 
 	t.Cleanup(func() {
 		pool.Close()
+	})
+}
+
+func Test_ChangeOrganizationOwnership_Failure_Unit(t *testing.T) {
+	service := organization.New(nil, nil)
+	ctx := context.Background()
+
+	testCases := []struct {
+		name string
+		*organizationv1.ChangeOrganizationOwnershipRequest
+	}{
+		{
+			name: "Blank ids and token scope",
+		},
+		{
+			name: "Blank ids",
+			ChangeOrganizationOwnershipRequest: &organizationv1.ChangeOrganizationOwnershipRequest{
+				TokenScope: string(token.TokenScopeChangeOrganizationOwner),
+			},
+		},
+		{
+			name: "Blank token scope",
+			ChangeOrganizationOwnershipRequest: &organizationv1.ChangeOrganizationOwnershipRequest{
+				OrganizationId: uuid.New().String(),
+				NewOwnerId:     uuid.New().String(),
+			},
+		},
+		{
+			name: "Invalid token scope",
+			ChangeOrganizationOwnershipRequest: &organizationv1.ChangeOrganizationOwnershipRequest{
+				OrganizationId: uuid.New().String(),
+				NewOwnerId:     uuid.New().String(),
+				TokenScope:     "invalid",
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			_, err := service.ChangeOrganizationOwnership(ctx, testCase.ChangeOrganizationOwnershipRequest)
+			if err == nil {
+				t.Errorf("expected error, got nil")
+			}
+			if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
+				t.Errorf("expected error code validation, got something else")
+			}
+		})
+	}
+}
+
+func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
+	q := db.New(pool)
+	service := organization.New(q, mockUserServiceClient)
+
+	ctx := context.Background()
+
+	createdBy := uuid.New()
+	newOwner := uuid.New()
+
+	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+		Id: newOwner.String(),
+	}).Return(&userv1.CheckExistsResponse{
+		Exists: true,
+	}, nil)
+
+	org, err := q.CreateOrganization(ctx, db.CreateOrganizationParams{
+		Name:        testutils.GenerateRandomString(5),
+		Description: pgtype.Text{String: testutils.GenerateRandomString(20), Valid: true},
+		Slug:        "org-6",
+		CreatedBy:   createdBy,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = service.ChangeOrganizationOwnership(ctx, &organizationv1.ChangeOrganizationOwnershipRequest{
+		OrganizationId: org.ID.String(),
+		NewOwnerId:     newOwner.String(),
+		TokenScope:     string(token.TokenScopeChangeOrganizationOwner),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fetchedOrg, err := q.GetOrganization(ctx, org.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fetchedOrg.ID.String() != newOwner.String() {
+	}
+
+	t.Cleanup(func() {
+		q.DeleteOrganizationHard(context.Background(), org.ID)
 	})
 }
 
@@ -247,7 +341,7 @@ func normalizeCreateRequest(req *organizationv1.CreateOrganizationRequest) *orga
 		return &organizationv1.CreateOrganizationRequest{
 			Name:        testutils.GenerateRandomString(5),
 			Description: testutils.GenerateRandomString(20),
-			Slug:        "org-1",
+			Slug:        strings.ToLower(testutils.GenerateRandomString(5)),
 			CreatedBy:   uuid.New().String(),
 		}
 	}
@@ -268,7 +362,7 @@ func normalizeCreateRequest(req *organizationv1.CreateOrganizationRequest) *orga
 		normalized.Description = testutils.GenerateRandomString(20)
 	}
 	if normalized.Slug == "" {
-		normalized.Slug = "org-1"
+		normalized.Slug = strings.ToLower(testutils.GenerateRandomString(5))
 	}
 	if normalized.CreatedBy == "" {
 		normalized.CreatedBy = uuid.New().String()
