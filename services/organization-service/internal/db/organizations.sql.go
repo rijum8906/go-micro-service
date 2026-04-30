@@ -15,7 +15,7 @@ import (
 const ArchiveOrganization = `-- name: ArchiveOrganization :exec
 UPDATE organizations
 SET status = 'archived', archived_at = now()
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) ArchiveOrganization(ctx context.Context, id uuid.UUID) error {
@@ -26,7 +26,7 @@ func (q *Queries) ArchiveOrganization(ctx context.Context, id uuid.UUID) error {
 const ChangeOrganizationOwnership = `-- name: ChangeOrganizationOwnership :exec
 UPDATE organizations
 SET created_by = $2
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 `
 
 type ChangeOrganizationOwnershipParams struct {
@@ -53,11 +53,13 @@ func (q *Queries) CheckOrganizationExists(ctx context.Context, id uuid.UUID) (bo
 }
 
 const CheckOrganizationExistsBySlug = `-- name: CheckOrganizationExistsBySlug :one
+
 SELECT EXISTS(
     SELECT 1 FROM organizations WHERE slug = $1
 ) AS exists
 `
 
+// NOTE: exists check methods must not use 'deleted_at IS NULL'
 func (q *Queries) CheckOrganizationExistsBySlug(ctx context.Context, slug string) (bool, error) {
 	row := q.db.QueryRow(ctx, CheckOrganizationExistsBySlug, slug)
 	var exists bool
@@ -66,6 +68,7 @@ func (q *Queries) CheckOrganizationExistsBySlug(ctx context.Context, slug string
 }
 
 const CreateOrganization = `-- name: CreateOrganization :one
+
 INSERT INTO organizations (
     name,
     slug,
@@ -112,7 +115,7 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 const DeleteOrganization = `-- name: DeleteOrganization :exec
 UPDATE organizations
 SET status = 'deleted', deleted_by = $2, deleted_at = now()
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 `
 
 type DeleteOrganizationParams struct {
@@ -135,12 +138,40 @@ func (q *Queries) DeleteOrganizationHard(ctx context.Context, id uuid.UUID) erro
 	return err
 }
 
-const GetOrganization = `-- name: GetOrganization :one
+const GetDeletedOrganization = `-- name: GetDeletedOrganization :one
 SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NOT NULL
 LIMIT 1
 `
 
+func (q *Queries) GetDeletedOrganization(ctx context.Context, id uuid.UUID) (Organization, error) {
+	row := q.db.QueryRow(ctx, GetDeletedOrganization, id)
+	var i Organization
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Status,
+		&i.Slug,
+		&i.Description,
+		&i.LogoUrl,
+		&i.CreatedBy,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
+		&i.ArchivedAt,
+	)
+	return i, err
+}
+
+const GetOrganization = `-- name: GetOrganization :one
+
+SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
+WHERE id = $1 AND deleted_at IS NULL
+LIMIT 1
+`
+
+// NOTE: get methods must use 'deleted_at IS NULL'
 func (q *Queries) GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error) {
 	row := q.db.QueryRow(ctx, GetOrganization, id)
 	var i Organization
@@ -163,7 +194,7 @@ func (q *Queries) GetOrganization(ctx context.Context, id uuid.UUID) (Organizati
 
 const GetOrganizationBySlug = `-- name: GetOrganizationBySlug :one
 SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
-WHERE slug = $1
+WHERE slug = $1 AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -189,7 +220,7 @@ func (q *Queries) GetOrganizationBySlug(ctx context.Context, slug string) (Organ
 
 const GetOrganizationsByCreatedBy = `-- name: GetOrganizationsByCreatedBy :many
 SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
-WHERE created_by = $1
+WHERE created_by = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
 
@@ -233,9 +264,10 @@ func (q *Queries) GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrgani
 }
 
 const UpdateOrganization = `-- name: UpdateOrganization :one
+
 UPDATE organizations
 SET name = $2, description = $3
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at
 `
 
@@ -245,6 +277,7 @@ type UpdateOrganizationParams struct {
 	Description pgtype.Text
 }
 
+// NOTE: update methods must use 'deleted_at IS NULL'
 func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error) {
 	row := q.db.QueryRow(ctx, UpdateOrganization, arg.ID, arg.Name, arg.Description)
 	var i Organization
