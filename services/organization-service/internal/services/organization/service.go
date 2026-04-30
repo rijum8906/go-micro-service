@@ -18,6 +18,9 @@ import (
 	"github.com/rijum8906/relay/services/organization-service/internal/utils"
 )
 
+// CreateOrganization
+//   - Creates an organization
+//   - Then creates a organizatio member for the user and make him the owner
 func (s *organizationService) CreateOrganization(ctx context.Context, req *organizationv1.CreateOrganizationRequest) (*modelsv1.Organization, error) {
 	// Step 0. Validation
 	if appErr := validateCreateOrganizationRequest(req); appErr != nil {
@@ -139,12 +142,8 @@ func (s *organizationService) GetOrganizationsListByCreatedBy(ctx context.Contex
 
 func (s *organizationService) UpdateOrganizationName(ctx context.Context, req *organizationv1.UpdateOrganizationNameRequest) (*modelsv1.Organization, error) {
 	// Step 0. Validation
-	if err := uuid.Validate(req.OrganizationId); err != nil {
-		return nil, apperror.New(apperror.CodeValidation, "invalid organization id")
-	}
-	isValid := token.ValidateTokenScope(req.TokenScope)
-	if !isValid {
-		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
+	if err := validateUpdateOrganizationName(req); err != nil {
+		return nil, err
 	}
 
 	orgID, _ := uuid.Parse(req.OrganizationId)
@@ -224,6 +223,10 @@ func (s *organizationService) ChangeOrganizationOwnership(ctx context.Context, r
 	}, nil
 }
 
+// DeleteOrganization Soft deletes a organization
+// NOTE: Gateway validates organization ownership before issuing scoped token.
+// However, we still check - Token Scope, Organization Existence
+// but not the stuffs that comes from the token (token can't be altered by any means)
 func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev1.IDAndScopedTokenRequest) (*corev1.SuccessResponse, error) {
 	// Step 0. Validation
 	if err := protoutils.ValidateIDAndScopedToken(req); err != nil {
@@ -298,5 +301,7 @@ func (s *organizationService) ArchiveOrganization(ctx context.Context, req *core
 		return nil, apperror.New(apperror.CodeInternal, "couldn't archive organization").WithDetail("error", err.Error())
 	}
 
-	return nil, nil
+	return &corev1.SuccessResponse{
+		Success: true,
+	}, nil
 }

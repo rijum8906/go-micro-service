@@ -134,3 +134,57 @@ func Test_validateChangeOwnershipRequst(t *testing.T) {
 		})
 	}
 }
+
+func Test_validateUpdateOrganizationName(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		req     *organizationv1.UpdateOrganizationNameRequest
+		wantErr bool
+	}{
+		{
+			name: "valid request",
+			req: &organizationv1.UpdateOrganizationNameRequest{
+				OrganizationId: uuid.NewString(),
+				TokenScope:     string(token.TokenScopeUpdateOrganizationName),
+				Name:           testutils.GenerateRandomString(5),
+				Description:    testutils.GenerateRandomString(20),
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid token scope",
+			req: &organizationv1.UpdateOrganizationNameRequest{
+				OrganizationId: uuid.NewString(),
+				TokenScope:     "invalid",
+				Name:           testutils.GenerateRandomString(5),
+				Description:    testutils.GenerateRandomString(20),
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid organization id",
+			req: &organizationv1.UpdateOrganizationNameRequest{
+				OrganizationId: "invalid",
+				TokenScope:     string(token.TokenScopeUpdateOrganizationName),
+				Name:           testutils.GenerateRandomString(5),
+				Description:    testutils.GenerateRandomString(20),
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotErr := validateUpdateOrganizationName(tt.req)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("validateUpdateOrganizationName() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("validateUpdateOrganizationName() succeeded unexpectedly")
+			}
+		})
+	}
+}
