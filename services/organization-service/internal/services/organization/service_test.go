@@ -64,8 +64,6 @@ func Test_CreateOrganization_Failure_Integration(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
-
 			_, err := service.CreateOrganization(ctx, &organizationv1.CreateOrganizationRequest{
 				Name:        testCase.req.Name,
 				Description: testCase.req.Description,
@@ -99,7 +97,7 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 	createOrg := &organizationv1.CreateOrganizationRequest{
 		Name:        testutils.GenerateRandomString(5),
 		Description: testutils.GenerateRandomString(20),
-		Slug:        "org-1",
+		Slug:        strings.ToLower(testutils.GenerateRandomString(5)),
 		CreatedBy:   createdBy.String(),
 	}
 
@@ -150,7 +148,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-2",
+		Slug: "org-4",
 	})
 
 	fetchedOrg, err := service.GetOrganization(ctx, &corev1.IDRequest{
@@ -203,7 +201,7 @@ func Test_GetOrganization_Failure_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-3",
+		Slug: "org-5",
 	})
 	id, _ := uuid.Parse(org.Id)
 	err := q.DeleteOrganizationHard(ctx, id)
@@ -291,7 +289,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	org, err := q.CreateOrganization(ctx, db.CreateOrganizationParams{
 		Name:        testutils.GenerateRandomString(5),
 		Description: pgtype.Text{String: testutils.GenerateRandomString(20), Valid: true},
-		Slug:        "org-4",
+		Slug:        "org-6",
 		CreatedBy:   createdBy,
 	})
 	if err != nil {
@@ -343,7 +341,7 @@ func normalizeCreateRequest(req *organizationv1.CreateOrganizationRequest) *orga
 		return &organizationv1.CreateOrganizationRequest{
 			Name:        testutils.GenerateRandomString(5),
 			Description: testutils.GenerateRandomString(20),
-			Slug:        "org-1",
+			Slug:        strings.ToLower(testutils.GenerateRandomString(5)),
 			CreatedBy:   uuid.New().String(),
 		}
 	}
@@ -364,7 +362,7 @@ func normalizeCreateRequest(req *organizationv1.CreateOrganizationRequest) *orga
 		normalized.Description = testutils.GenerateRandomString(20)
 	}
 	if normalized.Slug == "" {
-		normalized.Slug = "org-1"
+		normalized.Slug = strings.ToLower(testutils.GenerateRandomString(5))
 	}
 	if normalized.CreatedBy == "" {
 		normalized.CreatedBy = uuid.New().String()
