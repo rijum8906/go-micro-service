@@ -18,6 +18,7 @@ CREATE TABLE "organizations" (
   "updated_at" timestamptz NOT NULL DEFAULT now(),
   "deleted_at" timestamptz NULL,
   "deleted_by" uuid,
+  "archived_at" timestamptz NULL,
   PRIMARY KEY ("id"),
   CONSTRAINT "organizations_slug_key" UNIQUE ("slug"),
   CONSTRAINT "chk_organizations_slug_format" CHECK ((slug)::text ~ '^[a-z0-9-]+$'::text),
