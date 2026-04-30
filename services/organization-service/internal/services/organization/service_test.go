@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -315,6 +316,55 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 
 	t.Cleanup(func() {
 		q.DeleteOrganizationHard(context.Background(), org.ID)
+	})
+}
+
+func Test_DeleteOrganization_Success_Integration(t *testing.T) {
+	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
+	q := db.New(pool)
+	service := organization.New(q, mockUserServiceClient)
+
+	ctx := context.Background()
+
+	// Create organization
+	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{})
+	id, err := uuid.Parse(org.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Update Context With UserInfo
+	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
+		dto.MetaUserIDKey, org.CreatedBy,
+	))
+
+	// Delete organization
+	res, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+		Id:         org.Id,
+		TokenScope: string(token.TokenScopeDeleteOrganization),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.Success {
+		t.Errorf("expected success to be true but got false")
+	}
+
+	// Fetch Deleted org
+	deletedOrg, err := q.GetDeletedOrganization(ctx, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deletedOrg.DeletedBy.String() != org.CreatedBy {
+		t.Errorf("expected deleted by to be %s but got %s", org.CreatedBy, deletedOrg.DeletedBy.String())
+	}
+	if deletedOrg.DeletedAt.Time.After(time.Now()) {
+		t.Errorf("deleted_at should be in the past (already deleted), but got future time: %v", deletedOrg.DeletedAt.Time)
+	}
+
+	// Cleanup
+	t.Cleanup(func() {
+		q.DeleteOrganizationHard(context.Background(), id)
 	})
 }
 

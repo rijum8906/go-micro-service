@@ -265,7 +265,9 @@ func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev
 		return nil, apperror.New(apperror.CodeInternal, "couldn't delete organization").WithDetail("error", err.Error())
 	}
 
-	return nil, nil
+	return &corev1.SuccessResponse{
+		Success: true,
+	}, nil
 }
 
 func (s *organizationService) ArchiveOrganization(ctx context.Context, req *corev1.IDAndScopedTokenRequest) (*corev1.SuccessResponse, error) {
