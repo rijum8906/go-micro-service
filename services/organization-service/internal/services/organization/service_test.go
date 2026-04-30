@@ -309,7 +309,8 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if fetchedOrg.ID.String() != newOwner.String() {
+	if fetchedOrg.CreatedBy.String() != newOwner.String() {
+		t.Errorf("expected organization owner to be %s but got %s", newOwner.String(), fetchedOrg.CreatedBy.String())
 	}
 
 	t.Cleanup(func() {
