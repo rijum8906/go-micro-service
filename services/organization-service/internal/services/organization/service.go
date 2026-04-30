@@ -40,7 +40,7 @@ func (s *organizationService) CreateOrganization(ctx context.Context, req *organ
 	if err != nil {
 		return nil, apperror.ErrInternal.WithDetail("error", err.Error())
 	}
-	if !exists {
+	if exists {
 		return nil, apperror.New(apperror.CodeValidation, "slug already exists")
 	}
 
