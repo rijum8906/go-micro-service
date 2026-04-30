@@ -246,11 +246,12 @@ func (x *GetOrganizationBySlugRequest) GetSlug() string {
 }
 
 type ChangeOrganizationOwnershipRequest struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	TokenScope        string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
-	NewOrganizationId string                 `protobuf:"bytes,2,opt,name=new_organization_id,json=newOrganizationId,proto3" json:"new_organization_id,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TokenScope     string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
+	NewOwnerId     string                 `protobuf:"bytes,2,opt,name=new_owner_id,json=newOwnerId,proto3" json:"new_owner_id,omitempty"`
+	OrganizationId string                 `protobuf:"bytes,3,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ChangeOrganizationOwnershipRequest) Reset() {
@@ -290,9 +291,16 @@ func (x *ChangeOrganizationOwnershipRequest) GetTokenScope() string {
 	return ""
 }
 
-func (x *ChangeOrganizationOwnershipRequest) GetNewOrganizationId() string {
+func (x *ChangeOrganizationOwnershipRequest) GetNewOwnerId() string {
 	if x != nil {
-		return x.NewOrganizationId
+		return x.NewOwnerId
+	}
+	return ""
+}
+
+func (x *ChangeOrganizationOwnershipRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
 	}
 	return ""
 }
@@ -317,11 +325,13 @@ const file_organization_service_organization_v1_request_proto_rawDesc = "" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\"2\n" +
 	"\x1cGetOrganizationBySlugRequest\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\"u\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"\x90\x01\n" +
 	"\"ChangeOrganizationOwnershipRequest\x12\x1f\n" +
 	"\vtoken_scope\x18\x01 \x01(\tR\n" +
-	"tokenScope\x12.\n" +
-	"\x13new_organization_id\x18\x02 \x01(\tR\x11newOrganizationIdB\xc2\x02\n" +
+	"tokenScope\x12 \n" +
+	"\fnew_owner_id\x18\x02 \x01(\tR\n" +
+	"newOwnerId\x12'\n" +
+	"\x0forganization_id\x18\x03 \x01(\tR\x0eorganizationIdB\xc2\x02\n" +
 	"(com.organization_service.organization.v1B\fRequestProtoP\x01ZZgithub.com/rijum8906/relay/packages/pb/organization_service/organization/v1;organizationv1\xa2\x02\x03OOX\xaa\x02#OrganizationService.Organization.V1\xca\x02#OrganizationService\\Organization\\V1\xe2\x02/OrganizationService\\Organization\\V1\\GPBMetadata\xea\x02%OrganizationService::Organization::V1b\x06proto3"
 
 var (
