@@ -26,5 +26,6 @@ message GetOrganizationBySlugRequest {
 
 message ChangeOrganizationOwnershipRequest {
   string token_scope = 1;
-  string new_organization_id = 2;
+  string new_owner_id = 2;
+  string organization_id = 3;
 }
