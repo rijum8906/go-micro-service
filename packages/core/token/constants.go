@@ -45,6 +45,8 @@ var tokenScopes = []TokenScope{
 	TokenScopeRecovery,
 	TokenScopeUpdateOrganizationName,
 	TokenScopeChangeOrganizationOwner,
+	TokenScopeDeleteOrganization,
+	TokenScopeArchiveOrganization,
 }
 
 func ValidateTokenScope(token string) bool {
