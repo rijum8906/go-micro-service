@@ -18,7 +18,11 @@ RUN go mod download
 # Now copy source code - but only the necessary directories
 COPY packages/core/ ./packages/core/
 COPY packages/pb/ ./packages/pb/
-COPY services/organization-service/ ./services/organization-service/
+
+COPY services/organization-service/go.mod ./services/organization-service/go.mod
+COPY services/organization-service/internal ./services/organization-service/internal
+COPY services/organization-service/app ./services/organization-service/app
+COPY services/organization-service/cmd ./services/organization-service/cmd
 
 # Build
 RUN go build -o service-organization services/organization-service/cmd/app/main.go
@@ -28,8 +32,9 @@ FROM alpine:3.10
 WORKDIR /app
 
 COPY --from=builder /app/service-organization .
+COPY packages/core/coreopenfga/models/ ./packages/core/coreopenfga/models/
 COPY services/organization-service/.env .
 
-EXPOSE 8081
+EXPOSE 8084
 
 CMD ["./service-organization"]

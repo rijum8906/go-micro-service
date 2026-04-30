@@ -12,6 +12,36 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const CheckUserEmailExists = `-- name: CheckUserEmailExists :one
+SELECT EXISTS(
+    SELECT 1
+    FROM users
+    WHERE email = $1
+)
+`
+
+func (q *Queries) CheckUserEmailExists(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRow(ctx, CheckUserEmailExists, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const CheckUserExists = `-- name: CheckUserExists :one
+SELECT EXISTS(
+    SELECT 1
+    FROM users
+    WHERE id = $1
+)
+`
+
+func (q *Queries) CheckUserExists(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, CheckUserExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const CreateUser = `-- name: CreateUser :one
 INSERT INTO users (
     email,

@@ -4,6 +4,7 @@ type UserInfo struct {
 	UserID      string
 	AccessToken string
 	SessionID   string
+	Role        string
 }
 
 type ClientInfo struct {

@@ -103,3 +103,21 @@ func (r *userRepository) DeleteUser(ctx context.Context, id uuid.UUID) *apperror
 	}
 	return nil
 }
+
+func (r *userRepository) CheckExists(ctx context.Context, id uuid.UUID) (bool, *apperror.AppError) {
+	exists, err := r.q.CheckUserExists(ctx, id)
+	if err != nil {
+		return false, apperror.ErrInternal.WithMessage("Failed to check user exists").WithDetail("error", err.Error())
+	}
+
+	return exists, nil
+}
+
+func (r *userRepository) CheckEmailExists(ctx context.Context, email string) (bool, *apperror.AppError) {
+	exists, err := r.q.CheckUserEmailExists(ctx, email)
+	if err != nil {
+		return false, apperror.ErrInternal.WithMessage("Failed to check user exists").WithDetail("error", err.Error())
+	}
+
+	return exists, nil
+}

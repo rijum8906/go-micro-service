@@ -30,7 +30,7 @@ jobs:
 
       - name: Start Test docker-compose
         run: |
-          docker compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml up -d --wait
           docker compose -f docker-compose.test.yml ps
 
       - name: Setup Atlas

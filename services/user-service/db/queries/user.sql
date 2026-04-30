@@ -8,6 +8,19 @@ SELECT *
 FROM users
 WHERE email = $1 LIMIT 1;
 
+-- name: CheckUserExists :one
+SELECT EXISTS(
+    SELECT 1
+    FROM users
+    WHERE id = $1
+);
+
+-- name: CheckUserEmailExists :one
+SELECT EXISTS(
+    SELECT 1
+    FROM users
+    WHERE email = $1
+);
 
 -- name: UpdateUserPassword :one
 UPDATE users

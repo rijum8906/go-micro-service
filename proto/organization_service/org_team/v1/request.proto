@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package organization_service.org_team.v1;
+
+message CreateOrgTeamRequest {
+  string organization_id = 1;
+  string membership_id = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message UpdateOrgTeamNameRequest {
+  string team_id = 1;
+  string new_name = 2;
+  string new_description = 3;
+}

@@ -18,7 +18,11 @@ RUN go mod download
 # Now copy source code - but only the necessary directories
 COPY packages/core/ ./packages/core/
 COPY packages/pb/ ./packages/pb/
-COPY services/task-service/ ./services/task-service/
+
+COPY services/task-service/go.mod ./services/task-service/go.mod
+COPY services/task-service/internal ./services/task-service/internal
+COPY services/task-service/app ./services/task-service/app
+COPY services/task-service/cmd ./services/task-service/cmd
 
 # Build
 RUN go build -o service-task services/task-service/cmd/app/main.go
@@ -30,6 +34,6 @@ WORKDIR /app
 COPY --from=builder /app/service-task .
 COPY services/task-service/.env .
 
-EXPOSE 8081
+EXPOSE 8083
 
 CMD ["./service-task"]

@@ -2,10 +2,12 @@
 package constants
 
 const (
-	StreamVerification = "verification"
+	StreamUser         = "user"
+	StreamOrganization = "organization"
 )
 
 const (
-	ConsumerVerification  = "verification"
-	ConsumerPasswordReset = "password-reset"
+	ConsumerUserAuth            = "auth"
+	ConsumerOrganizationAuth    = "auth"
+	ConsumerOrganizationOpenFGA = "openfga"
 )

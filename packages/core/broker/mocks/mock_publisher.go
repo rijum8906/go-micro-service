@@ -5,8 +5,6 @@ package mocks
 import (
 	apperror "github.com/rijum8906/relay/packages/core/apperror"
 
-	dto "github.com/rijum8906/relay/packages/core/dto"
-
 	mock "github.com/stretchr/testify/mock"
 
 	nats "github.com/nats-io/nats.go"
@@ -26,7 +24,7 @@ func (_m *MockPublisher) EXPECT() *MockPublisher_Expecter {
 }
 
 // Publish provides a mock function with given fields: subject, data
-func (_m *MockPublisher) Publish(subject dto.JobSubject, data interface{}) *apperror.AppError {
+func (_m *MockPublisher) Publish(subject string, data interface{}) *apperror.AppError {
 	ret := _m.Called(subject, data)
 
 	if len(ret) == 0 {
@@ -34,7 +32,7 @@ func (_m *MockPublisher) Publish(subject dto.JobSubject, data interface{}) *appe
 	}
 
 	var r0 *apperror.AppError
-	if rf, ok := ret.Get(0).(func(dto.JobSubject, interface{}) *apperror.AppError); ok {
+	if rf, ok := ret.Get(0).(func(string, interface{}) *apperror.AppError); ok {
 		r0 = rf(subject, data)
 	} else {
 		if ret.Get(0) != nil {
@@ -51,15 +49,15 @@ type MockPublisher_Publish_Call struct {
 }
 
 // Publish is a helper method to define mock.On call
-//   - subject dto.JobSubject
+//   - subject string
 //   - data interface{}
 func (_e *MockPublisher_Expecter) Publish(subject interface{}, data interface{}) *MockPublisher_Publish_Call {
 	return &MockPublisher_Publish_Call{Call: _e.mock.On("Publish", subject, data)}
 }
 
-func (_c *MockPublisher_Publish_Call) Run(run func(subject dto.JobSubject, data interface{})) *MockPublisher_Publish_Call {
+func (_c *MockPublisher_Publish_Call) Run(run func(subject string, data interface{})) *MockPublisher_Publish_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(dto.JobSubject), args[1].(interface{}))
+		run(args[0].(string), args[1].(interface{}))
 	})
 	return _c
 }
@@ -69,13 +67,13 @@ func (_c *MockPublisher_Publish_Call) Return(_a0 *apperror.AppError) *MockPublis
 	return _c
 }
 
-func (_c *MockPublisher_Publish_Call) RunAndReturn(run func(dto.JobSubject, interface{}) *apperror.AppError) *MockPublisher_Publish_Call {
+func (_c *MockPublisher_Publish_Call) RunAndReturn(run func(string, interface{}) *apperror.AppError) *MockPublisher_Publish_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PublishAsync provides a mock function with given fields: subject, data
-func (_m *MockPublisher) PublishAsync(subject dto.JobSubject, data interface{}) (nats.PubAckFuture, *apperror.AppError) {
+func (_m *MockPublisher) PublishAsync(subject string, data interface{}) (nats.PubAckFuture, *apperror.AppError) {
 	ret := _m.Called(subject, data)
 
 	if len(ret) == 0 {
@@ -84,10 +82,10 @@ func (_m *MockPublisher) PublishAsync(subject dto.JobSubject, data interface{}) 
 
 	var r0 nats.PubAckFuture
 	var r1 *apperror.AppError
-	if rf, ok := ret.Get(0).(func(dto.JobSubject, interface{}) (nats.PubAckFuture, *apperror.AppError)); ok {
+	if rf, ok := ret.Get(0).(func(string, interface{}) (nats.PubAckFuture, *apperror.AppError)); ok {
 		return rf(subject, data)
 	}
-	if rf, ok := ret.Get(0).(func(dto.JobSubject, interface{}) nats.PubAckFuture); ok {
+	if rf, ok := ret.Get(0).(func(string, interface{}) nats.PubAckFuture); ok {
 		r0 = rf(subject, data)
 	} else {
 		if ret.Get(0) != nil {
@@ -95,7 +93,7 @@ func (_m *MockPublisher) PublishAsync(subject dto.JobSubject, data interface{}) 
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(dto.JobSubject, interface{}) *apperror.AppError); ok {
+	if rf, ok := ret.Get(1).(func(string, interface{}) *apperror.AppError); ok {
 		r1 = rf(subject, data)
 	} else {
 		if ret.Get(1) != nil {
@@ -112,15 +110,15 @@ type MockPublisher_PublishAsync_Call struct {
 }
 
 // PublishAsync is a helper method to define mock.On call
-//   - subject dto.JobSubject
+//   - subject string
 //   - data interface{}
 func (_e *MockPublisher_Expecter) PublishAsync(subject interface{}, data interface{}) *MockPublisher_PublishAsync_Call {
 	return &MockPublisher_PublishAsync_Call{Call: _e.mock.On("PublishAsync", subject, data)}
 }
 
-func (_c *MockPublisher_PublishAsync_Call) Run(run func(subject dto.JobSubject, data interface{})) *MockPublisher_PublishAsync_Call {
+func (_c *MockPublisher_PublishAsync_Call) Run(run func(subject string, data interface{})) *MockPublisher_PublishAsync_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(dto.JobSubject), args[1].(interface{}))
+		run(args[0].(string), args[1].(interface{}))
 	})
 	return _c
 }
@@ -130,13 +128,13 @@ func (_c *MockPublisher_PublishAsync_Call) Return(_a0 nats.PubAckFuture, _a1 *ap
 	return _c
 }
 
-func (_c *MockPublisher_PublishAsync_Call) RunAndReturn(run func(dto.JobSubject, interface{}) (nats.PubAckFuture, *apperror.AppError)) *MockPublisher_PublishAsync_Call {
+func (_c *MockPublisher_PublishAsync_Call) RunAndReturn(run func(string, interface{}) (nats.PubAckFuture, *apperror.AppError)) *MockPublisher_PublishAsync_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PublishWithHeaders provides a mock function with given fields: subject, data, headers
-func (_m *MockPublisher) PublishWithHeaders(subject dto.JobSubject, data interface{}, headers nats.Header) *apperror.AppError {
+func (_m *MockPublisher) PublishWithHeaders(subject string, data interface{}, headers nats.Header) *apperror.AppError {
 	ret := _m.Called(subject, data, headers)
 
 	if len(ret) == 0 {
@@ -144,7 +142,7 @@ func (_m *MockPublisher) PublishWithHeaders(subject dto.JobSubject, data interfa
 	}
 
 	var r0 *apperror.AppError
-	if rf, ok := ret.Get(0).(func(dto.JobSubject, interface{}, nats.Header) *apperror.AppError); ok {
+	if rf, ok := ret.Get(0).(func(string, interface{}, nats.Header) *apperror.AppError); ok {
 		r0 = rf(subject, data, headers)
 	} else {
 		if ret.Get(0) != nil {
@@ -161,16 +159,16 @@ type MockPublisher_PublishWithHeaders_Call struct {
 }
 
 // PublishWithHeaders is a helper method to define mock.On call
-//   - subject dto.JobSubject
+//   - subject string
 //   - data interface{}
 //   - headers nats.Header
 func (_e *MockPublisher_Expecter) PublishWithHeaders(subject interface{}, data interface{}, headers interface{}) *MockPublisher_PublishWithHeaders_Call {
 	return &MockPublisher_PublishWithHeaders_Call{Call: _e.mock.On("PublishWithHeaders", subject, data, headers)}
 }
 
-func (_c *MockPublisher_PublishWithHeaders_Call) Run(run func(subject dto.JobSubject, data interface{}, headers nats.Header)) *MockPublisher_PublishWithHeaders_Call {
+func (_c *MockPublisher_PublishWithHeaders_Call) Run(run func(subject string, data interface{}, headers nats.Header)) *MockPublisher_PublishWithHeaders_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(dto.JobSubject), args[1].(interface{}), args[2].(nats.Header))
+		run(args[0].(string), args[1].(interface{}), args[2].(nats.Header))
 	})
 	return _c
 }
@@ -180,7 +178,7 @@ func (_c *MockPublisher_PublishWithHeaders_Call) Return(_a0 *apperror.AppError) 
 	return _c
 }
 
-func (_c *MockPublisher_PublishWithHeaders_Call) RunAndReturn(run func(dto.JobSubject, interface{}, nats.Header) *apperror.AppError) *MockPublisher_PublishWithHeaders_Call {
+func (_c *MockPublisher_PublishWithHeaders_Call) RunAndReturn(run func(string, interface{}, nats.Header) *apperror.AppError) *MockPublisher_PublishWithHeaders_Call {
 	_c.Call.Return(run)
 	return _c
 }

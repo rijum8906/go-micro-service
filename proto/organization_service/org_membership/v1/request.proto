@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package organization_service.org_membership.v1;
+
+import "core/v1/common.proto";
+
+message GetOrgMembershipsByRoleReq {
+  string organization_id = 1;
+  string role = 2;
+  core.v1.PaginationRequest pagination = 3;
+}
+
+message GetOrgMembershipsByStatusReq {
+  string organization_id = 1;
+  string status = 2;
+  core.v1.PaginationRequest pagination = 3;
+}
+
+message ChangeOrgMembershipRoleReq {
+  string organization_membership_id = 1;
+  string new_role = 2;
+  string token_scope = 3;
+}
+
+message SendInvitationRequest {
+  string organization_id = 1;
+  string email = 2;
+  string role = 3;
+}
