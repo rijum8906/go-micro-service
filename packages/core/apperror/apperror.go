@@ -72,7 +72,7 @@ func (e *AppError) Error() string {
 		if config.Logger != nil {
 			config.Logger.Error(e.Message, zap.Any("details", e.Details))
 		} else {
-			fmt.Printf("[%s] %s (ID: %s)\n", e.Code, e.Message, e.RequestID)
+			fmt.Printf("[%s] %s Details : %v \n", e.Code, e.Message, e.RequestID, e.Details)
 		}
 	}
 
