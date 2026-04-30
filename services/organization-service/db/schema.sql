@@ -29,7 +29,6 @@ CREATE TABLE organizations (
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
     deleted_by uuid,
-    archived_at timestamptz,
 
     -- Ensures slugs are consistently lowercase to prevent case-sensitive duplicates
     CONSTRAINT chk_organizations_slug_lowercase CHECK (slug = lower(slug)),
