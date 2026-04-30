@@ -12,6 +12,59 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const ArchiveOrganization = `-- name: ArchiveOrganization :exec
+UPDATE organizations
+SET status = 'archived', archived_at = now()
+WHERE id = $1
+`
+
+func (q *Queries) ArchiveOrganization(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, ArchiveOrganization, id)
+	return err
+}
+
+const ChangeOrganizationOwnership = `-- name: ChangeOrganizationOwnership :exec
+UPDATE organizations
+SET created_by = $2
+WHERE id = $1
+`
+
+type ChangeOrganizationOwnershipParams struct {
+	ID        uuid.UUID
+	CreatedBy uuid.UUID
+}
+
+func (q *Queries) ChangeOrganizationOwnership(ctx context.Context, arg ChangeOrganizationOwnershipParams) error {
+	_, err := q.db.Exec(ctx, ChangeOrganizationOwnership, arg.ID, arg.CreatedBy)
+	return err
+}
+
+const CheckOrganizationExists = `-- name: CheckOrganizationExists :one
+SELECT EXISTS(
+    SELECT 1 FROM organizations WHERE id = $1
+) AS exists
+`
+
+func (q *Queries) CheckOrganizationExists(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, CheckOrganizationExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const CheckOrganizationExistsBySlug = `-- name: CheckOrganizationExistsBySlug :one
+SELECT EXISTS(
+    SELECT 1 FROM organizations WHERE slug = $1
+) AS exists
+`
+
+func (q *Queries) CheckOrganizationExistsBySlug(ctx context.Context, slug string) (bool, error) {
+	row := q.db.QueryRow(ctx, CheckOrganizationExistsBySlug, slug)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const CreateOrganization = `-- name: CreateOrganization :one
 INSERT INTO organizations (
     name,
@@ -21,7 +74,7 @@ INSERT INTO organizations (
 ) VALUES (
     $1, $2, $3, $4
 )
-RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by
+RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at
 `
 
 type CreateOrganizationParams struct {
@@ -51,6 +104,7 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 		&i.UpdatedAt,
 		&i.DeletedAt,
 		&i.DeletedBy,
+		&i.ArchivedAt,
 	)
 	return i, err
 }
@@ -82,7 +136,7 @@ func (q *Queries) DeleteOrganizationHard(ctx context.Context, id uuid.UUID) erro
 }
 
 const GetOrganization = `-- name: GetOrganization :one
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by FROM organizations
+SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
 WHERE id = $1
 LIMIT 1
 `
@@ -102,12 +156,13 @@ func (q *Queries) GetOrganization(ctx context.Context, id uuid.UUID) (Organizati
 		&i.UpdatedAt,
 		&i.DeletedAt,
 		&i.DeletedBy,
+		&i.ArchivedAt,
 	)
 	return i, err
 }
 
 const GetOrganizationBySlug = `-- name: GetOrganizationBySlug :one
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by FROM organizations
+SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
 WHERE slug = $1
 LIMIT 1
 `
@@ -127,12 +182,13 @@ func (q *Queries) GetOrganizationBySlug(ctx context.Context, slug string) (Organ
 		&i.UpdatedAt,
 		&i.DeletedAt,
 		&i.DeletedBy,
+		&i.ArchivedAt,
 	)
 	return i, err
 }
 
 const GetOrganizationsByCreatedBy = `-- name: GetOrganizationsByCreatedBy :many
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by FROM organizations
+SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
 WHERE created_by = $1
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
@@ -164,6 +220,7 @@ func (q *Queries) GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrgani
 			&i.UpdatedAt,
 			&i.DeletedAt,
 			&i.DeletedBy,
+			&i.ArchivedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -179,7 +236,7 @@ const UpdateOrganization = `-- name: UpdateOrganization :one
 UPDATE organizations
 SET name = $2, description = $3
 WHERE id = $1
-RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by
+RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at
 `
 
 type UpdateOrganizationParams struct {
@@ -203,6 +260,7 @@ func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganization
 		&i.UpdatedAt,
 		&i.DeletedAt,
 		&i.DeletedBy,
+		&i.ArchivedAt,
 	)
 	return i, err
 }
