@@ -69,7 +69,11 @@ func (e *AppError) WithRequestID(requestID string) *AppError {
 
 func (e *AppError) Error() string {
 	if e.Code == CodeInternal || e.Code == CodeThirdParty {
-		config.Logger.Error(e.Message, zap.Any("details", e.Details))
+		if config.Logger != nil {
+			config.Logger.Error(e.Message, zap.Any("details", e.Details))
+		} else {
+			fmt.Printf("[%s] %s Details : %v \n", e.Code, e.Message, e.Details)
+		}
 	}
 
 	if e.RequestID == "" {

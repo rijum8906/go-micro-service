@@ -11,6 +11,10 @@ import (
 )
 
 type Querier interface {
+	ArchiveOrganization(ctx context.Context, id uuid.UUID) error
+	ChangeOrganizationOwnership(ctx context.Context, arg ChangeOrganizationOwnershipParams) error
+	CheckOrganizationExists(ctx context.Context, id uuid.UUID) (bool, error)
+	CheckOrganizationExistsBySlug(ctx context.Context, slug string) (bool, error)
 	CreateOrganization(ctx context.Context, arg CreateOrganizationParams) (Organization, error)
 	CreateOrganizationMembership(ctx context.Context, arg CreateOrganizationMembershipParams) (OrganizationMembership, error)
 	CreateOrganizationMembershipOwner(ctx context.Context, arg CreateOrganizationMembershipOwnerParams) (OrganizationMembership, error)

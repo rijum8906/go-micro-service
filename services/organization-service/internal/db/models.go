@@ -19,11 +19,12 @@ type Organization struct {
 	Description pgtype.Text
 	LogoUrl     pgtype.Text
 	// User ID who created this organization
-	CreatedBy uuid.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
-	DeletedBy uuid.UUID
+	CreatedBy  uuid.UUID
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	DeletedAt  pgtype.Timestamptz
+	DeletedBy  uuid.UUID
+	ArchivedAt pgtype.Timestamptz
 }
 
 // Immutable audit trail for security, compliance, and debugging

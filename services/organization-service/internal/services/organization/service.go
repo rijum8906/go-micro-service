@@ -5,10 +5,10 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
+	"github.com/rijum8906/relay/packages/core/protoutils"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
@@ -20,16 +20,8 @@ import (
 
 func (s *organizationService) CreateOrganization(ctx context.Context, req *organizationv1.CreateOrganizationRequest) (*modelsv1.Organization, error) {
 	// Step 0. Validation
-	if err := uuid.Validate(req.CreatedBy); err != nil {
-		return nil, apperror.New(apperror.CodeValidation, "invalid user id")
-	}
-	createdBy, err := uuid.Parse(req.CreatedBy)
-	if err != nil {
-		return nil, apperror.New(apperror.CodeValidation, "invalid create_by id")
-	}
-	isValidSlug := utils.ValidateSlug(req.Slug)
-	if !isValidSlug {
-		return nil, apperror.New(apperror.CodeValidation, "invalid slug")
+	if appErr := validateCreateOrganizationRequest(req); appErr != nil {
+		return nil, appErr
 	}
 
 	// Step 1. Check user existstence and slug availability
@@ -44,16 +36,16 @@ func (s *organizationService) CreateOrganization(ctx context.Context, req *organ
 	}
 
 	// WARN: use other method to validate slug (eg. bloom filter)
-	_, err = s.q.GetOrganizationBySlug(ctx, req.Slug)
-	if err == nil {
-		return nil, errors.New("organization already exists with slug " + req.Slug)
-	} else {
-		if !errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperror.New(apperror.CodeInternal, "error getting information from database").WithDetail("error", err.Error())
-		}
+	exists, err := s.q.CheckOrganizationExistsBySlug(ctx, req.Slug)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithDetail("error", err.Error())
+	}
+	if exists {
+		return nil, apperror.New(apperror.CodeValidation, "slug already exists")
 	}
 
 	// Step 2. Create Organization
+	createdBy, _ := uuid.Parse(req.CreatedBy)
 	org, err := s.q.CreateOrganization(ctx, db.CreateOrganizationParams{
 		Name:        req.Name,
 		Slug:        req.Slug,
@@ -84,7 +76,7 @@ func (s *organizationService) CreateOrganization(ctx context.Context, req *organ
 func (s *organizationService) GetOrganization(ctx context.Context, req *corev1.IDRequest) (*modelsv1.Organization, error) {
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
-		return nil, apperror.New(apperror.CodeValidation, "invalid organization id").WithDetail("error", err.Error())
+		return nil, apperror.ErrValidation.WithMessage("invalid id")
 	}
 
 	org, err := s.q.GetOrganization(ctx, id)
@@ -155,16 +147,23 @@ func (s *organizationService) UpdateOrganizationName(ctx context.Context, req *o
 		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
 	}
 
+	orgID, _ := uuid.Parse(req.OrganizationId)
+
 	// Step 1. Check Token Scope
 	if req.TokenScope != string(token.TokenScopeUpdateOrganizationName) {
 		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
 	}
 
-	// Step 2. Update
-	orgID, err := uuid.Parse(req.OrganizationId)
+	// Step 2. Check if organization exists
+	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
 	if err != nil {
 		apperror.ErrInternal.WithDetail("error", err.Error())
 	}
+	if !exists {
+		return nil, apperror.New(apperror.CodeNotFound, "organization does not exist")
+	}
+
+	// Step 3. Update
 	org, err := s.q.UpdateOrganization(ctx, db.UpdateOrganizationParams{
 		ID:          orgID,
 		Name:        req.Name,
@@ -177,14 +176,125 @@ func (s *organizationService) UpdateOrganizationName(ctx context.Context, req *o
 	return utils.MapOrganization(&org), nil
 }
 
-func (s *organizationService) ChangeOrganizationOwnership(context.Context, *organizationv1.ChangeOrganizationOwnershipRequest) (*corev1.SuccessResponse, error) {
+func (s *organizationService) ChangeOrganizationOwnership(ctx context.Context, req *organizationv1.ChangeOrganizationOwnershipRequest) (*corev1.SuccessResponse, error) {
+	// Step 0. Validation
+	if appErr := validateChangeOwnershipRequst(req); appErr != nil {
+		return nil, appErr
+	}
+
+	orgID, _ := uuid.Parse(req.OrganizationId)
+	newOwnerID, _ := uuid.Parse(req.NewOwnerId)
+
+	// Step 1. Check if user exists
+	res, err := s.userClient.CheckExists(ctx, &userv1.CheckExistsRequest{
+		Id: req.NewOwnerId,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithDetail("error", err.Error())
+	}
+	if !res.Exists {
+		return nil, apperror.New(apperror.CodeNotFound, "user does not exist")
+	}
+
+	// Step 2. Check if organization exists
+	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
+	if err != nil {
+		apperror.ErrInternal.WithDetail("error", err.Error())
+	}
+	if !exists {
+		return nil, apperror.New(apperror.CodeNotFound, "organization does not exist")
+	}
+
+	// Step 3. Check Token Scope
+	if req.TokenScope != string(token.TokenScopeChangeOrganizationOwner) {
+		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
+	}
+
+	// Step 4. Change Ownership
+	err = s.q.ChangeOrganizationOwnership(ctx, db.ChangeOrganizationOwnershipParams{
+		ID:        orgID,
+		CreatedBy: newOwnerID,
+	})
+	if err != nil {
+		return nil, apperror.New(apperror.CodeInternal, "couldn't change organization ownership").WithDetail("error", err.Error())
+	}
+
+	return &corev1.SuccessResponse{
+		Success: true,
+	}, nil
+}
+
+func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev1.IDAndScopedTokenRequest) (*corev1.SuccessResponse, error) {
+	// Step 0. Validation
+	if err := protoutils.ValidateIDAndScopedToken(req); err != nil {
+		return nil, err
+	}
+
+	orgID, _ := uuid.Parse(req.Id)
+
+	// Step 1. Check if organization exists
+	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
+	if err != nil {
+		apperror.ErrInternal.WithDetail("error", err.Error())
+	}
+	if !exists {
+		return nil, apperror.New(apperror.CodeNotFound, "organization does not exist")
+	}
+
+	// Step 2. Check Token Scope
+	if req.TokenScope != string(token.TokenScopeDeleteOrganization) {
+		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
+	}
+
+	// Step 3. Extract User Info
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.New(apperror.CodeInternal, "failed to extract user info from context")
+	}
+	deletedBy, err := uuid.Parse(userInfo.UserID)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to parse user id").WithDetail("error", err.Error())
+	}
+
+	// Step 4. Delete
+	err = s.q.DeleteOrganization(ctx, db.DeleteOrganizationParams{
+		ID:        orgID,
+		DeletedBy: deletedBy,
+	})
+	if err != nil {
+		return nil, apperror.New(apperror.CodeInternal, "couldn't delete organization").WithDetail("error", err.Error())
+	}
+
 	return nil, nil
 }
 
-func (s *organizationService) DeleteOrganization(context.Context, *corev1.IDAndScopedTokenRequest) (*corev1.SuccessResponse, error) {
-	return nil, nil
-}
+func (s *organizationService) ArchiveOrganization(ctx context.Context, req *corev1.IDAndScopedTokenRequest) (*corev1.SuccessResponse, error) {
+	// Step 0. Validation
+	if err := protoutils.ValidateIDAndScopedToken(req); err != nil {
+		return nil, err
+	}
 
-func (s *organizationService) ArchiveOrganization(context.Context, *corev1.IDAndScopedTokenRequest) (*corev1.SuccessResponse, error) {
+	orgID, _ := uuid.Parse(req.Id)
+
+	// Step 1. Check if organization exists
+	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
+	if err != nil {
+		apperror.ErrInternal.WithDetail("error", err.Error())
+	}
+	if !exists {
+		return nil, apperror.New(apperror.CodeNotFound, "organization does not exist")
+	}
+
+	// Step 2. Check Token Scope
+	if req.TokenScope != string(token.TokenScopeArchiveOrganization) {
+		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
+	}
+
+	// Step 3. Archive
+	err = s.q.ArchiveOrganization(ctx, orgID)
+	if err != nil {
+		return nil, apperror.New(apperror.CodeInternal, "couldn't archive organization").WithDetail("error", err.Error())
+	}
+
 	return nil, nil
 }
