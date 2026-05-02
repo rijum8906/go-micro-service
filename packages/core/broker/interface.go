@@ -16,9 +16,9 @@ type Client interface {
 }
 
 type Publisher interface {
-	Publish(subject dto.JobSubject, data any) *apperror.AppError
-	PublishAsync(subject dto.JobSubject, data any) (nats.PubAckFuture, *apperror.AppError)
-	PublishWithHeaders(subject dto.JobSubject, data any, headers nats.Header) *apperror.AppError
+	Publish(subject string, data any) *apperror.AppError
+	PublishAsync(subject string, data any) (nats.PubAckFuture, *apperror.AppError)
+	PublishWithHeaders(subject string, data any, headers nats.Header) *apperror.AppError
 }
 
 type Subscriber interface {
