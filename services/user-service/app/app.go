@@ -71,7 +71,7 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 		return nil, appErr
 	}
 
-	if appErr = app.initNATS(ctx); appErr != nil {
+	if appErr = app.initNATS(); appErr != nil {
 		return nil, appErr
 	}
 

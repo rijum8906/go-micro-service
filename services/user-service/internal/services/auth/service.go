@@ -13,6 +13,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
+	"github.com/rijum8906/relay/services/user/internal/constants"
 	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
@@ -204,7 +205,7 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.Publish(dto.JobEmailVerification, dto.EmailVerificationDTO{
+	if appErr = s.publisher.Publish(constants.JobRequestedEmailVerification, dto.EmailVerificationDTO{
 		ClientName:      prof.FirstName + " " + prof.LastName,
 		ClientEmail:     user.Email,
 		VerificationURL: verificationURL,
@@ -244,7 +245,7 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 		return nil, appErr
 	}
 
-	if appErr = s.publisher.Publish(dto.JobEmailPasswordReset, dto.PasswordResetDTO{
+	if appErr = s.publisher.Publish(constants.JobRequestedPasswordReset, dto.PasswordResetDTO{
 		ClientName:  prof.FirstName + " " + prof.LastName,
 		ClientEmail: user.Email,
 		ResetURL:    resetURL,
