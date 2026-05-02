@@ -1,6 +1,11 @@
 // Package jobs
 package jobs
 
+import (
+	"fmt"
+	"strings"
+)
+
 // NOTE: naming convension of jobs - [domain].[subdomain].[event].[version]
 // eg. user.auth.requested_password_reset.v1, user.auth.created_user.v1, user.auth.updated_user.v1
 // 	user.security.email_changed.v1, user.security.password_changed.v1
@@ -26,4 +31,26 @@ var Domains = []Domain{
 	DomainTask,
 	DomainNotification,
 	DomainOrganization,
+}
+
+// GetDomainWildcard returns wildcard for entire domain with version
+func GetDomainWildcard(job string) string {
+	parts := strings.Split(job, ".")
+	return fmt.Sprintf("%s.*.*.%s", parts[0], parts[3])
+}
+
+func GetDomainWildcardWithoutVersion(job string) string {
+	parts := strings.Split(job, ".")
+	return fmt.Sprintf("%s.*.*.*", parts[0])
+}
+
+// GetSubdomainWildcard returns wildcard for entire job with version
+func GetSubdomainWildcard(job string) string {
+	parts := strings.Split(job, ".")
+	return fmt.Sprintf("%s.%s.*.%s", parts[0], parts[1], parts[3])
+}
+
+func GetSubdomainWildcardWithoutVersion(job string) string {
+	parts := strings.Split(job, ".")
+	return fmt.Sprintf("%s.%s.*.*", parts[0], parts[1])
 }
