@@ -38,7 +38,6 @@ CREATE TABLE "organization_memberships" (
   "user_id" uuid NOT NULL,
   "role" character varying(30) NOT NULL DEFAULT 'member',
   "status" character varying(30) NOT NULL DEFAULT 'active',
-  "invited_by" uuid,
   "joined_at" timestamptz NOT NULL DEFAULT now(),
   "left_at" timestamptz NULL,
   "created_at" timestamptz NOT NULL DEFAULT now(),
@@ -48,7 +47,6 @@ CREATE TABLE "organization_memberships" (
   PRIMARY KEY ("id"),
   CONSTRAINT "uq_organization_memberships_org_user" UNIQUE ("organization_id", "user_id"),
   CONSTRAINT "organization_memberships_deleted_by_fkey" FOREIGN KEY ("deleted_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT "organization_memberships_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_memberships_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "organization_memberships_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying, 'left'::character varying])::text[]))
 );

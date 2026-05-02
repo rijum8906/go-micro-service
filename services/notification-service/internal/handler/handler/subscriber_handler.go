@@ -7,7 +7,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
-	"github.com/rijum8906/relay/packages/core/dto"
+	"github.com/rijum8906/relay/packages/core/jobs"
 	"github.com/rijum8906/relay/packages/core/mailer"
 	"github.com/rijum8906/relay/packages/core/template"
 	"github.com/rijum8906/relay/services/notification-service/internal/constants"
@@ -36,14 +36,12 @@ func New(subService subscriber.Service, client broker.Client, mailerCfg *mailer.
 }
 
 func (h *SubscribeHandler) CreateStreams() *apperror.AppError {
-	streamManager := broker.NewStreamManager(h.BrokerClient.GetClient())
-
-	// Verification Stream Config
-	config := broker.NewStreamConfig(constants.StreamVerification).
-		AddSubjects(string(dto.JobEmailVerification), string(dto.JobEmailPasswordReset)).
-		AddMaxConsumer(5)
-	fmt.Println("stream config: ", config.StreamConfig.MaxConsumers)
-	_, appErr := streamManager.Create(config)
+	// Stream User Auth
+	subjectWildcard := jobs.GetSubdomainWildcard(jobs.JobUserRequestedEmailVerification)
+	streamCfg := broker.NewStreamConfig(constants.StreamUser).
+		AddSubjects(subjectWildcard)
+	userAuthStream := broker.NewStreamManager(h.BrokerClient.GetClient())
+	_, appErr := userAuthStream.Create(streamCfg)
 	if appErr != nil {
 		return appErr
 	}
@@ -52,20 +50,12 @@ func (h *SubscribeHandler) CreateStreams() *apperror.AppError {
 }
 
 func (h *SubscribeHandler) CreateConsumers() *apperror.AppError {
-	consumerManager := broker.NewConsumerManager(h.BrokerClient.GetClient())
-
-	// Verification Comsumer
-	config1 := broker.NewConsumerConfig(constants.ConsumerVerification)
-	config1.WithFilterSubject(string(dto.JobEmailVerification))
-
-	_, appErr := consumerManager.Create(constants.StreamVerification, config1)
-	if appErr != nil {
-		return appErr
-	}
-
-	config2 := broker.NewConsumerConfig(constants.ConsumerPasswordReset)
-	config2.WithFilterSubject(string(dto.JobEmailPasswordReset))
-	_, appErr = consumerManager.Create(constants.StreamVerification, config2)
+	// Consumer Request Emails
+	subjectWildcard := jobs.GetSubdomainWildcard(jobs.JobUserRequestedEmailVerification)
+	consumerCfg := broker.NewConsumerConfig(constants.ConsumerUserAuth).AddDeliverPolicy(nats.DeliverAllPolicy).
+		WithFilterSubject(subjectWildcard)
+	consumerHandler := broker.NewConsumerManager(h.BrokerClient.GetClient())
+	_, appErr := consumerHandler.Create(constants.StreamUser, consumerCfg)
 	if appErr != nil {
 		return appErr
 	}
@@ -91,15 +81,9 @@ func (h *SubscribeHandler) Subscribe() *apperror.AppError {
 	}
 
 	go func(service subscriber.Service) {
-		if appErr := service.SubscribeEmailVerificationJob(constants.ConsumerVerification); appErr != nil {
+		if appErr := service.SubscribeUserAuthEmailJobs(constants.ConsumerUserAuth); appErr != nil {
 			fmt.Println(appErr.Details)
 		}
 	}(h.SubscriberService)
-	go func(service subscriber.Service) {
-		if appErr := service.SubscribeJobPasswordReset(constants.ConsumerPasswordReset); appErr != nil {
-			fmt.Println(appErr.Details)
-		}
-	}(h.SubscriberService)
-
 	return nil
 }

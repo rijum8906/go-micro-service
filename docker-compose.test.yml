@@ -1,7 +1,7 @@
 services:
   # postgres
   test-postgres:
-    image: postgres:14.22-bookworm
+    image: postgres:17
     environment:
       POSTGRES_USER: "test_user"
       POSTGRES_PASSWORD: "test_password"
@@ -18,7 +18,7 @@ services:
       - test-postgres:/var/lib/postgresql/data
 
   test-redis:
-    image: redis:8.4.2-trixie
+    image: redis:7.4-alpine
     ports:
       - "6380:6379"
     healthcheck:

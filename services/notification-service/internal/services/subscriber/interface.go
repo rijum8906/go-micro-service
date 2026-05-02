@@ -11,8 +11,7 @@ import (
 )
 
 type Service interface {
-	SubscribeEmailVerificationJob(consumerName string) *apperror.AppError
-	SubscribeJobPasswordReset(consumerName string) *apperror.AppError
+	SubscribeUserAuthEmailJobs(consumerName string) *apperror.AppError
 }
 
 type service struct {

@@ -16,15 +16,12 @@ func main() {
 	ctx := context.Background()
 
 	application, appErr := app.NewApplication(ctx)
-	logger := application.GetLogger()
-
 	if appErr != nil {
 		// If logger is nil, fallback to standard log
-		if logger == nil {
-			log.Fatalf("failed to create application: %v", appErr)
-		}
-		logger.Fatal("failed to create application", zap.Error(appErr))
+		log.Fatalf("failed to create application: %v\nDetails:%v", appErr, appErr.Details)
 	}
+
+	logger := application.GetLogger()
 
 	runErrCh := make(chan *apperror.AppError, 1)
 	go func() {

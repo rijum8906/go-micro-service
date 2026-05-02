@@ -56,7 +56,6 @@ CREATE TABLE organization_memberships (
     role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'active'
         CHECK (status IN ('active', 'suspended', 'left')),
-    invited_by uuid REFERENCES organization_memberships(id),
     joined_at timestamptz NOT NULL DEFAULT now(),
     left_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),

@@ -5,7 +5,6 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/dto"
 )
 
 type publisher struct {
@@ -21,7 +20,7 @@ func NewPublisher(client *brokerClient) Publisher {
 // Methods
 
 // Publish blocks until the subscriber send a confirmation
-func (p *publisher) Publish(subject dto.JobSubject, data any) *apperror.AppError {
+func (p *publisher) Publish(subject string, data any) *apperror.AppError {
 	if p.client == nil {
 		return apperror.New(apperror.CodeValidation, "nats client is not set")
 	}
@@ -31,7 +30,7 @@ func (p *publisher) Publish(subject dto.JobSubject, data any) *apperror.AppError
 		return apperror.New(apperror.CodeInternal, "failed to marshal nats payload").WithDetail("error", err.Error())
 	}
 
-	_, err = p.client.JS.Publish(string(subject), dataBytes)
+	_, err = p.client.JS.Publish(subject, dataBytes)
 	if err != nil {
 		return apperror.New(apperror.CodeThirdParty, "failed to publish to nats subject").WithDetail("error", err.Error())
 	}
@@ -40,7 +39,7 @@ func (p *publisher) Publish(subject dto.JobSubject, data any) *apperror.AppError
 }
 
 // PublishAsync doesn't block the code
-func (p *publisher) PublishAsync(subject dto.JobSubject, data any) (nats.PubAckFuture, *apperror.AppError) {
+func (p *publisher) PublishAsync(subject string, data any) (nats.PubAckFuture, *apperror.AppError) {
 	if p.client == nil {
 		return nil, apperror.New(apperror.CodeValidation, "nats client is not set")
 	}
@@ -50,7 +49,7 @@ func (p *publisher) PublishAsync(subject dto.JobSubject, data any) (nats.PubAckF
 		return nil, apperror.New(apperror.CodeInternal, "failed to marshal nats payload").WithDetail("error", err.Error())
 	}
 
-	ack, err := p.client.JS.PublishAsync(string(subject), dataBytes)
+	ack, err := p.client.JS.PublishAsync(subject, dataBytes)
 	if err != nil {
 		return nil, apperror.New(apperror.CodeThirdParty, "failed to publish to nats subject").WithDetail("error", err.Error())
 	}
@@ -58,7 +57,7 @@ func (p *publisher) PublishAsync(subject dto.JobSubject, data any) (nats.PubAckF
 	return ack, nil
 }
 
-func (p *publisher) PublishWithHeaders(subject dto.JobSubject, data any, headers nats.Header) *apperror.AppError {
+func (p *publisher) PublishWithHeaders(subject string, data any, headers nats.Header) *apperror.AppError {
 	// TODO: implement
 	if p.client == nil {
 		return apperror.New(apperror.CodeValidation, "nats client is not set")

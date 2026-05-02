@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package organization_service.org_membership.v1;
+
+import "core/v1/common.proto";
+import "organization_service/models/v1/model.proto";
+import "organization_service/org_membership/v1/request.proto";
+
+service OrganizationMembershipService {
+  // Public
+  rpc CreateOrganizationMembership(CreateOrganizationMembershipRequest) returns (organization_service.models.v1.Organization);
+
+  // Private
+  rpc GetOrganizationMembership(core.v1.IDRequest) returns (organization_service.models.v1.Organization);
+}

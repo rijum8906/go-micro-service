@@ -107,10 +107,12 @@ func TestTemplateManager_ValidateData(t *testing.T) {
 		{
 			name: "valid password reset dto",
 			data: dto.PasswordResetDTO{
-				ClientName:  "John Doe",
-				ClientEmail: "john@example.com",
-				ResetURL:    "https://relay.dev/reset-password?token=token123",
-				Validity:    "15 minutes",
+				BaseEmailDTO: dto.BaseEmailDTO{
+					ClientName:  "John Doe",
+					ClientEmail: "john@example.com",
+				},
+				ResetURL: "https://relay.dev/reset-password?token=token123",
+				Validity: "15 minutes",
 			},
 		},
 		{
@@ -122,8 +124,10 @@ func TestTemplateManager_ValidateData(t *testing.T) {
 		{
 			name: "invalid email verification dto",
 			data: dto.EmailVerificationDTO{
-				ClientName:      "John Doe",
-				ClientEmail:     "invalid-email",
+				BaseEmailDTO: dto.BaseEmailDTO{
+					ClientName:  "John Doe",
+					ClientEmail: "john@example.com",
+				},
 				VerificationURL: "",
 				Validity:        "",
 			},
@@ -169,10 +173,12 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 			name:         "password reset",
 			templateType: template.TemplateTypeEmailPasswordReset,
 			data: dto.PasswordResetDTO{
-				ClientName:  "John Doe",
-				ClientEmail: "john@example.com",
-				ResetURL:    "https://relay.dev/reset-password?token=token123",
-				Validity:    "15 minutes",
+				BaseEmailDTO: dto.BaseEmailDTO{
+					ClientName:  "John Doe",
+					ClientEmail: "john@example.com",
+				},
+				ResetURL: "https://relay.dev/reset-password?token=token123",
+				Validity: "15 minutes",
 			},
 			wantContains: []string{
 				"John Doe",
@@ -202,8 +208,10 @@ func TestTemplateManager_RenderToString(t *testing.T) {
 			name:         "email verification",
 			templateType: template.TemplateTypeEmailVerification,
 			data: dto.EmailVerificationDTO{
-				ClientName:      "John Doe",
-				ClientEmail:     "john@example.com",
+				BaseEmailDTO: dto.BaseEmailDTO{
+					ClientName:  "John Doe",
+					ClientEmail: "john@example.com",
+				},
 				VerificationURL: "verify-123",
 				Validity:        "15 minutes",
 			},
@@ -244,10 +252,12 @@ func TestTemplateManager_RenderToBytes(t *testing.T) {
 	tm := mustCreateTemplateManagerWithCompanyInfo(t)
 
 	data := dto.PasswordResetDTO{
-		ClientName:  "John Doe",
-		ClientEmail: "john@example.com",
-		ResetURL:    "https://relay.dev/reset-password?token=token123",
-		Validity:    "15 minutes",
+		BaseEmailDTO: dto.BaseEmailDTO{
+			ClientName:  "John Doe",
+			ClientEmail: "john@example.com",
+		},
+		ResetURL: "https://relay.dev/reset-password?token=token123",
+		Validity: "15 minutes",
 	}
 
 	rendered, err := tm.RenderToBytes(template.TemplateTypeEmailPasswordReset, data)
@@ -303,8 +313,10 @@ func TestTemplateManager_RenderFailures(t *testing.T) {
 			name:         "invalid payload",
 			templateType: template.TemplateTypeEmailVerification,
 			data: dto.EmailVerificationDTO{
-				ClientName:  "John Doe",
-				ClientEmail: "not-an-email",
+				BaseEmailDTO: dto.BaseEmailDTO{
+					ClientName:  "John Doe",
+					ClientEmail: "john@example.com",
+				},
 			},
 			wantCode: apperror.CodeValidation,
 		},
