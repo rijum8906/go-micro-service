@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
@@ -11,10 +12,10 @@ import (
 )
 
 type ProjectMembershipService interface {
-	AddProjectMember(ctx context.Context, req *taskv1.AddProjectMemberRequest) (*modelsv1.ProjectMembership, *apperror.AppError)
-	RemoveProjectMember(ctx context.Context, req *taskv1.RemoveProjectMemberRequest) (*corev1.SuccessResponse, *apperror.AppError)
-	UpdateProjectMemberRole(ctx context.Context, req *taskv1.UpdateProjectMemberRoleRequest) (*modelsv1.ProjectMembership, *apperror.AppError)
-	ListProjectMembers(ctx context.Context, req *taskv1.ListProjectMembersRequest) (*taskv1.ListProjectMembersResponse, *apperror.AppError)
+	AddProjectMember(ctx context.Context, req *taskv1.AddProjectMemberRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError)
+	RemoveProjectMember(ctx context.Context, req *taskv1.RemoveProjectMemberRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
+	UpdateProjectMemberRole(ctx context.Context, req *taskv1.UpdateProjectMemberRoleRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError)
+	ListProjectMembers(ctx context.Context, req *taskv1.ListProjectMembersRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectMembersResponse, *apperror.AppError)
 }
 
 type service struct {

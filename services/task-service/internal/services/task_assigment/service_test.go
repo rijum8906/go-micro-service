@@ -245,7 +245,7 @@ func TestUnassignTaskSuccess(t *testing.T) {
 		TaskId:       taskID.String(),
 		AssigneeType: "team",
 		AssigneeId:   assigneeID.String(),
-	})
+	}, &coredto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -266,7 +266,7 @@ func TestUnassignTaskValidation(t *testing.T) {
 		TaskId:       uuid.NewString(),
 		AssigneeType: "group",
 		AssigneeId:   uuid.NewString(),
-	})
+	}, &coredto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -492,7 +492,7 @@ func TestListTaskAssignmentsSuccess(t *testing.T) {
 
 	res, err := svc.ListTaskAssignments(context.Background(), &taskv1.ListTaskAssignmentsRequest{
 		TaskId: taskID.String(),
-	})
+	}, &coredto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -514,7 +514,7 @@ func TestListTaskAssignmentsValidation(t *testing.T) {
 
 	res, err := svc.ListTaskAssignments(context.Background(), &taskv1.ListTaskAssignmentsRequest{
 		TaskId: "bad-uuid",
-	})
+	}, &coredto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}

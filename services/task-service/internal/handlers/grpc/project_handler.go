@@ -34,7 +34,12 @@ func (h *TaskHandler) GetProject(ctx context.Context, req *taskv1.GetProjectRequ
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("get project request is required"))
 	}
 
-	result, appErr := h.projectService.GetProject(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("get project user metadata is required"))
+	}
+
+	result, appErr := h.projectService.GetProject(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -47,7 +52,12 @@ func (h *TaskHandler) UpdateProject(ctx context.Context, req *taskv1.UpdateProje
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("update project request is required"))
 	}
 
-	result, appErr := h.projectService.UpdateProject(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("update project user metadata is required"))
+	}
+
+	result, appErr := h.projectService.UpdateProject(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -60,7 +70,12 @@ func (h *TaskHandler) CompleteProject(ctx context.Context, req *taskv1.CompleteP
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("complete project request is required"))
 	}
 
-	result, appErr := h.projectService.CompleteProject(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("complete project user metadata is required"))
+	}
+
+	result, appErr := h.projectService.CompleteProject(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -73,7 +88,12 @@ func (h *TaskHandler) ArchiveProject(ctx context.Context, req *taskv1.ArchivePro
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("archive project request is required"))
 	}
 
-	result, appErr := h.projectService.ArchiveProject(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("archive project user metadata is required"))
+	}
+
+	result, appErr := h.projectService.ArchiveProject(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -104,7 +124,12 @@ func (h *TaskHandler) ListProjects(ctx context.Context, req *taskv1.ListProjects
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("list projects request is required"))
 	}
 
-	result, appErr := h.projectService.ListProjects(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("list projects user metadata is required"))
+	}
+
+	result, appErr := h.projectService.ListProjects(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}

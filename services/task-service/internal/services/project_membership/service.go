@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
@@ -13,9 +14,14 @@ import (
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMemberRequest) (*modelsv1.ProjectMembership, *apperror.AppError) {
+func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMemberRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("add project member request is required")
+	}
+
+	_, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	projectID, appErr := requiredUUID(req.GetProjectId(), "project_id", "project id is required")
@@ -54,10 +60,17 @@ func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMe
 	return mapProjectMembership(membership), nil
 }
 
-func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemoveProjectMemberRequest) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemoveProjectMemberRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("remove project member request is required")
 	}
+
+	userIDCheck, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userIDCheck
 
 	projectID, appErr := requiredUUID(req.GetProjectId(), "project_id", "project id is required")
 	if appErr != nil {
@@ -79,10 +92,17 @@ func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemovePro
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.UpdateProjectMemberRoleRequest) (*modelsv1.ProjectMembership, *apperror.AppError) {
+func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.UpdateProjectMemberRoleRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update project member role request is required")
 	}
+
+	userIDCheck, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userIDCheck
 
 	projectID, appErr := requiredUUID(req.GetProjectId(), "project_id", "project id is required")
 	if appErr != nil {
@@ -111,10 +131,17 @@ func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.Updat
 	return mapProjectMembership(membership), nil
 }
 
-func (s *service) ListProjectMembers(ctx context.Context, req *taskv1.ListProjectMembersRequest) (*taskv1.ListProjectMembersResponse, *apperror.AppError) {
+func (s *service) ListProjectMembers(ctx context.Context, req *taskv1.ListProjectMembersRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectMembersResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list project members request is required")
 	}
+
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userID
 
 	projectID, appErr := requiredUUID(req.GetProjectId(), "project_id", "project id is required")
 	if appErr != nil {

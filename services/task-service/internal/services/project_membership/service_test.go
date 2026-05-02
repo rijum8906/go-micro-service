@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 )
@@ -126,7 +127,7 @@ func TestAddProjectMemberValidation(t *testing.T) {
 				},
 			})
 
-			res, err := svc.AddProjectMember(context.Background(), tc.req)
+			res, err := svc.AddProjectMember(context.Background(), tc.req, &dto.UserInfo{UserID: uuid.NewString()})
 			if res != nil {
 				t.Fatalf("expected nil response, got %#v", res)
 			}
@@ -158,7 +159,7 @@ func TestAddProjectMemberDuplicateConflict(t *testing.T) {
 		ProjectId: projectID.String(),
 		UserId:    userID.String(),
 		Role:      "member",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -183,7 +184,7 @@ func TestAddProjectMemberLookupErrorPropagation(t *testing.T) {
 		ProjectId: projectID.String(),
 		UserId:    userID.String(),
 		Role:      "member",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -229,7 +230,7 @@ func TestAddProjectMemberSuccess(t *testing.T) {
 		ProjectId: projectID.String(),
 		UserId:    userID.String(),
 		Role:      "admin",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -269,7 +270,7 @@ func TestRemoveProjectMemberSuccess(t *testing.T) {
 	res, err := svc.RemoveProjectMember(context.Background(), &taskv1.RemoveProjectMemberRequest{
 		ProjectId: projectID.String(),
 		UserId:    userID.String(),
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -306,7 +307,7 @@ func TestUpdateProjectMemberRoleSuccess(t *testing.T) {
 		ProjectId: projectID.String(),
 		UserId:    userID.String(),
 		Role:      "owner",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -347,7 +348,7 @@ func TestListProjectMembersSuccess(t *testing.T) {
 
 	res, err := svc.ListProjectMembers(context.Background(), &taskv1.ListProjectMembersRequest{
 		ProjectId: projectID.String(),
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -369,7 +370,7 @@ func TestListProjectMembersValidationAndRepoError(t *testing.T) {
 
 	res, err := svc.ListProjectMembers(context.Background(), &taskv1.ListProjectMembersRequest{
 		ProjectId: "bad-uuid",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -388,7 +389,7 @@ func TestListProjectMembersValidationAndRepoError(t *testing.T) {
 
 	res, err = svc.ListProjectMembers(context.Background(), &taskv1.ListProjectMembersRequest{
 		ProjectId: projectID.String(),
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}

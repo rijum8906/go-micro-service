@@ -15,7 +15,7 @@ type TaskCommentService interface {
 	CreateTaskComment(ctx context.Context, req *taskv1.CreateTaskCommentRequest, userInfo *dto.UserInfo) (*modelsv1.TaskComment, *apperror.AppError)
 	UpdateTaskComment(ctx context.Context, req *taskv1.UpdateTaskCommentRequest, userInfo *dto.UserInfo) (*modelsv1.TaskComment, *apperror.AppError)
 	DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskCommentRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
-	ListTaskComments(ctx context.Context, req *taskv1.ListTaskCommentsRequest) (*taskv1.ListTaskCommentsResponse, *apperror.AppError)
+	ListTaskComments(ctx context.Context, req *taskv1.ListTaskCommentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskCommentsResponse, *apperror.AppError)
 }
 
 type service struct {

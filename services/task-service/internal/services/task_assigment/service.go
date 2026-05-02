@@ -55,9 +55,12 @@ func (s *service) AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest,
 	return mapTaskAssignment(assignment), nil
 }
 
-func (s *service) UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequest) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *service) UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("unassign task request is required")
+	}
+	if _, appErr := utils.ValidateUserInfo(userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	taskID, assigneeType, assigneeID, appErr := parseAssignment(req.GetTaskId(), req.GetAssigneeType(), req.GetAssigneeId(), "task_id", "assignee_id")
@@ -149,9 +152,12 @@ func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 	return mapTaskAssignment(assignment), nil
 }
 
-func (s *service) ListTaskAssignments(ctx context.Context, req *taskv1.ListTaskAssignmentsRequest) (*taskv1.ListTaskAssignmentsResponse, *apperror.AppError) {
+func (s *service) ListTaskAssignments(ctx context.Context, req *taskv1.ListTaskAssignmentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskAssignmentsResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list task assignments request is required")
+	}
+	if _, appErr := utils.ValidateUserInfo(userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	taskID, appErr := requiredUUID(req.GetTaskId(), "task_id", "task id is required")

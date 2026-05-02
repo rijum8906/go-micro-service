@@ -123,9 +123,12 @@ func (s *service) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskC
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) ListTaskComments(ctx context.Context, req *taskv1.ListTaskCommentsRequest) (*taskv1.ListTaskCommentsResponse, *apperror.AppError) {
+func (s *service) ListTaskComments(ctx context.Context, req *taskv1.ListTaskCommentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskCommentsResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list task comments request is required")
+	}
+	if _, appErr := utils.ValidateUserInfo(userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	taskID, appErr := requiredUUID(req.GetTaskId(), "task_id", "task id is required")

@@ -13,9 +13,9 @@ import (
 
 type TaskAssignmentService interface {
 	AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest, userInfo *dto.UserInfo) (*modelsv1.TaskAssignment, *apperror.AppError)
-	UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequest) (*corev1.SuccessResponse, *apperror.AppError)
+	UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
 	ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequest, userInfo *dto.UserInfo) (*modelsv1.TaskAssignment, *apperror.AppError)
-	ListTaskAssignments(ctx context.Context, req *taskv1.ListTaskAssignmentsRequest) (*taskv1.ListTaskAssignmentsResponse, *apperror.AppError)
+	ListTaskAssignments(ctx context.Context, req *taskv1.ListTaskAssignmentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskAssignmentsResponse, *apperror.AppError)
 }
 
 type service struct {

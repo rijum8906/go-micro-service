@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
@@ -242,7 +243,7 @@ func TestGetProjectValidation(t *testing.T) {
 				},
 			})
 
-			res, err := svc.GetProject(context.Background(), tc.req)
+			res, err := svc.GetProject(context.Background(), tc.req, &dto.UserInfo{UserID: uuid.NewString()})
 			if res != nil {
 				t.Fatalf("expected nil response, got %#v", res)
 			}
@@ -267,7 +268,7 @@ func TestGetProjectRepoError(t *testing.T) {
 		},
 	})
 
-	res, err := svc.GetProject(context.Background(), &taskv1.GetProjectRequest{Id: projectID.String()})
+	res, err := svc.GetProject(context.Background(), &taskv1.GetProjectRequest{Id: projectID.String()}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -305,7 +306,7 @@ func TestUpdateProjectSuccess(t *testing.T) {
 		Id:          projectID.String(),
 		Name:        "Renamed",
 		Description: "Updated description",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -328,7 +329,7 @@ func TestArchiveProjectValidationAndRepoError(t *testing.T) {
 		},
 	})
 
-	res, err := svc.ArchiveProject(context.Background(), &taskv1.ArchiveProjectRequest{Id: "bad-uuid"})
+	res, err := svc.ArchiveProject(context.Background(), &taskv1.ArchiveProjectRequest{Id: "bad-uuid"}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -345,7 +346,7 @@ func TestArchiveProjectValidationAndRepoError(t *testing.T) {
 		},
 	})
 
-	res, err = svc.ArchiveProject(context.Background(), &taskv1.ArchiveProjectRequest{Id: projectID.String()})
+	res, err = svc.ArchiveProject(context.Background(), &taskv1.ArchiveProjectRequest{Id: projectID.String()}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -466,7 +467,7 @@ func TestListProjectsSuccess(t *testing.T) {
 	res, err := svc.ListProjects(context.Background(), &taskv1.ListProjectsRequest{
 		OrganizationId: orgID.String(),
 		Status:         "active",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -488,7 +489,7 @@ func TestListProjectsInvalidOrganizationAndRepoError(t *testing.T) {
 
 	res, err := svc.ListProjects(context.Background(), &taskv1.ListProjectsRequest{
 		OrganizationId: "bad-uuid",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -504,7 +505,7 @@ func TestListProjectsInvalidOrganizationAndRepoError(t *testing.T) {
 		},
 	})
 
-	res, err = svc.ListProjects(context.Background(), &taskv1.ListProjectsRequest{Status: "archived"})
+	res, err = svc.ListProjects(context.Background(), &taskv1.ListProjectsRequest{Status: "archived"}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -532,7 +533,7 @@ func TestCompleteProjectSuccess(t *testing.T) {
 		},
 	})
 
-	res, err := svc.CompleteProject(context.Background(), &taskv1.CompleteProjectRequest{Id: projectID.String()})
+	res, err := svc.CompleteProject(context.Background(), &taskv1.CompleteProjectRequest{Id: projectID.String()}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}

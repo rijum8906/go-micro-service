@@ -13,12 +13,12 @@ import (
 
 type ProjectService interface {
 	CreateProject(ctx context.Context, req *taskv1.CreateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError)
-	GetProject(ctx context.Context, req *taskv1.GetProjectRequest) (*modelsv1.Project, *apperror.AppError)
-	UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRequest) (*modelsv1.Project, *apperror.AppError)
-	CompleteProject(ctx context.Context, req *taskv1.CompleteProjectRequest) (*modelsv1.Project, *apperror.AppError)
-	ArchiveProject(ctx context.Context, req *taskv1.ArchiveProjectRequest) (*modelsv1.Project, *apperror.AppError)
+	GetProject(ctx context.Context, req *taskv1.GetProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError)
+	UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError)
+	CompleteProject(ctx context.Context, req *taskv1.CompleteProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError)
+	ArchiveProject(ctx context.Context, req *taskv1.ArchiveProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError)
 	DeleteProject(ctx context.Context, req *taskv1.DeleteProjectRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
-	ListProjects(ctx context.Context, req *taskv1.ListProjectsRequest) (*taskv1.ListProjectsResponse, *apperror.AppError)
+	ListProjects(ctx context.Context, req *taskv1.ListProjectsRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectsResponse, *apperror.AppError)
 }
 
 type service struct {

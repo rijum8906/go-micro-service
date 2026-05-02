@@ -2,8 +2,6 @@ package project
 
 import (
 	"context"
-	"strings"
-
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -11,6 +9,7 @@ import (
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
+	"strings"
 )
 
 func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
@@ -47,13 +46,20 @@ func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRe
 	return mapProject(project), nil
 }
 
-func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("get project request is required")
 	}
 	if strings.TrimSpace(req.GetId()) == "" {
 		return nil, apperror.ErrValidation.WithMessage("project id is required")
 	}
+
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userID
 
 	id, appErr := utils.NewUUID(req.GetId())
 	if appErr != nil {
@@ -68,7 +74,7 @@ func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest)
 	return mapProject(project), nil
 }
 
-func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRequest) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update project request is required")
 	}
@@ -78,6 +84,13 @@ func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRe
 	if strings.TrimSpace(req.GetName()) == "" {
 		return nil, apperror.ErrValidation.WithMessage("name is required")
 	}
+
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userID
 
 	id, appErr := utils.NewUUID(req.GetId())
 	if appErr != nil {
@@ -96,13 +109,19 @@ func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRe
 	return mapProject(project), nil
 }
 
-func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProjectRequest) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("complete project request is required")
 	}
 	if strings.TrimSpace(req.GetId()) == "" {
 		return nil, apperror.ErrValidation.WithMessage("project id is required")
 	}
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userID
 
 	id, appErr := utils.NewUUID(req.GetId())
 	if appErr != nil {
@@ -117,13 +136,20 @@ func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProje
 	return mapProject(project), nil
 }
 
-func (s *service) ArchiveProject(ctx context.Context, req *taskv1.ArchiveProjectRequest) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) ArchiveProject(ctx context.Context, req *taskv1.ArchiveProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("archive project request is required")
 	}
 	if strings.TrimSpace(req.GetId()) == "" {
 		return nil, apperror.ErrValidation.WithMessage("project id is required")
 	}
+
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userID
 
 	id, appErr := utils.NewUUID(req.GetId())
 	if appErr != nil {
@@ -170,10 +196,16 @@ func (s *service) DeleteProject(ctx context.Context, req *taskv1.DeleteProjectRe
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) ListProjects(ctx context.Context, req *taskv1.ListProjectsRequest) (*taskv1.ListProjectsResponse, *apperror.AppError) {
+func (s *service) ListProjects(ctx context.Context, req *taskv1.ListProjectsRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectsResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list projects request is required")
 	}
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userID
 
 	organizationID, appErr := utils.ParseOptionalUUID(req.GetOrganizationId(), "organization_id")
 	if appErr != nil {

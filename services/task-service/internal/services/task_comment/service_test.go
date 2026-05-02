@@ -380,7 +380,7 @@ func TestListTaskCommentsSuccess(t *testing.T) {
 
 	res, err := svc.ListTaskComments(context.Background(), &taskv1.ListTaskCommentsRequest{
 		TaskId: taskID.String(),
-	})
+	}, &coredto.UserInfo{UserID: authorID.String()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -393,6 +393,7 @@ func TestListTaskCommentsSuccess(t *testing.T) {
 }
 
 func TestListTaskCommentsValidationAndRepoError(t *testing.T) {
+	authorID := uuid.New()
 	svc := mustTaskCommentService(t, &stubTaskCommentRepository{
 		listTaskCommentsFn: func(context.Context, uuid.UUID) ([]db.TaskComment, *apperror.AppError) {
 			t.Fatal("repository should not be called for invalid task id")
@@ -402,7 +403,7 @@ func TestListTaskCommentsValidationAndRepoError(t *testing.T) {
 
 	res, err := svc.ListTaskComments(context.Background(), &taskv1.ListTaskCommentsRequest{
 		TaskId: "bad-uuid",
-	})
+	}, &coredto.UserInfo{UserID: authorID.String()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -421,7 +422,7 @@ func TestListTaskCommentsValidationAndRepoError(t *testing.T) {
 
 	res, err = svc.ListTaskComments(context.Background(), &taskv1.ListTaskCommentsRequest{
 		TaskId: taskID.String(),
-	})
+	}, &coredto.UserInfo{UserID: authorID.String()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}

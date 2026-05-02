@@ -18,7 +18,7 @@ func (h *TaskHandler) CreateTaskComment(ctx context.Context, req *taskv1.CreateT
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("create task comment user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("create task comment user metadata is required"))
 	}
 
 	result, appErr := h.taskCommentService.CreateTaskComment(ctx, req, &userInfo)
@@ -36,7 +36,7 @@ func (h *TaskHandler) UpdateTaskComment(ctx context.Context, req *taskv1.UpdateT
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("update task comment user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("update task comment user metadata is required"))
 	}
 
 	result, appErr := h.taskCommentService.UpdateTaskComment(ctx, req, &userInfo)
@@ -54,7 +54,7 @@ func (h *TaskHandler) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteT
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("delete task comment user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("delete task comment user metadata is required"))
 	}
 
 	result, appErr := h.taskCommentService.DeleteTaskComment(ctx, req, &userInfo)
@@ -70,7 +70,12 @@ func (h *TaskHandler) ListTaskComments(ctx context.Context, req *taskv1.ListTask
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("list task comments request is required"))
 	}
 
-	result, appErr := h.taskCommentService.ListTaskComments(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("list task comments user metadata is required"))
+	}
+
+	result, appErr := h.taskCommentService.ListTaskComments(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}

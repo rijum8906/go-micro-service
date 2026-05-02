@@ -19,7 +19,7 @@ func (h *TaskHandler) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequ
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("create task user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("create task user metadata is required"))
 	}
 
 	result, appErr := h.taskService.CreateTask(ctx, req, &userInfo)
@@ -32,10 +32,15 @@ func (h *TaskHandler) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequ
 
 func (h *TaskHandler) GetTask(ctx context.Context, req *taskv1.GetTaskRequest) (*modelsv1.Task, error) {
 	if req == nil {
-		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("create task request is required"))
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("get task request is required"))
 	}
 
-	result, appErr := h.taskService.GetTask(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("get task user metadata is required"))
+	}
+
+	result, appErr := h.taskService.GetTask(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -45,10 +50,15 @@ func (h *TaskHandler) GetTask(ctx context.Context, req *taskv1.GetTaskRequest) (
 
 func (h *TaskHandler) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksByProjectRequest) (*taskv1.ListTasksByProjectResponse, error) {
 	if req == nil {
-		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("create task request is required"))
+		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("list tasks by project request is required"))
 	}
 
-	result, appErr := h.taskService.ListTasksByProject(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("list tasks by project user metadata is required"))
+	}
+
+	result, appErr := h.taskService.ListTasksByProject(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -63,7 +73,7 @@ func (h *TaskHandler) UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequ
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("update task user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("update task user metadata is required"))
 	}
 
 	result, appErr := h.taskService.UpdateTask(ctx, req, &userInfo)
@@ -81,7 +91,7 @@ func (h *TaskHandler) DeleteTask(ctx context.Context, req *taskv1.DeleteTaskRequ
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("delete task user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("delete task user metadata is required"))
 	}
 
 	result, appErr := h.taskService.DeleteTask(ctx, req, &userInfo)
@@ -99,7 +109,7 @@ func (h *TaskHandler) ArchiveTask(ctx context.Context, req *taskv1.ArchiveTaskRe
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("archive task user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("archive task user metadata is required"))
 	}
 
 	result, appErr := h.taskService.ArchiveTask(ctx, req, &userInfo)
@@ -117,7 +127,7 @@ func (h *TaskHandler) UpdateTaskStatus(ctx context.Context, req *taskv1.UpdateTa
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("update task status user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("update task status user metadata is required"))
 	}
 
 	result, appErr := h.taskService.UpdateTaskStatus(ctx, req, &userInfo)
@@ -135,7 +145,7 @@ func (h *TaskHandler) UpdateTaskProgress(ctx context.Context, req *taskv1.Update
 
 	userInfo, ok := metadata.ReceiveUserInfo(ctx)
 	if !ok {
-		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("update task progress user metadata is required"))
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("update task progress user metadata is required"))
 	}
 
 	result, appErr := h.taskService.UpdateTaskProgress(ctx, req, &userInfo)
@@ -151,7 +161,12 @@ func (h *TaskHandler) ListTasksByOrganization(ctx context.Context, req *taskv1.L
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("list tasks by organization request is required"))
 	}
 
-	result, appErr := h.taskService.ListTasksByOrganization(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("list tasks by organization user metadata is required"))
+	}
+
+	result, appErr := h.taskService.ListTasksByOrganization(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -164,7 +179,12 @@ func (h *TaskHandler) ListTasksByParent(ctx context.Context, req *taskv1.ListTas
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("list tasks by parent request is required"))
 	}
 
-	result, appErr := h.taskService.ListTasksByParent(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("list tasks by parent user metadata is required"))
+	}
+
+	result, appErr := h.taskService.ListTasksByParent(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}
@@ -177,7 +197,12 @@ func (h *TaskHandler) ListTasksByCreator(ctx context.Context, req *taskv1.ListTa
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("list tasks by creator request is required"))
 	}
 
-	result, appErr := h.taskService.ListTasksByCreator(ctx, req)
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, utils.MapAppError(apperror.ErrUnAuthenticated.WithMessage("list tasks by creator user metadata is required"))
+	}
+
+	result, appErr := h.taskService.ListTasksByCreator(ctx, req, &userInfo)
 	if appErr != nil {
 		return nil, utils.MapAppError(appErr)
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/dto"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
@@ -291,7 +292,7 @@ func TestGetTaskRepoError(t *testing.T) {
 		},
 	})
 
-	res, err := svc.GetTask(context.Background(), &taskv1.GetTaskRequest{Id: taskID.String()})
+	res, err := svc.GetTask(context.Background(), &taskv1.GetTaskRequest{Id: taskID.String()}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -322,7 +323,7 @@ func TestListTasksByProjectFiltersByStatus(t *testing.T) {
 	res, err := svc.ListTasksByProject(context.Background(), &taskv1.ListTasksByProjectRequest{
 		ProjectId: projectID.String(),
 		Status:    "completed",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
@@ -345,7 +346,7 @@ func TestListTasksByProjectValidationAndRepoError(t *testing.T) {
 	res, err := svc.ListTasksByProject(context.Background(), &taskv1.ListTasksByProjectRequest{
 		ProjectId: uuid.NewString(),
 		Status:    "done",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -365,7 +366,7 @@ func TestListTasksByProjectValidationAndRepoError(t *testing.T) {
 	res, err = svc.ListTasksByProject(context.Background(), &taskv1.ListTasksByProjectRequest{
 		ProjectId: projectID.String(),
 		Status:    "pending",
-	})
+	}, &dto.UserInfo{UserID: uuid.NewString()})
 	if res != nil {
 		t.Fatalf("expected nil response, got %#v", res)
 	}
@@ -558,7 +559,7 @@ func TestListTasksByOrganizationAndCreatorValidation(t *testing.T) {
 
 	orgRes, orgErr := svc.ListTasksByOrganization(context.Background(), &taskv1.ListTasksByOrganizationRequest{
 		OrganizationId: "bad-uuid",
-	})
+	}, &coredto.UserInfo{UserID: uuid.NewString()})
 	if orgRes != nil {
 		t.Fatalf("expected nil response, got %#v", orgRes)
 	}
@@ -566,7 +567,7 @@ func TestListTasksByOrganizationAndCreatorValidation(t *testing.T) {
 
 	creatorRes, creatorErr := svc.ListTasksByCreator(context.Background(), &taskv1.ListTasksByCreatorRequest{
 		CreatedBy: "bad-uuid",
-	})
+	}, &coredto.UserInfo{UserID: uuid.NewString()})
 	if creatorRes != nil {
 		t.Fatalf("expected nil response, got %#v", creatorRes)
 	}

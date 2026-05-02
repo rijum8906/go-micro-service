@@ -74,13 +74,20 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 	return mapTask(task), nil
 }
 
-func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest) (*modelsv1.Task, *apperror.AppError) {
+func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("get task request is required")
 	}
 	if strings.TrimSpace(req.GetId()) == "" {
 		return nil, apperror.ErrValidation.WithMessage("task id is required")
 	}
+
+	userIDCheck, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userIDCheck
 
 	id, appErr := utils.NewUUID(req.GetId())
 	if appErr != nil {
@@ -95,13 +102,21 @@ func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest) (*mod
 	return mapTask(task), nil
 }
 
-func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksByProjectRequest) (*taskv1.ListTasksByProjectResponse, *apperror.AppError) {
+func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksByProjectRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByProjectResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by project request is required")
 	}
 	if strings.TrimSpace(req.GetProjectId()) == "" {
 		return nil, apperror.ErrValidation.WithMessage("project id is required")
 	}
+
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	_ = userID
+
 	status, appErr := validateOptionalTaskStatus(req.GetStatus())
 	if appErr != nil {
 		return nil, appErr
@@ -342,9 +357,12 @@ func (s *service) UpdateTaskProgress(ctx context.Context, req *taskv1.UpdateTask
 	return mapTask(task), nil
 }
 
-func (s *service) ListTasksByOrganization(ctx context.Context, req *taskv1.ListTasksByOrganizationRequest) (*taskv1.ListTasksByOrganizationResponse, *apperror.AppError) {
+func (s *service) ListTasksByOrganization(ctx context.Context, req *taskv1.ListTasksByOrganizationRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByOrganizationResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by organization request is required")
+	}
+	if _, appErr := utils.ValidateUserInfo(userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	organizationID, appErr := requiredUUID(req.GetOrganizationId(), "organization_id", "organization id is required")
@@ -369,9 +387,12 @@ func (s *service) ListTasksByOrganization(ctx context.Context, req *taskv1.ListT
 	}, nil
 }
 
-func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksByParentRequest) (*taskv1.ListTasksByParentResponse, *apperror.AppError) {
+func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksByParentRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByParentResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by parent request is required")
+	}
+	if _, appErr := utils.ValidateUserInfo(userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	parentTaskID, appErr := requiredUUID(req.GetParentTaskId(), "parent_task_id", "parent task id is required")
@@ -389,9 +410,12 @@ func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksBy
 	}, nil
 }
 
-func (s *service) ListTasksByCreator(ctx context.Context, req *taskv1.ListTasksByCreatorRequest) (*taskv1.ListTasksByCreatorResponse, *apperror.AppError) {
+func (s *service) ListTasksByCreator(ctx context.Context, req *taskv1.ListTasksByCreatorRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByCreatorResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by creator request is required")
+	}
+	if _, appErr := utils.ValidateUserInfo(userInfo); appErr != nil {
+		return nil, appErr
 	}
 
 	createdBy, appErr := requiredUUID(req.GetCreatedBy(), "created_by", "created_by is required")
