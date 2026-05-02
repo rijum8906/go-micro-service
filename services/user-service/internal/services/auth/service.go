@@ -206,8 +206,10 @@ func (s *authService) RequestEmailVerification(ctx context.Context, req *authv1.
 	}
 
 	if appErr = s.publisher.Publish(jobs.JobUserRequestedEmailVerification, dto.EmailVerificationDTO{
-		ClientName:      prof.FirstName + " " + prof.LastName,
-		ClientEmail:     user.Email,
+		BaseEmailDTO: dto.BaseEmailDTO{
+			ClientName:  prof.FirstName + " " + prof.LastName,
+			ClientEmail: user.Email,
+		},
 		VerificationURL: verificationURL,
 		Validity:        "10 minutes",
 	}); appErr != nil {
@@ -246,10 +248,12 @@ func (s *authService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 	}
 
 	if appErr = s.publisher.Publish(jobs.JobUserRequestedPasswordReset, dto.PasswordResetDTO{
-		ClientName:  prof.FirstName + " " + prof.LastName,
-		ClientEmail: user.Email,
-		ResetURL:    resetURL,
-		Validity:    "10 minutes",
+		BaseEmailDTO: dto.BaseEmailDTO{
+			ClientName:  prof.FirstName + " " + prof.LastName,
+			ClientEmail: user.Email,
+		},
+		ResetURL: resetURL,
+		Validity: "10 minutes",
 	}); appErr != nil {
 		return nil, appErr
 	}
