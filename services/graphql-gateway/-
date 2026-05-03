@@ -1,0 +1,241 @@
+2026-05-02 09:15:35	[34mINFO[0m	runtime/proc.go:290	service started	{"service": "graphql-gateway", "env": "development", "port": 8080}
+2026-05-02 09:15:42	[31mERROR[0m	gqlerror/error.go:125	rpc error: code = Unavailable desc = name resolver error: produced zero addresses	{"details": [{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"}]}
+github.com/vektah/gqlparser/v2/gqlerror.WrapPath
+	/home/rijum/go/pkg/mod/github.com/vektah/gqlparser/v2@v2.5.32/gqlerror/error.go:125
+github.com/99designs/gqlgen/graphql.ErrorOnPath
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/error.go:35
+github.com/99designs/gqlgen/graphql.AddError
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_response.go:63
+github.com/99designs/gqlgen/graphql.(*OperationContext).Error
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_operation.go:125
+github.com/99designs/gqlgen/graphql.resolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:118
+github.com/99designs/gqlgen/graphql.ResolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:21
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation_RequestPasswordReset
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:457
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation.func5
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1680
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func3
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:79
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1679
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executableSchema).Exec.func2
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/root_.generated.go:847
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:136
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func2
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:76
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:135
+github.com/99designs/gqlgen/graphql/handler/transport.POST.Do
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/transport/http_post.go:129
+github.com/99designs/gqlgen/graphql/handler.(*Server).ServeHTTP
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/server.go:166
+net/http.(*ServeMux).ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2828
+github.com/rijum8906/relay/services/graphql-gateway/app.(*Application).initHTTPServer.WithRequestHeaders.func1
+	/home/rijum/Projects/go-ms/services/graphql-gateway/internal/middleware/request_context.go:25
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+github.com/rijum8906/relay/services/graphql-gateway/internal/middleware.CORS.(*Cors).Handler.func1
+	/home/rijum/go/pkg/mod/github.com/rs/cors@v1.11.1/cors.go:289
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+net/http.serverHandler.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:3311
+net/http.(*conn).serve
+	/usr/lib/go/src/net/http/server.go:2073
+2026-05-02 09:15:43	[31mERROR[0m	gqlerror/error.go:125	rpc error: code = Unavailable desc = name resolver error: produced zero addresses	{"details": [{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"}]}
+github.com/vektah/gqlparser/v2/gqlerror.WrapPath
+	/home/rijum/go/pkg/mod/github.com/vektah/gqlparser/v2@v2.5.32/gqlerror/error.go:125
+github.com/99designs/gqlgen/graphql.ErrorOnPath
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/error.go:35
+github.com/99designs/gqlgen/graphql.AddError
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_response.go:63
+github.com/99designs/gqlgen/graphql.(*OperationContext).Error
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_operation.go:125
+github.com/99designs/gqlgen/graphql.resolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:118
+github.com/99designs/gqlgen/graphql.ResolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:21
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation_RequestPasswordReset
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:457
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation.func5
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1680
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func3
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:79
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1679
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executableSchema).Exec.func2
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/root_.generated.go:847
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:136
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func2
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:76
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:135
+github.com/99designs/gqlgen/graphql/handler/transport.POST.Do
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/transport/http_post.go:129
+github.com/99designs/gqlgen/graphql/handler.(*Server).ServeHTTP
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/server.go:166
+net/http.(*ServeMux).ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2828
+github.com/rijum8906/relay/services/graphql-gateway/app.(*Application).initHTTPServer.WithRequestHeaders.func1
+	/home/rijum/Projects/go-ms/services/graphql-gateway/internal/middleware/request_context.go:25
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+github.com/rijum8906/relay/services/graphql-gateway/internal/middleware.CORS.(*Cors).Handler.func1
+	/home/rijum/go/pkg/mod/github.com/rs/cors@v1.11.1/cors.go:289
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+net/http.serverHandler.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:3311
+net/http.(*conn).serve
+	/usr/lib/go/src/net/http/server.go:2073
+2026-05-02 09:16:28	[31mERROR[0m	gqlerror/error.go:125	rpc error: code = Unavailable desc = name resolver error: produced zero addresses	{"details": [{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"}]}
+github.com/vektah/gqlparser/v2/gqlerror.WrapPath
+	/home/rijum/go/pkg/mod/github.com/vektah/gqlparser/v2@v2.5.32/gqlerror/error.go:125
+github.com/99designs/gqlgen/graphql.ErrorOnPath
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/error.go:35
+github.com/99designs/gqlgen/graphql.AddError
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_response.go:63
+github.com/99designs/gqlgen/graphql.(*OperationContext).Error
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_operation.go:125
+github.com/99designs/gqlgen/graphql.resolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:118
+github.com/99designs/gqlgen/graphql.ResolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:21
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation_RequestPasswordReset
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:457
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation.func5
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1680
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func3
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:79
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1679
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executableSchema).Exec.func2
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/root_.generated.go:847
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:136
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func2
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:76
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:135
+github.com/99designs/gqlgen/graphql/handler/transport.POST.Do
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/transport/http_post.go:129
+github.com/99designs/gqlgen/graphql/handler.(*Server).ServeHTTP
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/server.go:166
+net/http.(*ServeMux).ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2828
+github.com/rijum8906/relay/services/graphql-gateway/app.(*Application).initHTTPServer.WithRequestHeaders.func1
+	/home/rijum/Projects/go-ms/services/graphql-gateway/internal/middleware/request_context.go:25
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+github.com/rijum8906/relay/services/graphql-gateway/internal/middleware.CORS.(*Cors).Handler.func1
+	/home/rijum/go/pkg/mod/github.com/rs/cors@v1.11.1/cors.go:289
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+net/http.serverHandler.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:3311
+net/http.(*conn).serve
+	/usr/lib/go/src/net/http/server.go:2073
+2026-05-02 09:16:28	[31mERROR[0m	gqlerror/error.go:125	rpc error: code = Unavailable desc = name resolver error: produced zero addresses	{"details": [{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"}]}
+github.com/vektah/gqlparser/v2/gqlerror.WrapPath
+	/home/rijum/go/pkg/mod/github.com/vektah/gqlparser/v2@v2.5.32/gqlerror/error.go:125
+github.com/99designs/gqlgen/graphql.ErrorOnPath
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/error.go:35
+github.com/99designs/gqlgen/graphql.AddError
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_response.go:63
+github.com/99designs/gqlgen/graphql.(*OperationContext).Error
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_operation.go:125
+github.com/99designs/gqlgen/graphql.resolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:118
+github.com/99designs/gqlgen/graphql.ResolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:21
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation_RequestPasswordReset
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:457
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation.func5
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1680
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func3
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:79
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1679
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executableSchema).Exec.func2
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/root_.generated.go:847
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:136
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func2
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:76
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:135
+github.com/99designs/gqlgen/graphql/handler/transport.POST.Do
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/transport/http_post.go:129
+github.com/99designs/gqlgen/graphql/handler.(*Server).ServeHTTP
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/server.go:166
+net/http.(*ServeMux).ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2828
+github.com/rijum8906/relay/services/graphql-gateway/app.(*Application).initHTTPServer.WithRequestHeaders.func1
+	/home/rijum/Projects/go-ms/services/graphql-gateway/internal/middleware/request_context.go:25
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+github.com/rijum8906/relay/services/graphql-gateway/internal/middleware.CORS.(*Cors).Handler.func1
+	/home/rijum/go/pkg/mod/github.com/rs/cors@v1.11.1/cors.go:289
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+net/http.serverHandler.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:3311
+net/http.(*conn).serve
+	/usr/lib/go/src/net/http/server.go:2073
+2026-05-02 09:16:28	[31mERROR[0m	gqlerror/error.go:125	rpc error: code = Unavailable desc = name resolver error: produced zero addresses	{"details": [{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"},{"Field":"error","Message":"rpc error: code = Unavailable desc = name resolver error: produced zero addresses"}]}
+github.com/vektah/gqlparser/v2/gqlerror.WrapPath
+	/home/rijum/go/pkg/mod/github.com/vektah/gqlparser/v2@v2.5.32/gqlerror/error.go:125
+github.com/99designs/gqlgen/graphql.ErrorOnPath
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/error.go:35
+github.com/99designs/gqlgen/graphql.AddError
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_response.go:63
+github.com/99designs/gqlgen/graphql.(*OperationContext).Error
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/context_operation.go:125
+github.com/99designs/gqlgen/graphql.resolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:118
+github.com/99designs/gqlgen/graphql.ResolveField[...]
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/resolve_field.go:21
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation_RequestPasswordReset
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:457
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation.func5
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1680
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func3
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:79
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executionContext)._Mutation
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/schema.generated.go:1679
+github.com/rijum8906/relay/services/graphql-gateway/graph/generated.(*executableSchema).Exec.func2
+	/home/rijum/Projects/go-ms/services/graphql-gateway/graph/generated/root_.generated.go:847
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:136
+github.com/99designs/gqlgen/graphql/executor.processExtensions.func2
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/extensions.go:76
+github.com/99designs/gqlgen/graphql/executor.(*Executor).DispatchOperation.func1.1
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/executor/executor.go:135
+github.com/99designs/gqlgen/graphql/handler/transport.POST.Do
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/transport/http_post.go:129
+github.com/99designs/gqlgen/graphql/handler.(*Server).ServeHTTP
+	/home/rijum/go/pkg/mod/github.com/99designs/gqlgen@v0.17.88/graphql/handler/server.go:166
+net/http.(*ServeMux).ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2828
+github.com/rijum8906/relay/services/graphql-gateway/app.(*Application).initHTTPServer.WithRequestHeaders.func1
+	/home/rijum/Projects/go-ms/services/graphql-gateway/internal/middleware/request_context.go:25
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+github.com/rijum8906/relay/services/graphql-gateway/internal/middleware.CORS.(*Cors).Handler.func1
+	/home/rijum/go/pkg/mod/github.com/rs/cors@v1.11.1/cors.go:289
+net/http.HandlerFunc.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:2286
+net/http.serverHandler.ServeHTTP
+	/usr/lib/go/src/net/http/server.go:3311
+net/http.(*conn).serve
+	/usr/lib/go/src/net/http/server.go:2073
+2026-05-02 09:20:56	[34mINFO[0m	runtime/proc.go:290	shutdown signal received	{"signal": "interrupt"}
+2026-05-02 09:20:56	[34mINFO[0m	runtime/proc.go:290	shutdown complete
+2026-05-02 09:21:00	[34mINFO[0m	runtime/proc.go:290	service started	{"service": "graphql-gateway", "env": "development", "port": 8080}
+2026-05-02 10:04:34	[34mINFO[0m	runtime/proc.go:290	shutdown signal received	{"signal": "interrupt"}
+2026-05-02 10:04:34	[34mINFO[0m	runtime/proc.go:290	shutdown complete
