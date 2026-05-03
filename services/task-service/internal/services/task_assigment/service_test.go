@@ -11,6 +11,7 @@ import (
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
+	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 )
 
 type stubTaskAssignmentRepository struct {
@@ -57,7 +58,7 @@ func (s *stubTaskAssignmentRepository) ListActiveAssignmentsByAssignee(ctx conte
 }
 
 func TestNewTaskAssignmentService(t *testing.T) {
-	svc, err := NewTaskAssignmentService(nil)
+	svc, err := NewTaskAssignmentService(nil, servicetestutil.NewAllowAuthorizer())
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -68,7 +69,7 @@ func TestNewTaskAssignmentService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewTaskAssignmentService(&stubTaskAssignmentRepository{})
+	svc, err = NewTaskAssignmentService(&stubTaskAssignmentRepository{}, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -524,7 +525,7 @@ func TestListTaskAssignmentsValidation(t *testing.T) {
 func mustTaskAssignmentService(t *testing.T, repo *stubTaskAssignmentRepository) TaskAssignmentService {
 	t.Helper()
 
-	svc, err := NewTaskAssignmentService(repo)
+	svc, err := NewTaskAssignmentService(repo, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("failed to construct task assignment service: %v", err)
 	}

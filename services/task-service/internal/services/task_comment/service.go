@@ -10,6 +10,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
@@ -27,6 +28,9 @@ func (s *service) CreateTaskComment(ctx context.Context, req *taskv1.CreateTaskC
 
 	taskID, appErr := requiredUUID(req.GetTaskId(), "task_id", "task id is required")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 
@@ -67,6 +71,9 @@ func (s *service) UpdateTaskComment(ctx context.Context, req *taskv1.UpdateTaskC
 	if appErr != nil {
 		return nil, appErr
 	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, comment.TaskID, userInfo, authz.RoleMember); appErr != nil {
+		return nil, appErr
+	}
 
 	userID, appErr := utils.NewUUID(userInfo.UserID)
 	if appErr != nil {
@@ -104,6 +111,9 @@ func (s *service) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskC
 	if appErr != nil {
 		return nil, appErr
 	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, comment.TaskID, userInfo, authz.RoleMember); appErr != nil {
+		return nil, appErr
+	}
 
 	userID, appErr := utils.NewUUID(userInfo.UserID)
 	if appErr != nil {
@@ -133,6 +143,9 @@ func (s *service) ListTaskComments(ctx context.Context, req *taskv1.ListTaskComm
 
 	taskID, appErr := requiredUUID(req.GetTaskId(), "task_id", "task id is required")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 

@@ -2,14 +2,16 @@ package project
 
 import (
 	"context"
+	"strings"
+
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
-	"strings"
 )
 
 func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
@@ -66,6 +68,10 @@ func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest,
 		return nil, appErr.WithDetail("field", "id")
 	}
 
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleMember) ; appErr != nil {
+		return nil, appErr
+	}
+
 	project, appErr := s.repo.GetProject(ctx, id)
 	if appErr != nil {
 		return nil, appErr
@@ -95,6 +101,10 @@ func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRe
 	id, appErr := utils.NewUUID(req.GetId())
 	if appErr != nil {
 		return nil, appErr.WithDetail("field", "id")
+	}
+
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin) ; appErr != nil {
+		return nil, appErr
 	}
 
 	project, appErr := s.repo.UpdateProject(ctx, db.UpdateProjectParams{
@@ -128,6 +138,10 @@ func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProje
 		return nil, appErr.WithDetail("field", "id")
 	}
 
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin) ; appErr != nil {
+		return nil, appErr
+	}
+
 	project, appErr := s.repo.CompleteProject(ctx, id)
 	if appErr != nil {
 		return nil, appErr
@@ -156,6 +170,10 @@ func (s *service) ArchiveProject(ctx context.Context, req *taskv1.ArchiveProject
 		return nil, appErr.WithDetail("field", "id")
 	}
 
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin) ; appErr != nil {
+		return nil, appErr
+	}
+
 	project, appErr := s.repo.ArchiveProject(ctx, id)
 	if appErr != nil {
 		return nil, appErr
@@ -182,6 +200,10 @@ func (s *service) DeleteProject(ctx context.Context, req *taskv1.DeleteProjectRe
 
 	deletedBy, appErr := utils.NewUUID(userInfo.UserID)
 	if appErr != nil {
+		return nil, appErr
+	}
+	
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleOwner) ; appErr != nil {
 		return nil, appErr
 	}
 

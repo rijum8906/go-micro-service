@@ -12,6 +12,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
@@ -45,6 +46,21 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 	parentTaskID, appErr := utils.ParseOptionalUUID(req.GetParentTaskId(), "parent_task_id")
 	if appErr != nil {
 		return nil, appErr
+	}
+	var parentTask *db.Task
+	if parentTaskID.Valid {
+		parentTask, appErr = s.authz.RequireTaskRole(ctx, parentTaskID.Bytes, userInfo, authz.RoleMember)
+		if appErr != nil {
+			return nil, appErr
+		}
+		if appErr = validateChildTaskScope(parentTask, organizationID, projectID); appErr != nil {
+			return nil, appErr
+		}
+	}
+	if projectID.Valid {
+		if _, appErr = s.authz.RequireProjectRole(ctx, projectID.Bytes, userInfo, authz.RoleMember); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	dueAt, appErr := utils.ParseOptionalTimestamp(req.GetDueAt(), "due_at")
@@ -93,6 +109,9 @@ func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest, userI
 	if appErr != nil {
 		return nil, appErr.WithDetail("field", "id")
 	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
+		return nil, appErr
+	}
 
 	task, appErr := s.repo.GetTask(ctx, id)
 	if appErr != nil {
@@ -126,6 +145,9 @@ func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksB
 	if appErr != nil {
 		return nil, appErr.WithDetail("field", "project_id")
 	}
+	if _, appErr = s.authz.RequireProjectRole(ctx, projectUUID, userInfo, authz.RoleMember); appErr != nil {
+		return nil, appErr
+	}
 
 	tasks, appErr := s.repo.ListTasksByProject(ctx, pgtype.UUID{
 		Bytes: projectUUID,
@@ -153,6 +175,9 @@ func (s *service) UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequest,
 
 	id, appErr := requiredUUID(req.GetId(), "id", "task id is required")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 
@@ -203,8 +228,7 @@ func (s *service) DeleteTask(ctx context.Context, req *taskv1.DeleteTaskRequest,
 	if appErr != nil {
 		return nil, appErr
 	}
-
-	if _, appErr = s.repo.GetTask(ctx, id); appErr != nil {
+	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
 		return nil, appErr
 	}
 
@@ -235,8 +259,7 @@ func (s *service) ArchiveTask(ctx context.Context, req *taskv1.ArchiveTaskReques
 	if appErr != nil {
 		return nil, appErr
 	}
-
-	if _, appErr = s.repo.GetTask(ctx, id); appErr != nil {
+	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
 		return nil, appErr
 	}
 
@@ -266,6 +289,9 @@ func (s *service) UpdateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskSt
 
 	id, appErr := requiredUUID(req.GetId(), "id", "task id is required")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 
@@ -335,8 +361,7 @@ func (s *service) UpdateTaskProgress(ctx context.Context, req *taskv1.UpdateTask
 	if appErr != nil {
 		return nil, appErr
 	}
-
-	if _, appErr = s.repo.GetTask(ctx, id); appErr != nil {
+	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 
@@ -391,11 +416,16 @@ func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksBy
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by parent request is required")
 	}
-	if _, appErr := utils.ValidateUserInfo(userInfo); appErr != nil {
+	userID, appErr := utils.ValidateUserInfo(userInfo)
+	if appErr != nil {
 		return nil, appErr
 	}
 
 	parentTaskID, appErr := requiredUUID(req.GetParentTaskId(), "parent_task_id", "parent task id is required")
+	if appErr != nil {
+		return nil, appErr
+	}
+	parentTask, appErr := s.authz.RequireTaskRole(ctx, parentTaskID, userInfo, authz.RoleMember)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -406,7 +436,7 @@ func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksBy
 	}
 
 	return &taskv1.ListTasksByParentResponse{
-		Tasks: mapTasks(tasks),
+		Tasks: mapTasks(filterTasksByParentScope(tasks, parentTask, userID)),
 	}, nil
 }
 
@@ -502,6 +532,69 @@ func filterTasksByStatus(tasks []db.Task, status string) []db.Task {
 	}
 
 	return filtered
+}
+
+func validateChildTaskScope(parent *db.Task, organizationID, projectID pgtype.UUID) *apperror.AppError {
+	if parent == nil {
+		return nil
+	}
+
+	if parent.ProjectID.Valid {
+		if !optionalUUIDEqual(parent.ProjectID, projectID) || organizationID.Valid {
+			return invalidParentTaskScope()
+		}
+		return nil
+	}
+
+	if projectID.Valid {
+		return invalidParentTaskScope()
+	}
+
+	if !optionalUUIDEqual(parent.OrganizationID, organizationID) {
+		return invalidParentTaskScope()
+	}
+
+	return nil
+}
+
+func filterTasksByParentScope(tasks []db.Task, parent *db.Task, userID uuid.UUID) []db.Task {
+	filtered := make([]db.Task, 0, len(tasks))
+	for i := range tasks {
+		if taskMatchesParentScope(&tasks[i], parent, userID) {
+			filtered = append(filtered, tasks[i])
+		}
+	}
+	return filtered
+}
+
+func taskMatchesParentScope(task, parent *db.Task, userID uuid.UUID) bool {
+	if task == nil || parent == nil {
+		return false
+	}
+
+	if parent.ProjectID.Valid {
+		return optionalUUIDEqual(task.ProjectID, parent.ProjectID) && !task.OrganizationID.Valid
+	}
+
+	if task.ProjectID.Valid || task.CreatedBy != userID {
+		return false
+	}
+
+	return optionalUUIDEqual(task.OrganizationID, parent.OrganizationID)
+}
+
+func optionalUUIDEqual(left, right pgtype.UUID) bool {
+	if left.Valid != right.Valid {
+		return false
+	}
+	if !left.Valid {
+		return true
+	}
+	return left.Bytes == right.Bytes
+}
+
+func invalidParentTaskScope() *apperror.AppError {
+	return apperror.ErrValidation.WithMessage("child task scope must match parent task scope").WithDetail("field", "parent_task_id")
 }
 
 func timestamptz(value time.Time) pgtype.Timestamptz {

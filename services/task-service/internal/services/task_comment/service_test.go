@@ -11,6 +11,7 @@ import (
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
+	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 )
 
 type stubTaskCommentRepository struct {
@@ -57,7 +58,7 @@ func (s *stubTaskCommentRepository) ListTaskComments(ctx context.Context, taskID
 }
 
 func TestNewTaskCommentService(t *testing.T) {
-	svc, err := NewTaskCommentService(nil)
+	svc, err := NewTaskCommentService(nil, servicetestutil.NewAllowAuthorizer())
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -68,7 +69,7 @@ func TestNewTaskCommentService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewTaskCommentService(&stubTaskCommentRepository{})
+	svc, err = NewTaskCommentService(&stubTaskCommentRepository{}, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -434,7 +435,7 @@ func TestListTaskCommentsValidationAndRepoError(t *testing.T) {
 func mustTaskCommentService(t *testing.T, repo *stubTaskCommentRepository) TaskCommentService {
 	t.Helper()
 
-	svc, err := NewTaskCommentService(repo)
+	svc, err := NewTaskCommentService(repo, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("failed to construct task comment service: %v", err)
 	}

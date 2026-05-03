@@ -8,6 +8,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	taskcommentrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_comment"
 )
 
@@ -19,13 +20,17 @@ type TaskCommentService interface {
 }
 
 type service struct {
-	repo taskcommentrepo.TaskCommentRepository
+	repo  taskcommentrepo.TaskCommentRepository
+	authz authz.Authorizer
 }
 
-func NewTaskCommentService(repo taskcommentrepo.TaskCommentRepository) (TaskCommentService, *apperror.AppError) {
-	if repo == nil {
+func NewTaskCommentService(repo taskcommentrepo.TaskCommentRepository, authz authz.Authorizer) (TaskCommentService, *apperror.AppError) {
+	if repo == nil || authz == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize task comment service").WithDetail("repo", "task comment repository must be configured")
 	}
 
-	return &service{repo: repo}, nil
+	return &service{
+		repo:  repo,
+		authz: authz,
+	}, nil
 }

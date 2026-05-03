@@ -9,6 +9,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/app/config"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	taskdb "github.com/rijum8906/relay/services/task-service/internal/db"
 	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
 	projectRepo "github.com/rijum8906/relay/services/task-service/internal/repository/project"
@@ -70,32 +71,36 @@ func (a *Application) initServices() *apperror.AppError {
 	taskRepository := taskrepo.NewTaskRepository(queries)
 	taskAssignmentRepository := taskassignmentrepo.NewTaskAssignmentRepository(queries)
 	taskCommentRepository := taskcommentrepo.NewTaskCommentRepository(queries)
+	authorizer, appErr := authz.NewAuthorizer(projectMembershipRepository, taskRepository)
+	if appErr != nil {
+		return appErr
+	}
 
-	projectService, appErr := projectservice.NewProjectService(projectRepository)
+	projectService, appErr := projectservice.NewProjectService(projectRepository, authorizer)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.project = projectService
 
-	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository)
+	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository,authorizer)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.projectMembership = projectMembershipService
 
-	taskService, appErr := taskservice.NewTaskService(taskRepository)
+	taskService, appErr := taskservice.NewTaskService(taskRepository, authorizer)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.task = taskService
 
-	taskAssignmentService, appErr := taskassigmentservice.NewTaskAssignmentService(taskAssignmentRepository)
+	taskAssignmentService, appErr := taskassigmentservice.NewTaskAssignmentService(taskAssignmentRepository, authorizer)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.taskAssignment = taskAssignmentService
 
-	taskCommentService, appErr := taskcommentservice.NewTaskCommentService(taskCommentRepository)
+	taskCommentService, appErr := taskcommentservice.NewTaskCommentService(taskCommentRepository, authorizer)
 	if appErr != nil {
 		return appErr
 	}

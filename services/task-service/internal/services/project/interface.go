@@ -8,6 +8,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	projectrepo "github.com/rijum8906/relay/services/task-service/internal/repository/project"
 )
 
@@ -22,13 +23,16 @@ type ProjectService interface {
 }
 
 type service struct {
-	repo projectrepo.ProjectRepository
+	repo  projectrepo.ProjectRepository
+	authz authz.Authorizer
 }
 
-func NewProjectService(repo projectrepo.ProjectRepository) (ProjectService, *apperror.AppError) {
-	if repo == nil {
+func NewProjectService(repo projectrepo.ProjectRepository, authz authz.Authorizer) (ProjectService, *apperror.AppError) {
+	if repo == nil || authz == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize project service").WithDetail("repo", "project repository must be configured")
 	}
 
-	return &service{repo: repo}, nil
+	return &service{
+		repo:  repo,
+		authz: authz}, nil
 }

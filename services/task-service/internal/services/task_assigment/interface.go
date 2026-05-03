@@ -8,6 +8,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	taskassignmentrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_assignment"
 )
 
@@ -19,13 +20,17 @@ type TaskAssignmentService interface {
 }
 
 type service struct {
-	repo taskassignmentrepo.TaskAssignmentRepository
+	repo  taskassignmentrepo.TaskAssignmentRepository
+	authz authz.Authorizer
 }
 
-func NewTaskAssignmentService(repo taskassignmentrepo.TaskAssignmentRepository) (TaskAssignmentService, *apperror.AppError) {
-	if repo == nil {
+func NewTaskAssignmentService(repo taskassignmentrepo.TaskAssignmentRepository, authz authz.Authorizer) (TaskAssignmentService, *apperror.AppError) {
+	if repo == nil || authz == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize task assignment service").WithDetail("repo", "task assignment repository must be configured")
 	}
 
-	return &service{repo: repo}, nil
+	return &service{
+		repo:  repo,
+		authz: authz,
+	}, nil
 }

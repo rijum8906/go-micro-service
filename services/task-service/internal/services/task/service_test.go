@@ -12,7 +12,9 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
+	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -28,6 +30,25 @@ type stubTaskRepository struct {
 	listTasksByOrganizationFn func(context.Context, db.ListTasksByOrganizationParams) ([]db.Task, *apperror.AppError)
 	listTasksByParentFn       func(context.Context, pgtype.UUID) ([]db.Task, *apperror.AppError)
 	listTasksByCreatorFn      func(context.Context, db.ListTasksByCreatorParams) ([]db.Task, *apperror.AppError)
+}
+
+type stubTaskAuthorizer struct {
+	requireProjectRoleFn func(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.ProjectMembership, *apperror.AppError)
+	requireTaskRoleFn    func(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.Task, *apperror.AppError)
+}
+
+func (s stubTaskAuthorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+	if s.requireProjectRoleFn == nil {
+		panic("unexpected RequireProjectRole call")
+	}
+	return s.requireProjectRoleFn(ctx, projectID, userInfo, minRole)
+}
+
+func (s stubTaskAuthorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
+	if s.requireTaskRoleFn == nil {
+		panic("unexpected RequireTaskRole call")
+	}
+	return s.requireTaskRoleFn(ctx, taskID, userInfo, minRole)
 }
 
 func (s *stubTaskRepository) CreateTask(ctx context.Context, params db.CreateTaskParams) (*db.Task, *apperror.AppError) {
@@ -108,7 +129,7 @@ func (s *stubTaskRepository) ListTasksByCreator(ctx context.Context, params db.L
 }
 
 func TestNewTaskService(t *testing.T) {
-	svc, err := NewTaskService(nil)
+	svc, err := NewTaskService(nil, servicetestutil.NewAllowAuthorizer())
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -119,7 +140,7 @@ func TestNewTaskService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewTaskService(&stubTaskRepository{})
+	svc, err = NewTaskService(&stubTaskRepository{}, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -193,15 +214,14 @@ func TestCreateTaskValidation(t *testing.T) {
 
 func TestCreateTaskSuccess(t *testing.T) {
 	userID := uuid.New()
-	orgID := uuid.New()
 	projectID := uuid.New()
 	parentTaskID := uuid.New()
 	taskID := uuid.New()
 	dueAt := time.Date(2026, time.May, 2, 9, 30, 0, 0, time.UTC)
 
-	svc := mustTaskService(t, &stubTaskRepository{
+	svc := mustTaskServiceWithAuthorizer(t, &stubTaskRepository{
 		createTaskFn: func(_ context.Context, params db.CreateTaskParams) (*db.Task, *apperror.AppError) {
-			if !params.OrganizationID.Valid || params.OrganizationID.Bytes != orgID {
+			if params.OrganizationID.Valid {
 				t.Fatalf("unexpected organization id: %#v", params.OrganizationID)
 			}
 			if !params.ProjectID.Valid || params.ProjectID.Bytes != projectID {
@@ -239,16 +259,44 @@ func TestCreateTaskSuccess(t *testing.T) {
 				DueAt:          params.DueAt,
 			}, nil
 		},
+	}, stubTaskAuthorizer{
+		requireTaskRoleFn: func(_ context.Context, taskID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
+			if taskID != parentTaskID {
+				t.Fatalf("unexpected parent task id: %s", taskID)
+			}
+			if userInfo == nil || userInfo.UserID != userID.String() {
+				t.Fatalf("unexpected user info: %#v", userInfo)
+			}
+			if minRole != authz.RoleMember {
+				t.Fatalf("unexpected task role requirement: %s", minRole)
+			}
+			return &db.Task{
+				ID:        parentTaskID,
+				ProjectID: pgtype.UUID{Bytes: projectID, Valid: true},
+				CreatedBy: userID,
+			}, nil
+		},
+		requireProjectRoleFn: func(_ context.Context, gotProjectID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+			if gotProjectID != projectID {
+				t.Fatalf("unexpected project id: %s", gotProjectID)
+			}
+			if userInfo == nil || userInfo.UserID != userID.String() {
+				t.Fatalf("unexpected user info: %#v", userInfo)
+			}
+			if minRole != authz.RoleMember {
+				t.Fatalf("unexpected project role requirement: %s", minRole)
+			}
+			return &db.ProjectMembership{ProjectID: projectID, Role: string(minRole)}, nil
+		},
 	})
 
 	res, err := svc.CreateTask(context.Background(), &taskv1.CreateTaskRequest{
-		OrganizationId: orgID.String(),
-		ProjectId:      projectID.String(),
-		ParentTaskId:   parentTaskID.String(),
-		Title:          "Ship feature",
-		Description:    "Finish the service tests",
-		Priority:       "high",
-		DueAt:          timestamppb.New(dueAt),
+		ProjectId:    projectID.String(),
+		ParentTaskId: parentTaskID.String(),
+		Title:        "Ship feature",
+		Description:  "Finish the service tests",
+		Priority:     "high",
+		DueAt:        timestamppb.New(dueAt),
 	}, &coredto.UserInfo{UserID: userID.String()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
@@ -258,9 +306,6 @@ func TestCreateTaskSuccess(t *testing.T) {
 	}
 	if res.Id != taskID.String() {
 		t.Fatalf("unexpected task id: %s", res.Id)
-	}
-	if res.OrganizationId != orgID.String() {
-		t.Fatalf("unexpected organization id: %s", res.OrganizationId)
 	}
 	if res.ProjectId != projectID.String() {
 		t.Fatalf("unexpected project id: %s", res.ProjectId)
@@ -277,6 +322,47 @@ func TestCreateTaskSuccess(t *testing.T) {
 	if res.DueAt == nil || !res.DueAt.AsTime().Equal(dueAt) {
 		t.Fatalf("unexpected due_at: %#v", res.DueAt)
 	}
+}
+
+func TestCreateTaskRejectsMismatchedParentProjectScope(t *testing.T) {
+	parentTaskID := uuid.New()
+	parentProjectID := uuid.New()
+	requestProjectID := uuid.New()
+
+	svc := mustTaskServiceWithAuthorizer(t, &stubTaskRepository{
+		createTaskFn: func(context.Context, db.CreateTaskParams) (*db.Task, *apperror.AppError) {
+			t.Fatal("repository should not be called for mismatched parent scope")
+			return nil, nil
+		},
+	}, stubTaskAuthorizer{
+		requireTaskRoleFn: func(_ context.Context, taskID uuid.UUID, _ *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
+			if taskID != parentTaskID {
+				t.Fatalf("unexpected parent task id: %s", taskID)
+			}
+			if minRole != authz.RoleMember {
+				t.Fatalf("unexpected role requirement: %s", minRole)
+			}
+			return &db.Task{
+				ID:        parentTaskID,
+				ProjectID: pgtype.UUID{Bytes: parentProjectID, Valid: true},
+				CreatedBy: uuid.New(),
+			}, nil
+		},
+		requireProjectRoleFn: func(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+			t.Fatal("project authorization should not run after a parent scope mismatch")
+			return nil, nil
+		},
+	})
+
+	res, err := svc.CreateTask(context.Background(), &taskv1.CreateTaskRequest{
+		ProjectId:    requestProjectID.String(),
+		ParentTaskId: parentTaskID.String(),
+		Title:        "Ship feature",
+	}, &dto.UserInfo{UserID: uuid.NewString()})
+	if res != nil {
+		t.Fatalf("expected nil response, got %#v", res)
+	}
+	assertTaskAppError(t, err, apperror.CodeValidation, "child task scope must match parent task scope")
 }
 
 func TestGetTaskRepoError(t *testing.T) {
@@ -574,10 +660,85 @@ func TestListTasksByOrganizationAndCreatorValidation(t *testing.T) {
 	assertTaskAppError(t, creatorErr, apperror.CodeValidation, "invalid uuid")
 }
 
+func TestListTasksByParentFiltersMismatchedChildren(t *testing.T) {
+	parentTaskID := uuid.New()
+	projectID := uuid.New()
+	userID := uuid.New()
+	keptTaskID := uuid.New()
+	wrongProjectTaskID := uuid.New()
+	personalTaskID := uuid.New()
+
+	svc := mustTaskServiceWithAuthorizer(t, &stubTaskRepository{
+		listTasksByParentFn: func(_ context.Context, parent pgtype.UUID) ([]db.Task, *apperror.AppError) {
+			if !parent.Valid || parent.Bytes != parentTaskID {
+				t.Fatalf("unexpected parent task id: %#v", parent)
+			}
+			return []db.Task{
+				{
+					ID:        keptTaskID,
+					ProjectID: pgtype.UUID{Bytes: projectID, Valid: true},
+					CreatedBy: userID,
+					Title:     "Kept",
+					Priority:  "medium",
+				},
+				{
+					ID:        wrongProjectTaskID,
+					ProjectID: pgtype.UUID{Bytes: uuid.New(), Valid: true},
+					CreatedBy: userID,
+					Title:     "Wrong project",
+					Priority:  "medium",
+				},
+				{
+					ID:        personalTaskID,
+					CreatedBy: userID,
+					Title:     "Wrong scope",
+					Priority:  "medium",
+				},
+			}, nil
+		},
+	}, stubTaskAuthorizer{
+		requireTaskRoleFn: func(_ context.Context, taskID uuid.UUID, gotUserInfo *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
+			if taskID != parentTaskID {
+				t.Fatalf("unexpected parent task id: %s", taskID)
+			}
+			if gotUserInfo == nil || gotUserInfo.UserID != userID.String() {
+				t.Fatalf("unexpected user info: %#v", gotUserInfo)
+			}
+			if minRole != authz.RoleMember {
+				t.Fatalf("unexpected role requirement: %s", minRole)
+			}
+			return &db.Task{
+				ID:        parentTaskID,
+				ProjectID: pgtype.UUID{Bytes: projectID, Valid: true},
+				CreatedBy: userID,
+			}, nil
+		},
+	})
+
+	res, err := svc.ListTasksByParent(context.Background(), &taskv1.ListTasksByParentRequest{
+		ParentTaskId: parentTaskID.String(),
+	}, &dto.UserInfo{UserID: userID.String()})
+	if err != nil {
+		t.Fatalf("expected success, got error: %v", err)
+	}
+	if len(res.Tasks) != 1 {
+		t.Fatalf("expected 1 task after filtering, got %d", len(res.Tasks))
+	}
+	if res.Tasks[0].Id != keptTaskID.String() {
+		t.Fatalf("unexpected task kept after filtering: %s", res.Tasks[0].Id)
+	}
+}
+
 func mustTaskService(t *testing.T, repo *stubTaskRepository) TaskService {
 	t.Helper()
 
-	svc, err := NewTaskService(repo)
+	return mustTaskServiceWithAuthorizer(t, repo, servicetestutil.NewAllowAuthorizer())
+}
+
+func mustTaskServiceWithAuthorizer(t *testing.T, repo *stubTaskRepository, authorizer authz.Authorizer) TaskService {
+	t.Helper()
+
+	svc, err := NewTaskService(repo, authorizer)
 	if err != nil {
 		t.Fatalf("failed to construct task service: %v", err)
 	}

@@ -12,6 +12,7 @@ import (
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
+	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 )
 
 type stubProjectRepository struct {
@@ -74,7 +75,7 @@ func (s *stubProjectRepository) ListProjects(ctx context.Context, params db.List
 }
 
 func TestNewProjectService(t *testing.T) {
-	svc, err := NewProjectService(nil)
+	svc, err := NewProjectService(nil, servicetestutil.NewAllowAuthorizer())
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -85,7 +86,7 @@ func TestNewProjectService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewProjectService(&stubProjectRepository{})
+	svc, err = NewProjectService(&stubProjectRepository{}, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -551,7 +552,7 @@ func TestCompleteProjectSuccess(t *testing.T) {
 func mustProjectService(t *testing.T, repo *stubProjectRepository) ProjectService {
 	t.Helper()
 
-	svc, err := NewProjectService(repo)
+	svc, err := NewProjectService(repo, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("failed to construct project service: %v", err)
 	}

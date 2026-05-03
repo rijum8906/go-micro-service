@@ -10,7 +10,9 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
+	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 )
 
 type stubProjectMembershipRepository struct {
@@ -20,6 +22,21 @@ type stubProjectMembershipRepository struct {
 	removeProjectMemberFn        func(context.Context, db.RemoveProjectMemberParams) (*db.ProjectMembership, *apperror.AppError)
 	listProjectMembersFn         func(context.Context, uuid.UUID) ([]db.ProjectMembership, *apperror.AppError)
 	listMembershipsByUserFn      func(context.Context, uuid.UUID) ([]db.ProjectMembership, *apperror.AppError)
+}
+
+type stubProjectMembershipAuthorizer struct {
+	requireProjectRoleFn func(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.ProjectMembership, *apperror.AppError)
+}
+
+func (s stubProjectMembershipAuthorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+	if s.requireProjectRoleFn == nil {
+		panic("unexpected RequireProjectRole call")
+	}
+	return s.requireProjectRoleFn(ctx, projectID, userInfo, minRole)
+}
+
+func (stubProjectMembershipAuthorizer) RequireTaskRole(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.Task, *apperror.AppError) {
+	panic("unexpected RequireTaskRole call")
 }
 
 func (s *stubProjectMembershipRepository) AddProjectMember(ctx context.Context, params db.AddProjectMemberParams) (*db.ProjectMembership, *apperror.AppError) {
@@ -65,7 +82,7 @@ func (s *stubProjectMembershipRepository) ListProjectMembershipsByUser(ctx conte
 }
 
 func TestNewProjectMembershipService(t *testing.T) {
-	svc, err := NewProjectMembershipService(nil)
+	svc, err := NewProjectMembershipService(nil, servicetestutil.NewAllowAuthorizer())
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -76,7 +93,7 @@ func TestNewProjectMembershipService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewProjectMembershipService(&stubProjectMembershipRepository{})
+	svc, err = NewProjectMembershipService(&stubProjectMembershipRepository{}, servicetestutil.NewAllowAuthorizer())
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -251,6 +268,149 @@ func TestAddProjectMemberSuccess(t *testing.T) {
 	}
 }
 
+func TestAddProjectMemberRequiresOwnerToAddOwner(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+	repoCalled := false
+
+	svc := mustProjectMembershipServiceWithAuthorizer(t, &stubProjectMembershipRepository{
+		getActiveProjectMembershipFn: func(context.Context, db.GetActiveProjectMembershipParams) (*db.ProjectMembership, *apperror.AppError) {
+			repoCalled = true
+			return nil, nil
+		},
+		addProjectMemberFn: func(context.Context, db.AddProjectMemberParams) (*db.ProjectMembership, *apperror.AppError) {
+			repoCalled = true
+			return nil, nil
+		},
+	}, stubProjectMembershipAuthorizer{
+		requireProjectRoleFn: func(_ context.Context, gotProjectID uuid.UUID, gotUserInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+			if gotProjectID != projectID {
+				t.Fatalf("unexpected project id: %s", gotProjectID)
+			}
+			if gotUserInfo == nil || gotUserInfo.UserID == "" {
+				t.Fatalf("unexpected user info: %#v", gotUserInfo)
+			}
+			if minRole != authz.RoleOwner {
+				t.Fatalf("expected owner role requirement, got %s", minRole)
+			}
+			return nil, apperror.ErrForbidden.WithMessage("insufficient project role")
+		},
+	})
+
+	res, err := svc.AddProjectMember(context.Background(), &taskv1.AddProjectMemberRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+		Role:      "owner",
+	}, &dto.UserInfo{UserID: uuid.NewString()})
+	if res != nil {
+		t.Fatalf("expected nil response, got %#v", res)
+	}
+	assertProjectMembershipAppError(t, err, apperror.CodeForbidden, "insufficient project role")
+	if repoCalled {
+		t.Fatal("repository should not be called when owner authorization fails")
+	}
+}
+
+func TestAddProjectMemberOwnerCanAddOwner(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+
+	svc := mustProjectMembershipServiceWithAuthorizer(t, &stubProjectMembershipRepository{
+		getActiveProjectMembershipFn: func(_ context.Context, params db.GetActiveProjectMembershipParams) (*db.ProjectMembership, *apperror.AppError) {
+			if params.ProjectID != projectID || params.UserID != userID {
+				t.Fatalf("unexpected lookup params: %#v", params)
+			}
+			return nil, &apperror.AppError{Code: apperror.CodeNotFound, Message: "project membership not found"}
+		},
+		addProjectMemberFn: func(_ context.Context, params db.AddProjectMemberParams) (*db.ProjectMembership, *apperror.AppError) {
+			if params.Role != "owner" {
+				t.Fatalf("unexpected role: %s", params.Role)
+			}
+			return &db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      params.Role,
+			}, nil
+		},
+	}, stubProjectMembershipAuthorizer{
+		requireProjectRoleFn: func(_ context.Context, gotProjectID uuid.UUID, gotUserInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+			if gotProjectID != projectID {
+				t.Fatalf("unexpected project id: %s", gotProjectID)
+			}
+			if gotUserInfo == nil || gotUserInfo.UserID == "" {
+				t.Fatalf("unexpected user info: %#v", gotUserInfo)
+			}
+			if minRole != authz.RoleOwner {
+				t.Fatalf("expected owner role requirement, got %s", minRole)
+			}
+			return &db.ProjectMembership{ProjectID: projectID, Role: string(minRole)}, nil
+		},
+	})
+
+	res, err := svc.AddProjectMember(context.Background(), &taskv1.AddProjectMemberRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+		Role:      "owner",
+	}, &dto.UserInfo{UserID: uuid.NewString()})
+	if err != nil {
+		t.Fatalf("expected success, got error: %v", err)
+	}
+	if res == nil || res.Role != "owner" {
+		t.Fatalf("unexpected response: %#v", res)
+	}
+}
+
+func TestAddProjectMemberAdminCanAddMember(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+
+	svc := mustProjectMembershipServiceWithAuthorizer(t, &stubProjectMembershipRepository{
+		getActiveProjectMembershipFn: func(_ context.Context, params db.GetActiveProjectMembershipParams) (*db.ProjectMembership, *apperror.AppError) {
+			if params.ProjectID != projectID || params.UserID != userID {
+				t.Fatalf("unexpected lookup params: %#v", params)
+			}
+			return nil, &apperror.AppError{Code: apperror.CodeNotFound, Message: "project membership not found"}
+		},
+		addProjectMemberFn: func(_ context.Context, params db.AddProjectMemberParams) (*db.ProjectMembership, *apperror.AppError) {
+			if params.Role != "member" {
+				t.Fatalf("unexpected role: %s", params.Role)
+			}
+			return &db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      params.Role,
+			}, nil
+		},
+	}, stubProjectMembershipAuthorizer{
+		requireProjectRoleFn: func(_ context.Context, gotProjectID uuid.UUID, gotUserInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+			if gotProjectID != projectID {
+				t.Fatalf("unexpected project id: %s", gotProjectID)
+			}
+			if gotUserInfo == nil || gotUserInfo.UserID == "" {
+				t.Fatalf("unexpected user info: %#v", gotUserInfo)
+			}
+			if minRole != authz.RoleAdmin {
+				t.Fatalf("expected admin role requirement, got %s", minRole)
+			}
+			return &db.ProjectMembership{ProjectID: projectID, Role: string(minRole)}, nil
+		},
+	})
+
+	res, err := svc.AddProjectMember(context.Background(), &taskv1.AddProjectMemberRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+		Role:      "member",
+	}, &dto.UserInfo{UserID: uuid.NewString()})
+	if err != nil {
+		t.Fatalf("expected success, got error: %v", err)
+	}
+	if res == nil || res.Role != "member" {
+		t.Fatalf("unexpected response: %#v", res)
+	}
+}
+
 func TestRemoveProjectMemberSuccess(t *testing.T) {
 	projectID := uuid.New()
 	userID := uuid.New()
@@ -401,7 +561,13 @@ func TestListProjectMembersValidationAndRepoError(t *testing.T) {
 func mustProjectMembershipService(t *testing.T, repo *stubProjectMembershipRepository) ProjectMembershipService {
 	t.Helper()
 
-	svc, err := NewProjectMembershipService(repo)
+	return mustProjectMembershipServiceWithAuthorizer(t, repo, servicetestutil.NewAllowAuthorizer())
+}
+
+func mustProjectMembershipServiceWithAuthorizer(t *testing.T, repo *stubProjectMembershipRepository, authorizer authz.Authorizer) ProjectMembershipService {
+	t.Helper()
+
+	svc, err := NewProjectMembershipService(repo, authorizer)
 	if err != nil {
 		t.Fatalf("failed to construct project membership service: %v", err)
 	}

@@ -10,6 +10,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
@@ -24,6 +25,9 @@ func (s *service) AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest,
 
 	taskID, assigneeType, assigneeID, appErr := parseAssignment(req.GetTaskId(), req.GetAssigneeType(), req.GetAssigneeId(), "task_id", "assignee_id")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleAdmin); appErr != nil {
 		return nil, appErr
 	}
 
@@ -67,6 +71,9 @@ func (s *service) UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequ
 	if appErr != nil {
 		return nil, appErr
 	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleAdmin); appErr != nil {
+		return nil, appErr
+	}
 
 	if _, appErr = s.repo.UnassignTask(ctx, db.UnassignTaskParams{
 		TaskID:       taskID,
@@ -89,6 +96,9 @@ func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 
 	taskID, fromAssigneeType, fromAssigneeID, appErr := parseAssignment(req.GetTaskId(), req.GetFromAssigneeType(), req.GetFromAssigneeId(), "task_id", "from_assignee_id")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleAdmin); appErr != nil {
 		return nil, appErr
 	}
 
@@ -162,6 +172,9 @@ func (s *service) ListTaskAssignments(ctx context.Context, req *taskv1.ListTaskA
 
 	taskID, appErr := requiredUUID(req.GetTaskId(), "task_id", "task id is required")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 

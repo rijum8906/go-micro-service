@@ -8,6 +8,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
 )
 
@@ -26,13 +27,17 @@ type TaskService interface {
 }
 
 type service struct {
-	repo taskrepo.TaskRepository
+	repo  taskrepo.TaskRepository
+	authz authz.Authorizer
 }
 
-func NewTaskService(repo taskrepo.TaskRepository) (TaskService, *apperror.AppError) {
-	if repo == nil {
+func NewTaskService(repo taskrepo.TaskRepository, authz authz.Authorizer) (TaskService, *apperror.AppError) {
+	if repo == nil || authz == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize task service").WithDetail("repo", "task repository must be configured")
 	}
 
-	return &service{repo: repo}, nil
+	return &service{
+		repo:  repo,
+		authz: authz,
+	}, nil
 }

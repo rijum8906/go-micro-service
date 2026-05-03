@@ -10,6 +10,7 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
@@ -36,6 +37,13 @@ func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMe
 
 	role, appErr := normalizeRole(req.GetRole())
 	if appErr != nil {
+		return nil, appErr
+	}
+	requiredRole := authz.RoleAdmin
+	if role == string(authz.RoleOwner) {
+		requiredRole = authz.RoleOwner
+	}
+	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, requiredRole); appErr != nil {
 		return nil, appErr
 	}
 
@@ -76,6 +84,9 @@ func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemovePro
 	if appErr != nil {
 		return nil, appErr
 	}
+	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, authz.RoleAdmin); appErr != nil {
+		return nil, appErr
+	}
 
 	userID, appErr := requiredUUID(req.GetUserId(), "user_id", "user id is required")
 	if appErr != nil {
@@ -106,6 +117,9 @@ func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.Updat
 
 	projectID, appErr := requiredUUID(req.GetProjectId(), "project_id", "project id is required")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, authz.RoleOwner); appErr != nil {
 		return nil, appErr
 	}
 
@@ -145,6 +159,9 @@ func (s *service) ListProjectMembers(ctx context.Context, req *taskv1.ListProjec
 
 	projectID, appErr := requiredUUID(req.GetProjectId(), "project_id", "project id is required")
 	if appErr != nil {
+		return nil, appErr
+	}
+	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 
