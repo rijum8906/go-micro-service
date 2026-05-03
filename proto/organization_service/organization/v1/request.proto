@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package organization_service.organization.v1;
+
+message CreateOrganizationRequest {
+  string name = 1;
+  string description = 2;
+  string slug = 3;
+  string created_by = 4;
+}
+
+message GetOrganizationsByCreatedAtRequest {
+  string id = 1;
+}
+
+message UpdateOrganizationNameRequest {
+  string token_scope = 1;
+  string organization_id = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message GetOrganizationBySlugRequest {
+  string slug = 1;
+}
+
+message ChangeOrganizationOwnershipRequest {
+  string token_scope = 1;
+  string new_owner_id = 2;
+  string organization_id = 3;
+}

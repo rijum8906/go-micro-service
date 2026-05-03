@@ -1,7 +1,7 @@
 package token
 
 // NOTE: do no change this without adding the same types in graphql-gateway
-// schema (schema/core/v1/enums.graphqls)
+// schema (services/graphql-gateway/internal/schema/core/v1/enums.graphqls)
 
 import "slices"
 
@@ -22,6 +22,14 @@ const (
 	TokenScopeRecovery       TokenScope = "RECOVERY"
 )
 
+// Organization
+const (
+	TokenScopeUpdateOrganizationName  TokenScope = "UPDATE_ORG_NAME"
+	TokenScopeChangeOrganizationOwner TokenScope = "CHANGE_ORG_OWNER"
+	TokenScopeDeleteOrganization      TokenScope = "DELETE_ORG"
+	TokenScopeArchiveOrganization     TokenScope = "ARCHIVE_ORG"
+)
+
 var tokenScopes = []TokenScope{
 	TokenScopeAuth,
 	TokenScopeRefresh,
@@ -35,6 +43,12 @@ var tokenScopes = []TokenScope{
 	TokenScopeAdmin,
 	TokenScopeImpersonate,
 	TokenScopeRecovery,
+	TokenScopeUpdateOrganizationName,
+	TokenScopeChangeOrganizationOwner,
+}
+
+func ValidateTokenScope(token string) bool {
+	return slices.Contains(tokenScopes, TokenScope(token))
 }
 
 func (t TokenScope) Validate() bool {

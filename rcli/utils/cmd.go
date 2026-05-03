@@ -24,6 +24,19 @@ func RunCommand(name string, args ...string) error {
 	return nil
 }
 
+func RunCommandSilent(name string, args ...string) error {
+	command := formatCommandForLog(name, args)
+	fmt.Printf("\n▶️  Running: %s\n", command)
+
+	cmd := exec.Command(name, args...)
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("command failed (%s): %w", command, err)
+	}
+
+	return nil
+}
+
 func formatCommandForLog(name string, args []string) string {
 	parts := []string{name}
 	redactNext := false

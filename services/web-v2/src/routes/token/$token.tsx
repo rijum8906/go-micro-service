@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ThemeToggle } from '#/components/ThemeToggle'
-import { useThemeStore } from '#/store/theme'
+import { useIsDarkTheme } from '#/store/theme'
 import { ResetPasswordForm } from '#/components/ResetPasswordForm'
 
 export const Route = createFileRoute('/token/$token')({
@@ -10,8 +10,7 @@ export const Route = createFileRoute('/token/$token')({
 /** Password reset from emailed link: /token/{scopedToken} */
 function TokenResetPasswordPage() {
   const { token: tokenParam } = Route.useParams()
-  const { theme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const isDark = useIsDarkTheme()
 
   const scopedToken = (() => {
     try {

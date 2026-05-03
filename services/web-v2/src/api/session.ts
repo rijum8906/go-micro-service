@@ -1,4 +1,5 @@
 import { gqlRequest } from '#/lib/gql-client'
+import type { GqlFailure } from '#/lib/gql-client'
 import { useAuthStore } from '#/store/auth'
 import type { SessionBootstrapData } from '#/types/response'
 
@@ -7,7 +8,6 @@ const SESSION_BOOTSTRAP = `
     GetCurrentSession {
       id
       userId
-      refreshToken
       deviceId
       ipAddr
       createdAt
@@ -37,7 +37,7 @@ const SESSION_BOOTSTRAP = `
 
 export async function fetchSessionBootstrap(): Promise<
   | { success: true; data: SessionBootstrapData }
-  | { success: false; message: string }
+  | GqlFailure
 > {
   const getAccessToken = () => useAuthStore.getState().getAccessTokenValue()
 

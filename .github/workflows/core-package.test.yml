@@ -3,11 +3,16 @@ name: Core Package Test
 on:
   push:
     branches: ["main", "develop"]
+    paths:
+      - "packages/core/**"
   pull_request:
     branches: ["main"]
+    paths:
+      - "packages/core/**"
 
 env:
-  TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable&search_path=public"
+  TEST_DB_URL: "postgres://test_user:test_password@localhost:5433/test_db?sslmode\
+    =disable&search_path=public"
   TEST_SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
   TEST_SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
   TEST_SMTP_HOST: ${{ secrets.SMTP_HOST }}
@@ -30,7 +35,7 @@ jobs:
 
       - name: Start Test docker-compose
         run: |
-          docker compose -f docker-compose.test.yml up -d
+          docker compose -f docker-compose.test.yml up -d --wait
           docker compose -f docker-compose.test.yml ps
 
       - name: Setup Workspace

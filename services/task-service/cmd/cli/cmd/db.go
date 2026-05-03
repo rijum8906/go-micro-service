@@ -7,7 +7,6 @@ import (
 
 	"github.com/rijum8906/relay/packages/core/command"
 	"github.com/rijum8906/relay/packages/core/coreenv"
-	"github.com/rijum8906/relay/packages/core/testutils"
 	"github.com/spf13/cobra"
 )
 
@@ -29,8 +28,7 @@ var atlasDBInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize atlas database",
 	Run: func(cmd *cobra.Command, args []string) {
-		defaultCfg := *config
-		defaultCfg.DBName = "postgres"
+		defaultCfg := localDBConfig("postgres")
 
 		fmt.Println("Initializing database...")
 
@@ -256,13 +254,17 @@ func runCommand(name string, args ...string) error {
 }
 
 func dbURL() string {
+	return namedDBURL(config.DBName)
+}
+
+func namedDBURL(name string) string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
 		config.DBUser,
 		config.DBPassword,
 		"localhost",
 		config.DBPort,
-		config.DBName,
+		name,
 		config.DBSSLMode,
 	)
 }
@@ -276,5 +278,32 @@ func schemaURL() string {
 }
 
 func devDBURL() string {
-	return testutils.DevDBURL
+	return namedDBURL("dev_" + config.DBName)
+}
+
+func localDBConfig(dbName string) coreenv.CoreEnv {
+	cfg := *config
+	cfg.DBHost = "localhost"
+	cfg.DBName = dbName
+	return cfg
+}
+
+func localTestAdminConfig() coreenv.CoreEnv {
+	cfg := *config
+	cfg.DBHost = "localhost"
+	cfg.DBPort = 5433
+	cfg.DBUser = "test_user"
+	cfg.DBPassword = "test_password"
+	cfg.DBName = "test_db"
+	cfg.DBSSLMode = "disable"
+	return cfg
+}
+
+func ensureTestDatabase() error {
+	testCfg := localTestAdminConfig()
+	if err := command.CreateNewDatabase(&testCfg, testDBName()); err != nil {
+		return fmt.Errorf("create test database %s: %w", testDBName(), err)
+	}
+
+	return nil
 }

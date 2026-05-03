@@ -20,6 +20,7 @@ type UserService interface {
 	UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
 	GetProfile(ctx context.Context, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
 	GetUser(ctx context.Context, user *dto.UserInfo) (*modelsv1.User, *apperror.AppError)
+	CheckExists(ctx context.Context, id string) (bool, *apperror.AppError)
 }
 
 type userService struct {

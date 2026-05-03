@@ -68,12 +68,16 @@ func (e *AppError) WithRequestID(requestID string) *AppError {
 }
 
 func (e *AppError) Error() string {
-	if config.AppEnv != "production" {
-		fmt.Printf("Error: %s : %v", e.Message, e.Details)
-	} else {
-		if config.Debug && e.Code == CodeInternal {
-			fmt.Printf("Error: %s : %v", e.Message, e.Details)
+	if e.Code == CodeInternal || e.Code == CodeThirdParty {
+		if config.Logger != nil {
+			config.Logger.Error(e.Message, zap.Any("details", e.Details))
+		} else {
+			fmt.Printf("[%s] %s Details : %v \n", e.Code, e.Message, e.Details)
 		}
+	}
+
+	if e.RequestID == "" {
+		return fmt.Sprintf("[%s] %s", e.Code, e.Message)
 	}
 
 	return fmt.Sprintf("[%s] %s (ID: %s)", e.Code, e.Message, e.RequestID)

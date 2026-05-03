@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAuthStore } from '#/store/auth'
 import { signin } from '#/api/auth'
 import { signinSchema, type SigninSchemaType } from '#/schemas/auth'
 import { ThemeToggle } from '#/components/ThemeToggle'
-import { useThemeStore } from '#/store/theme'
+import { useIsDarkTheme } from '#/store/theme'
+import { safeInternalRedirect } from '#/lib/redirect'
 import z from 'zod'
 
 const searchSchema = z.object({
@@ -20,39 +22,24 @@ export const Route = createFileRoute('/auth/signin')({
 function SignInPage() {
   const router = useRouter()
   const { redirect } = Route.useSearch()
-  const { createToken, createAccount, createProfile, isSignedIn } = useAuthStore()
-  const { theme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const redirectTo = safeInternalRedirect(redirect)
+  const { applyAuthSuccess, isSignedIn } = useAuthStore()
+  const isDark = useIsDarkTheme()
 
-  if (isSignedIn) {
-    router.navigate({ to: redirect || '/' })
-  }
+  useEffect(() => {
+    if (isSignedIn) {
+      router.navigate({ to: redirectTo })
+    }
+  }, [isSignedIn, redirectTo, router])
 
   const form = useForm({
     defaultValues: { email: '', password: '' } as SigninSchemaType,
     onSubmit: async ({ value }) => {
       const response = await signin(value) as any
       if (response.success) {
-        const payload = response.data.Login
-        const accountId = payload.user.id
-        createAccount({ id: accountId, email: payload.user.email, createdAt: '', updatedAt: '', passwordHash: '' })
-        const displayName = [payload.profile.firstName, payload.profile.lastName].filter(Boolean).join(' ') || null
-        createProfile({
-          id: payload.profile.id,
-          firstName: payload.profile.firstName,
-          lastName: payload.profile.lastName,
-          displayName,
-          avatarUrl: payload.profile.avatarUrl ?? null,
-          accountId,
-          createdAt: '',
-          updatedAt: '',
-        })
-        createToken({
-          access_token: payload.tokens.accessToken.value,
-          refresh_token: payload.tokens.refreshToken.value,
-        })
+        applyAuthSuccess(response.data.Login)
         toast.success('Logged in successfully')
-        router.navigate({ to: redirect || '/' })
+        router.navigate({ to: redirectTo })
       } else {
         toast.error(response.message || 'Authentication failed')
       }
@@ -73,7 +60,7 @@ function SignInPage() {
 
         <div className={`w-full max-w-sm rounded-2xl p-8 transition-colors duration-300 ${isDark ? 'bg-[#30302E] shadow-[inset_0_0_0_0.2px_#F2EDE4]' : 'bg-white/40 shadow-[inset_0_0_0_0.3px_#9A9A9A] backdrop-blur-sm'}`}>
           <form
-            onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+            onSubmit={async (e) => { e.preventDefault(); await form.handleSubmit() }}
             className="flex flex-col gap-5"
           >
             <form.Field name="email" validators={{ onChange: signinSchema.shape.email }}>

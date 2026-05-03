@@ -8,14 +8,25 @@ services:
       POSTGRES_DB: "test_db"
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     volumes:
       - test-postgres:/var/lib/postgresql/data
 
-    # redis
   test-redis:
     image: redis:8.4.2-trixie
     ports:
       - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     volumes:
       - test-redis:/var/lib/redis/data
 
@@ -24,6 +35,12 @@ services:
     command: ["-js"]
     ports:
       - "4223:4222"
+    healthcheck:
+      test: ["CMD", "nats-server", "-sl"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     volumes:
       - test-nats:/var/lib/nats/data
 

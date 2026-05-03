@@ -247,6 +247,50 @@ func (x *ChangePasswordRequest) GetNewPassword() string {
 	return ""
 }
 
+type CheckExistsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckExistsRequest) Reset() {
+	*x = CheckExistsRequest{}
+	mi := &file_user_service_user_v1_request_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckExistsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckExistsRequest) ProtoMessage() {}
+
+func (x *CheckExistsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_user_v1_request_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckExistsRequest.ProtoReflect.Descriptor instead.
+func (*CheckExistsRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_user_v1_request_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CheckExistsRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 var File_user_service_user_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_user_v1_request_proto_rawDesc = "" +
@@ -271,7 +315,9 @@ const file_user_service_user_v1_request_proto_rawDesc = "" +
 	"\tlast_name\x18\x03 \x01(\tR\blastName\"|\n" +
 	"\x15ChangePasswordRequest\x12@\n" +
 	"\fscoped_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vscopedToken\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPasswordB\xda\x01\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"$\n" +
+	"\x12CheckExistsRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02idB\xda\x01\n" +
 	"\x18com.user_service.user.v1B\fRequestProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/user/v1;userv1\xa2\x02\x03UUX\xaa\x02\x13UserService.User.V1\xca\x02\x13UserService\\User\\V1\xe2\x02\x1fUserService\\User\\V1\\GPBMetadata\xea\x02\x15UserService::User::V1b\x06proto3"
 
 var (
@@ -286,20 +332,21 @@ func file_user_service_user_v1_request_proto_rawDescGZIP() []byte {
 	return file_user_service_user_v1_request_proto_rawDescData
 }
 
-var file_user_service_user_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_user_service_user_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_user_service_user_v1_request_proto_goTypes = []any{
 	(*GenerateScopedTokenRequest)(nil),    // 0: user_service.user.v1.GenerateScopedTokenRequest
 	(*UpdateProfileAvatarUrlRequest)(nil), // 1: user_service.user.v1.UpdateProfileAvatarUrlRequest
 	(*UpdateProfileNameRequest)(nil),      // 2: user_service.user.v1.UpdateProfileNameRequest
 	(*ChangePasswordRequest)(nil),         // 3: user_service.user.v1.ChangePasswordRequest
-	(v1.TokenScope)(0),                    // 4: core.v1.TokenScope
-	(v1.AuthMethod)(0),                    // 5: core.v1.AuthMethod
-	(*v11.Token)(nil),                     // 6: user_service.models.v1.Token
+	(*CheckExistsRequest)(nil),            // 4: user_service.user.v1.CheckExistsRequest
+	(v1.TokenScope)(0),                    // 5: core.v1.TokenScope
+	(v1.AuthMethod)(0),                    // 6: core.v1.AuthMethod
+	(*v11.Token)(nil),                     // 7: user_service.models.v1.Token
 }
 var file_user_service_user_v1_request_proto_depIdxs = []int32{
-	4, // 0: user_service.user.v1.GenerateScopedTokenRequest.scope:type_name -> core.v1.TokenScope
-	5, // 1: user_service.user.v1.GenerateScopedTokenRequest.auth_method:type_name -> core.v1.AuthMethod
-	6, // 2: user_service.user.v1.ChangePasswordRequest.scoped_token:type_name -> user_service.models.v1.Token
+	5, // 0: user_service.user.v1.GenerateScopedTokenRequest.scope:type_name -> core.v1.TokenScope
+	6, // 1: user_service.user.v1.GenerateScopedTokenRequest.auth_method:type_name -> core.v1.AuthMethod
+	7, // 2: user_service.user.v1.ChangePasswordRequest.scoped_token:type_name -> user_service.models.v1.Token
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -318,7 +365,7 @@ func file_user_service_user_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_user_v1_request_proto_rawDesc), len(file_user_service_user_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

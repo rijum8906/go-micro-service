@@ -96,3 +96,17 @@ func IsRootDir() bool {
 
 	return strings.Contains(string(content), "module github.com/rijum8906/relay")
 }
+
+func GetServices() ([]string, error) {
+	entries, err := filepath.Glob("services/*/db/schema.sql")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read services directory: %w", err)
+	}
+
+	services := []string{}
+	for _, entry := range entries {
+		services = append(services, filepath.Join(entry, "../../"))
+	}
+
+	return services, nil
+}

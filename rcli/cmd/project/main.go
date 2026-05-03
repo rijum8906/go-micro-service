@@ -3,7 +3,6 @@ package projectcmd
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/rijum8906/relay/rcli/utils"
@@ -13,6 +12,13 @@ import (
 var ProjectCmd = &cobra.Command{
 	Use:   "project",
 	Short: "Project commands",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if !utils.IsRootDir() {
+			return fmt.Errorf("must run from root directory")
+		}
+
+		return nil
+	},
 }
 
 var initProjectCmd = &cobra.Command{
@@ -114,30 +120,14 @@ func addWorkspaceDirectories() error {
 	return nil
 }
 
-func getServices() ([]string, error) {
-	entries, err := os.ReadDir("services")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read services directory: %w", err)
-	}
-
-	services := []string{}
-	for _, entry := range entries {
-		if entry.IsDir() {
-			services = append(services, entry.Name())
-		}
-	}
-
-	return services, nil
-}
-
 func copyEnvFiles() error {
-	services, err := getServices()
+	services, err := utils.GetServices()
 	if err != nil {
 		return err
 	}
 
 	for _, svc := range services {
-		if err := utils.CopyFile(filepath.Join("services", svc, ".env.example"), filepath.Join("services", svc, ".env")); err != nil {
+		if err := utils.CopyFile(filepath.Join(svc, ".env.example"), filepath.Join(svc, ".env")); err != nil {
 			return fmt.Errorf("copy environment file for %s: %w", svc, err)
 		}
 	}

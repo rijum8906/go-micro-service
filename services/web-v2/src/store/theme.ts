@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeStore {
   theme: Theme;
@@ -16,7 +17,14 @@ export const useThemeStore = create<ThemeStore>()(
       setTheme: (theme) => set({ theme }),
       toggleTheme: () =>
         set((state) => ({
-          theme: state.theme === 'light' ? 'dark' : 'light',
+          theme:
+            state.theme === 'system'
+              ? getSystemPrefersDark()
+                ? 'light'
+                : 'dark'
+              : state.theme === 'dark'
+                ? 'light'
+                : 'dark',
         })),
     }),
     {
@@ -25,3 +33,32 @@ export const useThemeStore = create<ThemeStore>()(
     }
   )
 );
+
+function getSystemPrefersDark() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+export function useIsDarkTheme() {
+  const theme = useThemeStore((state) => state.theme);
+  const [systemPrefersDark, setSystemPrefersDark] = useState(getSystemPrefersDark);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateSystemTheme = () => setSystemPrefersDark(mediaQuery.matches);
+
+    updateSystemTheme();
+    mediaQuery.addEventListener('change', updateSystemTheme);
+
+    return () => mediaQuery.removeEventListener('change', updateSystemTheme);
+  }, []);
+
+  return theme === 'system' ? systemPrefersDark : theme === 'dark';
+}

@@ -27,6 +27,7 @@ const (
 	UserService_ChangePassword_FullMethodName         = "/user_service.user.v1.UserService/ChangePassword"
 	UserService_GetProfile_FullMethodName             = "/user_service.user.v1.UserService/GetProfile"
 	UserService_GetUser_FullMethodName                = "/user_service.user.v1.UserService/GetUser"
+	UserService_CheckExists_FullMethodName            = "/user_service.user.v1.UserService/CheckExists"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -39,6 +40,7 @@ type UserServiceClient interface {
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
 	GetProfile(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.Profile, error)
 	GetUser(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.User, error)
+	CheckExists(ctx context.Context, in *CheckExistsRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
 }
 
 type userServiceClient struct {
@@ -109,6 +111,16 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *v11.EmptyRequest, o
 	return out, nil
 }
 
+func (c *userServiceClient) CheckExists(ctx context.Context, in *CheckExistsRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckExistsResponse)
+	err := c.cc.Invoke(ctx, UserService_CheckExists_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations should embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -119,6 +131,7 @@ type UserServiceServer interface {
 	ChangePassword(context.Context, *ChangePasswordRequest) (*v11.SuccessResponse, error)
 	GetProfile(context.Context, *v11.EmptyRequest) (*v1.Profile, error)
 	GetUser(context.Context, *v11.EmptyRequest) (*v1.User, error)
+	CheckExists(context.Context, *CheckExistsRequest) (*CheckExistsResponse, error)
 }
 
 // UnimplementedUserServiceServer should be embedded to have
@@ -145,6 +158,9 @@ func (UnimplementedUserServiceServer) GetProfile(context.Context, *v11.EmptyRequ
 }
 func (UnimplementedUserServiceServer) GetUser(context.Context, *v11.EmptyRequest) (*v1.User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedUserServiceServer) CheckExists(context.Context, *CheckExistsRequest) (*CheckExistsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CheckExists not implemented")
 }
 func (UnimplementedUserServiceServer) testEmbeddedByValue() {}
 
@@ -274,6 +290,24 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_CheckExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckExistsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CheckExists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_CheckExists_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CheckExists(ctx, req.(*CheckExistsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +338,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUser",
 			Handler:    _UserService_GetUser_Handler,
+		},
+		{
+			MethodName: "CheckExists",
+			Handler:    _UserService_CheckExists_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

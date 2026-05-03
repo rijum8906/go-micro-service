@@ -20,6 +20,11 @@ var testSetupCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("Setting up test environment...")
 
+		fmt.Printf("Ensuring test database %s exists...\n", testDBName())
+		if err := ensureTestDatabase(); err != nil {
+			return fmt.Errorf("ensure test database: %w", err)
+		}
+
 		fmt.Println("Cleaning test database...")
 		if err := runCommand(
 			"atlas", "schema", "clean",
@@ -61,11 +66,15 @@ func init() {
 func testDBURL() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=public",
-		testutils.DBUser,
-		testutils.DBPassword,
-		testutils.DBHost,
-		testutils.DBPort,
-		testutils.DBName,
-		testutils.DBSSLMode,
+		"test_user",
+		"test_password",
+		"localhost",
+		5433,
+		testDBName(),
+		"disable",
 	)
+}
+
+func testDBName() string {
+	return testutils.GetTestDBName(config.AppName)
 }

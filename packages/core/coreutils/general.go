@@ -10,9 +10,12 @@ import (
 )
 
 func ParseToUUID(id string) (uuid.UUID, *apperror.AppError) {
+	if id == "" {
+		return uuid.UUID{}, apperror.ErrValidation.WithMessage("invalid id")
+	}
 	u, err := uuid.Parse(id)
 	if err != nil {
-		return uuid.UUID{}, apperror.ErrValidation.WithMessage("invalid uuid").WithDetail("error", err.Error())
+		return uuid.UUID{}, apperror.ErrValidation.WithMessage("invalid id")
 	}
 
 	return u, nil

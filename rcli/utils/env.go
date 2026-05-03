@@ -21,6 +21,9 @@ type Environment struct {
 }
 
 func LoadEnv() (*Environment, error) {
+	if !IsServiceDir() {
+		return nil, fmt.Errorf("must be run from a service directory")
+	}
 	_ = godotenv.Load()
 
 	cfg := &Environment{}

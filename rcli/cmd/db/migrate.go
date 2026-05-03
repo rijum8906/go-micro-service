@@ -1,9 +1,7 @@
 package dbcmd
 
 import (
-	"context"
 	"fmt"
-	"os"
 
 	"github.com/rijum8906/relay/rcli/utils"
 	"github.com/spf13/cobra"
@@ -24,63 +22,14 @@ var migrateApplyCmd = &cobra.Command{
 	Aliases: []string{"up"},
 	Short:   "Apply atlas migrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
-			return err
-		}
-
-		pool, err := utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
-		if err != nil {
-			return err
-		}
-		defer pool.Close()
-
-		if err := utils.CreateDatabase(pool, config.DBName); err != nil {
-			return err
-		}
-		if err := utils.CreateDatabase(pool, utils.DevDBName); err != nil {
-			return err
+			return fmt.Errorf("failed to load config: %w", err)
 		}
 
 		return utils.RunCommand("atlas", "migrate", "apply",
-			"--url", utils.GetDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
 			"--dir", utils.GetMigrationDir())
-	},
-}
-
-var migrateSQLApply = &cobra.Command{
-	Use:   "sql-apply",
-	Short: "Apply SQL migrations",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
-		if err != nil {
-			return err
-		}
-
-		content, err := os.ReadFile("db/schema.sql")
-		if err != nil {
-			return fmt.Errorf("read db/schema.sql: %w", err)
-		}
-
-		pool, err := utils.ConnectDB(config.DBPort, config.DBUser, config.DBPassword, "postgres", config.DBSSLMode)
-		if err != nil {
-			return err
-		}
-		defer pool.Close()
-		if err = utils.CreateDatabase(pool, config.DBName); err != nil {
-			return err
-		}
-		if err = utils.CreateDatabase(pool, utils.DevDBName); err != nil {
-			return err
-		}
-
-		_, err = pool.Exec(context.Background(), string(content))
-		if err != nil {
-			return fmt.Errorf("apply db/schema.sql: %w", err)
-		}
-
-		fmt.Println("\n✅ Applied SQL migrations")
-		return nil
 	},
 }
 
@@ -88,15 +37,15 @@ var migrateSchemaCmd = &cobra.Command{
 	Use:   "schema",
 	Short: "Sync database schema",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
 
 		return utils.RunCommand("atlas",
 			"schema", "apply",
-			"--url", utils.GetDBURL(config),
-			"--dev-url", utils.GetDevDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
+			"--dev-url", utils.GetDynamicDevDBURL(useTestDB, config),
 			"--file", utils.GetSchemaDir(),
 			"--auto-approve")
 	},
@@ -106,13 +55,13 @@ var migrateCleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean atlas migrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
 
 		return utils.RunCommand("atlas", "schema", "clean",
-			"--url", utils.GetDBURL(config))
+			"--url", utils.GetDynamicDBURL(useTestDB, config))
 	},
 }
 
@@ -120,14 +69,14 @@ var migrateStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show atlas status",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
 
 		return utils.RunCommand("atlas",
 			"migrate", "status",
-			"--url", utils.GetDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
 			"--dir", utils.GetMigrationDir())
 	},
 }
@@ -137,7 +86,7 @@ var migrateCreateCmd = &cobra.Command{
 	Aliases: []string{"new"},
 	Short:   "Create a new atlas migration",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
@@ -145,7 +94,7 @@ var migrateCreateCmd = &cobra.Command{
 		return utils.RunCommand("atlas", "migrate", "diff", nameVar,
 			"--dir", utils.GetMigrationDir(),
 			"--to", utils.GetSchemaDir(),
-			"--dev-url", utils.GetDevDBURL(config))
+			"--dev-url", utils.GetDynamicDevDBURL(useTestDB, config))
 	},
 }
 
@@ -157,7 +106,7 @@ var migrateRehashCmd = &cobra.Command{
 			return fmt.Errorf("must be run from a service directory")
 		}
 
-		return utils.RunCommand("atlas", "migrate", "rehash",
+		return utils.RunCommand("atlas", "migrate", "hash",
 			"--dir", utils.GetMigrationDir())
 	},
 }
@@ -172,24 +121,16 @@ var migrateRollbackCmd = &cobra.Command{
 	Use:   "rollback",
 	Short: "Rollback atlas migrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := loadServiceConfig()
+		config, err := utils.LoadEnv()
 		if err != nil {
 			return err
 		}
 
 		return utils.RunCommand("atlas", "migrate", "down", fmt.Sprint(count),
-			"--url", utils.GetDBURL(config),
+			"--url", utils.GetDynamicDBURL(useTestDB, config),
 			"--dir", utils.GetMigrationDir(),
-			"--dev-url", utils.GetDevDBURL(config))
+			"--dev-url", utils.GetDynamicDevDBURL(useTestDB, config))
 	},
-}
-
-func loadServiceConfig() (*utils.Environment, error) {
-	if !utils.IsServiceDir() {
-		return nil, fmt.Errorf("must be run from a service directory")
-	}
-
-	return utils.LoadEnv()
 }
 
 func init() {
@@ -200,9 +141,11 @@ func init() {
 	_ = migrateCreateCmd.MarkFlagRequired("name")
 	_ = migrateRollbackCmd.MarkFlagRequired("count")
 
+	// Add Test Flags
+	migrateCmd.PersistentFlags().BoolVarP(&useTestDB, "test", "t", false, "Run migrations for test environment database")
+
 	migrateCmd.AddCommand(migrateApplyCmd)
 	migrateCmd.AddCommand(migrateSchemaCmd)
-	migrateCmd.AddCommand(migrateSQLApply)
 	migrateCmd.AddCommand(migrateCleanCmd)
 	migrateCmd.AddCommand(migrateStatusCmd)
 	migrateCmd.AddCommand(migrateCreateCmd)
@@ -210,5 +153,5 @@ func init() {
 	migrateCmd.AddCommand(migrateRollbackCmd)
 	migrateCmd.AddCommand(migrateResetCommand)
 
-	DBCMd.AddCommand(migrateCmd)
+	DBCmd.AddCommand(migrateCmd)
 }

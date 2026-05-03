@@ -4,15 +4,14 @@ import { toast } from 'sonner'
 import { requestPasswordReset } from '#/api/auth'
 import { requestPasswordResetSchema, type RequestPasswordResetSchemaType } from '#/schemas/auth'
 import { ThemeToggle } from '#/components/ThemeToggle'
-import { useThemeStore } from '#/store/theme'
+import { useIsDarkTheme } from '#/store/theme'
 
 export const Route = createFileRoute('/auth/forgot-password')({
   component: ForgotPasswordPage,
 })
 
 function ForgotPasswordPage() {
-  const { theme } = useThemeStore()
-  const isDark = theme === 'dark'
+  const isDark = useIsDarkTheme()
 
   const form = useForm({
     defaultValues: { email: '' } as RequestPasswordResetSchemaType,
@@ -40,7 +39,7 @@ function ForgotPasswordPage() {
 
         <div className={`w-full max-w-sm rounded-2xl p-8 transition-colors duration-300 ${isDark ? 'bg-[#30302E] shadow-[inset_0_0_0_0.2px_#F2EDE4]' : 'bg-white/40 shadow-[inset_0_0_0_0.3px_#9A9A9A] backdrop-blur-sm'}`}>
           <form
-            onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }}
+            onSubmit={async (e) => { e.preventDefault(); await form.handleSubmit() }}
             className="flex flex-col gap-5"
           >
             <form.Field name="email" validators={{ onChange: requestPasswordResetSchema.shape.email }}>
