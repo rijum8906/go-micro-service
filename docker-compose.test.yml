@@ -44,7 +44,35 @@ services:
     volumes:
       - test-nats:/var/lib/nats/data
 
+  test-migrate:
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+    image: openfga/openfga:latest
+    command: migrate
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=postgres
+      - OPENFGA_DATASTORE_URI=postgres://test_user:test_password@test-postgres:5432/test_db?sslmode=disable
+
+  test-openfga:
+    image: openfga/openfga:latest
+    command: run
+    ports:
+      - "9000:9000"
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-migrate:
+        condition: service_completed_successfully
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=postgres
+      - OPENFGA_DATASTORE_URI=postgres://test_user:test_password@test-postgres:5432/test_db?sslmode=disable
+      - OPENFGA_HTTP_ADDR=0.0.0.0:9000
+    volumes:
+      - test-openfga:/var/lib/openfga/data
+
 volumes:
   test-redis:
   test-postgres:
   test-nats:
+  test-openfga:

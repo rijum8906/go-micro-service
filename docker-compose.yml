@@ -62,16 +62,13 @@ services:
     environment:
       - OPENFGA_DATASTORE_ENGINE=postgres
       - OPENFGA_DATASTORE_URI=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
-      - OPENFGA_LOG_FORMAT=json
-      - OPENFGA_PLAYGROUND_ENABLED=true
+      # 1. Set the internal ports to match your external mapping for simplicity
+      - OPENFGA_HTTP_ADDR=0.0.0.0:8000
+      - OPENFGA_GRPC_ADDR=0.0.0.0:8001
     command: run
     ports:
-      # Needed for the http server
-      - "8000:8080"
-      # Needed for the grpc server (if used)
-      - "8001:8081"
-      # Needed for the playground (Do not enable in prod!)
-      - "8002:3000"
+      - "8000:8000" # HTTP API
+      - "8001:8001" # gRPC
 
   # graphql-gateway
   graphql-gateway:
