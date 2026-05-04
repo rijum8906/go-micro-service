@@ -1,0 +1,10 @@
+model
+    schema 1.1
+
+type user
+
+type books
+    relations
+        define author: [user]
+
+        define can_edit: author
