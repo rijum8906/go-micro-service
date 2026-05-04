@@ -4,14 +4,13 @@ import (
 	"context"
 
 	"github.com/openfga/go-sdk/client"
+	"github.com/rijum8906/relay/packages/core/apperror"
 )
 
-type Client interface {
-	Connect()
-	CreateStore()
-	GetStore()
-	ListStores()
-	DeleteStore()
+type Client struct {
+	StoreID              string
+	AuthorizationModelID string
+	Client               *client.OpenFgaClient
 }
 
 type StoreManager interface {
@@ -28,4 +27,23 @@ type ModelManager interface {
 	Read(ctx context.Context) (*client.ClientReadAuthorizationModelResponse, error)
 	GetAuthorizationModelID() string
 	SetAuthorizationModelID(id string)
+}
+
+type TuppleManager interface {
+	Write(ctx context.Context, writes []client.ClientTupleKey) error
+	Read(ctx context.Context, req client.ClientReadRequest) (*client.ClientReadResponse, error)
+	Delete(ctx context.Context, deletes []client.ClientTupleKeyWithoutCondition) error
+}
+
+func NewClient(url string) (*Client, error) {
+	fgaClient, err := client.NewSdkClient(&client.ClientConfiguration{
+		ApiUrl: url,
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to create FGA client").WithDetail("error", err.Error())
+	}
+
+	return &Client{
+		Client: fgaClient,
+	}, nil
 }
