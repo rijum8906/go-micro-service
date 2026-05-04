@@ -22,6 +22,18 @@ func validateCreateOrganizationRequest(req *organizationv1.CreateOrganizationReq
 	return nil
 }
 
+func validateUpdateOrganizationName(req *organizationv1.UpdateOrganizationNameRequest) error {
+	if err := uuid.Validate(req.OrganizationId); err != nil {
+		return apperror.New(apperror.CodeValidation, "invalid organization id")
+	}
+	isValid := token.ValidateTokenScope(req.TokenScope)
+	if !isValid {
+		return apperror.New(apperror.CodeValidation, "invalid token scope")
+	}
+
+	return nil
+}
+
 func validateChangeOwnershipRequst(req *organizationv1.ChangeOrganizationOwnershipRequest) error {
 	if req == nil {
 		return apperror.ErrValidation.WithMessage("request cannot be nil")

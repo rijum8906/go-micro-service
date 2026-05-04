@@ -2,12 +2,18 @@ services:
   nats:
     image: nats:2.12-alpine
     command: ["-js"]
+    healthcheck:
+      test: ["CMD", "nats-server", "-sl"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     ports:
       - "4222:4222"
 
   # postgres
   postgres:
-    image: postgres:14.22-bookworm
+    image: postgres:17
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -16,14 +22,53 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-    # redis
+  # redis
   redis:
-    image: redis:8.4.2-trixie
+    image: redis:7.4-alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     volumes:
       - redis:/var/lib/redis/data
+
+  migrate:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: openfga/openfga:latest
+    container_name: migrate
+    command: migrate
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=postgres
+      - OPENFGA_DATASTORE_URI=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+
+  openfga:
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    image: openfga/openfga:latest
+    container_name: openfga
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=postgres
+      - OPENFGA_DATASTORE_URI=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+      # 1. Set the internal ports to match your external mapping for simplicity
+      - OPENFGA_HTTP_ADDR=0.0.0.0:8000
+      - OPENFGA_GRPC_ADDR=0.0.0.0:8001
+    command: run
+    ports:
+      - "8000:8000" # HTTP API
+      - "8001:8001" # gRPC
 
   # graphql-gateway
   graphql-gateway:
@@ -35,7 +80,12 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "user-service"
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
 
   # user-service
   user-service:
@@ -48,11 +98,16 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - "nats"
-      - "postgres"
-      - "redis"
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      graphql-gateway:
+        condition: service_started
 
-    # notifaction-service
+  # notifaction-service
   notification-service:
     build:
       context: .
@@ -63,11 +118,14 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - "nats"
-      - "postgres"
-      - "redis"
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
 
-    # task-service
+  # task-service
   task-service:
     build:
       context: .
@@ -78,9 +136,12 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - "nats"
-      - "postgres"
-      - "redis"
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
 
   # organization-service
   organization-service:
@@ -93,9 +154,14 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - "nats"
-      - "postgres"
-      - "redis"
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      graphql-gateway:
+        condition: service_started
 
   # web-v2
   web-v2:
@@ -107,8 +173,10 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - graphql-gateway
+      graphql-gateway:
+        condition: service_started
 
 volumes:
   pg_data:
   redis:
+

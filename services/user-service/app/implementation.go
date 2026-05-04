@@ -127,7 +127,7 @@ func (a *Application) initCache(ctx context.Context) *apperror.AppError {
 	return nil
 }
 
-func (a *Application) initNATS(ctx context.Context) *apperror.AppError {
+func (a *Application) initNATS() *apperror.AppError {
 	client := broker.NewClient()
 	if appErr := client.Connect(a.config.NATSURL); appErr != nil {
 		return appErr

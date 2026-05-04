@@ -13,25 +13,19 @@ import (
 
 const CreateOrganizationMembership = `-- name: CreateOrganizationMembership :one
 INSERT INTO organization_memberships (
-    user_id, organization_id, role, invited_by
-) VALUES ( $1, $2, $3, $4 )
-    RETURNING id, organization_id, user_id, role, status, invited_by, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+    user_id, organization_id, role
+) VALUES ( $1, $2, $3 )
+    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
 `
 
 type CreateOrganizationMembershipParams struct {
 	UserID         uuid.UUID
 	OrganizationID uuid.UUID
 	Role           string
-	InvitedBy      uuid.UUID
 }
 
 func (q *Queries) CreateOrganizationMembership(ctx context.Context, arg CreateOrganizationMembershipParams) (OrganizationMembership, error) {
-	row := q.db.QueryRow(ctx, CreateOrganizationMembership,
-		arg.UserID,
-		arg.OrganizationID,
-		arg.Role,
-		arg.InvitedBy,
-	)
+	row := q.db.QueryRow(ctx, CreateOrganizationMembership, arg.UserID, arg.OrganizationID, arg.Role)
 	var i OrganizationMembership
 	err := row.Scan(
 		&i.ID,
@@ -39,7 +33,6 @@ func (q *Queries) CreateOrganizationMembership(ctx context.Context, arg CreateOr
 		&i.UserID,
 		&i.Role,
 		&i.Status,
-		&i.InvitedBy,
 		&i.JoinedAt,
 		&i.LeftAt,
 		&i.CreatedAt,
@@ -54,7 +47,7 @@ const CreateOrganizationMembershipOwner = `-- name: CreateOrganizationMembership
 INSERT INTO organization_memberships (
     user_id, organization_id, role
 ) VALUES ( $1, $2, $3 )
-    RETURNING id, organization_id, user_id, role, status, invited_by, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
 `
 
 type CreateOrganizationMembershipOwnerParams struct {
@@ -72,7 +65,6 @@ func (q *Queries) CreateOrganizationMembershipOwner(ctx context.Context, arg Cre
 		&i.UserID,
 		&i.Role,
 		&i.Status,
-		&i.InvitedBy,
 		&i.JoinedAt,
 		&i.LeftAt,
 		&i.CreatedAt,
@@ -110,7 +102,7 @@ func (q *Queries) DeleteOrganizationMembershipHard(ctx context.Context, id uuid.
 }
 
 const GetOrganizationMembershipsByUserID = `-- name: GetOrganizationMembershipsByUserID :many
-SELECT id, organization_id, user_id, role, status, invited_by, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
 WHERE user_id = $1
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
@@ -136,7 +128,6 @@ func (q *Queries) GetOrganizationMembershipsByUserID(ctx context.Context, arg Ge
 			&i.UserID,
 			&i.Role,
 			&i.Status,
-			&i.InvitedBy,
 			&i.JoinedAt,
 			&i.LeftAt,
 			&i.CreatedAt,

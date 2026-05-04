@@ -4,7 +4,6 @@ package broker
 import (
 	"github.com/nats-io/nats.go"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/dto"
 )
 
 type Client interface {
@@ -16,13 +15,13 @@ type Client interface {
 }
 
 type Publisher interface {
-	Publish(subject dto.JobSubject, data any) *apperror.AppError
-	PublishAsync(subject dto.JobSubject, data any) (nats.PubAckFuture, *apperror.AppError)
-	PublishWithHeaders(subject dto.JobSubject, data any, headers nats.Header) *apperror.AppError
+	Publish(subject string, data any) *apperror.AppError
+	PublishAsync(subject string, data any) (nats.PubAckFuture, *apperror.AppError)
+	PublishWithHeaders(subject string, data any, headers nats.Header) *apperror.AppError
 }
 
 type Subscriber interface {
-	PullSubscribe(subject dto.JobSubject, consumerName string) (*nats.Subscription, *apperror.AppError)
+	PullSubscribe(subject string, consumerName string) (*nats.Subscription, *apperror.AppError)
 }
 
 type StreamManager interface {
