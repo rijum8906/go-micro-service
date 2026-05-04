@@ -33,13 +33,13 @@ func Test_tupleManager(t *testing.T) {
 	tupleManager := coreopenfga.NewTupleManager(fgaClient)
 
 	// create tuple
-	if err = tupleManager.Write(ctx, []client.ClientTupleKey{
+	if appErr := tupleManager.Write(ctx, []client.ClientTupleKey{
 		{
 			User:     "user:john",
 			Relation: "author",
 			Object:   "book:go.pdf",
 		},
-	}); err != nil {
+	}); appErr != nil {
 		t.Fatal(err)
 	}
 

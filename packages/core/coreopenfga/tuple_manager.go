@@ -22,7 +22,7 @@ func NewTupleManager(fgaClient *Client) *tupleManager {
 
 // Methods
 
-func (m *tupleManager) Write(ctx context.Context, creates []client.ClientTupleKey) error {
+func (m *tupleManager) Write(ctx context.Context, creates []client.ClientTupleKey) *apperror.AppError {
 	options := client.ClientWriteOptions{
 		AuthorizationModelId: &m.client.AuthorizationModelID,
 		StoreId:              &m.client.StoreID,
@@ -38,7 +38,7 @@ func (m *tupleManager) Write(ctx context.Context, creates []client.ClientTupleKe
 	return nil
 }
 
-func (m *tupleManager) Read(ctx context.Context, body client.ClientReadRequest) (*client.ClientReadResponse, error) {
+func (m *tupleManager) Read(ctx context.Context, body client.ClientReadRequest) (*client.ClientReadResponse, *apperror.AppError) {
 	options := client.ClientReadOptions{
 		StoreId:  &m.client.StoreID,
 		PageSize: openfga.PtrInt32(10),
@@ -52,7 +52,7 @@ func (m *tupleManager) Read(ctx context.Context, body client.ClientReadRequest) 
 	return res, nil
 }
 
-func (m *tupleManager) Check(ctx context.Context, body client.ClientCheckRequest) (*client.ClientCheckResponse, error) {
+func (m *tupleManager) Check(ctx context.Context, body client.ClientCheckRequest) (*client.ClientCheckResponse, *apperror.AppError) {
 	options := client.ClientCheckOptions{
 		StoreId:              &m.client.StoreID,
 		AuthorizationModelId: &m.client.AuthorizationModelID,
@@ -66,7 +66,7 @@ func (m *tupleManager) Check(ctx context.Context, body client.ClientCheckRequest
 	return res, nil
 }
 
-func (m *tupleManager) Delete(ctx context.Context, deletes []client.ClientTupleKeyWithoutCondition) error {
+func (m *tupleManager) Delete(ctx context.Context, deletes []client.ClientTupleKeyWithoutCondition) *apperror.AppError {
 	options := client.ClientWriteOptions{
 		AuthorizationModelId: &m.client.AuthorizationModelID,
 		StoreId:              &m.client.StoreID,
