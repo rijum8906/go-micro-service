@@ -26,10 +26,11 @@ type OrgMembershipRes struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	Role           string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
-	Status         string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
-	JoinedAt       *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
-	LeftAt         *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=left_at,json=leftAt,proto3" json:"left_at,omitempty"`
+	UserId         string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role           string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	Status         string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	JoinedAt       *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
+	LeftAt         *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=left_at,json=leftAt,proto3" json:"left_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -74,6 +75,13 @@ func (x *OrgMembershipRes) GetId() string {
 func (x *OrgMembershipRes) GetOrganizationId() string {
 	if x != nil {
 		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *OrgMembershipRes) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -154,14 +162,15 @@ var File_organization_service_org_membership_v1_response_proto protoreflect.File
 
 const file_organization_service_org_membership_v1_response_proto_rawDesc = "" +
 	"\n" +
-	"5organization_service/org_membership/v1/response.proto\x12&organization_service.org_membership.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe5\x01\n" +
+	"5organization_service/org_membership/v1/response.proto\x12&organization_service.org_membership.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfe\x01\n" +
 	"\x10OrgMembershipRes\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
-	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x127\n" +
-	"\tjoined_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bjoinedAt\x123\n" +
-	"\aleft_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06leftAt\"\x8c\x01\n" +
+	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x127\n" +
+	"\tjoined_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\bjoinedAt\x123\n" +
+	"\aleft_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x06leftAt\"\x8c\x01\n" +
 	"\x15OrgMembershipsListRes\x12s\n" +
 	"\x18organization_memberships\x18\x01 \x03(\v28.organization_service.org_membership.v1.OrgMembershipResR\x17organizationMembershipsB\xcd\x02\n" +
 	"*com.organization_service.org_membership.v1B\rResponseProtoP\x01Z^github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1;org_membershipv1\xa2\x02\x03OOX\xaa\x02$OrganizationService.OrgMembership.V1\xca\x02$OrganizationService\\OrgMembership\\V1\xe2\x020OrganizationService\\OrgMembership\\V1\\GPBMetadata\xea\x02&OrganizationService::OrgMembership::V1b\x06proto3"
