@@ -61,6 +61,7 @@ func SendUserInfo(ctx context.Context, info dto.UserInfo) context.Context {
 		dto.MetaUserIDKey, info.UserID,
 		dto.MetaAccessTokenKey, info.AccessToken,
 		dto.MetaSessionIDKey, info.SessionID,
+		dto.MetaRoleKey, info.Role,
 	)
 }
 
@@ -75,6 +76,7 @@ func ReceiveUserInfo(ctx context.Context) (dto.UserInfo, bool) {
 		UserID:      first(md, dto.MetaUserIDKey),
 		AccessToken: first(md, dto.MetaAccessTokenKey),
 		SessionID:   first(md, dto.MetaSessionIDKey),
+		Role:        first(md, dto.MetaRoleKey),
 	}, true
 }
 

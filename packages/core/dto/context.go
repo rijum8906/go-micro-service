@@ -14,4 +14,5 @@ const (
 	MetaUserIDKey       = "user-id"
 	MetaAccessTokenKey  = "access-token"
 	MetaRefreshTokenKey = "refresh-token"
+	MetaRoleKey         = "role"
 )
