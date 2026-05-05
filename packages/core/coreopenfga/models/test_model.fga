@@ -3,7 +3,7 @@ model
 
 type user
 
-type books
+type book
     relations
         define author: [user]
 
