@@ -5,11 +5,25 @@ package organization_service.org_membership.v1;
 import "core/v1/common.proto";
 import "organization_service/models/v1/model.proto";
 import "organization_service/org_membership/v1/request.proto";
+import "organization_service/org_membership/v1/response.proto";
 
 service OrganizationMembershipService {
-  // Public
-  rpc CreateOrganizationMembership(CreateOrganizationMembershipRequest) returns (organization_service.models.v1.Organization);
+  // ############################ USER QUERIES ############################
+  rpc GetMyMemberships(core.v1.EmptyRequest) returns (OrgMembershipsListRes);
+  rpc GetMyMembership(core.v1.IDRequest) returns (OrgMembershipRes);
 
-  // Private
-  rpc GetOrganizationMembership(core.v1.IDRequest) returns (organization_service.models.v1.Organization);
+  // ############################ ORGANIZATION QUERIES ############################
+  rpc GetOrganizationMembershipsByOrgID(core.v1.IDRequest) returns (OrgMembershipsListRes);
+  rpc GetOrganizationMembershipsByRole(GetOrgMembershipsByRoleReq) returns (OrgMembershipsListRes);
+  rpc GetOrganizationMembershipsByStatus(GetOrgMembershipsByStatusReq) returns (OrgMembershipsListRes);
+  rpc GetOrganizationMembership(core.v1.IDRequest) returns (OrgMembershipRes);
+
+  // ############################ USER'S MEMBERSHIP MANAGEMENT ############################
+  rpc LeaveOrganization(core.v1.IDRequest) returns (core.v1.SuccessResponse);
+
+  // ############################ ORGANIZATION'S MEMBERSHIP MANAGEMENT ############################
+  rpc CreateOrganizationMembership(core.v1.EmptyRequest) returns (organization_service.models.v1.OrganizationMembership);
+  rpc ChangeOrganizationMembershipStatus(ChangeOrgMembershipStatusReq) returns (core.v1.SuccessResponse);
+  rpc ChangeOrganizationMembershipRole(ChangeOrgMembershipRoleReq) returns (core.v1.SuccessResponse);
+  rpc RemoveOrganizationMember(core.v1.IDRequest) returns (core.v1.SuccessResponse);
 }

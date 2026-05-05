@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package organization_service.org_membership.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message OrgMembershipRes {
+  string id = 1;
+  string organization_id = 2;
+  string role = 3;
+  string status = 4;
+  google.protobuf.Timestamp joined_at = 5;
+  google.protobuf.Timestamp left_at = 6;
+}
+
+message OrgMembershipsListRes {
+  repeated OrgMembershipRes organization_memberships = 1;
+}

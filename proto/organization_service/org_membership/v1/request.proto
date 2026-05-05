@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package organization_service.org_membership.v1;
+
+message GetOrgMembershipsByRoleReq {
+  string organization_id = 1;
+  string role = 2;
+}
+
+message GetOrgMembershipsByStatusReq {
+  string organization_id = 1;
+  string status = 2;
+}
+
+message ChangeOrgMembershipRoleReq {
+  string id = 1;
+  string new_role = 2;
+  string token_scope = 3;
+}
+
+message ChangeOrgMembershipStatusReq {
+  string id = 1;
+  string new_status = 2;
+  string token_scope = 3;
+}
