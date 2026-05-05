@@ -32,6 +32,7 @@ type ModelManager interface {
 type TuppleManager interface {
 	Write(ctx context.Context, writes []client.ClientTupleKey) *apperror.AppError
 	Read(ctx context.Context, req client.ClientReadRequest) (*client.ClientReadResponse, *apperror.AppError)
+	Check(ctx context.Context, req client.ClientCheckRequest) (*client.ClientCheckResponse, *apperror.AppError)
 	Delete(ctx context.Context, deletes []client.ClientTupleKeyWithoutCondition) *apperror.AppError
 }
 

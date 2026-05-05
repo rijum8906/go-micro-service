@@ -20,8 +20,8 @@ type CoreEnv struct {
 	GatewayAddr             string `env:"GATEWAY_ADDR" envDefault:"graphql-gateway:8080"`
 	UserServiceAddr         string `env:"USER_SERVICE_ADDR" envDefault:"user-service:8081"`
 	NotificationServiceAddr string `env:"NOTIFICATION_SERVICE_ADDR" envDefault:"notification-service:8082"`
-	TaskServiceAddr 		string `env:"TASK_SERVICE_ADDR" envDefault:"task-service:8083"`
-	
+	TaskServiceAddr         string `env:"TASK_SERVICE_ADDR" envDefault:"task-service:8083"`
+
 	// NATS
 	NATSURL        string `env:"NATS_URL" envDefault:"nats://localhost:4222"`
 	NATSClientName string `env:"NATS_CLIENT_NAME" envDefault:"user-service"`
