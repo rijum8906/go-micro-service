@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/services/task-service/app/config"
 	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
 	projectservice "github.com/rijum8906/relay/services/task-service/internal/services/project"
@@ -21,9 +22,11 @@ import (
 )
 
 type ApplicationInfra struct {
-	cache        *redis.Client
-	database     *pgxpool.Pool
-	brokerClient broker.Client
+	cache         *redis.Client
+	database      *pgxpool.Pool
+	brokerClient  broker.Client
+	openFGA       *coreopenfga.Client
+	openFGATuples coreopenfga.TuppleManager
 }
 
 type ApplicationUtils struct {

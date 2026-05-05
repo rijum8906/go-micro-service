@@ -2,9 +2,12 @@ package authz
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	projectmembershiprepo "github.com/rijum8906/relay/services/task-service/internal/repository/project_membership"
@@ -34,9 +37,10 @@ type Authorizer interface {
 type authorizer struct {
 	memberships projectmembershiprepo.ProjectMembershipRepository
 	tasks       taskrepo.TaskRepository
+	tuples      coreopenfga.TuppleManager
 }
 
-func NewAuthorizer(memberships projectmembershiprepo.ProjectMembershipRepository, tasks taskrepo.TaskRepository) (Authorizer, *apperror.AppError) {
+func NewAuthorizer(memberships projectmembershiprepo.ProjectMembershipRepository, tasks taskrepo.TaskRepository, tuples coreopenfga.TuppleManager) (Authorizer, *apperror.AppError) {
 	if memberships == nil || tasks == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize authorizer")
 	}
@@ -44,6 +48,7 @@ func NewAuthorizer(memberships projectmembershiprepo.ProjectMembershipRepository
 	return &authorizer{
 		memberships: memberships,
 		tasks:       tasks,
+		tuples:      tuples,
 	}, nil
 }
 
@@ -51,6 +56,17 @@ func (a *authorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID
 	userID, appErr := utils.ValidateUserInfo(userInfo)
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	if a.tuples != nil {
+		if appErr = a.requireFGA(ctx, userID, projectRelation(minRole), fgaObject("project", projectID)); appErr != nil {
+			return nil, appErr
+		}
+		return &db.ProjectMembership{
+			ProjectID: projectID,
+			UserID:    userID,
+			Role:      string(minRole),
+		}, nil
 	}
 
 	memberships, appErr := a.memberships.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
@@ -83,6 +99,13 @@ func (a *authorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, user
 		return nil, appErr
 	}
 
+	if a.tuples != nil {
+		if appErr = a.requireFGA(ctx, userID, taskRelation(minRole), fgaObject("task", taskID)); appErr != nil {
+			return nil, appErr
+		}
+		return task, nil
+	}
+
 	if task.ProjectID.Valid {
 		if _, appErr := a.RequireProjectRole(ctx, task.ProjectID.Bytes, userInfo, minRole); appErr != nil {
 			return nil, appErr
@@ -100,4 +123,46 @@ func (a *authorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, user
 func hasMinRole(actual string, required Role) bool {
 	actualRole := Role(actual)
 	return roleRank[actualRole] >= roleRank[required]
+}
+
+func (a *authorizer) requireFGA(ctx context.Context, userID uuid.UUID, relation, object string) *apperror.AppError {
+	res, appErr := a.tuples.Check(ctx, client.ClientCheckRequest{
+		User:     fgaObject("user", userID),
+		Relation: relation,
+		Object:   object,
+	})
+	if appErr != nil {
+		return appErr
+	}
+	if res == nil || !res.GetAllowed() {
+		return apperror.ErrForbidden.WithMessage("permission denied")
+	}
+
+	return nil
+}
+
+func projectRelation(role Role) string {
+	switch role {
+	case RoleOwner:
+		return "can_delete"
+	case RoleAdmin:
+		return "can_manage_tasks"
+	default:
+		return "can_view"
+	}
+}
+
+func taskRelation(role Role) string {
+	switch role {
+	case RoleOwner:
+		return "can_delete"
+	case RoleAdmin:
+		return "can_manage"
+	default:
+		return "can_view"
+	}
+}
+
+func fgaObject(objectType string, id uuid.UUID) string {
+	return fmt.Sprintf("%s:%s", objectType, id)
 }

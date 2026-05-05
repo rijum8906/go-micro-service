@@ -12,6 +12,9 @@ import (
 
 type Env struct {
 	coreenv.CoreEnv
+	OpenFGAURL         string `env:"OPENFGA_URL"`
+	OpenFGAStoreID     string `env:"OPENFGA_STORE_ID"`
+	OpenFGAAuthModelID string `env:"OPENFGA_AUTH_MODEL_ID"`
 }
 
 func LoadEnv() (*Env, *apperror.AppError) {

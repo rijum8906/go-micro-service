@@ -51,6 +51,14 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 	}
 	a.infra.brokerClient = nats
 
+	// OpenFGA is optional until task-service authorization is fully migrated.
+	openFGA, openFGATuples, appErr := initOpenFGA(a.config)
+	if appErr != nil {
+		return appErr
+	}
+	a.infra.openFGA = openFGA
+	a.infra.openFGATuples = openFGATuples
+
 	return nil
 }
 
@@ -71,7 +79,7 @@ func (a *Application) initServices() *apperror.AppError {
 	taskRepository := taskrepo.NewTaskRepository(queries)
 	taskAssignmentRepository := taskassignmentrepo.NewTaskAssignmentRepository(queries)
 	taskCommentRepository := taskcommentrepo.NewTaskCommentRepository(queries)
-	authorizer, appErr := authz.NewAuthorizer(projectMembershipRepository, taskRepository)
+	authorizer, appErr := authz.NewAuthorizer(projectMembershipRepository, taskRepository, a.infra.openFGATuples)
 	if appErr != nil {
 		return appErr
 	}
@@ -82,7 +90,7 @@ func (a *Application) initServices() *apperror.AppError {
 	}
 	a.services.project = projectService
 
-	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository,authorizer)
+	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository, authorizer)
 	if appErr != nil {
 		return appErr
 	}

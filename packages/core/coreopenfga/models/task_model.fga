@@ -1,0 +1,48 @@
+model
+    schema 1.1
+
+type user
+
+type team
+
+type project
+    relations
+        define owner: [user]
+        define admin: [user]
+        define member: [user]
+
+        define can_view: owner or admin or member
+        define can_contribute_tasks: can_view
+        define can_manage_tasks: owner or admin
+        define can_update: owner or admin
+        define can_complete: owner or admin
+        define can_archive: owner or admin
+        define can_delete: owner
+        define can_add_member: owner or admin
+        define can_remove_member: owner or admin
+        define can_change_member_role: owner
+
+type task
+    relations
+        define creator: [user]
+        define assignee: [user, team]
+        define parent_project: [project]
+
+        define can_view: creator or can_view from parent_project
+        define can_edit: creator or can_contribute_tasks from parent_project
+        define can_update_status: creator or can_contribute_tasks from parent_project
+        define can_update_progress: creator or can_contribute_tasks from parent_project
+        define can_comment: creator or can_contribute_tasks from parent_project
+        define can_manage: creator or can_manage_tasks from parent_project
+        define can_assign: creator or can_manage_tasks from parent_project
+        define can_archive: creator or can_manage_tasks from parent_project
+        define can_delete: creator or can_manage_tasks from parent_project
+
+type task_comment
+    relations
+        define author: [user]
+        define parent_task: [task]
+
+        define can_view: can_comment from parent_task
+        define can_edit: author and can_comment from parent_task
+        define can_delete: author and can_comment from parent_task
