@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -46,6 +47,15 @@ func (s *service) CreateTaskComment(ctx context.Context, req *taskv1.CreateTaskC
 	})
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	if s.tuples != nil {
+		if appErr := s.tuples.Write(ctx, []client.ClientTupleKey{
+			authz.CommentAuthorTuple(comment.ID, authorID),
+			authz.CommentTaskTuple(comment.ID, taskID),
+		}); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	return mapTaskComment(comment), nil
@@ -128,6 +138,15 @@ func (s *service) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskC
 		DeletedBy: utils.PGUUID(userID),
 	}); appErr != nil {
 		return nil, appErr
+	}
+
+	if s.tuples != nil {
+		if appErr := s.tuples.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
+			authz.DeleteTuple(authz.CommentAuthorTuple(comment.ID, comment.AuthorID)),
+			authz.DeleteTuple(authz.CommentTaskTuple(comment.ID, comment.TaskID)),
+		}); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	return &corev1.SuccessResponse{Success: true}, nil

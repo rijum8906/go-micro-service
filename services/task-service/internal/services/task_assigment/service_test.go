@@ -58,7 +58,7 @@ func (s *stubTaskAssignmentRepository) ListActiveAssignmentsByAssignee(ctx conte
 }
 
 func TestNewTaskAssignmentService(t *testing.T) {
-	svc, err := NewTaskAssignmentService(nil, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewTaskAssignmentService(nil, servicetestutil.NewAllowAuthorizer(), nil)
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -69,7 +69,7 @@ func TestNewTaskAssignmentService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewTaskAssignmentService(&stubTaskAssignmentRepository{}, servicetestutil.NewAllowAuthorizer())
+	svc, err = NewTaskAssignmentService(&stubTaskAssignmentRepository{}, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -525,7 +525,7 @@ func TestListTaskAssignmentsValidation(t *testing.T) {
 func mustTaskAssignmentService(t *testing.T, repo *stubTaskAssignmentRepository) TaskAssignmentService {
 	t.Helper()
 
-	svc, err := NewTaskAssignmentService(repo, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewTaskAssignmentService(repo, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("failed to construct task assignment service: %v", err)
 	}

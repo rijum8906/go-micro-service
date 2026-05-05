@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -45,6 +46,14 @@ func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRe
 		return nil, appErr
 	}
 
+	if s.tuples != nil {
+		if appErr := s.tuples.Write(ctx, []client.ClientTupleKey{
+			authz.ProjectRoleTuple(project.ID, "owner", createdBy),
+		}); appErr != nil {
+			return nil, appErr
+		}
+	}
+
 	return mapProject(project), nil
 }
 
@@ -68,7 +77,7 @@ func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest,
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleMember) ; appErr != nil {
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
 		return nil, appErr
 	}
 
@@ -103,7 +112,7 @@ func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRe
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin) ; appErr != nil {
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
 		return nil, appErr
 	}
 
@@ -138,7 +147,7 @@ func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProje
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin) ; appErr != nil {
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
 		return nil, appErr
 	}
 
@@ -170,7 +179,7 @@ func (s *service) ArchiveProject(ctx context.Context, req *taskv1.ArchiveProject
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin) ; appErr != nil {
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
 		return nil, appErr
 	}
 
@@ -202,8 +211,8 @@ func (s *service) DeleteProject(ctx context.Context, req *taskv1.DeleteProjectRe
 	if appErr != nil {
 		return nil, appErr
 	}
-	
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleOwner) ; appErr != nil {
+
+	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleOwner); appErr != nil {
 		return nil, appErr
 	}
 

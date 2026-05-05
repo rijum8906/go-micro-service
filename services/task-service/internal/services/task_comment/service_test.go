@@ -58,7 +58,7 @@ func (s *stubTaskCommentRepository) ListTaskComments(ctx context.Context, taskID
 }
 
 func TestNewTaskCommentService(t *testing.T) {
-	svc, err := NewTaskCommentService(nil, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewTaskCommentService(nil, servicetestutil.NewAllowAuthorizer(), nil)
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -69,7 +69,7 @@ func TestNewTaskCommentService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewTaskCommentService(&stubTaskCommentRepository{}, servicetestutil.NewAllowAuthorizer())
+	svc, err = NewTaskCommentService(&stubTaskCommentRepository{}, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -435,7 +435,7 @@ func TestListTaskCommentsValidationAndRepoError(t *testing.T) {
 func mustTaskCommentService(t *testing.T, repo *stubTaskCommentRepository) TaskCommentService {
 	t.Helper()
 
-	svc, err := NewTaskCommentService(repo, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewTaskCommentService(repo, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("failed to construct task comment service: %v", err)
 	}

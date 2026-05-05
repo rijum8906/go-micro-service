@@ -84,31 +84,31 @@ func (a *Application) initServices() *apperror.AppError {
 		return appErr
 	}
 
-	projectService, appErr := projectservice.NewProjectService(projectRepository, authorizer)
+	projectService, appErr := projectservice.NewProjectService(projectRepository, authorizer, a.infra.openFGATuples)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.project = projectService
 
-	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository, authorizer)
+	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository, authorizer, a.infra.openFGATuples)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.projectMembership = projectMembershipService
 
-	taskService, appErr := taskservice.NewTaskService(taskRepository, authorizer)
+	taskService, appErr := taskservice.NewTaskService(taskRepository, authorizer, a.infra.openFGATuples)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.task = taskService
 
-	taskAssignmentService, appErr := taskassigmentservice.NewTaskAssignmentService(taskAssignmentRepository, authorizer)
+	taskAssignmentService, appErr := taskassigmentservice.NewTaskAssignmentService(taskAssignmentRepository, authorizer, a.infra.openFGATuples)
 	if appErr != nil {
 		return appErr
 	}
 	a.services.taskAssignment = taskAssignmentService
 
-	taskCommentService, appErr := taskcommentservice.NewTaskCommentService(taskCommentRepository, authorizer)
+	taskCommentService, appErr := taskcommentservice.NewTaskCommentService(taskCommentRepository, authorizer, a.infra.openFGATuples)
 	if appErr != nil {
 		return appErr
 	}

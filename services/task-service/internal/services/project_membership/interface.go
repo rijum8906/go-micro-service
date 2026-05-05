@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
@@ -22,9 +23,10 @@ type ProjectMembershipService interface {
 type service struct {
 	repo  projectmembershiprepo.ProjectMembershipRepository
 	authz authz.Authorizer
+	tuples coreopenfga.TuppleManager
 }
 
-func NewProjectMembershipService(repo projectmembershiprepo.ProjectMembershipRepository, authz authz.Authorizer) (ProjectMembershipService, *apperror.AppError) {
+func NewProjectMembershipService(repo projectmembershiprepo.ProjectMembershipRepository, authz authz.Authorizer, tuples coreopenfga.TuppleManager) (ProjectMembershipService, *apperror.AppError) {
 	if repo == nil || authz == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize project membership service").WithDetail("repo", "project membership repository must be configured")
 	}
@@ -32,5 +34,6 @@ func NewProjectMembershipService(repo projectmembershiprepo.ProjectMembershipRep
 	return &service{
 		repo:  repo,
 		authz: authz,
+		tuples: tuples,
 	}, nil
 }

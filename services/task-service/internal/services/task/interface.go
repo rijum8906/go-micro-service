@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
@@ -29,9 +30,10 @@ type TaskService interface {
 type service struct {
 	repo  taskrepo.TaskRepository
 	authz authz.Authorizer
+	tuples coreopenfga.TuppleManager
 }
 
-func NewTaskService(repo taskrepo.TaskRepository, authz authz.Authorizer) (TaskService, *apperror.AppError) {
+func NewTaskService(repo taskrepo.TaskRepository, authz authz.Authorizer, tuples coreopenfga.TuppleManager) (TaskService, *apperror.AppError) {
 	if repo == nil || authz == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize task service").WithDetail("repo", "task repository must be configured")
 	}
@@ -39,5 +41,6 @@ func NewTaskService(repo taskrepo.TaskRepository, authz authz.Authorizer) (TaskS
 	return &service{
 		repo:  repo,
 		authz: authz,
+		tuples:  tuples,
 	}, nil
 }

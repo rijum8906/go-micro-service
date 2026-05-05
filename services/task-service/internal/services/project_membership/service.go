@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -65,6 +66,14 @@ func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMe
 		return nil, appErr
 	}
 
+	if s.tuples != nil {
+		if appErr := s.tuples.Write(ctx, []client.ClientTupleKey{
+			authz.ProjectRoleTuple(projectID, role, userID),
+		}); appErr != nil {
+			return nil, appErr
+		}
+	}
+
 	return mapProjectMembership(membership), nil
 }
 
@@ -93,11 +102,20 @@ func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemovePro
 		return nil, appErr
 	}
 
-	if _, appErr = s.repo.RemoveProjectMember(ctx, db.RemoveProjectMemberParams{
+	membership, appErr := s.repo.RemoveProjectMember(ctx, db.RemoveProjectMemberParams{
 		ProjectID: projectID,
 		UserID:    userID,
-	}); appErr != nil {
+	})
+	if appErr != nil {
 		return nil, appErr
+	}
+
+	if s.tuples != nil {
+		if appErr := s.tuples.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
+			authz.DeleteTuple(authz.ProjectRoleTuple(projectID, membership.Role, userID)),
+		}); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
@@ -133,6 +151,17 @@ func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.Updat
 		return nil, appErr
 	}
 
+	var currentMembership *db.ProjectMembership
+	if s.tuples != nil {
+		currentMembership, appErr = s.repo.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
+			ProjectID: projectID,
+			UserID:    userID,
+		})
+		if appErr != nil {
+			return nil, appErr
+		}
+	}
+
 	membership, appErr := s.repo.UpdateProjectMemberRole(ctx, db.UpdateProjectMemberRoleParams{
 		ProjectID: projectID,
 		UserID:    userID,
@@ -140,6 +169,19 @@ func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.Updat
 	})
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	if s.tuples != nil && currentMembership.Role != membership.Role {
+		if appErr := s.tuples.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
+			authz.DeleteTuple(authz.ProjectRoleTuple(projectID, currentMembership.Role, userID)),
+		}); appErr != nil {
+			return nil, appErr
+		}
+		if appErr := s.tuples.Write(ctx, []client.ClientTupleKey{
+			authz.ProjectRoleTuple(projectID, membership.Role, userID),
+		}); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	return mapProjectMembership(membership), nil

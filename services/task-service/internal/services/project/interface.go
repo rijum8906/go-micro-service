@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
@@ -25,14 +26,17 @@ type ProjectService interface {
 type service struct {
 	repo  projectrepo.ProjectRepository
 	authz authz.Authorizer
+	tuples coreopenfga.TuppleManager
 }
 
-func NewProjectService(repo projectrepo.ProjectRepository, authz authz.Authorizer) (ProjectService, *apperror.AppError) {
+func NewProjectService(repo projectrepo.ProjectRepository, authz authz.Authorizer, tuples coreopenfga.TuppleManager) (ProjectService, *apperror.AppError) {
 	if repo == nil || authz == nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to initialize project service").WithDetail("repo", "project repository must be configured")
 	}
 
 	return &service{
 		repo:  repo,
-		authz: authz}, nil
+		authz: authz,
+		tuples: tuples,
+	}, nil
 }

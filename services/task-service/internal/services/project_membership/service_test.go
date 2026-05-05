@@ -82,7 +82,7 @@ func (s *stubProjectMembershipRepository) ListProjectMembershipsByUser(ctx conte
 }
 
 func TestNewProjectMembershipService(t *testing.T) {
-	svc, err := NewProjectMembershipService(nil, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewProjectMembershipService(nil, servicetestutil.NewAllowAuthorizer(), nil)
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -93,7 +93,7 @@ func TestNewProjectMembershipService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewProjectMembershipService(&stubProjectMembershipRepository{}, servicetestutil.NewAllowAuthorizer())
+	svc, err = NewProjectMembershipService(&stubProjectMembershipRepository{}, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -567,7 +567,7 @@ func mustProjectMembershipService(t *testing.T, repo *stubProjectMembershipRepos
 func mustProjectMembershipServiceWithAuthorizer(t *testing.T, repo *stubProjectMembershipRepository, authorizer authz.Authorizer) ProjectMembershipService {
 	t.Helper()
 
-	svc, err := NewProjectMembershipService(repo, authorizer)
+	svc, err := NewProjectMembershipService(repo, authorizer, nil)
 	if err != nil {
 		t.Fatalf("failed to construct project membership service: %v", err)
 	}

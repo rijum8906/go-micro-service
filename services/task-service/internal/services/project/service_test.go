@@ -75,7 +75,7 @@ func (s *stubProjectRepository) ListProjects(ctx context.Context, params db.List
 }
 
 func TestNewProjectService(t *testing.T) {
-	svc, err := NewProjectService(nil, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewProjectService(nil, servicetestutil.NewAllowAuthorizer(), nil)
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -86,7 +86,7 @@ func TestNewProjectService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewProjectService(&stubProjectRepository{}, servicetestutil.NewAllowAuthorizer())
+	svc, err = NewProjectService(&stubProjectRepository{}, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -552,7 +552,7 @@ func TestCompleteProjectSuccess(t *testing.T) {
 func mustProjectService(t *testing.T, repo *stubProjectRepository) ProjectService {
 	t.Helper()
 
-	svc, err := NewProjectService(repo, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewProjectService(repo, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("failed to construct project service: %v", err)
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -85,6 +86,18 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 	})
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	if s.tuples != nil {
+		writes := []client.ClientTupleKey{
+			authz.TaskCreatorTuple(task.ID, task.CreatedBy),
+		}
+		if task.ProjectID.Valid {
+			writes = append(writes, authz.TaskProjectTuple(task.ID, task.ProjectID.Bytes))
+		}
+		if appErr := s.tuples.Write(ctx, writes); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	return mapTask(task), nil

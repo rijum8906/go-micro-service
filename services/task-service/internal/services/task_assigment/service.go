@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
@@ -56,6 +57,14 @@ func (s *service) AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest,
 		return nil, appErr
 	}
 
+	if s.tuples != nil {
+		if appErr := s.tuples.Write(ctx, []client.ClientTupleKey{
+			authz.TaskAssigneeTuple(taskID, assigneeType, assigneeID),
+		}); appErr != nil {
+			return nil, appErr
+		}
+	}
+
 	return mapTaskAssignment(assignment), nil
 }
 
@@ -75,12 +84,21 @@ func (s *service) UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequ
 		return nil, appErr
 	}
 
-	if _, appErr = s.repo.UnassignTask(ctx, db.UnassignTaskParams{
+	assignment, appErr := s.repo.UnassignTask(ctx, db.UnassignTaskParams{
 		TaskID:       taskID,
 		AssigneeType: assigneeType,
 		AssigneeID:   assigneeID,
-	}); appErr != nil {
+	})
+	if appErr != nil {
 		return nil, appErr
+	}
+
+	if s.tuples != nil {
+		if appErr := s.tuples.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
+			authz.DeleteTuple(authz.TaskAssigneeTuple(assignment.TaskID, assignment.AssigneeType, assignment.AssigneeID)),
+		}); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
@@ -157,6 +175,19 @@ func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 			AssigneeID:   toAssigneeID,
 		})
 		return nil, appErr
+	}
+
+	if s.tuples != nil {
+		if appErr := s.tuples.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
+			authz.DeleteTuple(authz.TaskAssigneeTuple(taskID, fromAssigneeType, fromAssigneeID)),
+		}); appErr != nil {
+			return nil, appErr
+		}
+		if appErr := s.tuples.Write(ctx, []client.ClientTupleKey{
+			authz.TaskAssigneeTuple(taskID, toAssigneeType, toAssigneeID),
+		}); appErr != nil {
+			return nil, appErr
+		}
 	}
 
 	return mapTaskAssignment(assignment), nil

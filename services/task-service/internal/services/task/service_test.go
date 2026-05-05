@@ -129,7 +129,7 @@ func (s *stubTaskRepository) ListTasksByCreator(ctx context.Context, params db.L
 }
 
 func TestNewTaskService(t *testing.T) {
-	svc, err := NewTaskService(nil, servicetestutil.NewAllowAuthorizer())
+	svc, err := NewTaskService(nil, servicetestutil.NewAllowAuthorizer(), nil)
 	if err == nil {
 		t.Fatal("expected constructor error for nil repository")
 	}
@@ -140,7 +140,7 @@ func TestNewTaskService(t *testing.T) {
 		t.Fatalf("expected internal error, got %s", err.Code)
 	}
 
-	svc, err = NewTaskService(&stubTaskRepository{}, servicetestutil.NewAllowAuthorizer())
+	svc, err = NewTaskService(&stubTaskRepository{}, servicetestutil.NewAllowAuthorizer(), nil)
 	if err != nil {
 		t.Fatalf("expected constructor success, got error: %v", err)
 	}
@@ -738,7 +738,7 @@ func mustTaskService(t *testing.T, repo *stubTaskRepository) TaskService {
 func mustTaskServiceWithAuthorizer(t *testing.T, repo *stubTaskRepository, authorizer authz.Authorizer) TaskService {
 	t.Helper()
 
-	svc, err := NewTaskService(repo, authorizer)
+	svc, err := NewTaskService(repo, authorizer, nil)
 	if err != nil {
 		t.Fatalf("failed to construct task service: %v", err)
 	}
