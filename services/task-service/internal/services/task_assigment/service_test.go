@@ -10,6 +10,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 )
@@ -223,6 +224,47 @@ func TestAssignTaskSuccess(t *testing.T) {
 	}
 }
 
+func TestAssignTaskWritesAssigneeTuple(t *testing.T) {
+	taskID := uuid.New()
+	assigneeID := uuid.New()
+	assignedBy := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewTaskAssignmentService(&stubTaskAssignmentRepository{
+		getActiveTaskAssignmentFn: func(_ context.Context, params db.GetActiveTaskAssignmentParams) (*db.TaskAssignment, *apperror.AppError) {
+			return nil, &apperror.AppError{Code: apperror.CodeNotFound, Message: "task assignment not found"}
+		},
+		assignTaskFn: func(_ context.Context, params db.AssignTaskParams) (*db.TaskAssignment, *apperror.AppError) {
+			return &db.TaskAssignment{
+				ID:           uuid.New(),
+				TaskID:       params.TaskID,
+				AssigneeType: params.AssigneeType,
+				AssigneeID:   params.AssigneeID,
+				AssignedBy:   params.AssignedBy,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct task assignment service: %v", err)
+	}
+
+	_, appErr := svc.AssignTask(context.Background(), &taskv1.AssignTaskRequest{
+		TaskId:       taskID.String(),
+		AssigneeType: "user",
+		AssigneeId:   assigneeID.String(),
+	}, &coredto.UserInfo{UserID: assignedBy.String()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Writes) != 1 {
+		t.Fatalf("expected 1 tuple write, got %d: %#v", len(tuples.Writes), tuples.Writes)
+	}
+	if !tuples.HasWrite(authz.TaskAssigneeTuple(taskID, "user", assigneeID)) {
+		t.Fatalf("missing task assignee tuple write: %#v", tuples.Writes)
+	}
+}
+
 func TestUnassignTaskSuccess(t *testing.T) {
 	taskID := uuid.New()
 	assigneeID := uuid.New()
@@ -252,6 +294,42 @@ func TestUnassignTaskSuccess(t *testing.T) {
 	}
 	if res == nil || !res.Success {
 		t.Fatalf("expected success response, got %#v", res)
+	}
+}
+
+func TestUnassignTaskDeletesAssigneeTuple(t *testing.T) {
+	taskID := uuid.New()
+	assigneeID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewTaskAssignmentService(&stubTaskAssignmentRepository{
+		unassignTaskFn: func(_ context.Context, params db.UnassignTaskParams) (*db.TaskAssignment, *apperror.AppError) {
+			return &db.TaskAssignment{
+				ID:           uuid.New(),
+				TaskID:       params.TaskID,
+				AssigneeType: params.AssigneeType,
+				AssigneeID:   params.AssigneeID,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct task assignment service: %v", err)
+	}
+
+	_, appErr := svc.UnassignTask(context.Background(), &taskv1.UnassignTaskRequest{
+		TaskId:       taskID.String(),
+		AssigneeType: "team",
+		AssigneeId:   assigneeID.String(),
+	}, &coredto.UserInfo{UserID: uuid.NewString()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Deletes) != 1 {
+		t.Fatalf("expected 1 tuple delete, got %d: %#v", len(tuples.Deletes), tuples.Deletes)
+	}
+	if !tuples.HasDelete(authz.DeleteTuple(authz.TaskAssigneeTuple(taskID, "team", assigneeID))) {
+		t.Fatalf("missing task assignee tuple delete: %#v", tuples.Deletes)
 	}
 }
 
@@ -400,6 +478,74 @@ func TestReassignTaskSuccess(t *testing.T) {
 	}
 	if res.AssigneeId != toAssigneeID.String() {
 		t.Fatalf("unexpected assignee id: %s", res.AssigneeId)
+	}
+}
+
+func TestReassignTaskReplacesAssigneeTuple(t *testing.T) {
+	taskID := uuid.New()
+	fromAssigneeID := uuid.New()
+	toAssigneeID := uuid.New()
+	assignedBy := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	lookupCalls := 0
+	svc, err := NewTaskAssignmentService(&stubTaskAssignmentRepository{
+		getActiveTaskAssignmentFn: func(_ context.Context, params db.GetActiveTaskAssignmentParams) (*db.TaskAssignment, *apperror.AppError) {
+			lookupCalls++
+			switch lookupCalls {
+			case 1:
+				return &db.TaskAssignment{ID: uuid.New(), TaskID: taskID, AssigneeType: "user", AssigneeID: fromAssigneeID}, nil
+			case 2:
+				return nil, &apperror.AppError{Code: apperror.CodeNotFound, Message: "task assignment not found"}
+			default:
+				t.Fatalf("unexpected extra lookup: %#v", params)
+				return nil, nil
+			}
+		},
+		assignTaskFn: func(_ context.Context, params db.AssignTaskParams) (*db.TaskAssignment, *apperror.AppError) {
+			return &db.TaskAssignment{
+				ID:           uuid.New(),
+				TaskID:       params.TaskID,
+				AssigneeType: params.AssigneeType,
+				AssigneeID:   params.AssigneeID,
+				AssignedBy:   params.AssignedBy,
+			}, nil
+		},
+		unassignTaskFn: func(_ context.Context, params db.UnassignTaskParams) (*db.TaskAssignment, *apperror.AppError) {
+			return &db.TaskAssignment{
+				ID:           uuid.New(),
+				TaskID:       params.TaskID,
+				AssigneeType: params.AssigneeType,
+				AssigneeID:   params.AssigneeID,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct task assignment service: %v", err)
+	}
+
+	_, appErr := svc.ReassignTask(context.Background(), &taskv1.ReassignTaskRequest{
+		TaskId:           taskID.String(),
+		FromAssigneeType: "user",
+		FromAssigneeId:   fromAssigneeID.String(),
+		ToAssigneeType:   "team",
+		ToAssigneeId:     toAssigneeID.String(),
+	}, &coredto.UserInfo{UserID: assignedBy.String()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Deletes) != 1 {
+		t.Fatalf("expected 1 tuple delete, got %d: %#v", len(tuples.Deletes), tuples.Deletes)
+	}
+	if len(tuples.Writes) != 1 {
+		t.Fatalf("expected 1 tuple write, got %d: %#v", len(tuples.Writes), tuples.Writes)
+	}
+	if !tuples.HasDelete(authz.DeleteTuple(authz.TaskAssigneeTuple(taskID, "user", fromAssigneeID))) {
+		t.Fatalf("missing old task assignee tuple delete: %#v", tuples.Deletes)
+	}
+	if !tuples.HasWrite(authz.TaskAssigneeTuple(taskID, "team", toAssigneeID)) {
+		t.Fatalf("missing new task assignee tuple write: %#v", tuples.Writes)
 	}
 }
 

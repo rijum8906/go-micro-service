@@ -324,6 +324,47 @@ func TestCreateTaskSuccess(t *testing.T) {
 	}
 }
 
+func TestCreateTaskWritesCreatorAndProjectTuples(t *testing.T) {
+	userID := uuid.New()
+	projectID := uuid.New()
+	taskID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewTaskService(&stubTaskRepository{
+		createTaskFn: func(_ context.Context, params db.CreateTaskParams) (*db.Task, *apperror.AppError) {
+			return &db.Task{
+				ID:        taskID,
+				ProjectID: params.ProjectID,
+				CreatedBy: params.CreatedBy,
+				Title:     params.Title,
+				Status:    "pending",
+				Priority:  params.Priority,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct task service: %v", err)
+	}
+
+	_, appErr := svc.CreateTask(context.Background(), &taskv1.CreateTaskRequest{
+		ProjectId: projectID.String(),
+		Title:     "Ship feature",
+	}, &coredto.UserInfo{UserID: userID.String()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Writes) != 2 {
+		t.Fatalf("expected 2 tuple writes, got %d: %#v", len(tuples.Writes), tuples.Writes)
+	}
+	if !tuples.HasWrite(authz.TaskCreatorTuple(taskID, userID)) {
+		t.Fatalf("missing task creator tuple write: %#v", tuples.Writes)
+	}
+	if !tuples.HasWrite(authz.TaskProjectTuple(taskID, projectID)) {
+		t.Fatalf("missing task project tuple write: %#v", tuples.Writes)
+	}
+}
+
 func TestCreateTaskRejectsMismatchedParentProjectScope(t *testing.T) {
 	parentTaskID := uuid.New()
 	parentProjectID := uuid.New()

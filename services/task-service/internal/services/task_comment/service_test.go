@@ -10,6 +10,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 )
@@ -184,6 +185,45 @@ func TestCreateTaskCommentSuccess(t *testing.T) {
 	}
 }
 
+func TestCreateTaskCommentWritesCommentTuples(t *testing.T) {
+	taskID := uuid.New()
+	authorID := uuid.New()
+	commentID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewTaskCommentService(&stubTaskCommentRepository{
+		createTaskCommentFn: func(_ context.Context, params db.CreateTaskCommentParams) (*db.TaskComment, *apperror.AppError) {
+			return &db.TaskComment{
+				ID:       commentID,
+				TaskID:   params.TaskID,
+				AuthorID: params.AuthorID,
+				Body:     params.Body,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct task comment service: %v", err)
+	}
+
+	_, appErr := svc.CreateTaskComment(context.Background(), &taskv1.CreateTaskCommentRequest{
+		TaskId: taskID.String(),
+		Body:   "Looks good",
+	}, &coredto.UserInfo{UserID: authorID.String()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Writes) != 2 {
+		t.Fatalf("expected 2 tuple writes, got %d: %#v", len(tuples.Writes), tuples.Writes)
+	}
+	if !tuples.HasWrite(authz.CommentAuthorTuple(commentID, authorID)) {
+		t.Fatalf("missing comment author tuple write: %#v", tuples.Writes)
+	}
+	if !tuples.HasWrite(authz.CommentTaskTuple(commentID, taskID)) {
+		t.Fatalf("missing comment task tuple write: %#v", tuples.Writes)
+	}
+}
+
 func TestUpdateTaskCommentForbiddenForNonAuthor(t *testing.T) {
 	commentID := uuid.New()
 	authorID := uuid.New()
@@ -355,6 +395,50 @@ func TestDeleteTaskCommentSuccess(t *testing.T) {
 	}
 	if res == nil || !res.Success {
 		t.Fatalf("expected success response, got %#v", res)
+	}
+}
+
+func TestDeleteTaskCommentDeletesCommentTuples(t *testing.T) {
+	commentID := uuid.New()
+	taskID := uuid.New()
+	authorID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewTaskCommentService(&stubTaskCommentRepository{
+		getTaskCommentFn: func(_ context.Context, id uuid.UUID) (*db.TaskComment, *apperror.AppError) {
+			if id != commentID {
+				t.Fatalf("unexpected comment id: %s", id)
+			}
+			return &db.TaskComment{
+				ID:       commentID,
+				TaskID:   taskID,
+				AuthorID: authorID,
+				Body:     "Original",
+			}, nil
+		},
+		deleteTaskCommentFn: func(_ context.Context, params db.DeleteTaskCommentParams) (*db.TaskComment, *apperror.AppError) {
+			return &db.TaskComment{ID: params.ID}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct task comment service: %v", err)
+	}
+
+	_, appErr := svc.DeleteTaskComment(context.Background(), &taskv1.DeleteTaskCommentRequest{
+		Id: commentID.String(),
+	}, &coredto.UserInfo{UserID: authorID.String()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Deletes) != 2 {
+		t.Fatalf("expected 2 tuple deletes, got %d: %#v", len(tuples.Deletes), tuples.Deletes)
+	}
+	if !tuples.HasDelete(authz.DeleteTuple(authz.CommentAuthorTuple(commentID, authorID))) {
+		t.Fatalf("missing comment author tuple delete: %#v", tuples.Deletes)
+	}
+	if !tuples.HasDelete(authz.DeleteTuple(authz.CommentTaskTuple(commentID, taskID))) {
+		t.Fatalf("missing comment task tuple delete: %#v", tuples.Deletes)
 	}
 }
 

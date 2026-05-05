@@ -11,6 +11,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
+	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
 )
@@ -208,6 +209,40 @@ func TestCreateProjectSuccess(t *testing.T) {
 	}
 	if res.Name != "Platform" {
 		t.Fatalf("unexpected name: %s", res.Name)
+	}
+}
+
+func TestCreateProjectWritesOwnerTuple(t *testing.T) {
+	userID := uuid.New()
+	projectID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewProjectService(&stubProjectRepository{
+		createProjectFn: func(_ context.Context, params db.CreateProjectParams) (*db.Project, *apperror.AppError) {
+			return &db.Project{
+				ID:        projectID,
+				CreatedBy: params.CreatedBy,
+				Name:      params.Name,
+				Status:    "active",
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct project service: %v", err)
+	}
+
+	_, appErr := svc.CreateProject(context.Background(), &taskv1.CreateProjectRequest{
+		Name: "Platform",
+	}, &coredto.UserInfo{UserID: userID.String()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Writes) != 1 {
+		t.Fatalf("expected 1 tuple write, got %d: %#v", len(tuples.Writes), tuples.Writes)
+	}
+	if !tuples.HasWrite(authz.ProjectRoleTuple(projectID, string(authz.RoleOwner), userID)) {
+		t.Fatalf("missing project owner tuple write: %#v", tuples.Writes)
 	}
 }
 

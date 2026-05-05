@@ -411,6 +411,48 @@ func TestAddProjectMemberAdminCanAddMember(t *testing.T) {
 	}
 }
 
+func TestAddProjectMemberWritesRoleTuple(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewProjectMembershipService(&stubProjectMembershipRepository{
+		getActiveProjectMembershipFn: func(_ context.Context, params db.GetActiveProjectMembershipParams) (*db.ProjectMembership, *apperror.AppError) {
+			if params.ProjectID != projectID || params.UserID != userID {
+				t.Fatalf("unexpected membership lookup params: %#v", params)
+			}
+			return nil, &apperror.AppError{Code: apperror.CodeNotFound, Message: "project membership not found"}
+		},
+		addProjectMemberFn: func(_ context.Context, params db.AddProjectMemberParams) (*db.ProjectMembership, *apperror.AppError) {
+			return &db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      params.Role,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct project membership service: %v", err)
+	}
+
+	_, appErr := svc.AddProjectMember(context.Background(), &taskv1.AddProjectMemberRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+		Role:      "admin",
+	}, &dto.UserInfo{UserID: uuid.NewString()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Writes) != 1 {
+		t.Fatalf("expected 1 tuple write, got %d: %#v", len(tuples.Writes), tuples.Writes)
+	}
+	if !tuples.HasWrite(authz.ProjectRoleTuple(projectID, string(authz.RoleAdmin), userID)) {
+		t.Fatalf("missing project admin tuple write: %#v", tuples.Writes)
+	}
+}
+
 func TestRemoveProjectMemberSuccess(t *testing.T) {
 	projectID := uuid.New()
 	userID := uuid.New()
@@ -436,6 +478,41 @@ func TestRemoveProjectMemberSuccess(t *testing.T) {
 	}
 	if res == nil || !res.Success {
 		t.Fatalf("expected success response, got %#v", res)
+	}
+}
+
+func TestRemoveProjectMemberDeletesRoleTuple(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewProjectMembershipService(&stubProjectMembershipRepository{
+		removeProjectMemberFn: func(_ context.Context, params db.RemoveProjectMemberParams) (*db.ProjectMembership, *apperror.AppError) {
+			return &db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      string(authz.RoleMember),
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct project membership service: %v", err)
+	}
+
+	_, appErr := svc.RemoveProjectMember(context.Background(), &taskv1.RemoveProjectMemberRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+	}, &dto.UserInfo{UserID: uuid.NewString()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Deletes) != 1 {
+		t.Fatalf("expected 1 tuple delete, got %d: %#v", len(tuples.Deletes), tuples.Deletes)
+	}
+	if !tuples.HasDelete(authz.DeleteTuple(authz.ProjectRoleTuple(projectID, string(authz.RoleMember), userID))) {
+		t.Fatalf("missing project member tuple delete: %#v", tuples.Deletes)
 	}
 }
 
@@ -482,6 +559,59 @@ func TestUpdateProjectMemberRoleSuccess(t *testing.T) {
 	}
 	if res.Role != "owner" {
 		t.Fatalf("unexpected role: %s", res.Role)
+	}
+}
+
+func TestUpdateProjectMemberRoleReplacesRoleTuple(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc, err := NewProjectMembershipService(&stubProjectMembershipRepository{
+		getActiveProjectMembershipFn: func(_ context.Context, params db.GetActiveProjectMembershipParams) (*db.ProjectMembership, *apperror.AppError) {
+			if params.ProjectID != projectID || params.UserID != userID {
+				t.Fatalf("unexpected membership lookup params: %#v", params)
+			}
+			return &db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: projectID,
+				UserID:    userID,
+				Role:      string(authz.RoleMember),
+			}, nil
+		},
+		updateProjectMemberRoleFn: func(_ context.Context, params db.UpdateProjectMemberRoleParams) (*db.ProjectMembership, *apperror.AppError) {
+			return &db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      params.Role,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+	if err != nil {
+		t.Fatalf("failed to construct project membership service: %v", err)
+	}
+
+	_, appErr := svc.UpdateProjectMemberRole(context.Background(), &taskv1.UpdateProjectMemberRoleRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+		Role:      "admin",
+	}, &dto.UserInfo{UserID: uuid.NewString()})
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+
+	if len(tuples.Deletes) != 1 {
+		t.Fatalf("expected 1 tuple delete, got %d: %#v", len(tuples.Deletes), tuples.Deletes)
+	}
+	if len(tuples.Writes) != 1 {
+		t.Fatalf("expected 1 tuple write, got %d: %#v", len(tuples.Writes), tuples.Writes)
+	}
+	if !tuples.HasDelete(authz.DeleteTuple(authz.ProjectRoleTuple(projectID, string(authz.RoleMember), userID))) {
+		t.Fatalf("missing old project member tuple delete: %#v", tuples.Deletes)
+	}
+	if !tuples.HasWrite(authz.ProjectRoleTuple(projectID, string(authz.RoleAdmin), userID)) {
+		t.Fatalf("missing new project admin tuple write: %#v", tuples.Writes)
 	}
 }
 
