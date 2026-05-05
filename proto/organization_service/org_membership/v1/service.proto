@@ -9,11 +9,11 @@ import "organization_service/org_membership/v1/response.proto";
 
 service OrganizationMembershipService {
   // ############################ USER QUERIES ############################
-  rpc GetMyMemberships(core.v1.EmptyRequest) returns (OrgMembershipsListRes);
+  rpc GetMyMemberships(core.v1.PaginationRequest) returns (OrgMembershipsListRes);
   rpc GetMyMembership(core.v1.IDRequest) returns (OrgMembershipRes);
 
   // ############################ ORGANIZATION QUERIES ############################
-  rpc GetOrganizationMembershipsByOrgID(core.v1.IDRequest) returns (OrgMembershipsListRes);
+  rpc GetOrganizationMembershipsByOrgID(core.v1.IDWithPaginationReq) returns (OrgMembershipsListRes);
   rpc GetOrganizationMembershipsByRole(GetOrgMembershipsByRoleReq) returns (OrgMembershipsListRes);
   rpc GetOrganizationMembershipsByStatus(GetOrgMembershipsByStatusReq) returns (OrgMembershipsListRes);
   rpc GetOrganizationMembership(core.v1.IDRequest) returns (OrgMembershipRes);

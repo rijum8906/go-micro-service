@@ -7,6 +7,7 @@
 package org_membershipv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -25,6 +26,7 @@ type GetOrgMembershipsByRoleReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	Role           string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	Pagination     *v1.PaginationRequest  `protobuf:"bytes,3,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -73,10 +75,18 @@ func (x *GetOrgMembershipsByRoleReq) GetRole() string {
 	return ""
 }
 
+func (x *GetOrgMembershipsByRoleReq) GetPagination() *v1.PaginationRequest {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
+}
+
 type GetOrgMembershipsByStatusReq struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	Status         string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Pagination     *v1.PaginationRequest  `protobuf:"bytes,3,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -123,6 +133,13 @@ func (x *GetOrgMembershipsByStatusReq) GetStatus() string {
 		return x.Status
 	}
 	return ""
+}
+
+func (x *GetOrgMembershipsByStatusReq) GetPagination() *v1.PaginationRequest {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
 }
 
 type ChangeOrgMembershipRoleReq struct {
@@ -249,13 +266,19 @@ var File_organization_service_org_membership_v1_request_proto protoreflect.FileD
 
 const file_organization_service_org_membership_v1_request_proto_rawDesc = "" +
 	"\n" +
-	"4organization_service/org_membership/v1/request.proto\x12&organization_service.org_membership.v1\"Y\n" +
+	"4organization_service/org_membership/v1/request.proto\x12&organization_service.org_membership.v1\x1a\x14core/v1/common.proto\"\x95\x01\n" +
 	"\x1aGetOrgMembershipsByRoleReq\x12'\n" +
 	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x12\n" +
-	"\x04role\x18\x02 \x01(\tR\x04role\"_\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x12:\n" +
+	"\n" +
+	"pagination\x18\x03 \x01(\v2\x1a.core.v1.PaginationRequestR\n" +
+	"pagination\"\x9b\x01\n" +
 	"\x1cGetOrgMembershipsByStatusReq\x12'\n" +
 	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"h\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12:\n" +
+	"\n" +
+	"pagination\x18\x03 \x01(\v2\x1a.core.v1.PaginationRequestR\n" +
+	"pagination\"h\n" +
 	"\x1aChangeOrgMembershipRoleReq\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\bnew_role\x18\x02 \x01(\tR\anewRole\x12\x1f\n" +
@@ -287,13 +310,16 @@ var file_organization_service_org_membership_v1_request_proto_goTypes = []any{
 	(*GetOrgMembershipsByStatusReq)(nil), // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
 	(*ChangeOrgMembershipRoleReq)(nil),   // 2: organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
 	(*ChangeOrgMembershipStatusReq)(nil), // 3: organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
+	(*v1.PaginationRequest)(nil),         // 4: core.v1.PaginationRequest
 }
 var file_organization_service_org_membership_v1_request_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq.pagination:type_name -> core.v1.PaginationRequest
+	4, // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq.pagination:type_name -> core.v1.PaginationRequest
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_organization_service_org_membership_v1_request_proto_init() }

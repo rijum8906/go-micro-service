@@ -39,10 +39,10 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrganizationMembershipServiceClient interface {
 	// ############################ USER QUERIES ############################
-	GetMyMemberships(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
+	GetMyMemberships(ctx context.Context, in *v1.PaginationRequest, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetMyMembership(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*OrgMembershipRes, error)
 	// ############################ ORGANIZATION QUERIES ############################
-	GetOrganizationMembershipsByOrgID(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
+	GetOrganizationMembershipsByOrgID(ctx context.Context, in *v1.IDWithPaginationReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetOrganizationMembershipsByRole(ctx context.Context, in *GetOrgMembershipsByRoleReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetOrganizationMembershipsByStatus(ctx context.Context, in *GetOrgMembershipsByStatusReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*OrgMembershipRes, error)
@@ -63,7 +63,7 @@ func NewOrganizationMembershipServiceClient(cc grpc.ClientConnInterface) Organiz
 	return &organizationMembershipServiceClient{cc}
 }
 
-func (c *organizationMembershipServiceClient) GetMyMemberships(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*OrgMembershipsListRes, error) {
+func (c *organizationMembershipServiceClient) GetMyMemberships(ctx context.Context, in *v1.PaginationRequest, opts ...grpc.CallOption) (*OrgMembershipsListRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OrgMembershipsListRes)
 	err := c.cc.Invoke(ctx, OrganizationMembershipService_GetMyMemberships_FullMethodName, in, out, cOpts...)
@@ -83,7 +83,7 @@ func (c *organizationMembershipServiceClient) GetMyMembership(ctx context.Contex
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) GetOrganizationMembershipsByOrgID(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*OrgMembershipsListRes, error) {
+func (c *organizationMembershipServiceClient) GetOrganizationMembershipsByOrgID(ctx context.Context, in *v1.IDWithPaginationReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OrgMembershipsListRes)
 	err := c.cc.Invoke(ctx, OrganizationMembershipService_GetOrganizationMembershipsByOrgID_FullMethodName, in, out, cOpts...)
@@ -178,10 +178,10 @@ func (c *organizationMembershipServiceClient) RemoveOrganizationMember(ctx conte
 // for forward compatibility.
 type OrganizationMembershipServiceServer interface {
 	// ############################ USER QUERIES ############################
-	GetMyMemberships(context.Context, *v1.EmptyRequest) (*OrgMembershipsListRes, error)
+	GetMyMemberships(context.Context, *v1.PaginationRequest) (*OrgMembershipsListRes, error)
 	GetMyMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error)
 	// ############################ ORGANIZATION QUERIES ############################
-	GetOrganizationMembershipsByOrgID(context.Context, *v1.IDRequest) (*OrgMembershipsListRes, error)
+	GetOrganizationMembershipsByOrgID(context.Context, *v1.IDWithPaginationReq) (*OrgMembershipsListRes, error)
 	GetOrganizationMembershipsByRole(context.Context, *GetOrgMembershipsByRoleReq) (*OrgMembershipsListRes, error)
 	GetOrganizationMembershipsByStatus(context.Context, *GetOrgMembershipsByStatusReq) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error)
@@ -201,13 +201,13 @@ type OrganizationMembershipServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedOrganizationMembershipServiceServer struct{}
 
-func (UnimplementedOrganizationMembershipServiceServer) GetMyMemberships(context.Context, *v1.EmptyRequest) (*OrgMembershipsListRes, error) {
+func (UnimplementedOrganizationMembershipServiceServer) GetMyMemberships(context.Context, *v1.PaginationRequest) (*OrgMembershipsListRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetMyMemberships not implemented")
 }
 func (UnimplementedOrganizationMembershipServiceServer) GetMyMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetMyMembership not implemented")
 }
-func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembershipsByOrgID(context.Context, *v1.IDRequest) (*OrgMembershipsListRes, error) {
+func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembershipsByOrgID(context.Context, *v1.IDWithPaginationReq) (*OrgMembershipsListRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrganizationMembershipsByOrgID not implemented")
 }
 func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembershipsByRole(context.Context, *GetOrgMembershipsByRoleReq) (*OrgMembershipsListRes, error) {
@@ -255,7 +255,7 @@ func RegisterOrganizationMembershipServiceServer(s grpc.ServiceRegistrar, srv Or
 }
 
 func _OrganizationMembershipService_GetMyMemberships_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmptyRequest)
+	in := new(v1.PaginationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func _OrganizationMembershipService_GetMyMemberships_Handler(srv interface{}, ct
 		FullMethod: OrganizationMembershipService_GetMyMemberships_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).GetMyMemberships(ctx, req.(*v1.EmptyRequest))
+		return srv.(OrganizationMembershipServiceServer).GetMyMemberships(ctx, req.(*v1.PaginationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -291,7 +291,7 @@ func _OrganizationMembershipService_GetMyMembership_Handler(srv interface{}, ctx
 }
 
 func _OrganizationMembershipService_GetOrganizationMembershipsByOrgID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.IDRequest)
+	in := new(v1.IDWithPaginationReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -303,7 +303,7 @@ func _OrganizationMembershipService_GetOrganizationMembershipsByOrgID_Handler(sr
 		FullMethod: OrganizationMembershipService_GetOrganizationMembershipsByOrgID_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).GetOrganizationMembershipsByOrgID(ctx, req.(*v1.IDRequest))
+		return srv.(OrganizationMembershipServiceServer).GetOrganizationMembershipsByOrgID(ctx, req.(*v1.IDWithPaginationReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
