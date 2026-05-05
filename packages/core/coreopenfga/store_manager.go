@@ -30,7 +30,7 @@ func (s *storeManager) SetStoreID(storeID string) {
 	s.storeID = storeID
 }
 
-func (s *storeManager) Create(ctx context.Context, name string) (*client.ClientCreateStoreResponse, error) {
+func (s *storeManager) Create(ctx context.Context, name string) (*client.ClientCreateStoreResponse, *apperror.AppError) {
 	res, err := s.fgaClient.CreateStore(ctx).Body(client.ClientCreateStoreRequest{
 		Name: name,
 	}).Execute()
@@ -42,7 +42,7 @@ func (s *storeManager) Create(ctx context.Context, name string) (*client.ClientC
 	return res, nil
 }
 
-func (s *storeManager) Get(ctx context.Context) (*client.ClientGetStoreResponse, error) {
+func (s *storeManager) Get(ctx context.Context) (*client.ClientGetStoreResponse, *apperror.AppError) {
 	res, err := s.fgaClient.GetStore(ctx).Options(client.ClientGetStoreOptions{
 		StoreId: &s.storeID,
 	}).Execute()
@@ -53,7 +53,7 @@ func (s *storeManager) Get(ctx context.Context) (*client.ClientGetStoreResponse,
 	return res, nil
 }
 
-func (s *storeManager) List(ctx context.Context) (*client.ClientListStoresResponse, error) {
+func (s *storeManager) List(ctx context.Context) (*client.ClientListStoresResponse, *apperror.AppError) {
 	res, err := s.fgaClient.ListStores(ctx).Execute()
 	if err != nil {
 		return nil, apperror.New(apperror.CodeThirdParty, "failed to list stores").WithDetail("error", err.Error())
@@ -62,7 +62,7 @@ func (s *storeManager) List(ctx context.Context) (*client.ClientListStoresRespon
 	return res, nil
 }
 
-func (s *storeManager) Delete(ctx context.Context) error {
+func (s *storeManager) Delete(ctx context.Context) *apperror.AppError {
 	_, err := s.fgaClient.DeleteStore(ctx).Options(client.ClientDeleteStoreOptions{
 		StoreId: &s.storeID,
 	}).Execute()

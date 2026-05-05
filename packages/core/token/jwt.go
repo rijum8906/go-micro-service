@@ -26,6 +26,7 @@ type TokenManager struct {
 
 type Claims struct {
 	Scope TokenScope `json:"scope"`
+	Role  string     `json:"role"`
 	jwt.RegisteredClaims
 }
 

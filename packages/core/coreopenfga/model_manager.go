@@ -38,7 +38,7 @@ func (m *modelManager) SetAuthorizationModelID(id string) {
 	m.authorizationModelID = id
 }
 
-func (m *modelManager) Write(ctx context.Context, name string) error {
+func (m *modelManager) Write(ctx context.Context, name string) *apperror.AppError {
 	dslContent, err := os.ReadFile(fmt.Sprintf("./models/%s_model.fga", name))
 	if err != nil {
 		return apperror.New(apperror.CodeNotFound, "model not found").WithDetail("error", err.Error())
@@ -66,7 +66,7 @@ func (m *modelManager) Write(ctx context.Context, name string) error {
 	return nil
 }
 
-func (m *modelManager) Read(ctx context.Context) (*client.ClientReadAuthorizationModelResponse, error) {
+func (m *modelManager) Read(ctx context.Context) (*client.ClientReadAuthorizationModelResponse, *apperror.AppError) {
 	options := client.ClientReadAuthorizationModelOptions{
 		AuthorizationModelId: openfga.PtrString(m.authorizationModelID),
 		StoreId:              openfga.PtrString(m.storeManager.GetStoreID()),
