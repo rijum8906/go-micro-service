@@ -28,10 +28,18 @@ type Querier interface {
 	// NOTE: get methods must use 'deleted_at IS NULL'
 	GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
 	GetOrganizationBySlug(ctx context.Context, slug string) (Organization, error)
+	// NOTE: get and update methods must use "status != 'deleted'"
+	GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error)
+	GetOrganizationMembershipsByOrgID(ctx context.Context, arg GetOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error)
+	GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndRoleParams) ([]OrganizationMembership, error)
+	// NOTE: this method also return deleted so do not use "status != 'deleted'"
+	GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error)
 	GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrganizationsByCreatedByParams) ([]Organization, error)
 	// NOTE: update methods must use 'deleted_at IS NULL'
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error)
+	UpdateOrganizationMembershipRole(ctx context.Context, arg UpdateOrganizationMembershipRoleParams) (OrganizationMembership, error)
+	UpdateOrganizationMembershipStatus(ctx context.Context, arg UpdateOrganizationMembershipStatusParams) (OrganizationMembership, error)
 }
 
 var _ Querier = (*Queries)(nil)

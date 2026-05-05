@@ -101,9 +101,180 @@ func (q *Queries) DeleteOrganizationMembershipHard(ctx context.Context, id uuid.
 	return err
 }
 
+const GetOrganizationMembership = `-- name: GetOrganizationMembership :one
+
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+WHERE id = $1 AND status != 'deleted'
+`
+
+// NOTE: get and update methods must use "status != 'deleted'"
+func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error) {
+	row := q.db.QueryRow(ctx, GetOrganizationMembership, id)
+	var i OrganizationMembership
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.Status,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
+	)
+	return i, err
+}
+
+const GetOrganizationMembershipsByOrgID = `-- name: GetOrganizationMembershipsByOrgID :many
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+WHERE organization_id = $1 AND status != 'deleted'
+ORDER BY created_at DESC LIMIT $2 OFFSET $3
+`
+
+type GetOrganizationMembershipsByOrgIDParams struct {
+	OrganizationID uuid.UUID
+	Limit          int32
+	Offset         int32
+}
+
+func (q *Queries) GetOrganizationMembershipsByOrgID(ctx context.Context, arg GetOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error) {
+	rows, err := q.db.Query(ctx, GetOrganizationMembershipsByOrgID, arg.OrganizationID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []OrganizationMembership{}
+	for rows.Next() {
+		var i OrganizationMembership
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganizationID,
+			&i.UserID,
+			&i.Role,
+			&i.Status,
+			&i.JoinedAt,
+			&i.LeftAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.DeletedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const GetOrganizationMembershipsByOrgIDAndRole = `-- name: GetOrganizationMembershipsByOrgIDAndRole :many
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+WHERE organization_id = $1 AND role = $2 AND status != 'deleted'
+ORDER BY created_at DESC LIMIT $3 OFFSET $4
+`
+
+type GetOrganizationMembershipsByOrgIDAndRoleParams struct {
+	OrganizationID uuid.UUID
+	Role           string
+	Limit          int32
+	Offset         int32
+}
+
+func (q *Queries) GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndRoleParams) ([]OrganizationMembership, error) {
+	rows, err := q.db.Query(ctx, GetOrganizationMembershipsByOrgIDAndRole,
+		arg.OrganizationID,
+		arg.Role,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []OrganizationMembership{}
+	for rows.Next() {
+		var i OrganizationMembership
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganizationID,
+			&i.UserID,
+			&i.Role,
+			&i.Status,
+			&i.JoinedAt,
+			&i.LeftAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.DeletedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const GetOrganizationMembershipsByOrgIDAndStatus = `-- name: GetOrganizationMembershipsByOrgIDAndStatus :many
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+WHERE organization_id = $1 AND status = $2
+ORDER BY created_at DESC LIMIT $3 OFFSET $4
+`
+
+type GetOrganizationMembershipsByOrgIDAndStatusParams struct {
+	OrganizationID uuid.UUID
+	Status         string
+	Limit          int32
+	Offset         int32
+}
+
+// NOTE: this method also return deleted so do not use "status != 'deleted'"
+func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error) {
+	rows, err := q.db.Query(ctx, GetOrganizationMembershipsByOrgIDAndStatus,
+		arg.OrganizationID,
+		arg.Status,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []OrganizationMembership{}
+	for rows.Next() {
+		var i OrganizationMembership
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganizationID,
+			&i.UserID,
+			&i.Role,
+			&i.Status,
+			&i.JoinedAt,
+			&i.LeftAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.DeletedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const GetOrganizationMembershipsByUserID = `-- name: GetOrganizationMembershipsByUserID :many
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
-WHERE user_id = $1
+WHERE user_id = $1 AND status != 'deleted'
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
 
@@ -143,4 +314,66 @@ func (q *Queries) GetOrganizationMembershipsByUserID(ctx context.Context, arg Ge
 		return nil, err
 	}
 	return items, nil
+}
+
+const UpdateOrganizationMembershipRole = `-- name: UpdateOrganizationMembershipRole :one
+UPDATE organization_memberships
+SET role = $2
+WHERE id = $1 AND status != 'deleted'
+RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+`
+
+type UpdateOrganizationMembershipRoleParams struct {
+	ID   uuid.UUID
+	Role string
+}
+
+func (q *Queries) UpdateOrganizationMembershipRole(ctx context.Context, arg UpdateOrganizationMembershipRoleParams) (OrganizationMembership, error) {
+	row := q.db.QueryRow(ctx, UpdateOrganizationMembershipRole, arg.ID, arg.Role)
+	var i OrganizationMembership
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.Status,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
+	)
+	return i, err
+}
+
+const UpdateOrganizationMembershipStatus = `-- name: UpdateOrganizationMembershipStatus :one
+UPDATE organization_memberships
+SET status = $2
+WHERE id = $1 AND status != 'deleted'
+RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+`
+
+type UpdateOrganizationMembershipStatusParams struct {
+	ID     uuid.UUID
+	Status string
+}
+
+func (q *Queries) UpdateOrganizationMembershipStatus(ctx context.Context, arg UpdateOrganizationMembershipStatusParams) (OrganizationMembership, error) {
+	row := q.db.QueryRow(ctx, UpdateOrganizationMembershipStatus, arg.ID, arg.Status)
+	var i OrganizationMembership
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.Status,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
+	)
+	return i, err
 }
