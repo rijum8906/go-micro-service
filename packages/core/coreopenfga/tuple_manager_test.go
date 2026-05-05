@@ -90,3 +90,53 @@ func Test_tupleManager(t *testing.T) {
 		storeManager.Delete(context.Background())
 	})
 }
+
+func Test_tupleManager_Error(t *testing.T) {
+	fgaClient, err := coreopenfga.NewClient("http://localhost:9000")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	testStoreName := testutils.GenerateRandomString(10)
+
+	storeManager := coreopenfga.NewStoreManager(fgaClient.Client)
+	_, err = storeManager.Create(ctx, testStoreName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fgaClient.StoreID = storeManager.GetStoreID()
+	modelManager := coreopenfga.NewModelManager(fgaClient.Client, storeManager)
+	if err = modelManager.Write(ctx, "test"); err != nil {
+		t.Fatal(err)
+	}
+	fgaClient.AuthorizationModelID = modelManager.GetAuthorizationModelID()
+	_ = coreopenfga.NewTupleManager(fgaClient)
+
+	// t.Run("Should not allow publisher to edit a book", func(t *testing.T) {
+	// 	if err = tupleManager.Write(ctx, []client.ClientTupleKey{
+	// 		{
+	// 			User:     "user:john",
+	// 			Relation: "author",
+	// 			Object:   "book:go.pdf",
+	// 		},
+	// 		{
+	// 			User:     "user:bob",
+	// 			Relation: "publisher",
+	// 			Object:   "book:go.pdf",
+	// 		},
+	// 	}); err != nil {
+	// 		t.Fatal(err)
+	// 	}
+	//
+	// 	check, err := tupleManager.Check(ctx, client.ClientCheckRequest{
+	// 		User:     "user:bob",
+	// 		Relation: "author",
+	// 		Object:   "book:go.pdf",
+	// 	})
+	// })
+
+	t.Cleanup(func() {
+		storeManager.Delete(context.Background())
+	})
+}

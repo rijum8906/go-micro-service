@@ -6,5 +6,7 @@ type user
 type book
     relations
         define author: [user]
+        define publisher: [user]
 
         define can_edit: author
+        define can_publish: publisher or author

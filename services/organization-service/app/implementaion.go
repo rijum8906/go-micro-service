@@ -42,6 +42,13 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 	}
 	a.infra.brokerClient = nats
 
+	// OpenFGA
+	fgaClient, appErr := initFgaClient(ctx, a.config)
+	if appErr != nil {
+		return appErr
+	}
+	a.infra.fgaClient = fgaClient
+
 	return nil
 }
 
@@ -89,7 +96,8 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 
 func (a *Application) initServices() *apperror.AppError {
 	q := db.New(a.infra.database)
-	a.services.OrganizationService = organization.New(q, a.clients.UserClient)
+
+	a.services.OrganizationService = organization.New(q, a.clients.UserClient, a.infra.fgaClient)
 
 	return nil
 }

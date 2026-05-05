@@ -12,6 +12,12 @@ import (
 
 type Env struct {
 	coreenv.CoreEnv
+	FGAAPIURL string `env:"FGA_API_URL" envDefault:"localhost:8000"`
+
+	// Used for testing
+	FGATestAPIURL      string `env:"FGA_TEST_API_URL" envDefault:"localhost:9000"`
+	FGATestStoreID     string `env:"FGA_TEST_STORE_ID" envDefault:""`
+	FGATestAuthModelID string `env:"FGA_TEST_AUTH_MODEL_ID" envDefault:""`
 }
 
 func LoadEnv() (*Env, *apperror.AppError) {

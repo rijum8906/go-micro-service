@@ -2,9 +2,18 @@
 package permissions
 
 const (
-	PermissionCanUpdateOrganization       = "can_update_organization"
-	PermissionCanDeleteOrganization       = "can_delete_organization"
-	PermissiionCanAddOrganizationMember   = "can_add_organization_member"
-	PermissionCanRemoveOrganizationMember = "can_remove_organization_member"
-	PermissionCanViewOrganizationMemebers = "can_view_organization_members"
+	PermissionCanEdit         = "can_edit"
+	PermissionCanDelete       = "can_delete"
+	PermissionCanAddMember    = "can_add_member"
+	PermissionCanRemoveMember = "can_remove_member"
+	PermissionCanViewMember   = "can_view_member"
+	PermissionCanCreateTeam   = "can_create_team"
+)
+
+const (
+	RoleAdmin  = "admin"
+	RoleUser   = "user"
+	RoleOwner  = "owner"
+	RoleMember = "member"
+	RoleLeader = "leader"
 )
