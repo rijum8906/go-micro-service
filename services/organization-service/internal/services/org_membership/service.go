@@ -3,6 +3,8 @@ package orgmembership
 import (
 	"context"
 
+	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
@@ -10,7 +12,13 @@ import (
 
 // ############################ USER QUERIES ############################
 
-func (m *orgMembershipService) GetMyMemberships(ctx context.Context, req *corev1.EmptyRequest) (*org_membershipv1.OrgMembershipsListRes, error) {
+func (m *orgMembershipService) GetMyMemberships(ctx context.Context, req *corev1.PaginationRequest) (*org_membershipv1.OrgMembershipsListRes, error) {
+	// Step 1. Extract User Info
+	_, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("error", "failed to extract user info from context")
+	}
+
 	return nil, nil
 }
 
@@ -20,7 +28,7 @@ func (m *orgMembershipService) GetMyMembership(ctx context.Context, req *corev1.
 
 // ############################ ORGANIZATION QUERIES ############################
 
-func (m *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Context, req *corev1.IDRequest) (*org_membershipv1.OrgMembershipsListRes, error) {
+func (m *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Context, req *corev1.IDWithPaginationReq) (*org_membershipv1.OrgMembershipsListRes, error) {
 	return nil, nil
 }
 
