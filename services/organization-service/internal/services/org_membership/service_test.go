@@ -14,6 +14,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	orgmembershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	orgmembership "github.com/rijum8906/relay/services/organization-service/internal/services/org_membership"
@@ -571,6 +572,524 @@ func Test_GetOrganizationMembershipsByOrgID_Integration_Failure(t *testing.T) {
 
 		_, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
 			Id: org.ID.String(),
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodePermissionDenied)) {
+			t.Errorf("expected permission denied error, got %s", err.Error())
+		}
+	})
+
+	t.Cleanup(func() {
+		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
+			{
+				User:     "user:" + ownerID.String(),
+				Relation: permissions.RoleOwner,
+				Object:   "organization:" + org.ID.String(),
+			},
+		})
+		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
+		q.DeleteOrganizationHard(context.Background(), org.ID)
+		pool.Close()
+	})
+}
+
+func Test_GetOrganizationMembershipsByRole_Integration_Success(t *testing.T) {
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+
+	ctx := context.Background()
+
+	ownerID := uuid.New()
+	adminID := uuid.New()
+	memberID := uuid.New()
+
+	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
+	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
+		UserID:         ownerID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleOwner,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	adminMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+		UserID:         adminID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleAdmin,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	memberMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+		UserID:         memberID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleMember,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+		{
+			User:     "user:" + ownerID.String(),
+			Relation: permissions.RoleOwner,
+			Object:   "organization:" + org.ID.String(),
+		},
+		{
+			User:     "user:" + adminID.String(),
+			Relation: permissions.RoleAdmin,
+			Object:   "organization:" + org.ID.String(),
+		},
+		{
+			User:     "user:" + memberID.String(),
+			Relation: permissions.RoleMember,
+			Object:   "organization:" + org.ID.String(),
+		},
+	}); appErr != nil {
+		t.Fatal(appErr)
+	}
+
+	t.Run("Owner can filter admin memberships", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, ownerID.String(),
+		))
+
+		res, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
+			OrganizationId: org.ID.String(),
+			Role:           permissions.RoleAdmin,
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(res.OrganizationMemberships) != 1 {
+			t.Fatalf("expected 1 admin membership but got %d", len(res.OrganizationMemberships))
+		}
+		if res.OrganizationMemberships[0].Id != adminMembership.ID.String() {
+			t.Errorf("expected admin membership id to be %s but got %s", adminMembership.ID.String(), res.OrganizationMemberships[0].Id)
+		}
+	})
+
+	t.Run("Member can filter member memberships", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, memberID.String(),
+		))
+
+		res, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
+			OrganizationId: org.ID.String(),
+			Role:           permissions.RoleMember,
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(res.OrganizationMemberships) != 1 {
+			t.Fatalf("expected 1 member membership but got %d", len(res.OrganizationMemberships))
+		}
+		if res.OrganizationMemberships[0].Id != memberMembership.ID.String() {
+			t.Errorf("expected member membership id to be %s but got %s", memberMembership.ID.String(), res.OrganizationMemberships[0].Id)
+		}
+	})
+
+	t.Cleanup(func() {
+		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
+			{
+				User:     "user:" + ownerID.String(),
+				Relation: permissions.RoleOwner,
+				Object:   "organization:" + org.ID.String(),
+			},
+			{
+				User:     "user:" + adminID.String(),
+				Relation: permissions.RoleAdmin,
+				Object:   "organization:" + org.ID.String(),
+			},
+			{
+				User:     "user:" + memberID.String(),
+				Relation: permissions.RoleMember,
+				Object:   "organization:" + org.ID.String(),
+			},
+		})
+		q.DeleteOrganizationMembershipHard(context.Background(), memberMembership.ID)
+		q.DeleteOrganizationMembershipHard(context.Background(), adminMembership.ID)
+		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
+		q.DeleteOrganizationHard(context.Background(), org.ID)
+		pool.Close()
+	})
+}
+
+func Test_GetOrganizationMembershipsByRole_Integration_Failure(t *testing.T) {
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+
+	ctx := context.Background()
+
+	ownerID := uuid.New()
+	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
+	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
+		UserID:         ownerID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleOwner,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+		{
+			User:     "user:" + ownerID.String(),
+			Relation: permissions.RoleOwner,
+			Object:   "organization:" + org.ID.String(),
+		},
+	}); appErr != nil {
+		t.Fatal(appErr)
+	}
+
+	t.Run("Without user metadata", func(t *testing.T) {
+		_, err := service.GetOrganizationMembershipsByRole(context.Background(), &orgmembershipv1.GetOrgMembershipsByRoleReq{
+			OrganizationId: org.ID.String(),
+			Role:           permissions.RoleOwner,
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
+			t.Errorf("expected internal error, got %s", err.Error())
+		}
+	})
+
+	t.Run("With invalid organization id", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, ownerID.String(),
+		))
+
+		_, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
+			OrganizationId: "invalid-id",
+			Role:           permissions.RoleOwner,
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
+			t.Errorf("expected validation error, got %s", err.Error())
+		}
+	})
+
+	t.Run("With invalid pagination", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, ownerID.String(),
+		))
+
+		_, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
+			OrganizationId: org.ID.String(),
+			Role:           permissions.RoleOwner,
+			Pagination: &corev1.PaginationRequest{
+				Page:  0,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
+			t.Errorf("expected validation error, got %s", err.Error())
+		}
+	})
+
+	t.Run("Without organization permission", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, uuid.NewString(),
+		))
+
+		_, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
+			OrganizationId: org.ID.String(),
+			Role:           permissions.RoleOwner,
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodePermissionDenied)) {
+			t.Errorf("expected permission denied error, got %s", err.Error())
+		}
+	})
+
+	t.Cleanup(func() {
+		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
+			{
+				User:     "user:" + ownerID.String(),
+				Relation: permissions.RoleOwner,
+				Object:   "organization:" + org.ID.String(),
+			},
+		})
+		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
+		q.DeleteOrganizationHard(context.Background(), org.ID)
+		pool.Close()
+	})
+}
+
+func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+
+	ctx := context.Background()
+
+	ownerID := uuid.New()
+	adminID := uuid.New()
+	memberID := uuid.New()
+
+	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
+	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
+		UserID:         ownerID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleOwner,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	adminMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+		UserID:         adminID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleAdmin,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	memberMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+		UserID:         memberID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleMember,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	adminMembership, err = q.UpdateOrganizationMembershipStatus(ctx, db.UpdateOrganizationMembershipStatusParams{
+		ID:     adminMembership.ID,
+		Status: "suspended",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := q.DeleteOrganizationMembership(ctx, db.DeleteOrganizationMembershipParams{
+		ID:        memberMembership.ID,
+		DeletedBy: ownerID,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+		{
+			User:     "user:" + ownerID.String(),
+			Relation: permissions.RoleOwner,
+			Object:   "organization:" + org.ID.String(),
+		},
+		{
+			User:     "user:" + adminID.String(),
+			Relation: permissions.RoleAdmin,
+			Object:   "organization:" + org.ID.String(),
+		},
+		{
+			User:     "user:" + memberID.String(),
+			Relation: permissions.RoleMember,
+			Object:   "organization:" + org.ID.String(),
+		},
+	}); appErr != nil {
+		t.Fatal(appErr)
+	}
+
+	t.Run("Owner can filter suspended memberships", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, ownerID.String(),
+		))
+
+		res, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
+			OrganizationId: org.ID.String(),
+			Status:         "suspended",
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(res.OrganizationMemberships) != 1 {
+			t.Fatalf("expected 1 suspended membership but got %d", len(res.OrganizationMemberships))
+		}
+		if res.OrganizationMemberships[0].Id != adminMembership.ID.String() {
+			t.Errorf("expected suspended membership id to be %s but got %s", adminMembership.ID.String(), res.OrganizationMemberships[0].Id)
+		}
+	})
+
+	t.Run("Owner can filter deleted memberships", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, ownerID.String(),
+		))
+
+		res, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
+			OrganizationId: org.ID.String(),
+			Status:         "deleted",
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(res.OrganizationMemberships) != 1 {
+			t.Fatalf("expected 1 deleted membership but got %d", len(res.OrganizationMemberships))
+		}
+		if res.OrganizationMemberships[0].Id != memberMembership.ID.String() {
+			t.Errorf("expected deleted membership id to be %s but got %s", memberMembership.ID.String(), res.OrganizationMemberships[0].Id)
+		}
+	})
+
+	t.Cleanup(func() {
+		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
+			{
+				User:     "user:" + ownerID.String(),
+				Relation: permissions.RoleOwner,
+				Object:   "organization:" + org.ID.String(),
+			},
+			{
+				User:     "user:" + adminID.String(),
+				Relation: permissions.RoleAdmin,
+				Object:   "organization:" + org.ID.String(),
+			},
+			{
+				User:     "user:" + memberID.String(),
+				Relation: permissions.RoleMember,
+				Object:   "organization:" + org.ID.String(),
+			},
+		})
+		q.DeleteOrganizationMembershipHard(context.Background(), memberMembership.ID)
+		q.DeleteOrganizationMembershipHard(context.Background(), adminMembership.ID)
+		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
+		q.DeleteOrganizationHard(context.Background(), org.ID)
+		pool.Close()
+	})
+}
+
+func Test_GetOrganizationMembershipsByStatus_Integration_Failure(t *testing.T) {
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+
+	ctx := context.Background()
+
+	ownerID := uuid.New()
+	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
+	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
+		UserID:         ownerID,
+		OrganizationID: org.ID,
+		Role:           permissions.RoleOwner,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+		{
+			User:     "user:" + ownerID.String(),
+			Relation: permissions.RoleOwner,
+			Object:   "organization:" + org.ID.String(),
+		},
+	}); appErr != nil {
+		t.Fatal(appErr)
+	}
+
+	t.Run("Without user metadata", func(t *testing.T) {
+		_, err := service.GetOrganizationMembershipsByStatus(context.Background(), &orgmembershipv1.GetOrgMembershipsByStatusReq{
+			OrganizationId: org.ID.String(),
+			Status:         "active",
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
+			t.Errorf("expected internal error, got %s", err.Error())
+		}
+	})
+
+	t.Run("With invalid organization id", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, ownerID.String(),
+		))
+
+		_, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
+			OrganizationId: "invalid-id",
+			Status:         "active",
+			Pagination: &corev1.PaginationRequest{
+				Page:  1,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
+			t.Errorf("expected validation error, got %s", err.Error())
+		}
+	})
+
+	t.Run("With invalid pagination", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, ownerID.String(),
+		))
+
+		_, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
+			OrganizationId: org.ID.String(),
+			Status:         "active",
+			Pagination: &corev1.PaginationRequest{
+				Page:  0,
+				Limit: 50,
+			},
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
+			t.Errorf("expected validation error, got %s", err.Error())
+		}
+	})
+
+	t.Run("Without organization permission", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, uuid.NewString(),
+		))
+
+		_, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
+			OrganizationId: org.ID.String(),
+			Status:         "active",
 			Pagination: &corev1.PaginationRequest{
 				Page:  1,
 				Limit: 50,
