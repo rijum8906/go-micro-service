@@ -4,22 +4,23 @@ type ErrorCode string
 
 const (
 	// Core
-	CodeInternal        ErrorCode = "INTERNAL"
-	CodeNotFound        ErrorCode = "NOT_FOUND"
-	CodeValidation      ErrorCode = "VALIDATION"
-	CodeUnAuthenticated ErrorCode = "UNAUTHENTICATED"
-	CodeForbidden       ErrorCode = "FORBIDDEN"
-	CodeConflict        ErrorCode = "CONFLICT"
-	CodeBadRequest      ErrorCode = "BAD_REQUEST"
-	CodeTimeout         ErrorCode = "TIMEOUT"
-	CodeRateLimit       ErrorCode = "RATE_LIMIT"
-	CodeThirdParty      ErrorCode = "THIRD_PARTY"
-	CodeDatabase        ErrorCode = "DATABASE_ERROR"
-	CodeCache           ErrorCode = "CACHE_ERROR"
-	CodeDependency      ErrorCode = "DEPENDENCY_ERROR"
-	CodePrecondition    ErrorCode = "PRECONDITION_FAILED"
-	CodeTooManyRequests ErrorCode = "TOO_MANY_REQUESTS"
-	CodeUnavailable     ErrorCode = "SERVICE_UNAVAILABLE"
+	CodeInternal         ErrorCode = "INTERNAL"
+	CodeNotFound         ErrorCode = "NOT_FOUND"
+	CodeValidation       ErrorCode = "VALIDATION"
+	CodeUnAuthenticated  ErrorCode = "UNAUTHENTICATED"
+	CodeForbidden        ErrorCode = "FORBIDDEN"
+	CodePermissionDenied ErrorCode = "PERMISSION_DENIED"
+	CodeConflict         ErrorCode = "CONFLICT"
+	CodeBadRequest       ErrorCode = "BAD_REQUEST"
+	CodeTimeout          ErrorCode = "TIMEOUT"
+	CodeRateLimit        ErrorCode = "RATE_LIMIT"
+	CodeThirdParty       ErrorCode = "THIRD_PARTY"
+	CodeDatabase         ErrorCode = "DATABASE_ERROR"
+	CodeCache            ErrorCode = "CACHE_ERROR"
+	CodeDependency       ErrorCode = "DEPENDENCY_ERROR"
+	CodePrecondition     ErrorCode = "PRECONDITION_FAILED"
+	CodeTooManyRequests  ErrorCode = "TOO_MANY_REQUESTS"
+	CodeUnavailable      ErrorCode = "SERVICE_UNAVAILABLE"
 
 	// Token
 	CodeTokenInvalidSignature ErrorCode = "INVALID_SIGNATURE"
@@ -36,6 +37,10 @@ var (
 	ErrForbidden = &AppError{
 		Code:    CodeForbidden,
 		Message: "Forbidden",
+	}
+	ErrPermissionDenied = &AppError{
+		Code:    CodePermissionDenied,
+		Message: "Permission Denied",
 	}
 	ErrNotFound = &AppError{
 		Code:    CodeNotFound,
