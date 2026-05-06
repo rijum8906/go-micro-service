@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/app/config"
@@ -20,6 +21,7 @@ type ApplicationInfra struct {
 	cache        *redis.Client
 	database     *pgxpool.Pool
 	brokerClient broker.Client
+	fgaClient    *coreopenfga.Client
 }
 
 type ApplicationUtils struct {
@@ -57,6 +59,9 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	// NOTE: initialization sequence
+	// infra -> utils -> grpcClients -> services -> grpcServer
 
 	// Initialize Dependencies
 	if appErr = app.initInfra(ctx); appErr != nil {

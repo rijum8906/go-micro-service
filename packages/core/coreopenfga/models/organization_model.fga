@@ -1,21 +1,32 @@
 model
-    schema 1.1
+  schema 1.1
 
 type user
 
 type organization
-    relations
-        define admin: [user]
-        define member: [user]
-        define owner: [user]
+  relations
+    # Direct Roles
+    define owner: [user]
+    define admin: [user]
+    define member: [user]
 
-        define can_update_organization: owner
-        define can_delete_organization: owner
-        define can_add_organzation_memebr: owner or admin
-        define can_remove_oranization_memebr: owner or admin
-        define can_view_organization_members: owner or admin or member
+    # Permission Logic
+    define can_delete: owner
+    define can_edit: can_delete or admin
+    define can_add_member: can_edit
+    define can_remove_member: can_add_member
+    define can_view_member: owner or admin or member
+    define can_create_team: owner or admin or member
 
-type custom_role
-      relations
-        define parent: [organization]
-        define assignee: [user]
+type team
+  relations
+    define parent_org: [organization]
+    define leader: [user]
+    define member: [user]
+
+    # Inheritance: Org Owners/Admins are implicitly Team Leads
+    define can_delete: leader or owner from parent_org
+    define can_edit: can_delete
+    define can_add_member: leader or admin from parent_org
+    define can_remove_member: can_add_member
+    define can_view_member: leader or admin from parent_org or member

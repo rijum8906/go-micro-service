@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -39,7 +41,12 @@ func (m *modelManager) SetAuthorizationModelID(id string) {
 }
 
 func (m *modelManager) Write(ctx context.Context, name string) *apperror.AppError {
-	dslContent, err := os.ReadFile(fmt.Sprintf("./models/%s_model.fga", name))
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("failed to get caller info")
+	}
+	dir := filepath.Dir(filename)
+	dslContent, err := os.ReadFile(filepath.Join(dir, fmt.Sprintf("./models/%s_model.fga", name)))
 	if err != nil {
 		return apperror.New(apperror.CodeNotFound, "model not found").WithDetail("error", err.Error())
 	}
