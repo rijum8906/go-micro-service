@@ -9,7 +9,6 @@ package org_membershipv1
 import (
 	context "context"
 	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
-	v11 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -27,8 +26,10 @@ const (
 	OrganizationMembershipService_GetOrganizationMembershipsByRole_FullMethodName   = "/organization_service.org_membership.v1.OrganizationMembershipService/GetOrganizationMembershipsByRole"
 	OrganizationMembershipService_GetOrganizationMembershipsByStatus_FullMethodName = "/organization_service.org_membership.v1.OrganizationMembershipService/GetOrganizationMembershipsByStatus"
 	OrganizationMembershipService_GetOrganizationMembership_FullMethodName          = "/organization_service.org_membership.v1.OrganizationMembershipService/GetOrganizationMembership"
+	OrganizationMembershipService_SendInvitation_FullMethodName                     = "/organization_service.org_membership.v1.OrganizationMembershipService/SendInvitation"
+	OrganizationMembershipService_AcceptInvitation_FullMethodName                   = "/organization_service.org_membership.v1.OrganizationMembershipService/AcceptInvitation"
+	OrganizationMembershipService_DeclineInvitation_FullMethodName                  = "/organization_service.org_membership.v1.OrganizationMembershipService/DeclineInvitation"
 	OrganizationMembershipService_LeaveOrganization_FullMethodName                  = "/organization_service.org_membership.v1.OrganizationMembershipService/LeaveOrganization"
-	OrganizationMembershipService_CreateOrganizationMembership_FullMethodName       = "/organization_service.org_membership.v1.OrganizationMembershipService/CreateOrganizationMembership"
 	OrganizationMembershipService_ChangeOrganizationMembershipStatus_FullMethodName = "/organization_service.org_membership.v1.OrganizationMembershipService/ChangeOrganizationMembershipStatus"
 	OrganizationMembershipService_ChangeOrganizationMembershipRole_FullMethodName   = "/organization_service.org_membership.v1.OrganizationMembershipService/ChangeOrganizationMembershipRole"
 	OrganizationMembershipService_RemoveOrganizationMember_FullMethodName           = "/organization_service.org_membership.v1.OrganizationMembershipService/RemoveOrganizationMember"
@@ -46,10 +47,13 @@ type OrganizationMembershipServiceClient interface {
 	GetOrganizationMembershipsByRole(ctx context.Context, in *GetOrgMembershipsByRoleReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetOrganizationMembershipsByStatus(ctx context.Context, in *GetOrgMembershipsByStatusReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*OrgMembershipRes, error)
+	// ############################# INVITATION FLOW ############################
+	SendInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	AcceptInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	DeclineInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	// ############################ USER'S MEMBERSHIP MANAGEMENT ############################
 	LeaveOrganization(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	// ############################ ORGANIZATION'S MEMBERSHIP MANAGEMENT ############################
-	CreateOrganizationMembership(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.OrganizationMembership, error)
 	ChangeOrganizationMembershipStatus(ctx context.Context, in *ChangeOrgMembershipStatusReq, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	ChangeOrganizationMembershipRole(ctx context.Context, in *ChangeOrgMembershipRoleReq, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	RemoveOrganizationMember(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
@@ -123,20 +127,40 @@ func (c *organizationMembershipServiceClient) GetOrganizationMembership(ctx cont
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) LeaveOrganization(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *organizationMembershipServiceClient) SendInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
-	err := c.cc.Invoke(ctx, OrganizationMembershipService_LeaveOrganization_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, OrganizationMembershipService_SendInvitation_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) CreateOrganizationMembership(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.OrganizationMembership, error) {
+func (c *organizationMembershipServiceClient) AcceptInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.OrganizationMembership)
-	err := c.cc.Invoke(ctx, OrganizationMembershipService_CreateOrganizationMembership_FullMethodName, in, out, cOpts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, OrganizationMembershipService_AcceptInvitation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *organizationMembershipServiceClient) DeclineInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, OrganizationMembershipService_DeclineInvitation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *organizationMembershipServiceClient) LeaveOrganization(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, OrganizationMembershipService_LeaveOrganization_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -185,10 +209,13 @@ type OrganizationMembershipServiceServer interface {
 	GetOrganizationMembershipsByRole(context.Context, *GetOrgMembershipsByRoleReq) (*OrgMembershipsListRes, error)
 	GetOrganizationMembershipsByStatus(context.Context, *GetOrgMembershipsByStatusReq) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error)
+	// ############################# INVITATION FLOW ############################
+	SendInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
+	AcceptInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
+	DeclineInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
 	// ############################ USER'S MEMBERSHIP MANAGEMENT ############################
 	LeaveOrganization(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
 	// ############################ ORGANIZATION'S MEMBERSHIP MANAGEMENT ############################
-	CreateOrganizationMembership(context.Context, *v1.EmptyRequest) (*v11.OrganizationMembership, error)
 	ChangeOrganizationMembershipStatus(context.Context, *ChangeOrgMembershipStatusReq) (*v1.SuccessResponse, error)
 	ChangeOrganizationMembershipRole(context.Context, *ChangeOrgMembershipRoleReq) (*v1.SuccessResponse, error)
 	RemoveOrganizationMember(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
@@ -219,11 +246,17 @@ func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembershi
 func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrganizationMembership not implemented")
 }
+func (UnimplementedOrganizationMembershipServiceServer) SendInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SendInvitation not implemented")
+}
+func (UnimplementedOrganizationMembershipServiceServer) AcceptInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AcceptInvitation not implemented")
+}
+func (UnimplementedOrganizationMembershipServiceServer) DeclineInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeclineInvitation not implemented")
+}
 func (UnimplementedOrganizationMembershipServiceServer) LeaveOrganization(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method LeaveOrganization not implemented")
-}
-func (UnimplementedOrganizationMembershipServiceServer) CreateOrganizationMembership(context.Context, *v1.EmptyRequest) (*v11.OrganizationMembership, error) {
-	return nil, status.Error(codes.Unimplemented, "method CreateOrganizationMembership not implemented")
 }
 func (UnimplementedOrganizationMembershipServiceServer) ChangeOrganizationMembershipStatus(context.Context, *ChangeOrgMembershipStatusReq) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangeOrganizationMembershipStatus not implemented")
@@ -362,6 +395,60 @@ func _OrganizationMembershipService_GetOrganizationMembership_Handler(srv interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrganizationMembershipService_SendInvitation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.IDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationMembershipServiceServer).SendInvitation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrganizationMembershipService_SendInvitation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationMembershipServiceServer).SendInvitation(ctx, req.(*v1.IDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrganizationMembershipService_AcceptInvitation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.IDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationMembershipServiceServer).AcceptInvitation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrganizationMembershipService_AcceptInvitation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationMembershipServiceServer).AcceptInvitation(ctx, req.(*v1.IDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrganizationMembershipService_DeclineInvitation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.IDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationMembershipServiceServer).DeclineInvitation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrganizationMembershipService_DeclineInvitation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationMembershipServiceServer).DeclineInvitation(ctx, req.(*v1.IDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _OrganizationMembershipService_LeaveOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.IDRequest)
 	if err := dec(in); err != nil {
@@ -376,24 +463,6 @@ func _OrganizationMembershipService_LeaveOrganization_Handler(srv interface{}, c
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrganizationMembershipServiceServer).LeaveOrganization(ctx, req.(*v1.IDRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _OrganizationMembershipService_CreateOrganizationMembership_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmptyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrganizationMembershipServiceServer).CreateOrganizationMembership(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrganizationMembershipService_CreateOrganizationMembership_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).CreateOrganizationMembership(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -484,12 +553,20 @@ var OrganizationMembershipService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _OrganizationMembershipService_GetOrganizationMembership_Handler,
 		},
 		{
-			MethodName: "LeaveOrganization",
-			Handler:    _OrganizationMembershipService_LeaveOrganization_Handler,
+			MethodName: "SendInvitation",
+			Handler:    _OrganizationMembershipService_SendInvitation_Handler,
 		},
 		{
-			MethodName: "CreateOrganizationMembership",
-			Handler:    _OrganizationMembershipService_CreateOrganizationMembership_Handler,
+			MethodName: "AcceptInvitation",
+			Handler:    _OrganizationMembershipService_AcceptInvitation_Handler,
+		},
+		{
+			MethodName: "DeclineInvitation",
+			Handler:    _OrganizationMembershipService_DeclineInvitation_Handler,
+		},
+		{
+			MethodName: "LeaveOrganization",
+			Handler:    _OrganizationMembershipService_LeaveOrganization_Handler,
 		},
 		{
 			MethodName: "ChangeOrganizationMembershipStatus",
