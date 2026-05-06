@@ -6,8 +6,10 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
+	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/protoutils"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
@@ -94,7 +96,53 @@ func (s *orgMembershipService) GetMyMembership(ctx context.Context, req *corev1.
 // ############################ ORGANIZATION QUERIES ############################
 
 func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Context, req *corev1.IDWithPaginationReq) (*org_membershipv1.OrgMembershipsListRes, error) {
-	return nil, nil
+	// 0. Validate Pagination
+	if appErr := protoutils.ValidatePaginationReq(req.Pagination); appErr != nil {
+		return nil, appErr
+	}
+	orgID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid organization id")
+	}
+
+	// 1. Authenticate and extract User Identity
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("reason", "missing user metadata")
+	}
+
+	// 2. Check permission via openfga
+	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+		User:     "user:" + userInfo.UserID,
+		Relation: permissions.PermissionCanViewMember,
+		Object:   "organization:" + req.Id,
+	})
+	if appErr != nil {
+		return nil, appErr
+	}
+	if !*checkRes.Allowed {
+		return nil, apperror.ErrPermissionDenied.WithMessage("user does not have permission to view this organization")
+	}
+
+	// 3. Get the organization memberships
+	memberships, err := s.q.GetOrganizationMembershipsByOrgID(ctx, db.GetOrganizationMembershipsByOrgIDParams{
+		OrganizationID: orgID,
+		Limit:          req.Pagination.Limit,
+		Offset:         (req.Pagination.Page - 1) * req.Pagination.Limit,
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithDetail("error", "failed to fetch memberships").WithDetail("db_error", err.Error())
+	}
+
+	// 4. Parse result
+	result := []*org_membershipv1.OrgMembershipRes{}
+	for _, m := range memberships {
+		result = append(result, utils.MapOrgMembershipRes(&m))
+	}
+
+	return &org_membershipv1.OrgMembershipsListRes{
+		OrganizationMemberships: result,
+	}, nil
 }
 
 func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Context, req *org_membershipv1.GetOrgMembershipsByRoleReq) (*org_membershipv1.OrgMembershipsListRes, error) {
