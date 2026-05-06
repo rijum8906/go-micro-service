@@ -11,6 +11,22 @@ import (
 	"github.com/google/uuid"
 )
 
+const CheckOrganizationMembershipExists = `-- name: CheckOrganizationMembershipExists :one
+
+SELECT EXISTS (
+    SELECT 1 FROM organization_memberships
+    WHERE id = $1 AND status != 'deleted'
+)
+`
+
+// NOTE: get and update methods must use "status != 'deleted'"
+func (q *Queries) CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, CheckOrganizationMembershipExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const CreateOrganizationMembership = `-- name: CreateOrganizationMembership :one
 INSERT INTO organization_memberships (
     user_id, organization_id, role
@@ -102,14 +118,41 @@ func (q *Queries) DeleteOrganizationMembershipHard(ctx context.Context, id uuid.
 }
 
 const GetOrganizationMembership = `-- name: GetOrganizationMembership :one
-
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
 WHERE id = $1 AND status != 'deleted'
 `
 
-// NOTE: get and update methods must use "status != 'deleted'"
 func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error) {
 	row := q.db.QueryRow(ctx, GetOrganizationMembership, id)
+	var i OrganizationMembership
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.Status,
+		&i.JoinedAt,
+		&i.LeftAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.DeletedBy,
+	)
+	return i, err
+}
+
+const GetOrganizationMembershipByIDAndUserID = `-- name: GetOrganizationMembershipByIDAndUserID :one
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+WHERE id = $1 AND user_id = $2 AND status != 'deleted'
+`
+
+type GetOrganizationMembershipByIDAndUserIDParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetOrganizationMembershipByIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByIDAndUserIDParams) (OrganizationMembership, error) {
+	row := q.db.QueryRow(ctx, GetOrganizationMembershipByIDAndUserID, arg.ID, arg.UserID)
 	var i OrganizationMembership
 	err := row.Scan(
 		&i.ID,

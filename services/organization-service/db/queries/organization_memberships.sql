@@ -13,9 +13,19 @@ INSERT INTO organization_memberships (
 
 -- NOTE: get and update methods must use "status != 'deleted'"
 
+-- name: CheckOrganizationMembershipExists :one
+SELECT EXISTS (
+    SELECT 1 FROM organization_memberships
+    WHERE id = $1 AND status != 'deleted'
+);
+
 -- name: GetOrganizationMembership :one
 SELECT * FROM organization_memberships
 WHERE id = $1 AND status != 'deleted';
+
+-- name: GetOrganizationMembershipByIDAndUserID :one
+SELECT * FROM organization_memberships
+WHERE id = $1 AND user_id = $2 AND status != 'deleted';
 
 -- name: GetOrganizationMembershipsByUserID :many
 SELECT * FROM organization_memberships
