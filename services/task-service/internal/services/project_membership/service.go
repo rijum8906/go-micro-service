@@ -8,6 +8,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
@@ -233,11 +234,11 @@ func requiredUUID(value, field, requiredMessage string) (uuid.UUID, *apperror.Ap
 func normalizeRole(value string) (string, *apperror.AppError) {
 	role := strings.TrimSpace(value)
 	if role == "" {
-		role = "member"
+		role = string(taskpermissions.RoleMember)
 	}
 
 	switch role {
-	case "owner", "admin", "member":
+	case string(taskpermissions.RoleOwner), string(taskpermissions.RoleAdmin), string(taskpermissions.RoleMember):
 		return role, nil
 	default:
 		return "", apperror.ErrValidation.WithMessage("invalid project member role").WithDetail("field", "role")

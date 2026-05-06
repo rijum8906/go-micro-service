@@ -9,18 +9,19 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	projectmembershiprepo "github.com/rijum8906/relay/services/task-service/internal/repository/project_membership"
 	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-type Role string
+type Role = taskpermissions.Role
 
 const (
-	RoleMember Role = "member"
-	RoleAdmin  Role = "admin"
-	RoleOwner  Role = "owner"
+	RoleMember Role = taskpermissions.RoleMember
+	RoleAdmin  Role = taskpermissions.RoleAdmin
+	RoleOwner  Role = taskpermissions.RoleOwner
 )
 
 var roleRank = map[Role]int{
@@ -144,22 +145,22 @@ func (a *authorizer) requireFGA(ctx context.Context, userID uuid.UUID, relation,
 func projectRelation(role Role) string {
 	switch role {
 	case RoleOwner:
-		return "can_delete"
+		return taskpermissions.PermissionCanDelete
 	case RoleAdmin:
-		return "can_manage_tasks"
+		return taskpermissions.PermissionCanManageTasks
 	default:
-		return "can_view"
+		return taskpermissions.PermissionCanView
 	}
 }
 
 func taskRelation(role Role) string {
 	switch role {
 	case RoleOwner:
-		return "can_delete"
+		return taskpermissions.PermissionCanDelete
 	case RoleAdmin:
-		return "can_manage"
+		return taskpermissions.PermissionCanManage
 	default:
-		return "can_view"
+		return taskpermissions.PermissionCanView
 	}
 }
 

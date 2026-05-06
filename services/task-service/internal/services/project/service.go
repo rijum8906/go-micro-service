@@ -7,6 +7,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
@@ -48,7 +49,7 @@ func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRe
 
 	if s.tuples != nil {
 		if appErr := s.tuples.Write(ctx, []client.ClientTupleKey{
-			authz.ProjectRoleTuple(project.ID, "owner", createdBy),
+			authz.ProjectRoleTuple(project.ID, string(taskpermissions.RoleOwner), createdBy),
 		}); appErr != nil {
 			return nil, appErr
 		}

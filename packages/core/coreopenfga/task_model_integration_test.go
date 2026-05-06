@@ -9,6 +9,7 @@ import (
 
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 )
 
 func TestTaskModelProjectInheritanceIntegration(t *testing.T) {
@@ -46,13 +47,17 @@ func TestTaskModelProjectInheritanceIntegration(t *testing.T) {
 	const project = "project:project-1"
 	const task = "task:task-1"
 	if appErr := tupleManager.Write(ctx, []client.ClientTupleKey{
-		{User: user, Relation: "owner", Object: project},
+		{User: user, Relation: string(taskpermissions.RoleOwner), Object: project},
 		{User: project, Relation: "parent_project", Object: task},
 	}); appErr != nil {
 		t.Fatal(appErr)
 	}
 
-	for _, relation := range []string{"can_view", "can_manage", "can_delete"} {
+	for _, relation := range []string{
+		taskpermissions.PermissionCanView,
+		taskpermissions.PermissionCanManage,
+		taskpermissions.PermissionCanDelete,
+	} {
 		res, appErr := tupleManager.Check(ctx, client.ClientCheckRequest{
 			User:     user,
 			Relation: relation,
