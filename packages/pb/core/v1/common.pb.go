@@ -337,6 +337,58 @@ func (x *PaginationRequest) GetLimit() int32 {
 	return 0
 }
 
+type IDWithPaginationReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Pagination    *PaginationRequest     `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IDWithPaginationReq) Reset() {
+	*x = IDWithPaginationReq{}
+	mi := &file_core_v1_common_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IDWithPaginationReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IDWithPaginationReq) ProtoMessage() {}
+
+func (x *IDWithPaginationReq) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_common_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IDWithPaginationReq.ProtoReflect.Descriptor instead.
+func (*IDWithPaginationReq) Descriptor() ([]byte, []int) {
+	return file_core_v1_common_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *IDWithPaginationReq) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *IDWithPaginationReq) GetPagination() *PaginationRequest {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
+}
+
 var File_core_v1_common_proto protoreflect.FileDescriptor
 
 const file_core_v1_common_proto_rawDesc = "" +
@@ -358,7 +410,12 @@ const file_core_v1_common_proto_rawDesc = "" +
 	"\x02id\x18\x02 \x01(\tR\x02id\"=\n" +
 	"\x11PaginationRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limitB\x8e\x01\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"a\n" +
+	"\x13IDWithPaginationReq\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12:\n" +
+	"\n" +
+	"pagination\x18\x02 \x01(\v2\x1a.core.v1.PaginationRequestR\n" +
+	"paginationB\x8e\x01\n" +
 	"\vcom.core.v1B\vCommonProtoP\x01Z5github.com/rijum8906/relay/packages/pb/core/v1;corev1\xa2\x02\x03CXX\xaa\x02\aCore.V1\xca\x02\aCore\\V1\xe2\x02\x13Core\\V1\\GPBMetadata\xea\x02\bCore::V1b\x06proto3"
 
 var (
@@ -373,7 +430,7 @@ func file_core_v1_common_proto_rawDescGZIP() []byte {
 	return file_core_v1_common_proto_rawDescData
 }
 
-var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_core_v1_common_proto_goTypes = []any{
 	(*RequestMetadata)(nil),         // 0: core.v1.RequestMetadata
 	(*EmptyRequest)(nil),            // 1: core.v1.EmptyRequest
@@ -382,13 +439,15 @@ var file_core_v1_common_proto_goTypes = []any{
 	(*IDRequest)(nil),               // 4: core.v1.IDRequest
 	(*IDAndScopedTokenRequest)(nil), // 5: core.v1.IDAndScopedTokenRequest
 	(*PaginationRequest)(nil),       // 6: core.v1.PaginationRequest
+	(*IDWithPaginationReq)(nil),     // 7: core.v1.IDWithPaginationReq
 }
 var file_core_v1_common_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	6, // 0: core.v1.IDWithPaginationReq.pagination:type_name -> core.v1.PaginationRequest
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_core_v1_common_proto_init() }
@@ -402,7 +461,7 @@ func file_core_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_v1_common_proto_rawDesc), len(file_core_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
