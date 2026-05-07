@@ -56,6 +56,10 @@ type OrganizationInvitation struct {
 	ExpiresAt  pgtype.Timestamptz
 	AcceptedBy uuid.UUID
 	AcceptedAt pgtype.Timestamptz
+	RejectedBy uuid.UUID
+	RejectedAt pgtype.Timestamptz
+	RevokedBy  uuid.UUID
+	RevokedAt  pgtype.Timestamptz
 	CreatedAt  pgtype.Timestamptz
 }
 

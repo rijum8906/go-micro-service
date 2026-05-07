@@ -11,25 +11,34 @@ import (
 )
 
 type Querier interface {
+	AccecptOrganizationInvitation(ctx context.Context, arg AccecptOrganizationInvitationParams) (OrganizationInvitation, error)
 	ArchiveOrganization(ctx context.Context, id uuid.UUID) error
 	ChangeOrganizationOwnership(ctx context.Context, arg ChangeOrganizationOwnershipParams) error
 	CheckOrganizationExists(ctx context.Context, id uuid.UUID) (bool, error)
 	// NOTE: exists check methods must not use 'deleted_at IS NULL'
 	CheckOrganizationExistsBySlug(ctx context.Context, slug string) (bool, error)
+	CheckOrganizationInvitationExists(ctx context.Context, id uuid.UUID) (bool, error)
+	CheckOrganizationInvitationExistsByTokenHash(ctx context.Context, tokenHash string) (bool, error)
 	// NOTE: get and update methods must use "status != 'left'"
 	CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error)
 	//
 	CreateOrganization(ctx context.Context, arg CreateOrganizationParams) (Organization, error)
+	CreateOrganizationInvitation(ctx context.Context, arg CreateOrganizationInvitationParams) (OrganizationInvitation, error)
 	CreateOrganizationMembership(ctx context.Context, arg CreateOrganizationMembershipParams) (OrganizationMembership, error)
 	CreateOrganizationMembershipOwner(ctx context.Context, arg CreateOrganizationMembershipOwnerParams) (OrganizationMembership, error)
 	DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error
 	DeleteOrganizationHard(ctx context.Context, id uuid.UUID) error
+	DeleteOrganizationInvitation(ctx context.Context, id uuid.UUID) error
 	DeleteOrganizationMembership(ctx context.Context, arg DeleteOrganizationMembershipParams) error
 	DeleteOrganizationMembershipHard(ctx context.Context, id uuid.UUID) error
 	GetDeletedOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
 	// NOTE: get methods must use 'deleted_at IS NULL'
 	GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
 	GetOrganizationBySlug(ctx context.Context, slug string) (Organization, error)
+	GetOrganizationInvitation(ctx context.Context, id uuid.UUID) (OrganizationInvitation, error)
+	GetOrganizationInvitationByTokenHash(ctx context.Context, tokenHash string) (OrganizationInvitation, error)
+	GetOrganizationInvitationsByOrgID(ctx context.Context, arg GetOrganizationInvitationsByOrgIDParams) ([]OrganizationInvitation, error)
+	GetOrganizationInvitationsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationInvitationsByOrgIDAndStatusParams) ([]OrganizationInvitation, error)
 	GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error)
 	GetOrganizationMembershipByIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByIDAndUserIDParams) (OrganizationMembership, error)
 	GetOrganizationMembershipsByOrgID(ctx context.Context, arg GetOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error)
@@ -38,6 +47,8 @@ type Querier interface {
 	GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error)
 	GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrganizationsByCreatedByParams) ([]Organization, error)
+	RejectOrganizationInvitation(ctx context.Context, arg RejectOrganizationInvitationParams) (OrganizationInvitation, error)
+	RevokeOrganizationInvitation(ctx context.Context, arg RevokeOrganizationInvitationParams) (OrganizationInvitation, error)
 	// NOTE: update methods must use 'deleted_at IS NULL'
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error)
 	UpdateOrganizationMembershipRole(ctx context.Context, arg UpdateOrganizationMembershipRoleParams) (OrganizationMembership, error)
