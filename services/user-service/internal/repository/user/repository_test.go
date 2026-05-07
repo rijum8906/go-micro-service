@@ -155,6 +155,60 @@ func TestUserRepository_DeleteUser(t *testing.T) {
 	}
 }
 
+func TestUserRepository_CheckExists(t *testing.T) {
+	repos := createRepo()
+	user := mustCreateUser(repos)
+
+	exists, appErr := repos.User.CheckExists(context.Background(), uuid.New())
+	if appErr != nil {
+		t.Fatalf("ExistsUser() unexpected error = %v", appErr)
+	}
+	if exists {
+		t.Fatalf("ExistsUser() exists = true, want false")
+	}
+
+	exists, appErr = repos.User.CheckExists(context.Background(), user.ID)
+	if appErr != nil {
+		t.Fatalf("ExistsUser() unexpected error = %v", appErr)
+	}
+	if !exists {
+		t.Fatalf("ExistsUser() exists = false, want true")
+	}
+
+	t.Cleanup(func() {
+		if err := repos.User.DeleteUser(context.Background(), user.ID); err != nil {
+			t.Fatalf("DeleteUser() unexpected error = %v", err)
+		}
+	})
+}
+
+func TestUserRepository_CheckEmailExists(t *testing.T) {
+	repos := createRepo()
+	user := mustCreateUser(repos)
+
+	exists, appErr := repos.User.CheckEmailExists(context.Background(), uniqueEmail())
+	if appErr != nil {
+		t.Fatalf("CheckEmailExists() unexpected error = %v", appErr)
+	}
+	if exists {
+		t.Fatalf("CheckEmailExists() exists = true, want false")
+	}
+
+	exists, appErr = repos.User.CheckEmailExists(context.Background(), user.Email)
+	if appErr != nil {
+		t.Fatalf("CheckEmailExists() unexpected error = %v", appErr)
+	}
+	if !exists {
+		t.Fatalf("CheckEmailExists() exists = false, want true")
+	}
+
+	t.Cleanup(func() {
+		if err := repos.User.DeleteUser(context.Background(), user.ID); err != nil {
+			t.Fatalf("DeleteUser() unexpected error = %v", err)
+		}
+	})
+}
+
 type Repos struct {
 	User user.UserRepository
 }

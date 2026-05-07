@@ -21,6 +21,7 @@ type UserService interface {
 	GetProfile(ctx context.Context, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
 	GetUser(ctx context.Context, user *dto.UserInfo) (*modelsv1.User, *apperror.AppError)
 	CheckExists(ctx context.Context, id string) (bool, *apperror.AppError)
+	CheckEmailExists(ctx context.Context, email string) (bool, *apperror.AppError)
 }
 
 type userService struct {

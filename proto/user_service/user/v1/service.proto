@@ -15,4 +15,5 @@ service UserService {
   rpc GetProfile(core.v1.EmptyRequest) returns (user_service.models.v1.Profile);
   rpc GetUser(core.v1.EmptyRequest) returns (user_service.models.v1.User);
   rpc CheckExists(CheckExistsRequest) returns (CheckExistsResponse);
+  rpc CheckEmailExists(core.v1.EmailRequest) returns (CheckExistsResponse);
 }
