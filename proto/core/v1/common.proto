@@ -12,7 +12,7 @@ message SuccessResponse {
   bool success = 1;
 }
 
-message EmailInput {
+message EmailRequest {
   string email = 1;
 }
 

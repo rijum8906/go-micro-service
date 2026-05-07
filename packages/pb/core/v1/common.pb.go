@@ -145,27 +145,27 @@ func (x *SuccessResponse) GetSuccess() bool {
 	return false
 }
 
-type EmailInput struct {
+type EmailRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *EmailInput) Reset() {
-	*x = EmailInput{}
+func (x *EmailRequest) Reset() {
+	*x = EmailRequest{}
 	mi := &file_core_v1_common_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EmailInput) String() string {
+func (x *EmailRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EmailInput) ProtoMessage() {}
+func (*EmailRequest) ProtoMessage() {}
 
-func (x *EmailInput) ProtoReflect() protoreflect.Message {
+func (x *EmailRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_core_v1_common_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -177,12 +177,12 @@ func (x *EmailInput) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EmailInput.ProtoReflect.Descriptor instead.
-func (*EmailInput) Descriptor() ([]byte, []int) {
+// Deprecated: Use EmailRequest.ProtoReflect.Descriptor instead.
+func (*EmailRequest) Descriptor() ([]byte, []int) {
 	return file_core_v1_common_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *EmailInput) GetEmail() string {
+func (x *EmailRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
@@ -398,9 +398,8 @@ const file_core_v1_common_proto_rawDesc = "" +
 	"\tdevice_id\x18\x01 \x01(\tR\bdeviceId\"\x0e\n" +
 	"\fEmptyRequest\"+\n" +
 	"\x0fSuccessResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\"\n" +
-	"\n" +
-	"EmailInput\x12\x14\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"$\n" +
+	"\fEmailRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"\x1b\n" +
 	"\tIDRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"J\n" +
@@ -435,7 +434,7 @@ var file_core_v1_common_proto_goTypes = []any{
 	(*RequestMetadata)(nil),         // 0: core.v1.RequestMetadata
 	(*EmptyRequest)(nil),            // 1: core.v1.EmptyRequest
 	(*SuccessResponse)(nil),         // 2: core.v1.SuccessResponse
-	(*EmailInput)(nil),              // 3: core.v1.EmailInput
+	(*EmailRequest)(nil),            // 3: core.v1.EmailRequest
 	(*IDRequest)(nil),               // 4: core.v1.IDRequest
 	(*IDAndScopedTokenRequest)(nil), // 5: core.v1.IDAndScopedTokenRequest
 	(*PaginationRequest)(nil),       // 6: core.v1.PaginationRequest

@@ -8,7 +8,6 @@ package org_membershipv1
 
 import (
 	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
-	_ "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -26,15 +25,15 @@ var File_organization_service_org_membership_v1_service_proto protoreflect.FileD
 
 const file_organization_service_org_membership_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"4organization_service/org_membership/v1/service.proto\x12&organization_service.org_membership.v1\x1a\x14core/v1/common.proto\x1a*organization_service/models/v1/model.proto\x1a4organization_service/org_membership/v1/request.proto\x1a5organization_service/org_membership/v1/response.proto2\x8d\v\n" +
+	"4organization_service/org_membership/v1/service.proto\x12&organization_service.org_membership.v1\x1a\x14core/v1/common.proto\x1a4organization_service/org_membership/v1/request.proto\x1a5organization_service/org_membership/v1/response.proto2\x90\v\n" +
 	"\x1dOrganizationMembershipService\x12m\n" +
 	"\x10GetMyMemberships\x12\x1a.core.v1.PaginationRequest\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12_\n" +
 	"\x0fGetMyMembership\x12\x12.core.v1.IDRequest\x1a8.organization_service.org_membership.v1.OrgMembershipRes\x12\x80\x01\n" +
 	"!GetOrganizationMembershipsByOrgID\x12\x1c.core.v1.IDWithPaginationReq\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12\xa5\x01\n" +
 	" GetOrganizationMembershipsByRole\x12B.organization_service.org_membership.v1.GetOrgMembershipsByRoleReq\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12\xa9\x01\n" +
 	"\"GetOrganizationMembershipsByStatus\x12D.organization_service.org_membership.v1.GetOrgMembershipsByStatusReq\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12i\n" +
-	"\x19GetOrganizationMembership\x12\x12.core.v1.IDRequest\x1a8.organization_service.org_membership.v1.OrgMembershipRes\x12>\n" +
-	"\x0eSendInvitation\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12@\n" +
+	"\x19GetOrganizationMembership\x12\x12.core.v1.IDRequest\x1a8.organization_service.org_membership.v1.OrgMembershipRes\x12A\n" +
+	"\x0eSendInvitation\x12\x15.core.v1.EmailRequest\x1a\x18.core.v1.SuccessResponse\x12@\n" +
 	"\x10AcceptInvitation\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12A\n" +
 	"\x11DeclineInvitation\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12A\n" +
 	"\x11LeaveOrganization\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12\x84\x01\n" +
@@ -49,11 +48,12 @@ var file_organization_service_org_membership_v1_service_proto_goTypes = []any{
 	(*v1.IDWithPaginationReq)(nil),       // 2: core.v1.IDWithPaginationReq
 	(*GetOrgMembershipsByRoleReq)(nil),   // 3: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq
 	(*GetOrgMembershipsByStatusReq)(nil), // 4: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
-	(*ChangeOrgMembershipStatusReq)(nil), // 5: organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
-	(*ChangeOrgMembershipRoleReq)(nil),   // 6: organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
-	(*OrgMembershipsListRes)(nil),        // 7: organization_service.org_membership.v1.OrgMembershipsListRes
-	(*OrgMembershipRes)(nil),             // 8: organization_service.org_membership.v1.OrgMembershipRes
-	(*v1.SuccessResponse)(nil),           // 9: core.v1.SuccessResponse
+	(*v1.EmailRequest)(nil),              // 5: core.v1.EmailRequest
+	(*ChangeOrgMembershipStatusReq)(nil), // 6: organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
+	(*ChangeOrgMembershipRoleReq)(nil),   // 7: organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
+	(*OrgMembershipsListRes)(nil),        // 8: organization_service.org_membership.v1.OrgMembershipsListRes
+	(*OrgMembershipRes)(nil),             // 9: organization_service.org_membership.v1.OrgMembershipRes
+	(*v1.SuccessResponse)(nil),           // 10: core.v1.SuccessResponse
 }
 var file_organization_service_org_membership_v1_service_proto_depIdxs = []int32{
 	0,  // 0: organization_service.org_membership.v1.OrganizationMembershipService.GetMyMemberships:input_type -> core.v1.PaginationRequest
@@ -62,26 +62,26 @@ var file_organization_service_org_membership_v1_service_proto_depIdxs = []int32{
 	3,  // 3: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByRole:input_type -> organization_service.org_membership.v1.GetOrgMembershipsByRoleReq
 	4,  // 4: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByStatus:input_type -> organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
 	1,  // 5: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembership:input_type -> core.v1.IDRequest
-	1,  // 6: organization_service.org_membership.v1.OrganizationMembershipService.SendInvitation:input_type -> core.v1.IDRequest
+	5,  // 6: organization_service.org_membership.v1.OrganizationMembershipService.SendInvitation:input_type -> core.v1.EmailRequest
 	1,  // 7: organization_service.org_membership.v1.OrganizationMembershipService.AcceptInvitation:input_type -> core.v1.IDRequest
 	1,  // 8: organization_service.org_membership.v1.OrganizationMembershipService.DeclineInvitation:input_type -> core.v1.IDRequest
 	1,  // 9: organization_service.org_membership.v1.OrganizationMembershipService.LeaveOrganization:input_type -> core.v1.IDRequest
-	5,  // 10: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipStatus:input_type -> organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
-	6,  // 11: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipRole:input_type -> organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
+	6,  // 10: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipStatus:input_type -> organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
+	7,  // 11: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipRole:input_type -> organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
 	1,  // 12: organization_service.org_membership.v1.OrganizationMembershipService.RemoveOrganizationMember:input_type -> core.v1.IDRequest
-	7,  // 13: organization_service.org_membership.v1.OrganizationMembershipService.GetMyMemberships:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
-	8,  // 14: organization_service.org_membership.v1.OrganizationMembershipService.GetMyMembership:output_type -> organization_service.org_membership.v1.OrgMembershipRes
-	7,  // 15: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByOrgID:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
-	7,  // 16: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByRole:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
-	7,  // 17: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByStatus:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
-	8,  // 18: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembership:output_type -> organization_service.org_membership.v1.OrgMembershipRes
-	9,  // 19: organization_service.org_membership.v1.OrganizationMembershipService.SendInvitation:output_type -> core.v1.SuccessResponse
-	9,  // 20: organization_service.org_membership.v1.OrganizationMembershipService.AcceptInvitation:output_type -> core.v1.SuccessResponse
-	9,  // 21: organization_service.org_membership.v1.OrganizationMembershipService.DeclineInvitation:output_type -> core.v1.SuccessResponse
-	9,  // 22: organization_service.org_membership.v1.OrganizationMembershipService.LeaveOrganization:output_type -> core.v1.SuccessResponse
-	9,  // 23: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipStatus:output_type -> core.v1.SuccessResponse
-	9,  // 24: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipRole:output_type -> core.v1.SuccessResponse
-	9,  // 25: organization_service.org_membership.v1.OrganizationMembershipService.RemoveOrganizationMember:output_type -> core.v1.SuccessResponse
+	8,  // 13: organization_service.org_membership.v1.OrganizationMembershipService.GetMyMemberships:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
+	9,  // 14: organization_service.org_membership.v1.OrganizationMembershipService.GetMyMembership:output_type -> organization_service.org_membership.v1.OrgMembershipRes
+	8,  // 15: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByOrgID:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
+	8,  // 16: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByRole:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
+	8,  // 17: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByStatus:output_type -> organization_service.org_membership.v1.OrgMembershipsListRes
+	9,  // 18: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembership:output_type -> organization_service.org_membership.v1.OrgMembershipRes
+	10, // 19: organization_service.org_membership.v1.OrganizationMembershipService.SendInvitation:output_type -> core.v1.SuccessResponse
+	10, // 20: organization_service.org_membership.v1.OrganizationMembershipService.AcceptInvitation:output_type -> core.v1.SuccessResponse
+	10, // 21: organization_service.org_membership.v1.OrganizationMembershipService.DeclineInvitation:output_type -> core.v1.SuccessResponse
+	10, // 22: organization_service.org_membership.v1.OrganizationMembershipService.LeaveOrganization:output_type -> core.v1.SuccessResponse
+	10, // 23: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipStatus:output_type -> core.v1.SuccessResponse
+	10, // 24: organization_service.org_membership.v1.OrganizationMembershipService.ChangeOrganizationMembershipRole:output_type -> core.v1.SuccessResponse
+	10, // 25: organization_service.org_membership.v1.OrganizationMembershipService.RemoveOrganizationMember:output_type -> core.v1.SuccessResponse
 	13, // [13:26] is the sub-list for method output_type
 	0,  // [0:13] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name

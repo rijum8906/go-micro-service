@@ -48,7 +48,7 @@ type OrganizationMembershipServiceClient interface {
 	GetOrganizationMembershipsByStatus(ctx context.Context, in *GetOrgMembershipsByStatusReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*OrgMembershipRes, error)
 	// ############################# INVITATION FLOW ############################
-	SendInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	SendInvitation(ctx context.Context, in *v1.EmailRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	AcceptInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	DeclineInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	// ############################ USER'S MEMBERSHIP MANAGEMENT ############################
@@ -127,7 +127,7 @@ func (c *organizationMembershipServiceClient) GetOrganizationMembership(ctx cont
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) SendInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *organizationMembershipServiceClient) SendInvitation(ctx context.Context, in *v1.EmailRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationMembershipService_SendInvitation_FullMethodName, in, out, cOpts...)
@@ -210,7 +210,7 @@ type OrganizationMembershipServiceServer interface {
 	GetOrganizationMembershipsByStatus(context.Context, *GetOrgMembershipsByStatusReq) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error)
 	// ############################# INVITATION FLOW ############################
-	SendInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
+	SendInvitation(context.Context, *v1.EmailRequest) (*v1.SuccessResponse, error)
 	AcceptInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
 	DeclineInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
 	// ############################ USER'S MEMBERSHIP MANAGEMENT ############################
@@ -246,7 +246,7 @@ func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembershi
 func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrganizationMembership not implemented")
 }
-func (UnimplementedOrganizationMembershipServiceServer) SendInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedOrganizationMembershipServiceServer) SendInvitation(context.Context, *v1.EmailRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendInvitation not implemented")
 }
 func (UnimplementedOrganizationMembershipServiceServer) AcceptInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
@@ -396,7 +396,7 @@ func _OrganizationMembershipService_GetOrganizationMembership_Handler(srv interf
 }
 
 func _OrganizationMembershipService_SendInvitation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.IDRequest)
+	in := new(v1.EmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -408,7 +408,7 @@ func _OrganizationMembershipService_SendInvitation_Handler(srv interface{}, ctx 
 		FullMethod: OrganizationMembershipService_SendInvitation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).SendInvitation(ctx, req.(*v1.IDRequest))
+		return srv.(OrganizationMembershipServiceServer).SendInvitation(ctx, req.(*v1.EmailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
