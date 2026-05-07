@@ -160,11 +160,18 @@ CREATE TABLE "organization_invitations" (
   "expires_at" timestamptz NOT NULL,
   "accepted_by" uuid NULL,
   "accepted_at" timestamptz NULL,
+  "rejected_by" uuid NULL,
+  "rejected_at" timestamptz NULL,
+  "revoked_by" uuid NULL,
+  "revoked_at" timestamptz NULL,
   "created_at" timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY ("id"),
   CONSTRAINT "organization_invitations_token_hash_key" UNIQUE ("token_hash"),
   CONSTRAINT "organization_invitations_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_invitations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "organization_invitations_accepted_by_fkey" FOREIGN KEY ("accepted_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "organization_invitations_rejected_by_fkey" FOREIGN KEY ("rejected_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT "organization_invitations_revoked_by_fkey" FOREIGN KEY ("revoked_by") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_invitations_status_check" CHECK ((status)::text = ANY ((ARRAY['pending'::character varying, 'accepted'::character varying, 'revoked'::character varying, 'expired'::character varying])::text[]))
 );
 -- Create index "idx_organization_invitations_email" to table: "organization_invitations"

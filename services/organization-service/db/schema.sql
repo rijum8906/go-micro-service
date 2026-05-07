@@ -179,8 +179,12 @@ CREATE TABLE organization_invitations (
     invited_by uuid NOT NULL REFERENCES organization_memberships(id),
     token_hash varchar(255) UNIQUE NOT NULL,  -- Store hash, not raw token for security
     expires_at timestamptz NOT NULL,           -- Tokens expire after N days
-    accepted_by uuid,
+    accepted_by uuid REFERENCES organization_memberships(id),
     accepted_at timestamptz,
+    rejected_by uuid REFERENCES organization_memberships(id),
+    rejected_at timestamptz,
+    revoked_by uuid REFERENCES organization_memberships(id),
+    revoked_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
