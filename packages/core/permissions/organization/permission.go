@@ -17,3 +17,12 @@ const (
 	RoleMember = "member"
 	RoleLeader = "leader"
 )
+
+func ValidateRole(role string) bool {
+	switch role {
+	case RoleAdmin, RoleUser, RoleOwner, RoleMember, RoleLeader:
+		return true
+	default:
+		return false
+	}
+}

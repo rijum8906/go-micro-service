@@ -3,1116 +3,965 @@ package orgmembership_test
 import (
 	"context"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/dto"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	orgmembershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
-	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
-	orgmembership "github.com/rijum8906/relay/services/organization-service/internal/services/org_membership"
-	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/services/testutils"
+	"github.com/rijum8906/relay/services/organization-service/internal/services/org_membership/testutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
 )
 
 func TestMain(m *testing.M) {
-	// Load .env file before running tests
 	if err := godotenv.Load("../../../.env"); err != nil {
-		// Optional: fall back to .env.test
 		if err := godotenv.Load("../../.env.test"); err != nil {
-			// Skip if no .env file (for CI)
 			if os.Getenv("CI") == "" {
 				panic("No .env file found")
 			}
 		}
 	}
-
 	os.Exit(m.Run())
 }
 
+// =============================================================================
+// GetMyMemberships Tests
+// =============================================================================
+
 func Test_GetMyMemberships_Integration_Success(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-
-	ctx := context.Background()
-
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 	ownerID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
 
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Run("owner_can_view_their_membership", func(t *testing.T) {
+		orgSuite.CreateOwner(t, ownerID)
+		expectedMembershipID := orgSuite.OwnerMembership.ID.String()
 
-	t.Run("Get the owner membership", func(t *testing.T) {
-		// Attach the owner's user id in context
 		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
 			dto.MetaUserIDKey, ownerID.String(),
 		))
 
-		// Get memberships
 		memberships, err := service.GetMyMemberships(ctx, &corev1.PaginationRequest{
 			Page:  1,
 			Limit: 50,
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
 
-		if len(memberships.OrganizationMemberships) != 1 {
-			t.Errorf("expected only 1 mebership record but got %d", len(memberships.OrganizationMemberships))
-		}
+		require.NoError(t, err)
+		require.Len(t, memberships.OrganizationMemberships, 1)
 
-		if memberships.OrganizationMemberships[0].Id != ownerMembership.ID.String() {
-			t.Errorf("expected membership id to be %s but got %s", ownerMembership.ID.String(), memberships.OrganizationMemberships[0].Id)
-		}
+		actual := memberships.OrganizationMemberships[0]
+		assert.Equal(t, expectedMembershipID, actual.Id)
+		assert.Equal(t, permissions.RoleOwner, actual.Role)
+		assert.Equal(t, orgSuite.Org.ID.String(), actual.OrganizationId)
 	})
 
-	t.Run("Create and get admin memberships", func(t *testing.T) {
-		// Create a new admin
-		membership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
-			UserID:         uuid.New(),
-			Role:           permissions.RoleAdmin,
-			OrganizationID: org.ID,
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
+	t.Run("admin_can_view_their_membership", func(t *testing.T) {
+		adminID := uuid.New()
+		orgSuite.CreateAdmin(t, adminID)
+		expectedMembershipID := orgSuite.AdminMembership.ID.String()
 
-		// Attach user info to context
 		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, membership.UserID.String(),
+			dto.MetaUserIDKey, adminID.String(),
 		))
 
-		// Get my memberships
 		memberships, err := service.GetMyMemberships(ctx, &corev1.PaginationRequest{
 			Page:  1,
 			Limit: 50,
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
 
-		if memberships.OrganizationMemberships[0].Id != membership.ID.String() {
-			t.Errorf("expected membership id to be %s but got %s", membership.ID.String(), memberships.OrganizationMemberships[0].Id)
-		}
+		require.NoError(t, err)
+		require.Len(t, memberships.OrganizationMemberships, 1)
 
-		t.Cleanup(func() {
-			q.DeleteOrganizationMembershipHard(ctx, membership.ID)
-		})
+		actual := memberships.OrganizationMemberships[0]
+		assert.Equal(t, expectedMembershipID, actual.Id)
+		assert.Equal(t, permissions.RoleAdmin, actual.Role)
+		assert.Equal(t, orgSuite.Org.ID.String(), actual.OrganizationId)
 	})
 
-	t.Cleanup(func() {
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
+	t.Run("member_can_view_their_membership", func(t *testing.T) {
+		memberID := uuid.New()
+		orgSuite.CreateMember(t, memberID)
+		expectedMembershipID := orgSuite.MemberMembership.ID.String()
+
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, memberID.String(),
+		))
+
+		memberships, err := service.GetMyMemberships(ctx, &corev1.PaginationRequest{
+			Page:  1,
+			Limit: 50,
+		})
+
+		require.NoError(t, err)
+		require.Len(t, memberships.OrganizationMemberships, 1)
+
+		actual := memberships.OrganizationMemberships[0]
+		assert.Equal(t, expectedMembershipID, actual.Id)
+		assert.Equal(t, permissions.RoleMember, actual.Role)
+		assert.Equal(t, orgSuite.Org.ID.String(), actual.OrganizationId)
 	})
 }
 
 func Test_GetMyMemberships_Integration_Failure(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-
-	ctx := context.Background()
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 
 	ownerID := uuid.New()
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	testCases := []struct {
+		name          string
+		setupContext  func() context.Context
+		pagination    *corev1.PaginationRequest
+		expectedError string
+	}{
+		{
+			name: "missing_user_metadata_returns_unauthenticated",
+			setupContext: func() context.Context {
+				return context.Background()
+			},
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeUnAuthenticated),
+		},
+		{
+			name: "invalid_pagination_page_zero_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			pagination:    &corev1.PaginationRequest{Page: 0, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_pagination_negative_page_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			pagination:    &corev1.PaginationRequest{Page: -1, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_pagination_limit_zero_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 0},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "pagination_limit_exceeds_maximum_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 1000},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_user_id_format_returns_internal_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, "not-a-valid-uuid",
+				))
+			},
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeInternal),
+		},
 	}
 
-	t.Run("Without user metadata", func(t *testing.T) {
-		_, err := service.GetMyMemberships(context.Background(), &corev1.PaginationRequest{
-			Page:  1,
-			Limit: 50,
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			_, err := service.GetMyMemberships(ctx, tc.pagination)
+
+			require.Error(t, err, "expected error for test case: %s", tc.name)
+			assert.Contains(t, err.Error(), tc.expectedError,
+				"expected error type %s, got %v", tc.expectedError, err)
 		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeUnAuthenticated)) {
-			t.Errorf("expected unauthenticated error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid pagination", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetMyMemberships(ctx, &corev1.PaginationRequest{
-			Page:  0,
-			Limit: 50,
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid user id in metadata", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, "invalid-user-id",
-		))
-
-		_, err := service.GetMyMemberships(ctx, &corev1.PaginationRequest{
-			Page:  1,
-			Limit: 50,
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
-			t.Errorf("expected internal error, got %s", err.Error())
-		}
-	})
-
-	t.Cleanup(func() {
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
-	})
+	}
 }
+
+// =============================================================================
+// GetMyMembership Tests
+// =============================================================================
 
 func Test_GetMyMembership_Integration_Success(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-
-	ctx := context.Background()
-
-	userID := uuid.New()
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: userID.String()})
-	membership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         userID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ctx = metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-		dto.MetaUserIDKey, userID.String(),
-	))
-
-	res, err := service.GetMyMembership(ctx, &corev1.IDRequest{
-		Id: membership.ID.String(),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if res.Id != membership.ID.String() {
-		t.Errorf("expected membership id to be %s but got %s", membership.ID.String(), res.Id)
-	}
-	if res.UserId != userID.String() {
-		t.Errorf("expected user id to be %s but got %s", userID.String(), res.UserId)
-	}
-	if res.OrganizationId != org.ID.String() {
-		t.Errorf("expected organization id to be %s but got %s", org.ID.String(), res.OrganizationId)
-	}
-
-	t.Cleanup(func() {
-		q.DeleteOrganizationMembershipHard(context.Background(), membership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
-	})
-}
-
-func Test_GetMyMembership_Integration_Failure(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-
-	ctx := context.Background()
-
-	ownerID := uuid.New()
-	otherUserID := uuid.New()
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	otherMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
-		UserID:         otherUserID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleMember,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Run("Without user metadata", func(t *testing.T) {
-		_, err := service.GetMyMembership(context.Background(), &corev1.IDRequest{
-			Id: ownerMembership.ID.String(),
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeUnAuthenticated)) {
-			t.Errorf("expected unauthenticated error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid membership id", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetMyMembership(ctx, &corev1.IDRequest{
-			Id: "invalid-membership-id",
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With unknown membership id", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetMyMembership(ctx, &corev1.IDRequest{
-			Id: uuid.NewString(),
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeNotFound)) {
-			t.Errorf("expected not found error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With ownership mismatch", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetMyMembership(ctx, &corev1.IDRequest{
-			Id: otherMembership.ID.String(),
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodePermissionDenied)) {
-			t.Errorf("expected permission denied error, got %s", err.Error())
-		}
-	})
-
-	t.Cleanup(func() {
-		q.DeleteOrganizationMembershipHard(context.Background(), otherMembership.ID)
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
-	})
-}
-
-func Test_GetOrganizationMembershipsByOrgID_Integration_Success(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
-
-	ctx := context.Background()
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 
 	ownerID := uuid.New()
 	adminID := uuid.New()
 	memberID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+	orgSuite.CreateAdmin(t, adminID)
+	orgSuite.CreateMember(t, memberID)
 
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
+	testCases := []struct {
+		name         string
+		userID       string
+		membershipID string
+		expectedRole string
+	}{
+		{
+			name:         "owner_can_view_their_membership",
+			userID:       ownerID.String(),
+			membershipID: orgSuite.OwnerMembership.ID.String(),
+			expectedRole: permissions.RoleOwner,
+		},
+		{
+			name:         "admin_can_view_their_membership",
+			userID:       adminID.String(),
+			membershipID: orgSuite.AdminMembership.ID.String(),
+			expectedRole: permissions.RoleAdmin,
+		},
+		{
+			name:         "member_can_view_their_membership",
+			userID:       memberID.String(),
+			membershipID: orgSuite.MemberMembership.ID.String(),
+			expectedRole: permissions.RoleMember,
+		},
 	}
-	adminMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
-		UserID:         adminID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleAdmin,
-	})
-	if err != nil {
-		t.Fatal(err)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+				dto.MetaUserIDKey, tc.userID,
+			))
+
+			res, err := service.GetMyMembership(ctx, &corev1.IDRequest{
+				Id: tc.membershipID,
+			})
+
+			require.NoError(t, err)
+			require.NotNil(t, res)
+
+			assert.Equal(t, tc.membershipID, res.Id)
+			assert.Equal(t, tc.userID, res.UserId)
+			assert.Equal(t, orgSuite.Org.ID.String(), res.OrganizationId)
+			assert.Equal(t, tc.expectedRole, res.Role)
+		})
 	}
-	memberMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
-		UserID:         memberID,
-		OrganizationID: org.ID,
+}
+
+func Test_GetMyMembership_Integration_Failure(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	ownerID := uuid.New()
+	otherUserID := uuid.New()
+
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	// Create another user as member
+	otherMembership, err := suite.Q.CreateOrganizationMembership(suite.Ctx, db.CreateOrganizationMembershipParams{
+		UserID:         otherUserID,
+		OrganizationID: orgSuite.Org.ID,
 		Role:           permissions.RoleMember,
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+	// Add FGA tuple for other user
+	appErr := suite.TuppleManager.Write(suite.Ctx, []client.ClientTupleKey{
 		{
-			User:     "user:" + ownerID.String(),
-			Relation: permissions.RoleOwner,
-			Object:   "organization:" + org.ID.String(),
-		},
-		{
-			User:     "user:" + adminID.String(),
-			Relation: permissions.RoleAdmin,
-			Object:   "organization:" + org.ID.String(),
-		},
-		{
-			User:     "user:" + memberID.String(),
+			User:     "user:" + otherUserID.String(),
 			Relation: permissions.RoleMember,
-			Object:   "organization:" + org.ID.String(),
+			Object:   "organization:" + orgSuite.Org.ID.String(),
 		},
-	}); appErr != nil {
-		t.Fatal(appErr)
+	})
+	require.Nil(t, appErr)
+
+	t.Cleanup(func() {
+		suite.TuppleManager.Delete(suite.Ctx, []client.ClientTupleKeyWithoutCondition{
+			{
+				User:     "user:" + otherUserID.String(),
+				Relation: permissions.RoleMember,
+				Object:   "organization:" + orgSuite.Org.ID.String(),
+			},
+		})
+		suite.Q.DeleteOrganizationMembershipHard(suite.Ctx, otherMembership.ID)
+	})
+
+	testCases := []struct {
+		name          string
+		setupContext  func() context.Context
+		requestID     string
+		expectedError string
+	}{
+		{
+			name: "missing_user_metadata_returns_unauthenticated",
+			setupContext: func() context.Context {
+				return context.Background()
+			},
+			requestID:     orgSuite.OwnerMembership.ID.String(),
+			expectedError: string(apperror.CodeUnAuthenticated),
+		},
+		{
+			name: "invalid_membership_id_format_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			requestID:     "not-a-valid-uuid",
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "non_existent_membership_id_returns_not_found",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			requestID:     uuid.New().String(),
+			expectedError: string(apperror.CodeNotFound),
+		},
+		{
+			name: "accessing_another_users_membership_returns_permission_denied",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			requestID:     otherMembership.ID.String(),
+			expectedError: string(apperror.CodePermissionDenied),
+		},
 	}
 
-	t.Run("Owner can list all memberships", func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			_, err := service.GetMyMembership(ctx, &corev1.IDRequest{Id: tc.requestID})
+
+			require.Error(t, err, "expected error for test case: %s", tc.name)
+			assert.Contains(t, err.Error(), tc.expectedError,
+				"expected error type %s, got %v", tc.expectedError, err)
+		})
+	}
+}
+
+// =============================================================================
+// GetOrganizationMembershipsByOrgID Tests
+// =============================================================================
+
+func Test_GetOrganizationMembershipsByOrgID_Integration_Success(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	ownerID := uuid.New()
+	adminID := uuid.New()
+	memberID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+	orgSuite.CreateAdmin(t, adminID)
+	orgSuite.CreateMember(t, memberID)
+
+	t.Run("owner_can_list_all_memberships", func(t *testing.T) {
 		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
 			dto.MetaUserIDKey, ownerID.String(),
 		))
 
 		res, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
-			Id: org.ID.String(),
+			Id: orgSuite.Org.ID.String(),
 			Pagination: &corev1.PaginationRequest{
 				Page:  1,
 				Limit: 50,
 			},
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
 
-		if len(res.OrganizationMemberships) != 3 {
-			t.Fatalf("expected 3 memberships but got %d", len(res.OrganizationMemberships))
-		}
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.Len(t, res.OrganizationMemberships, 3)
 
-		foundIDs := map[string]bool{}
+		membershipIDs := make(map[string]bool)
 		for _, membership := range res.OrganizationMemberships {
-			foundIDs[membership.Id] = true
+			membershipIDs[membership.Id] = true
 		}
-		if !foundIDs[ownerMembership.ID.String()] {
-			t.Errorf("expected owner membership %s to be present", ownerMembership.ID.String())
-		}
-		if !foundIDs[adminMembership.ID.String()] {
-			t.Errorf("expected admin membership %s to be present", adminMembership.ID.String())
-		}
-		if !foundIDs[memberMembership.ID.String()] {
-			t.Errorf("expected member membership %s to be present", memberMembership.ID.String())
-		}
+
+		assert.True(t, membershipIDs[orgSuite.OwnerMembership.ID.String()], "owner membership missing")
+		assert.True(t, membershipIDs[orgSuite.AdminMembership.ID.String()], "admin membership missing")
+		assert.True(t, membershipIDs[orgSuite.MemberMembership.ID.String()], "member membership missing")
 	})
 
-	t.Run("Member can list memberships with pagination", func(t *testing.T) {
+	t.Run("pagination_returns_correct_page_sizes", func(t *testing.T) {
 		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, memberID.String(),
+			dto.MetaUserIDKey, ownerID.String(),
 		))
 
 		pageOne, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
-			Id: org.ID.String(),
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 2,
-			},
+			Id:         orgSuite.Org.ID.String(),
+			Pagination: &corev1.PaginationRequest{Page: 1, Limit: 2},
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(pageOne.OrganizationMemberships) != 2 {
-			t.Fatalf("expected 2 memberships on page 1 but got %d", len(pageOne.OrganizationMemberships))
-		}
+		require.NoError(t, err)
+		assert.Len(t, pageOne.OrganizationMemberships, 2, "page 1 should have 2 memberships")
 
 		pageTwo, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
-			Id: org.ID.String(),
-			Pagination: &corev1.PaginationRequest{
-				Page:  2,
-				Limit: 2,
-			},
+			Id:         orgSuite.Org.ID.String(),
+			Pagination: &corev1.PaginationRequest{Page: 2, Limit: 2},
 		})
-		if err != nil {
-			t.Fatal(err)
+		require.NoError(t, err)
+		assert.Len(t, pageTwo.OrganizationMemberships, 1, "page 2 should have 1 membership")
+
+		// Verify no overlap
+		pageOneIDs := make(map[string]bool)
+		for _, m := range pageOne.OrganizationMemberships {
+			pageOneIDs[m.Id] = true
 		}
-		if len(pageTwo.OrganizationMemberships) != 1 {
-			t.Fatalf("expected 1 membership on page 2 but got %d", len(pageTwo.OrganizationMemberships))
+		for _, m := range pageTwo.OrganizationMemberships {
+			assert.False(t, pageOneIDs[m.Id], "membership should not appear on both pages")
 		}
 	})
 
-	t.Cleanup(func() {
-		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + ownerID.String(),
-				Relation: permissions.RoleOwner,
-				Object:   "organization:" + org.ID.String(),
-			},
-			{
-				User:     "user:" + adminID.String(),
-				Relation: permissions.RoleAdmin,
-				Object:   "organization:" + org.ID.String(),
-			},
-			{
-				User:     "user:" + memberID.String(),
-				Relation: permissions.RoleMember,
-				Object:   "organization:" + org.ID.String(),
-			},
+	t.Run("member_can_list_memberships", func(t *testing.T) {
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+			dto.MetaUserIDKey, orgSuite.MemberMembership.UserID.String(),
+		))
+
+		res, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
+			Id:         orgSuite.Org.ID.String(),
+			Pagination: &corev1.PaginationRequest{Page: 1, Limit: 50},
 		})
-		q.DeleteOrganizationMembershipHard(context.Background(), memberMembership.ID)
-		q.DeleteOrganizationMembershipHard(context.Background(), adminMembership.ID)
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
+
+		require.NoError(t, err)
+		assert.NotEmpty(t, res.OrganizationMemberships, "member should be able to list memberships")
 	})
 }
 
 func Test_GetOrganizationMembershipsByOrgID_Integration_Failure(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
-
-	ctx := context.Background()
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 
 	ownerID := uuid.New()
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	testCases := []struct {
+		name          string
+		setupContext  func() context.Context
+		orgID         string
+		pagination    *corev1.PaginationRequest
+		expectedError string
+	}{
 		{
-			User:     "user:" + ownerID.String(),
-			Relation: permissions.RoleOwner,
-			Object:   "organization:" + org.ID.String(),
+			name: "missing_user_metadata_returns_internal_error",
+			setupContext: func() context.Context {
+				return context.Background()
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeInternal),
 		},
-	}); appErr != nil {
-		t.Fatal(appErr)
+		{
+			name: "invalid_organization_id_format_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         "invalid-org-id",
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_pagination_page_zero_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: 0, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_pagination_negative_page_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: -1, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_pagination_limit_zero_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 0},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "pagination_limit_exceeds_maximum_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 1000},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "user_without_organization_permission_returns_permission_denied",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, uuid.New().String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodePermissionDenied),
+		},
+		{
+			name: "non_existent_organization_id_returns_not_found",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         uuid.New().String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeNotFound),
+		},
 	}
 
-	t.Run("Without user metadata", func(t *testing.T) {
-		_, err := service.GetOrganizationMembershipsByOrgID(context.Background(), &corev1.IDWithPaginationReq{
-			Id: org.ID.String(),
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			_, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
+				Id:         tc.orgID,
+				Pagination: tc.pagination,
+			})
+
+			require.Error(t, err, "expected error for test case: %s", tc.name)
+			assert.Contains(t, err.Error(), tc.expectedError,
+				"expected error type %s, got %v", tc.expectedError, err)
 		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
-			t.Errorf("expected internal error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid organization id", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
-			Id: "invalid-id",
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid pagination", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
-			Id: org.ID.String(),
-			Pagination: &corev1.PaginationRequest{
-				Page:  0,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("Without organization permission", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, uuid.NewString(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
-			Id: org.ID.String(),
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodePermissionDenied)) {
-			t.Errorf("expected permission denied error, got %s", err.Error())
-		}
-	})
-
-	t.Cleanup(func() {
-		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + ownerID.String(),
-				Relation: permissions.RoleOwner,
-				Object:   "organization:" + org.ID.String(),
-			},
-		})
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
-	})
+	}
 }
 
-func Test_GetOrganizationMembershipsByRole_Integration_Success(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+// =============================================================================
+// GetOrganizationMembershipsByRole Tests
+// =============================================================================
 
-	ctx := context.Background()
+func Test_GetOrganizationMembershipsByRole_Integration_Success(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 
 	ownerID := uuid.New()
 	adminID := uuid.New()
 	memberID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+	orgSuite.CreateAdmin(t, adminID)
+	orgSuite.CreateMember(t, memberID)
 
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	adminMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
-		UserID:         adminID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleAdmin,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	memberMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
-		UserID:         memberID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleMember,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+	testCases := []struct {
+		name          string
+		userID        string
+		filterRole    string
+		expectedID    string
+		expectedCount int
+	}{
 		{
-			User:     "user:" + ownerID.String(),
-			Relation: permissions.RoleOwner,
-			Object:   "organization:" + org.ID.String(),
+			name:          "owner_can_filter_admin_memberships",
+			userID:        ownerID.String(),
+			filterRole:    permissions.RoleAdmin,
+			expectedID:    orgSuite.AdminMembership.ID.String(),
+			expectedCount: 1,
 		},
 		{
-			User:     "user:" + adminID.String(),
-			Relation: permissions.RoleAdmin,
-			Object:   "organization:" + org.ID.String(),
+			name:          "owner_can_filter_member_memberships",
+			userID:        ownerID.String(),
+			filterRole:    permissions.RoleMember,
+			expectedID:    orgSuite.MemberMembership.ID.String(),
+			expectedCount: 1,
 		},
 		{
-			User:     "user:" + memberID.String(),
-			Relation: permissions.RoleMember,
-			Object:   "organization:" + org.ID.String(),
+			name:          "owner_can_filter_owner_memberships",
+			userID:        ownerID.String(),
+			filterRole:    permissions.RoleOwner,
+			expectedID:    orgSuite.OwnerMembership.ID.String(),
+			expectedCount: 1,
 		},
-	}); appErr != nil {
-		t.Fatal(appErr)
+		{
+			name:          "admin_can_filter_member_memberships",
+			userID:        orgSuite.AdminMembership.UserID.String(),
+			filterRole:    permissions.RoleMember,
+			expectedID:    orgSuite.MemberMembership.ID.String(),
+			expectedCount: 1,
+		},
+		{
+			name:          "member_can_filter_their_own_role",
+			userID:        orgSuite.MemberMembership.UserID.String(),
+			filterRole:    permissions.RoleMember,
+			expectedID:    orgSuite.MemberMembership.ID.String(),
+			expectedCount: 1,
+		},
 	}
 
-	t.Run("Owner can filter admin memberships", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+				dto.MetaUserIDKey, tc.userID,
+			))
 
-		res, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
-			OrganizationId: org.ID.String(),
-			Role:           permissions.RoleAdmin,
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
+			res, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
+				OrganizationId: orgSuite.Org.ID.String(),
+				Role:           tc.filterRole,
+				Pagination: &corev1.PaginationRequest{
+					Page:  1,
+					Limit: 50,
+				},
+			})
+
+			require.NoError(t, err)
+			require.Len(t, res.OrganizationMemberships, tc.expectedCount,
+				"expected %d membership(s) for role %s", tc.expectedCount, tc.filterRole)
+			assert.Equal(t, tc.expectedID, res.OrganizationMemberships[0].Id,
+				"membership ID mismatch for role %s", tc.filterRole)
 		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(res.OrganizationMemberships) != 1 {
-			t.Fatalf("expected 1 admin membership but got %d", len(res.OrganizationMemberships))
-		}
-		if res.OrganizationMemberships[0].Id != adminMembership.ID.String() {
-			t.Errorf("expected admin membership id to be %s but got %s", adminMembership.ID.String(), res.OrganizationMemberships[0].Id)
-		}
-	})
-
-	t.Run("Member can filter member memberships", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, memberID.String(),
-		))
-
-		res, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
-			OrganizationId: org.ID.String(),
-			Role:           permissions.RoleMember,
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(res.OrganizationMemberships) != 1 {
-			t.Fatalf("expected 1 member membership but got %d", len(res.OrganizationMemberships))
-		}
-		if res.OrganizationMemberships[0].Id != memberMembership.ID.String() {
-			t.Errorf("expected member membership id to be %s but got %s", memberMembership.ID.String(), res.OrganizationMemberships[0].Id)
-		}
-	})
-
-	t.Cleanup(func() {
-		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + ownerID.String(),
-				Relation: permissions.RoleOwner,
-				Object:   "organization:" + org.ID.String(),
-			},
-			{
-				User:     "user:" + adminID.String(),
-				Relation: permissions.RoleAdmin,
-				Object:   "organization:" + org.ID.String(),
-			},
-			{
-				User:     "user:" + memberID.String(),
-				Relation: permissions.RoleMember,
-				Object:   "organization:" + org.ID.String(),
-			},
-		})
-		q.DeleteOrganizationMembershipHard(context.Background(), memberMembership.ID)
-		q.DeleteOrganizationMembershipHard(context.Background(), adminMembership.ID)
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
-	})
+	}
 }
 
 func Test_GetOrganizationMembershipsByRole_Integration_Failure(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
-
-	ctx := context.Background()
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 
 	ownerID := uuid.New()
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	testCases := []struct {
+		name          string
+		setupContext  func() context.Context
+		orgID         string
+		role          string
+		pagination    *corev1.PaginationRequest
+		expectedError string
+	}{
 		{
-			User:     "user:" + ownerID.String(),
-			Relation: permissions.RoleOwner,
-			Object:   "organization:" + org.ID.String(),
+			name: "missing_user_metadata_returns_internal_error",
+			setupContext: func() context.Context {
+				return context.Background()
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			role:          permissions.RoleOwner,
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeInternal),
 		},
-	}); appErr != nil {
-		t.Fatal(appErr)
+		{
+			name: "invalid_organization_id_format_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         "invalid-org-id",
+			role:          permissions.RoleOwner,
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_pagination_page_zero_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			role:          permissions.RoleOwner,
+			pagination:    &corev1.PaginationRequest{Page: 0, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_role_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			role:          "invalid_role",
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "user_without_permission_returns_permission_denied",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, uuid.New().String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			role:          permissions.RoleOwner,
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodePermissionDenied),
+		},
+		{
+			name: "non_existent_organization_returns_not_found",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         uuid.New().String(),
+			role:          permissions.RoleOwner,
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeNotFound),
+		},
 	}
 
-	t.Run("Without user metadata", func(t *testing.T) {
-		_, err := service.GetOrganizationMembershipsByRole(context.Background(), &orgmembershipv1.GetOrgMembershipsByRoleReq{
-			OrganizationId: org.ID.String(),
-			Role:           permissions.RoleOwner,
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			_, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
+				OrganizationId: tc.orgID,
+				Role:           tc.role,
+				Pagination:     tc.pagination,
+			})
+
+			require.Error(t, err, "expected error for test case: %s", tc.name)
+			assert.Contains(t, err.Error(), tc.expectedError,
+				"expected error type %s, got %v", tc.expectedError, err)
 		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
-			t.Errorf("expected internal error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid organization id", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
-			OrganizationId: "invalid-id",
-			Role:           permissions.RoleOwner,
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid pagination", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
-			OrganizationId: org.ID.String(),
-			Role:           permissions.RoleOwner,
-			Pagination: &corev1.PaginationRequest{
-				Page:  0,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("Without organization permission", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, uuid.NewString(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByRole(ctx, &orgmembershipv1.GetOrgMembershipsByRoleReq{
-			OrganizationId: org.ID.String(),
-			Role:           permissions.RoleOwner,
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodePermissionDenied)) {
-			t.Errorf("expected permission denied error, got %s", err.Error())
-		}
-	})
-
-	t.Cleanup(func() {
-		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + ownerID.String(),
-				Relation: permissions.RoleOwner,
-				Object:   "organization:" + org.ID.String(),
-			},
-		})
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
-	})
+	}
 }
 
-func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+// =============================================================================
+// GetOrganizationMembershipsByStatus Tests
+// =============================================================================
 
-	ctx := context.Background()
+func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 
 	ownerID := uuid.New()
 	adminID := uuid.New()
 	memberID := uuid.New()
 
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	adminMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	// Create admin and member manually to control statuses
+	adminMembership, err := suite.Q.CreateOrganizationMembership(suite.Ctx, db.CreateOrganizationMembershipParams{
 		UserID:         adminID,
-		OrganizationID: org.ID,
+		OrganizationID: orgSuite.Org.ID,
 		Role:           permissions.RoleAdmin,
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	memberMembership, err := q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+	require.NoError(t, err)
+
+	memberMembership, err := suite.Q.CreateOrganizationMembership(suite.Ctx, db.CreateOrganizationMembershipParams{
 		UserID:         memberID,
-		OrganizationID: org.ID,
+		OrganizationID: orgSuite.Org.ID,
 		Role:           permissions.RoleMember,
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	adminMembership, err = q.UpdateOrganizationMembershipStatus(ctx, db.UpdateOrganizationMembershipStatusParams{
+	// Update admin status to suspended
+	adminMembership, err = suite.Q.UpdateOrganizationMembershipStatus(suite.Ctx, db.UpdateOrganizationMembershipStatusParams{
 		ID:     adminMembership.ID,
 		Status: "suspended",
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := q.DeleteOrganizationMembership(ctx, db.DeleteOrganizationMembershipParams{
+	require.NoError(t, err)
+
+	// Delete member membership
+	err = suite.Q.DeleteOrganizationMembership(suite.Ctx, db.DeleteOrganizationMembershipParams{
 		ID:        memberMembership.ID,
-		DeletedBy: ownerID,
-	}); err != nil {
-		t.Fatal(err)
-	}
-
-	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
-		{
-			User:     "user:" + ownerID.String(),
-			Relation: permissions.RoleOwner,
-			Object:   "organization:" + org.ID.String(),
-		},
-		{
-			User:     "user:" + adminID.String(),
-			Relation: permissions.RoleAdmin,
-			Object:   "organization:" + org.ID.String(),
-		},
-		{
-			User:     "user:" + memberID.String(),
-			Relation: permissions.RoleMember,
-			Object:   "organization:" + org.ID.String(),
-		},
-	}); appErr != nil {
-		t.Fatal(appErr)
-	}
-
-	t.Run("Owner can filter suspended memberships", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		res, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
-			OrganizationId: org.ID.String(),
-			Status:         "suspended",
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(res.OrganizationMemberships) != 1 {
-			t.Fatalf("expected 1 suspended membership but got %d", len(res.OrganizationMemberships))
-		}
-		if res.OrganizationMemberships[0].Id != adminMembership.ID.String() {
-			t.Errorf("expected suspended membership id to be %s but got %s", adminMembership.ID.String(), res.OrganizationMemberships[0].Id)
-		}
+		DeletedBy: orgSuite.OwnerMembership.ID,
 	})
+	require.NoError(t, err)
 
-	t.Run("Owner can filter deleted memberships", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		res, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
-			OrganizationId: org.ID.String(),
-			Status:         "deleted",
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(res.OrganizationMemberships) != 1 {
-			t.Fatalf("expected 1 deleted membership but got %d", len(res.OrganizationMemberships))
-		}
-		if res.OrganizationMemberships[0].Id != memberMembership.ID.String() {
-			t.Errorf("expected deleted membership id to be %s but got %s", memberMembership.ID.String(), res.OrganizationMemberships[0].Id)
-		}
+	// Write FGA tuples
+	appErr := suite.TuppleManager.Write(suite.Ctx, []client.ClientTupleKey{
+		{User: "user:" + adminID.String(), Relation: permissions.RoleAdmin, Object: "organization:" + orgSuite.Org.ID.String()},
+		{User: "user:" + memberID.String(), Relation: permissions.RoleMember, Object: "organization:" + orgSuite.Org.ID.String()},
 	})
+	require.Nil(t, appErr)
 
 	t.Cleanup(func() {
-		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + ownerID.String(),
-				Relation: permissions.RoleOwner,
-				Object:   "organization:" + org.ID.String(),
-			},
-			{
-				User:     "user:" + adminID.String(),
-				Relation: permissions.RoleAdmin,
-				Object:   "organization:" + org.ID.String(),
-			},
-			{
-				User:     "user:" + memberID.String(),
-				Relation: permissions.RoleMember,
-				Object:   "organization:" + org.ID.String(),
-			},
+		suite.TuppleManager.Delete(suite.Ctx, []client.ClientTupleKeyWithoutCondition{
+			{User: "user:" + adminID.String(), Relation: permissions.RoleAdmin, Object: "organization:" + orgSuite.Org.ID.String()},
+			{User: "user:" + memberID.String(), Relation: permissions.RoleMember, Object: "organization:" + orgSuite.Org.ID.String()},
 		})
-		q.DeleteOrganizationMembershipHard(context.Background(), memberMembership.ID)
-		q.DeleteOrganizationMembershipHard(context.Background(), adminMembership.ID)
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
+		suite.Q.DeleteOrganizationMembershipHard(suite.Ctx, memberMembership.ID)
+		suite.Q.DeleteOrganizationMembershipHard(suite.Ctx, adminMembership.ID)
 	})
+
+	testCases := []struct {
+		name          string
+		status        string
+		expectedID    string
+		expectedCount int
+	}{
+		{
+			name:          "owner_can_filter_suspended_memberships",
+			status:        "suspended",
+			expectedID:    adminMembership.ID.String(),
+			expectedCount: 1,
+		},
+		{
+			name:          "owner_can_filter_deleted_memberships",
+			status:        "left",
+			expectedID:    memberMembership.ID.String(),
+			expectedCount: 1,
+		},
+		{
+			name:          "owner_can_filter_active_memberships",
+			status:        "active",
+			expectedID:    orgSuite.OwnerMembership.ID.String(),
+			expectedCount: 1, // Only owner is active
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+				dto.MetaUserIDKey, ownerID.String(),
+			))
+
+			res, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
+				OrganizationId: orgSuite.Org.ID.String(),
+				Status:         tc.status,
+				Pagination: &corev1.PaginationRequest{
+					Page:  1,
+					Limit: 50,
+				},
+			})
+
+			require.NoError(t, err)
+			require.Len(t, res.OrganizationMemberships, tc.expectedCount,
+				"expected %d membership(s) with status %s", tc.expectedCount, tc.status)
+
+			if tc.expectedCount == 1 {
+				assert.Equal(t, tc.expectedID, res.OrganizationMemberships[0].Id,
+					"membership ID mismatch for status %s", tc.status)
+			}
+		})
+	}
 }
 
 func Test_GetOrganizationMembershipsByStatus_Integration_Failure(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
-	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
-
-	ctx := context.Background()
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
 
 	ownerID := uuid.New()
-	org := servicetestutils.MustCreateOrg(ctx, q, &organizationv1.CreateOrganizationRequest{CreatedBy: ownerID.String()})
-	ownerMembership, err := q.CreateOrganizationMembershipOwner(ctx, db.CreateOrganizationMembershipOwnerParams{
-		UserID:         ownerID,
-		OrganizationID: org.ID,
-		Role:           permissions.RoleOwner,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if appErr := tuppleManager.Write(ctx, []client.ClientTupleKey{
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	testCases := []struct {
+		name          string
+		setupContext  func() context.Context
+		orgID         string
+		status        string
+		pagination    *corev1.PaginationRequest
+		expectedError string
+	}{
 		{
-			User:     "user:" + ownerID.String(),
-			Relation: permissions.RoleOwner,
-			Object:   "organization:" + org.ID.String(),
+			name: "missing_user_metadata_returns_internal_error",
+			setupContext: func() context.Context {
+				return context.Background()
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			status:        "active",
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeInternal),
 		},
-	}); appErr != nil {
-		t.Fatal(appErr)
+		{
+			name: "invalid_organization_id_format_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         "invalid-org-id",
+			status:        "active",
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_pagination_page_zero_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			status:        "active",
+			pagination:    &corev1.PaginationRequest{Page: 0, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "invalid_status_returns_validation_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			status:        "invalid_status",
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeValidation),
+		},
+		{
+			name: "user_without_permission_returns_permission_denied",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, uuid.New().String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			status:        "active",
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodePermissionDenied),
+		},
+		{
+			name: "non_existent_organization_returns_not_found",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         uuid.New().String(),
+			status:        "active",
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeNotFound),
+		},
 	}
 
-	t.Run("Without user metadata", func(t *testing.T) {
-		_, err := service.GetOrganizationMembershipsByStatus(context.Background(), &orgmembershipv1.GetOrgMembershipsByStatusReq{
-			OrganizationId: org.ID.String(),
-			Status:         "active",
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			_, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
+				OrganizationId: tc.orgID,
+				Status:         tc.status,
+				Pagination:     tc.pagination,
+			})
+
+			require.Error(t, err, "expected error for test case: %s", tc.name)
+			assert.Contains(t, err.Error(), tc.expectedError,
+				"expected error type %s, got %v", tc.expectedError, err)
 		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
-			t.Errorf("expected internal error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid organization id", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
-			OrganizationId: "invalid-id",
-			Status:         "active",
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("With invalid pagination", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, ownerID.String(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
-			OrganizationId: org.ID.String(),
-			Status:         "active",
-			Pagination: &corev1.PaginationRequest{
-				Page:  0,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-			t.Errorf("expected validation error, got %s", err.Error())
-		}
-	})
-
-	t.Run("Without organization permission", func(t *testing.T) {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-			dto.MetaUserIDKey, uuid.NewString(),
-		))
-
-		_, err := service.GetOrganizationMembershipsByStatus(ctx, &orgmembershipv1.GetOrgMembershipsByStatusReq{
-			OrganizationId: org.ID.String(),
-			Status:         "active",
-			Pagination: &corev1.PaginationRequest{
-				Page:  1,
-				Limit: 50,
-			},
-		})
-		if err == nil {
-			t.Fatal("expected error, got nil")
-		}
-		if !strings.Contains(err.Error(), string(apperror.CodePermissionDenied)) {
-			t.Errorf("expected permission denied error, got %s", err.Error())
-		}
-	})
-
-	t.Cleanup(func() {
-		_ = tuppleManager.Delete(context.Background(), []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + ownerID.String(),
-				Relation: permissions.RoleOwner,
-				Object:   "organization:" + org.ID.String(),
-			},
-		})
-		q.DeleteOrganizationMembershipHard(context.Background(), ownerMembership.ID)
-		q.DeleteOrganizationHard(context.Background(), org.ID)
-		pool.Close()
-	})
+	}
 }

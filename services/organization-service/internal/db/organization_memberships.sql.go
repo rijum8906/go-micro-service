@@ -15,11 +15,11 @@ const CheckOrganizationMembershipExists = `-- name: CheckOrganizationMembershipE
 
 SELECT EXISTS (
     SELECT 1 FROM organization_memberships
-    WHERE id = $1 AND status != 'deleted'
+    WHERE id = $1 AND status != 'left'
 )
 `
 
-// NOTE: get and update methods must use "status != 'deleted'"
+// NOTE: get and update methods must use "status != 'left'"
 func (q *Queries) CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error) {
 	row := q.db.QueryRow(ctx, CheckOrganizationMembershipExists, id)
 	var exists bool
@@ -93,7 +93,7 @@ func (q *Queries) CreateOrganizationMembershipOwner(ctx context.Context, arg Cre
 
 const DeleteOrganizationMembership = `-- name: DeleteOrganizationMembership :exec
 UPDATE organization_memberships
-SET status = 'deleted', deleted_by = $2, deleted_at = now()
+SET status = 'left', deleted_by = $2, deleted_at = now()
 WHERE id = $1
 `
 
@@ -119,7 +119,7 @@ func (q *Queries) DeleteOrganizationMembershipHard(ctx context.Context, id uuid.
 
 const GetOrganizationMembership = `-- name: GetOrganizationMembership :one
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
-WHERE id = $1 AND status != 'deleted'
+WHERE id = $1 AND status != 'left'
 `
 
 func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error) {
@@ -143,7 +143,7 @@ func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (
 
 const GetOrganizationMembershipByIDAndUserID = `-- name: GetOrganizationMembershipByIDAndUserID :one
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
-WHERE id = $1 AND user_id = $2 AND status != 'deleted'
+WHERE id = $1 AND user_id = $2 AND status != 'left'
 `
 
 type GetOrganizationMembershipByIDAndUserIDParams struct {
@@ -172,7 +172,7 @@ func (q *Queries) GetOrganizationMembershipByIDAndUserID(ctx context.Context, ar
 
 const GetOrganizationMembershipsByOrgID = `-- name: GetOrganizationMembershipsByOrgID :many
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
-WHERE organization_id = $1 AND status != 'deleted'
+WHERE organization_id = $1 AND status != 'left'
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
 
@@ -216,7 +216,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgID(ctx context.Context, arg Get
 
 const GetOrganizationMembershipsByOrgIDAndRole = `-- name: GetOrganizationMembershipsByOrgIDAndRole :many
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
-WHERE organization_id = $1 AND role = $2 AND status != 'deleted'
+WHERE organization_id = $1 AND role = $2 AND status != 'left'
 ORDER BY created_at DESC LIMIT $3 OFFSET $4
 `
 
@@ -277,7 +277,7 @@ type GetOrganizationMembershipsByOrgIDAndStatusParams struct {
 	Offset         int32
 }
 
-// NOTE: this method also return deleted so do not use "status != 'deleted'"
+// NOTE: this method also return deleted so do not use "status != 'left'"
 func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error) {
 	rows, err := q.db.Query(ctx, GetOrganizationMembershipsByOrgIDAndStatus,
 		arg.OrganizationID,
@@ -317,7 +317,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context
 
 const GetOrganizationMembershipsByUserID = `-- name: GetOrganizationMembershipsByUserID :many
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
-WHERE user_id = $1 AND status != 'deleted'
+WHERE user_id = $1 AND status != 'left'
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
 
@@ -362,7 +362,7 @@ func (q *Queries) GetOrganizationMembershipsByUserID(ctx context.Context, arg Ge
 const UpdateOrganizationMembershipRole = `-- name: UpdateOrganizationMembershipRole :one
 UPDATE organization_memberships
 SET role = $2
-WHERE id = $1 AND status != 'deleted'
+WHERE id = $1 AND status != 'left'
 RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
 `
 
@@ -393,7 +393,7 @@ func (q *Queries) UpdateOrganizationMembershipRole(ctx context.Context, arg Upda
 const UpdateOrganizationMembershipStatus = `-- name: UpdateOrganizationMembershipStatus :one
 UPDATE organization_memberships
 SET status = $2
-WHERE id = $1 AND status != 'deleted'
+WHERE id = $1 AND status != 'left'
 RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
 `
 

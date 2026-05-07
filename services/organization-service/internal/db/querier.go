@@ -16,7 +16,7 @@ type Querier interface {
 	CheckOrganizationExists(ctx context.Context, id uuid.UUID) (bool, error)
 	// NOTE: exists check methods must not use 'deleted_at IS NULL'
 	CheckOrganizationExistsBySlug(ctx context.Context, slug string) (bool, error)
-	// NOTE: get and update methods must use "status != 'deleted'"
+	// NOTE: get and update methods must use "status != 'left'"
 	CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error)
 	//
 	CreateOrganization(ctx context.Context, arg CreateOrganizationParams) (Organization, error)
@@ -34,7 +34,7 @@ type Querier interface {
 	GetOrganizationMembershipByIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByIDAndUserIDParams) (OrganizationMembership, error)
 	GetOrganizationMembershipsByOrgID(ctx context.Context, arg GetOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndRoleParams) ([]OrganizationMembership, error)
-	// NOTE: this method also return deleted so do not use "status != 'deleted'"
+	// NOTE: this method also return deleted so do not use "status != 'left'"
 	GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error)
 	GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrganizationsByCreatedByParams) ([]Organization, error)

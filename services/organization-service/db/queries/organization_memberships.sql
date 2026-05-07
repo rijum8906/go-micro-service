@@ -11,38 +11,38 @@ INSERT INTO organization_memberships (
     RETURNING *;
 
 
--- NOTE: get and update methods must use "status != 'deleted'"
+-- NOTE: get and update methods must use "status != 'left'"
 
 -- name: CheckOrganizationMembershipExists :one
 SELECT EXISTS (
     SELECT 1 FROM organization_memberships
-    WHERE id = $1 AND status != 'deleted'
+    WHERE id = $1 AND status != 'left'
 );
 
 -- name: GetOrganizationMembership :one
 SELECT * FROM organization_memberships
-WHERE id = $1 AND status != 'deleted';
+WHERE id = $1 AND status != 'left';
 
 -- name: GetOrganizationMembershipByIDAndUserID :one
 SELECT * FROM organization_memberships
-WHERE id = $1 AND user_id = $2 AND status != 'deleted';
+WHERE id = $1 AND user_id = $2 AND status != 'left';
 
 -- name: GetOrganizationMembershipsByUserID :many
 SELECT * FROM organization_memberships
-WHERE user_id = $1 AND status != 'deleted'
+WHERE user_id = $1 AND status != 'left'
 ORDER BY created_at DESC LIMIT $2 OFFSET $3;
 
 -- name: GetOrganizationMembershipsByOrgID :many
 SELECT * FROM organization_memberships
-WHERE organization_id = $1 AND status != 'deleted'
+WHERE organization_id = $1 AND status != 'left'
 ORDER BY created_at DESC LIMIT $2 OFFSET $3;
 
 -- name: GetOrganizationMembershipsByOrgIDAndRole :many
 SELECT * FROM organization_memberships
-WHERE organization_id = $1 AND role = $2 AND status != 'deleted'
+WHERE organization_id = $1 AND role = $2 AND status != 'left'
 ORDER BY created_at DESC LIMIT $3 OFFSET $4;
 
--- NOTE: this method also return deleted so do not use "status != 'deleted'"
+-- NOTE: this method also return deleted so do not use "status != 'left'"
 -- name: GetOrganizationMembershipsByOrgIDAndStatus :many
 SELECT * FROM organization_memberships
 WHERE organization_id = $1 AND status = $2
@@ -51,18 +51,18 @@ ORDER BY created_at DESC LIMIT $3 OFFSET $4;
 -- name: UpdateOrganizationMembershipRole :one
 UPDATE organization_memberships
 SET role = $2
-WHERE id = $1 AND status != 'deleted'
+WHERE id = $1 AND status != 'left'
 RETURNING *;
 
 -- name: UpdateOrganizationMembershipStatus :one
 UPDATE organization_memberships
 SET status = $2
-WHERE id = $1 AND status != 'deleted'
+WHERE id = $1 AND status != 'left'
 RETURNING *;
 
 -- name: DeleteOrganizationMembership :exec
 UPDATE organization_memberships
-SET status = 'deleted', deleted_by = $2, deleted_at = now()
+SET status = 'left', deleted_by = $2, deleted_at = now()
 WHERE id = $1;
 
 -- name: DeleteOrganizationMembershipHard :exec
