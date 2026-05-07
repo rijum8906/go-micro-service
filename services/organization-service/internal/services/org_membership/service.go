@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
@@ -324,8 +326,57 @@ func (s *orgMembershipService) GetOrganizationMembership(ctx context.Context, re
 
 // ############################ INVITATION FLOW ############################
 
-func (s *orgMembershipService) SendInvitation(ctx context.Context, req *corev1.IDRequest) (*corev1.SuccessResponse, error) {
-	return nil, nil
+func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_membershipv1.SendInvitationRequest) (*corev1.SuccessResponse, error) {
+	// 0. Validate request
+	if appErr := protoutils.ValidateSendInvitationReq(req); appErr != nil {
+		return nil, appErr
+	}
+	emailReq := &corev1.EmailRequest{
+		Email: req.Email,
+	}
+
+	// 1. Authenticate and extract User Identity
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("reason", "missing user metadata")
+	}
+	inviteBy, err := uuid.Parse(userInfo.UserID)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithDetail("reason", "failed to parse user id").WithDetail("error", err.Error())
+	}
+
+	// 2. Check if email exists
+	exits, err := s.userClient.CheckEmailExists(ctx, emailReq)
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithDetail("error", err.Error())
+	}
+	if !exits.Exists {
+		return nil, apperror.ErrNotFound.WithMessage("email not found")
+	}
+
+	// 2. Create an invitation
+	tokenHash, appErr := s.hashService.Generate(32)
+	if appErr != nil {
+		return nil, appErr
+	}
+	_, err = s.q.CreateOrganizationInvitation(ctx, db.CreateOrganizationInvitationParams{
+		Email:          req.Email,
+		OrganizationID: uuid.MustParse(req.OrganizationId),
+		Role:           req.Role,
+		InvitedBy:      inviteBy,
+		TokenHash:      tokenHash,
+		ExpiresAt: pgtype.Timestamptz{
+			Time:  time.Now().Add(time.Hour * 24 * time.Duration(s.config.InvitationTokenTTL)),
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithDetail("error", "failed to create invitation").WithDetail("db_error", err.Error())
+	}
+
+	return &corev1.SuccessResponse{
+		Success: true,
+	}, nil
 }
 
 func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1.IDRequest) (*corev1.SuccessResponse, error) {

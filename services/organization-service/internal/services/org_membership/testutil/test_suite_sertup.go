@@ -30,7 +30,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	fgaClient := testutils.MustConnectFGAClient()
 	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
 	q := db.New(pool)
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient, nil)
 
 	ctx := context.Background()
 
