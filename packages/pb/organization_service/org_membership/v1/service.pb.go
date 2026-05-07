@@ -25,15 +25,15 @@ var File_organization_service_org_membership_v1_service_proto protoreflect.FileD
 
 const file_organization_service_org_membership_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"4organization_service/org_membership/v1/service.proto\x12&organization_service.org_membership.v1\x1a\x14core/v1/common.proto\x1a4organization_service/org_membership/v1/request.proto\x1a5organization_service/org_membership/v1/response.proto2\x90\v\n" +
+	"4organization_service/org_membership/v1/service.proto\x12&organization_service.org_membership.v1\x1a\x14core/v1/common.proto\x1a4organization_service/org_membership/v1/request.proto\x1a5organization_service/org_membership/v1/response.proto2\xb8\v\n" +
 	"\x1dOrganizationMembershipService\x12m\n" +
 	"\x10GetMyMemberships\x12\x1a.core.v1.PaginationRequest\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12_\n" +
 	"\x0fGetMyMembership\x12\x12.core.v1.IDRequest\x1a8.organization_service.org_membership.v1.OrgMembershipRes\x12\x80\x01\n" +
 	"!GetOrganizationMembershipsByOrgID\x12\x1c.core.v1.IDWithPaginationReq\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12\xa5\x01\n" +
 	" GetOrganizationMembershipsByRole\x12B.organization_service.org_membership.v1.GetOrgMembershipsByRoleReq\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12\xa9\x01\n" +
 	"\"GetOrganizationMembershipsByStatus\x12D.organization_service.org_membership.v1.GetOrgMembershipsByStatusReq\x1a=.organization_service.org_membership.v1.OrgMembershipsListRes\x12i\n" +
-	"\x19GetOrganizationMembership\x12\x12.core.v1.IDRequest\x1a8.organization_service.org_membership.v1.OrgMembershipRes\x12A\n" +
-	"\x0eSendInvitation\x12\x15.core.v1.EmailRequest\x1a\x18.core.v1.SuccessResponse\x12@\n" +
+	"\x19GetOrganizationMembership\x12\x12.core.v1.IDRequest\x1a8.organization_service.org_membership.v1.OrgMembershipRes\x12i\n" +
+	"\x0eSendInvitation\x12=.organization_service.org_membership.v1.SendInvitationRequest\x1a\x18.core.v1.SuccessResponse\x12@\n" +
 	"\x10AcceptInvitation\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12A\n" +
 	"\x11DeclineInvitation\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12A\n" +
 	"\x11LeaveOrganization\x12\x12.core.v1.IDRequest\x1a\x18.core.v1.SuccessResponse\x12\x84\x01\n" +
@@ -48,7 +48,7 @@ var file_organization_service_org_membership_v1_service_proto_goTypes = []any{
 	(*v1.IDWithPaginationReq)(nil),       // 2: core.v1.IDWithPaginationReq
 	(*GetOrgMembershipsByRoleReq)(nil),   // 3: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq
 	(*GetOrgMembershipsByStatusReq)(nil), // 4: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
-	(*v1.EmailRequest)(nil),              // 5: core.v1.EmailRequest
+	(*SendInvitationRequest)(nil),        // 5: organization_service.org_membership.v1.SendInvitationRequest
 	(*ChangeOrgMembershipStatusReq)(nil), // 6: organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
 	(*ChangeOrgMembershipRoleReq)(nil),   // 7: organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
 	(*OrgMembershipsListRes)(nil),        // 8: organization_service.org_membership.v1.OrgMembershipsListRes
@@ -62,7 +62,7 @@ var file_organization_service_org_membership_v1_service_proto_depIdxs = []int32{
 	3,  // 3: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByRole:input_type -> organization_service.org_membership.v1.GetOrgMembershipsByRoleReq
 	4,  // 4: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembershipsByStatus:input_type -> organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
 	1,  // 5: organization_service.org_membership.v1.OrganizationMembershipService.GetOrganizationMembership:input_type -> core.v1.IDRequest
-	5,  // 6: organization_service.org_membership.v1.OrganizationMembershipService.SendInvitation:input_type -> core.v1.EmailRequest
+	5,  // 6: organization_service.org_membership.v1.OrganizationMembershipService.SendInvitation:input_type -> organization_service.org_membership.v1.SendInvitationRequest
 	1,  // 7: organization_service.org_membership.v1.OrganizationMembershipService.AcceptInvitation:input_type -> core.v1.IDRequest
 	1,  // 8: organization_service.org_membership.v1.OrganizationMembershipService.DeclineInvitation:input_type -> core.v1.IDRequest
 	1,  // 9: organization_service.org_membership.v1.OrganizationMembershipService.LeaveOrganization:input_type -> core.v1.IDRequest

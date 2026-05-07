@@ -18,7 +18,7 @@ service OrganizationMembershipService {
   rpc GetOrganizationMembership(core.v1.IDRequest) returns (OrgMembershipRes);
 
   // ############################# INVITATION FLOW ############################
-  rpc SendInvitation(core.v1.EmailRequest) returns (core.v1.SuccessResponse);
+  rpc SendInvitation(SendInvitationRequest) returns (core.v1.SuccessResponse);
   rpc AcceptInvitation(core.v1.IDRequest) returns (core.v1.SuccessResponse);
   rpc DeclineInvitation(core.v1.IDRequest) returns (core.v1.SuccessResponse);
 
