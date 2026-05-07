@@ -965,3 +965,108 @@ func Test_GetOrganizationMembershipsByStatus_Integration_Failure(t *testing.T) {
 		})
 	}
 }
+
+// =============================================================================
+// GetOrganizationMembership Tests
+// =============================================================================
+
+func Test_GetOrganizationMembership_Integration_Failure(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	ownerID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	// Create a deleted membership for testing
+	deletedMemberID := uuid.New()
+	deletedMembership, _ := suite.Q.CreateOrganizationMembership(suite.Ctx, db.CreateOrganizationMembershipParams{
+		UserID:         deletedMemberID,
+		OrganizationID: orgSuite.Org.ID,
+		Role:           permissions.RoleMember,
+	})
+	suite.Q.DeleteOrganizationMembership(suite.Ctx, db.DeleteOrganizationMembershipParams{
+		ID:        deletedMembership.ID,
+		DeletedBy: orgSuite.OwnerMembership.ID,
+	})
+
+	testCases := []struct {
+		name          string
+		setupContext  func() context.Context
+		requestID     string
+		expectedError string
+	}{
+		{
+			name: "missing_user_metadata",
+			setupContext: func() context.Context {
+				return context.Background()
+			},
+			requestID:     orgSuite.OwnerMembership.ID.String(),
+			expectedError: string(apperror.CodeInternal),
+		},
+		{
+			name: "non_existent_membership_id",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			requestID:     uuid.New().String(),
+			expectedError: string(apperror.CodeNotFound),
+		},
+		{
+			name: "deleted_membership",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			requestID:     deletedMembership.ID.String(),
+			expectedError: string(apperror.CodeNotFound),
+		},
+		{
+			name: "invalid_user_id_in_metadata",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, "invalid-uuid",
+				))
+			},
+			requestID:     orgSuite.OwnerMembership.ID.String(),
+			expectedError: string(apperror.CodePermissionDenied),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			_, err := service.GetOrganizationMembership(ctx, &corev1.IDRequest{
+				Id: tc.requestID,
+			})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tc.expectedError)
+		})
+	}
+}
+
+func Test_GetOrganizationMembership_Integration_Success(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	// Create organization
+	ownerID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+		dto.MetaUserIDKey, ownerID.String(),
+	))
+
+	membership, err := service.GetOrganizationMembership(ctx, &corev1.IDRequest{
+		Id: orgSuite.OwnerMembership.ID.String(),
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, orgSuite.OwnerMembership.ID.String(), membership.Id)
+	assert.Equal(t, permissions.RoleOwner, membership.Role)
+	assert.Equal(t, orgSuite.Org.ID.String(), membership.OrganizationId)
+}

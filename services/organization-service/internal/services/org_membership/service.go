@@ -281,7 +281,45 @@ func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Co
 }
 
 func (s *orgMembershipService) GetOrganizationMembership(ctx context.Context, req *corev1.IDRequest) (*org_membershipv1.OrgMembershipRes, error) {
-	return nil, nil
+	// 0. Validate Pagination
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid request body")
+	}
+	orgMemID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid organization id")
+	}
+
+	// 1. Authenticate and extract User Identity
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("reason", "missing user metadata")
+	}
+
+	// 2. Get the membership
+	membership, err := s.q.GetOrganizationMembership(ctx, orgMemID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("membership not found")
+		}
+		return nil, apperror.ErrInternal.WithDetail("error", "failed to fetch membership").WithDetail("db_error", err.Error())
+	}
+
+	// 3. Check permission via openfga
+	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+		User:     "user:" + userInfo.UserID,
+		Relation: permissions.PermissionCanViewMember,
+		Object:   "organization:" + membership.OrganizationID.String(),
+	})
+	if appErr != nil {
+		return nil, appErr
+	}
+	if !*checkRes.Allowed {
+		return nil, apperror.ErrPermissionDenied.WithMessage("user does not have permission to view this organization")
+	}
+
+	// 4. Parse and return result
+	return utils.MapOrgMembershipRes(&membership), nil
 }
 
 // ############################ INVITATION FLOW ############################
