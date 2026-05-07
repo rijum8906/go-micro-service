@@ -1,6 +1,8 @@
 package protoutils
 
 import (
+	"net/mail"
+
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/token"
@@ -49,6 +51,29 @@ func ValidateIDAndScopedTokenReq(req *corev1.IDAndScopedTokenRequest) *apperror.
 	// Validate Token Scope
 	if !token.ValidateTokenScope(req.TokenScope) {
 		return apperror.ErrValidation.WithMessage("token scope must be provided")
+	}
+
+	return nil
+}
+
+// ValidateEmailReq ensures the email is not empty and a proper email
+func ValidateEmailReq(req *corev1.EmailRequest) *apperror.AppError {
+	if req == nil {
+		return apperror.ErrValidation.WithMessage("request body cannot be nil")
+	}
+
+	if req.Email == "" {
+		return apperror.ErrValidation.WithMessage("email cannot be empty")
+	}
+
+	if len(req.Email) > 254 {
+		return apperror.ErrValidation.WithMessage("email exceeds maximum length of 254 characters")
+	}
+
+	// Use Go's built-in email parser
+	_, err := mail.ParseAddress(req.Email)
+	if err != nil {
+		return apperror.ErrValidation.WithMessage("invalid email format: " + err.Error())
 	}
 
 	return nil
