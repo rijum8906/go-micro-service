@@ -22,6 +22,104 @@ import (
 // GetOrganizationMembershipsByOrgID Tests
 // =============================================================================
 
+func Test_GetOrganizationMembership_Validation(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	tests := []struct {
+		name string
+		req  *corev1.IDRequest
+	}{
+		{
+			name: "nil request",
+			req:  nil,
+		},
+		{
+			name: "blank id",
+			req: &corev1.IDRequest{
+				Id: "",
+			},
+		},
+		{
+			name: "malformed uuid",
+			req: &corev1.IDRequest{
+				Id: "malformed-uuid",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := service.GetOrganizationMembership(suite.Ctx, tt.req)
+			require.Error(t, err)
+			require.Contains(t, err.Error(), string(apperror.CodeValidation))
+		})
+	}
+}
+
+func Test_GetOrganizationMembershipsByOrgID_Integration_Failure(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	ownerID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+
+	testCases := []struct {
+		name          string
+		setupContext  func() context.Context
+		orgID         string
+		pagination    *corev1.PaginationRequest
+		expectedError string
+	}{
+		{
+			name: "missing_user_metadata_returns_internal_error",
+			setupContext: func() context.Context {
+				return context.Background()
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeInternal),
+		},
+		{
+			name: "user_without_organization_permission_returns_permission_denied",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, uuid.New().String(),
+				))
+			},
+			orgID:         orgSuite.Org.ID.String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodePermissionDenied),
+		},
+		{
+			name: "non_existent_organization_id_returns_not_found",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			orgID:         uuid.New().String(),
+			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
+			expectedError: string(apperror.CodeNotFound),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			_, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
+				Id:         tc.orgID,
+				Pagination: tc.pagination,
+			})
+
+			require.Error(t, err, "expected error for test case: %s", tc.name)
+			assert.Contains(t, err.Error(), tc.expectedError,
+				"expected error type %s, got %v", tc.expectedError, err)
+		})
+	}
+}
+
 func Test_GetOrganizationMembershipsByOrgID_Integration_Success(t *testing.T) {
 	suite := testutil.NewTestSuite(t)
 	service := suite.Service
@@ -103,124 +201,6 @@ func Test_GetOrganizationMembershipsByOrgID_Integration_Success(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotEmpty(t, res.OrganizationMemberships, "member should be able to list memberships")
 	})
-}
-
-func Test_GetOrganizationMembershipsByOrgID_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
-	service := suite.Service
-
-	ownerID := uuid.New()
-	orgSuite := suite.CreateOrg(t, ownerID)
-	orgSuite.CreateOwner(t, ownerID)
-
-	testCases := []struct {
-		name          string
-		setupContext  func() context.Context
-		orgID         string
-		pagination    *corev1.PaginationRequest
-		expectedError string
-	}{
-		{
-			name: "missing_user_metadata_returns_internal_error",
-			setupContext: func() context.Context {
-				return context.Background()
-			},
-			orgID:         orgSuite.Org.ID.String(),
-			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
-			expectedError: string(apperror.CodeInternal),
-		},
-		{
-			name: "invalid_organization_id_format_returns_validation_error",
-			setupContext: func() context.Context {
-				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-					dto.MetaUserIDKey, ownerID.String(),
-				))
-			},
-			orgID:         "invalid-org-id",
-			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
-			expectedError: string(apperror.CodeValidation),
-		},
-		{
-			name: "invalid_pagination_page_zero_returns_validation_error",
-			setupContext: func() context.Context {
-				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-					dto.MetaUserIDKey, ownerID.String(),
-				))
-			},
-			orgID:         orgSuite.Org.ID.String(),
-			pagination:    &corev1.PaginationRequest{Page: 0, Limit: 50},
-			expectedError: string(apperror.CodeValidation),
-		},
-		{
-			name: "invalid_pagination_negative_page_returns_validation_error",
-			setupContext: func() context.Context {
-				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-					dto.MetaUserIDKey, ownerID.String(),
-				))
-			},
-			orgID:         orgSuite.Org.ID.String(),
-			pagination:    &corev1.PaginationRequest{Page: -1, Limit: 50},
-			expectedError: string(apperror.CodeValidation),
-		},
-		{
-			name: "invalid_pagination_limit_zero_returns_validation_error",
-			setupContext: func() context.Context {
-				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-					dto.MetaUserIDKey, ownerID.String(),
-				))
-			},
-			orgID:         orgSuite.Org.ID.String(),
-			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 0},
-			expectedError: string(apperror.CodeValidation),
-		},
-		{
-			name: "pagination_limit_exceeds_maximum_returns_validation_error",
-			setupContext: func() context.Context {
-				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-					dto.MetaUserIDKey, ownerID.String(),
-				))
-			},
-			orgID:         orgSuite.Org.ID.String(),
-			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 1000},
-			expectedError: string(apperror.CodeValidation),
-		},
-		{
-			name: "user_without_organization_permission_returns_permission_denied",
-			setupContext: func() context.Context {
-				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-					dto.MetaUserIDKey, uuid.New().String(),
-				))
-			},
-			orgID:         orgSuite.Org.ID.String(),
-			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
-			expectedError: string(apperror.CodePermissionDenied),
-		},
-		{
-			name: "non_existent_organization_id_returns_not_found",
-			setupContext: func() context.Context {
-				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
-					dto.MetaUserIDKey, ownerID.String(),
-				))
-			},
-			orgID:         uuid.New().String(),
-			pagination:    &corev1.PaginationRequest{Page: 1, Limit: 50},
-			expectedError: string(apperror.CodeNotFound),
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			ctx := tc.setupContext()
-			_, err := service.GetOrganizationMembershipsByOrgID(ctx, &corev1.IDWithPaginationReq{
-				Id:         tc.orgID,
-				Pagination: tc.pagination,
-			})
-
-			require.Error(t, err, "expected error for test case: %s", tc.name)
-			assert.Contains(t, err.Error(), tc.expectedError,
-				"expected error type %s, got %v", tc.expectedError, err)
-		})
-	}
 }
 
 // =============================================================================

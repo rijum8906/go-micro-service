@@ -11,6 +11,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/metadata"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/protoutils"
+	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
@@ -21,6 +22,7 @@ import (
 // Execution Flow:
 //   - Validate request parameters (ID and scoped token)
 //   - Authenticate and extract user identity from context
+//   - Validate scoped token
 //   - Retrieve organization membership by ID
 //   - Verify the authenticated user owns this membership
 //   - Check if user has already left (idempotency)
@@ -86,13 +88,12 @@ func (s *orgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}
 
-	// 2. Parse and retrieve organization membership by ID
-	membershipID, err := uuid.Parse(req.Id)
-	if err != nil {
-		return nil, apperror.ErrValidation.WithMessage("invalid membership id")
+	// 2. Validate token scope
+	if req.TokenScope != string(token.TokenScopeLeaveOrganization) {
+		return nil, apperror.ErrPermissionDenied.WithMessage("invalid token scope")
 	}
 
-	membership, err := s.q.GetOrganizationMembership(ctx, membershipID)
+	membership, err := s.q.GetOrganizationMembership(ctx, uuid.MustParse(req.Id))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperror.ErrNotFound.WithMessage("membership not found")

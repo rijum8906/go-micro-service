@@ -20,7 +20,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	if err := godotenv.Load("../../../../.env"); err != nil {
+	if err := godotenv.Load("../../../.env"); err != nil {
 		if err := godotenv.Load("../../.env.test"); err != nil {
 			if os.Getenv("CI") == "" {
 				panic("No .env file found")

@@ -233,6 +233,50 @@ func (x *IDRequest) GetId() string {
 	return ""
 }
 
+type TokenHashRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TokenHash     string                 `protobuf:"bytes,1,opt,name=token_hash,json=tokenHash,proto3" json:"token_hash,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TokenHashRequest) Reset() {
+	*x = TokenHashRequest{}
+	mi := &file_core_v1_common_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TokenHashRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TokenHashRequest) ProtoMessage() {}
+
+func (x *TokenHashRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_common_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TokenHashRequest.ProtoReflect.Descriptor instead.
+func (*TokenHashRequest) Descriptor() ([]byte, []int) {
+	return file_core_v1_common_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *TokenHashRequest) GetTokenHash() string {
+	if x != nil {
+		return x.TokenHash
+	}
+	return ""
+}
+
 type IDAndScopedTokenRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TokenScope    string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
@@ -243,7 +287,7 @@ type IDAndScopedTokenRequest struct {
 
 func (x *IDAndScopedTokenRequest) Reset() {
 	*x = IDAndScopedTokenRequest{}
-	mi := &file_core_v1_common_proto_msgTypes[5]
+	mi := &file_core_v1_common_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -255,7 +299,7 @@ func (x *IDAndScopedTokenRequest) String() string {
 func (*IDAndScopedTokenRequest) ProtoMessage() {}
 
 func (x *IDAndScopedTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[5]
+	mi := &file_core_v1_common_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -268,7 +312,7 @@ func (x *IDAndScopedTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IDAndScopedTokenRequest.ProtoReflect.Descriptor instead.
 func (*IDAndScopedTokenRequest) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{5}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *IDAndScopedTokenRequest) GetTokenScope() string {
@@ -295,7 +339,7 @@ type PaginationRequest struct {
 
 func (x *PaginationRequest) Reset() {
 	*x = PaginationRequest{}
-	mi := &file_core_v1_common_proto_msgTypes[6]
+	mi := &file_core_v1_common_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -307,7 +351,7 @@ func (x *PaginationRequest) String() string {
 func (*PaginationRequest) ProtoMessage() {}
 
 func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[6]
+	mi := &file_core_v1_common_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -320,7 +364,7 @@ func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaginationRequest.ProtoReflect.Descriptor instead.
 func (*PaginationRequest) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{6}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *PaginationRequest) GetPage() int32 {
@@ -347,7 +391,7 @@ type IDWithPaginationReq struct {
 
 func (x *IDWithPaginationReq) Reset() {
 	*x = IDWithPaginationReq{}
-	mi := &file_core_v1_common_proto_msgTypes[7]
+	mi := &file_core_v1_common_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -359,7 +403,7 @@ func (x *IDWithPaginationReq) String() string {
 func (*IDWithPaginationReq) ProtoMessage() {}
 
 func (x *IDWithPaginationReq) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[7]
+	mi := &file_core_v1_common_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -372,7 +416,7 @@ func (x *IDWithPaginationReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IDWithPaginationReq.ProtoReflect.Descriptor instead.
 func (*IDWithPaginationReq) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{7}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *IDWithPaginationReq) GetId() string {
@@ -402,7 +446,10 @@ const file_core_v1_common_proto_rawDesc = "" +
 	"\fEmailRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"\x1b\n" +
 	"\tIDRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"J\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"1\n" +
+	"\x10TokenHashRequest\x12\x1d\n" +
+	"\n" +
+	"token_hash\x18\x01 \x01(\tR\ttokenHash\"J\n" +
 	"\x17IDAndScopedTokenRequest\x12\x1f\n" +
 	"\vtoken_scope\x18\x01 \x01(\tR\n" +
 	"tokenScope\x12\x0e\n" +
@@ -429,19 +476,20 @@ func file_core_v1_common_proto_rawDescGZIP() []byte {
 	return file_core_v1_common_proto_rawDescData
 }
 
-var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_core_v1_common_proto_goTypes = []any{
 	(*RequestMetadata)(nil),         // 0: core.v1.RequestMetadata
 	(*EmptyRequest)(nil),            // 1: core.v1.EmptyRequest
 	(*SuccessResponse)(nil),         // 2: core.v1.SuccessResponse
 	(*EmailRequest)(nil),            // 3: core.v1.EmailRequest
 	(*IDRequest)(nil),               // 4: core.v1.IDRequest
-	(*IDAndScopedTokenRequest)(nil), // 5: core.v1.IDAndScopedTokenRequest
-	(*PaginationRequest)(nil),       // 6: core.v1.PaginationRequest
-	(*IDWithPaginationReq)(nil),     // 7: core.v1.IDWithPaginationReq
+	(*TokenHashRequest)(nil),        // 5: core.v1.TokenHashRequest
+	(*IDAndScopedTokenRequest)(nil), // 6: core.v1.IDAndScopedTokenRequest
+	(*PaginationRequest)(nil),       // 7: core.v1.PaginationRequest
+	(*IDWithPaginationReq)(nil),     // 8: core.v1.IDWithPaginationReq
 }
 var file_core_v1_common_proto_depIdxs = []int32{
-	6, // 0: core.v1.IDWithPaginationReq.pagination:type_name -> core.v1.PaginationRequest
+	7, // 0: core.v1.IDWithPaginationReq.pagination:type_name -> core.v1.PaginationRequest
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -460,7 +508,7 @@ func file_core_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_v1_common_proto_rawDesc), len(file_core_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

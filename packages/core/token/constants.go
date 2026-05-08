@@ -28,6 +28,7 @@ const (
 	TokenScopeChangeOrganizationOwner TokenScope = "CHANGE_ORG_OWNER"
 	TokenScopeDeleteOrganization      TokenScope = "DELETE_ORG"
 	TokenScopeArchiveOrganization     TokenScope = "ARCHIVE_ORG"
+	TokenScopeLeaveOrganization       TokenScope = "LEAVE_ORG"
 )
 
 var tokenScopes = []TokenScope{
@@ -47,6 +48,7 @@ var tokenScopes = []TokenScope{
 	TokenScopeChangeOrganizationOwner,
 	TokenScopeDeleteOrganization,
 	TokenScopeArchiveOrganization,
+	TokenScopeLeaveOrganization,
 }
 
 func ValidateTokenScope(token string) bool {

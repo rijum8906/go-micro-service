@@ -19,11 +19,11 @@ service OrganizationMembershipService {
 
   // ############################# INVITATION FLOW ############################
   rpc SendInvitation(SendInvitationRequest) returns (core.v1.SuccessResponse);
-  rpc AcceptInvitation(core.v1.IDRequest) returns (core.v1.SuccessResponse);
-  rpc DeclineInvitation(core.v1.IDRequest) returns (core.v1.SuccessResponse);
+  rpc AcceptInvitation(core.v1.TokenHashRequest) returns (core.v1.SuccessResponse);
+  rpc DeclineInvitation(core.v1.TokenHashRequest) returns (core.v1.SuccessResponse);
 
   // ############################ USER'S MEMBERSHIP MANAGEMENT ############################
-  rpc LeaveOrganization(core.v1.IDRequest) returns (core.v1.SuccessResponse);
+  rpc LeaveOrganization(core.v1.IDAndScopedTokenRequest) returns (core.v1.SuccessResponse);
 
   // ############################ ORGANIZATION'S MEMBERSHIP MANAGEMENT ############################
   rpc ChangeOrganizationMembershipStatus(ChangeOrgMembershipStatusReq) returns (core.v1.SuccessResponse);

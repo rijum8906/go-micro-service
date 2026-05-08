@@ -29,6 +29,61 @@ import (
 // SendInvitation Tests
 // =============================================================================
 
+func Test_SendInvitation_Validation_Failure(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	tests := []struct {
+		name string
+		req  *org_membershipv1.SendInvitationRequest
+	}{
+		{
+			name: "nil request",
+			req:  nil,
+		},
+		{
+			name: "blank organization id",
+			req: &org_membershipv1.SendInvitationRequest{
+				OrganizationId: "",
+				Email:          "user@example.com",
+				Role:           "member",
+			},
+		},
+		{
+			name: "malformed organization id",
+			req: &org_membershipv1.SendInvitationRequest{
+				OrganizationId: "malformed-uuid",
+				Email:          "user@example.com",
+				Role:           "member",
+			},
+		},
+		{
+			name: "blank email",
+			req: &org_membershipv1.SendInvitationRequest{
+				OrganizationId: uuid.NewString(),
+				Email:          "",
+				Role:           "member",
+			},
+		},
+		{
+			name: "invalid email format",
+			req: &org_membershipv1.SendInvitationRequest{
+				OrganizationId: uuid.NewString(),
+				Email:          "not-an-email",
+				Role:           "member",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := service.SendInvitation(suite.Ctx, tt.req)
+			require.Error(t, err)
+			require.Contains(t, err.Error(), string(apperror.CodeValidation))
+		})
+	}
+}
+
 func Test_SendInvitation_Integration_Failure(t *testing.T) {
 	suite := testutil.NewTestSuite(t)
 	service := suite.Service
