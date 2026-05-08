@@ -26,6 +26,7 @@ type Querier interface {
 	CreateOrganizationInvitation(ctx context.Context, arg CreateOrganizationInvitationParams) (OrganizationInvitation, error)
 	CreateOrganizationMembership(ctx context.Context, arg CreateOrganizationMembershipParams) (OrganizationMembership, error)
 	CreateOrganizationMembershipOwner(ctx context.Context, arg CreateOrganizationMembershipOwnerParams) (OrganizationMembership, error)
+	DeclineOrganizationInvitation(ctx context.Context, arg DeclineOrganizationInvitationParams) (OrganizationInvitation, error)
 	DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error
 	DeleteOrganizationHard(ctx context.Context, id uuid.UUID) error
 	DeleteOrganizationInvitation(ctx context.Context, id uuid.UUID) error
@@ -47,7 +48,6 @@ type Querier interface {
 	GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error)
 	GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrganizationsByCreatedByParams) ([]Organization, error)
-	RejectOrganizationInvitation(ctx context.Context, arg RejectOrganizationInvitationParams) (OrganizationInvitation, error)
 	RevokeOrganizationInvitation(ctx context.Context, arg RevokeOrganizationInvitationParams) (OrganizationInvitation, error)
 	// NOTE: update methods must use 'deleted_at IS NULL'
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error)

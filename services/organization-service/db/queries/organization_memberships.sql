@@ -62,7 +62,7 @@ RETURNING *;
 
 -- name: DeleteOrganizationMembership :exec
 UPDATE organization_memberships
-SET status = 'left', deleted_by = $2, deleted_at = now()
+SET status = 'left', deleted_by_mem_id = $2, deleted_at = now()
 WHERE id = $1;
 
 -- name: DeleteOrganizationMembershipHard :exec

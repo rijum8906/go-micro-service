@@ -1,6 +1,6 @@
 -- name: CreateOrganizationInvitation :one
 INSERT INTO organization_invitations (
-    organization_id, email, role, invited_by, token_hash, expires_at
+    organization_id, email, role, invited_by_mem_id, token_hash, expires_at
 ) VALUES ( $1, $2, $3, $4, $5, $6)
     RETURNING *;
 
@@ -47,7 +47,7 @@ RETURNING *;
 
 -- name: RevokeOrganizationInvitation :one
 UPDATE organization_invitations
-SET status = 'revoked', revoked_by = $2, revoked_at = now()
+SET status = 'revoked', revoked_by_mem_id = $2, revoked_at = now()
 WHERE id = $1
 RETURNING *;
 

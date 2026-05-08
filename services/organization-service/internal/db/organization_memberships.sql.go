@@ -31,7 +31,7 @@ const CreateOrganizationMembership = `-- name: CreateOrganizationMembership :one
 INSERT INTO organization_memberships (
     user_id, organization_id, role
 ) VALUES ( $1, $2, $3 )
-    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
 `
 
 type CreateOrganizationMembershipParams struct {
@@ -54,7 +54,7 @@ func (q *Queries) CreateOrganizationMembership(ctx context.Context, arg CreateOr
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.DeletedBy,
+		&i.DeletedByMemID,
 	)
 	return i, err
 }
@@ -63,7 +63,7 @@ const CreateOrganizationMembershipOwner = `-- name: CreateOrganizationMembership
 INSERT INTO organization_memberships (
     user_id, organization_id, role
 ) VALUES ( $1, $2, $3 )
-    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
 `
 
 type CreateOrganizationMembershipOwnerParams struct {
@@ -86,24 +86,24 @@ func (q *Queries) CreateOrganizationMembershipOwner(ctx context.Context, arg Cre
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.DeletedBy,
+		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const DeleteOrganizationMembership = `-- name: DeleteOrganizationMembership :exec
 UPDATE organization_memberships
-SET status = 'left', deleted_by = $2, deleted_at = now()
+SET status = 'left', deleted_by_mem_id = $2, deleted_at = now()
 WHERE id = $1
 `
 
 type DeleteOrganizationMembershipParams struct {
-	ID        uuid.UUID
-	DeletedBy uuid.UUID
+	ID             uuid.UUID
+	DeletedByMemID uuid.UUID
 }
 
 func (q *Queries) DeleteOrganizationMembership(ctx context.Context, arg DeleteOrganizationMembershipParams) error {
-	_, err := q.db.Exec(ctx, DeleteOrganizationMembership, arg.ID, arg.DeletedBy)
+	_, err := q.db.Exec(ctx, DeleteOrganizationMembership, arg.ID, arg.DeletedByMemID)
 	return err
 }
 
@@ -118,7 +118,7 @@ func (q *Queries) DeleteOrganizationMembershipHard(ctx context.Context, id uuid.
 }
 
 const GetOrganizationMembership = `-- name: GetOrganizationMembership :one
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
 WHERE id = $1 AND status != 'left'
 `
 
@@ -136,13 +136,13 @@ func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.DeletedBy,
+		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const GetOrganizationMembershipByOrgIDAndUserID = `-- name: GetOrganizationMembershipByOrgIDAndUserID :one
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
 WHERE organization_id = $1 AND user_id = $2 AND status != 'left'
 `
 
@@ -165,13 +165,13 @@ func (q *Queries) GetOrganizationMembershipByOrgIDAndUserID(ctx context.Context,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.DeletedBy,
+		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const GetOrganizationMembershipsByOrgID = `-- name: GetOrganizationMembershipsByOrgID :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
 WHERE organization_id = $1 AND status != 'left'
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
@@ -202,7 +202,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgID(ctx context.Context, arg Get
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
-			&i.DeletedBy,
+			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -215,7 +215,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgID(ctx context.Context, arg Get
 }
 
 const GetOrganizationMembershipsByOrgIDAndRole = `-- name: GetOrganizationMembershipsByOrgIDAndRole :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
 WHERE organization_id = $1 AND role = $2 AND status != 'left'
 ORDER BY created_at DESC LIMIT $3 OFFSET $4
 `
@@ -252,7 +252,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, 
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
-			&i.DeletedBy,
+			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -265,7 +265,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, 
 }
 
 const GetOrganizationMembershipsByOrgIDAndStatus = `-- name: GetOrganizationMembershipsByOrgIDAndStatus :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
 WHERE organization_id = $1 AND status = $2
 ORDER BY created_at DESC LIMIT $3 OFFSET $4
 `
@@ -303,7 +303,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
-			&i.DeletedBy,
+			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -316,7 +316,7 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context
 }
 
 const GetOrganizationMembershipsByUserID = `-- name: GetOrganizationMembershipsByUserID :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
 WHERE user_id = $1 AND status != 'left'
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
@@ -347,7 +347,7 @@ func (q *Queries) GetOrganizationMembershipsByUserID(ctx context.Context, arg Ge
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
-			&i.DeletedBy,
+			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -363,7 +363,7 @@ const UpdateOrganizationMembershipRole = `-- name: UpdateOrganizationMembershipR
 UPDATE organization_memberships
 SET role = $2
 WHERE id = $1 AND status != 'left'
-RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
 `
 
 type UpdateOrganizationMembershipRoleParams struct {
@@ -385,7 +385,7 @@ func (q *Queries) UpdateOrganizationMembershipRole(ctx context.Context, arg Upda
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.DeletedBy,
+		&i.DeletedByMemID,
 	)
 	return i, err
 }
@@ -394,7 +394,7 @@ const UpdateOrganizationMembershipStatus = `-- name: UpdateOrganizationMembershi
 UPDATE organization_memberships
 SET status = $2
 WHERE id = $1 AND status != 'left'
-RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by
+RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
 `
 
 type UpdateOrganizationMembershipStatusParams struct {
@@ -416,7 +416,7 @@ func (q *Queries) UpdateOrganizationMembershipStatus(ctx context.Context, arg Up
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
-		&i.DeletedBy,
+		&i.DeletedByMemID,
 	)
 	return i, err
 }

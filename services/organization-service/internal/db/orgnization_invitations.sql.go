@@ -14,18 +14,18 @@ import (
 
 const AccecptOrganizationInvitation = `-- name: AccecptOrganizationInvitation :one
 UPDATE organization_invitations
-SET status = 'accepted', accepted_by = $2, accepted_at = now()
+SET status = 'accepted', responded_by = $2, responded_at = now(), response = 'accept'
 WHERE id = $1
-RETURNING id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at
+RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
 `
 
 type AccecptOrganizationInvitationParams struct {
-	ID         uuid.UUID
-	AcceptedBy uuid.UUID
+	ID          uuid.UUID
+	RespondedBy uuid.UUID
 }
 
 func (q *Queries) AccecptOrganizationInvitation(ctx context.Context, arg AccecptOrganizationInvitationParams) (OrganizationInvitation, error) {
-	row := q.db.QueryRow(ctx, AccecptOrganizationInvitation, arg.ID, arg.AcceptedBy)
+	row := q.db.QueryRow(ctx, AccecptOrganizationInvitation, arg.ID, arg.RespondedBy)
 	var i OrganizationInvitation
 	err := row.Scan(
 		&i.ID,
@@ -33,14 +33,13 @@ func (q *Queries) AccecptOrganizationInvitation(ctx context.Context, arg Accecpt
 		&i.Email,
 		&i.Role,
 		&i.Status,
-		&i.InvitedBy,
+		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.AcceptedBy,
-		&i.AcceptedAt,
-		&i.RejectedBy,
-		&i.RejectedAt,
-		&i.RevokedBy,
+		&i.RespondedBy,
+		&i.RespondedAt,
+		&i.Response,
+		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
 	)
@@ -77,16 +76,16 @@ func (q *Queries) CheckOrganizationInvitationExistsByTokenHash(ctx context.Conte
 
 const CreateOrganizationInvitation = `-- name: CreateOrganizationInvitation :one
 INSERT INTO organization_invitations (
-    organization_id, email, role, invited_by, token_hash, expires_at
+    organization_id, email, role, invited_by_mem_id, token_hash, expires_at
 ) VALUES ( $1, $2, $3, $4, $5, $6)
-    RETURNING id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at
+    RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
 `
 
 type CreateOrganizationInvitationParams struct {
 	OrganizationID uuid.UUID
 	Email          string
 	Role           string
-	InvitedBy      uuid.UUID
+	InvitedByMemID uuid.UUID
 	TokenHash      string
 	ExpiresAt      pgtype.Timestamptz
 }
@@ -96,7 +95,7 @@ func (q *Queries) CreateOrganizationInvitation(ctx context.Context, arg CreateOr
 		arg.OrganizationID,
 		arg.Email,
 		arg.Role,
-		arg.InvitedBy,
+		arg.InvitedByMemID,
 		arg.TokenHash,
 		arg.ExpiresAt,
 	)
@@ -107,14 +106,46 @@ func (q *Queries) CreateOrganizationInvitation(ctx context.Context, arg CreateOr
 		&i.Email,
 		&i.Role,
 		&i.Status,
-		&i.InvitedBy,
+		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.AcceptedBy,
-		&i.AcceptedAt,
-		&i.RejectedBy,
-		&i.RejectedAt,
-		&i.RevokedBy,
+		&i.RespondedBy,
+		&i.RespondedAt,
+		&i.Response,
+		&i.RevokedByMemID,
+		&i.RevokedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const DeclineOrganizationInvitation = `-- name: DeclineOrganizationInvitation :one
+UPDATE organization_invitations SET status = 'declined', responded_by = $2, responded_at = now(), response = 'decline'
+WHERE id = $1
+RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
+`
+
+type DeclineOrganizationInvitationParams struct {
+	ID          uuid.UUID
+	RespondedBy uuid.UUID
+}
+
+func (q *Queries) DeclineOrganizationInvitation(ctx context.Context, arg DeclineOrganizationInvitationParams) (OrganizationInvitation, error) {
+	row := q.db.QueryRow(ctx, DeclineOrganizationInvitation, arg.ID, arg.RespondedBy)
+	var i OrganizationInvitation
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.Email,
+		&i.Role,
+		&i.Status,
+		&i.InvitedByMemID,
+		&i.TokenHash,
+		&i.ExpiresAt,
+		&i.RespondedBy,
+		&i.RespondedAt,
+		&i.Response,
+		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
 	)
@@ -132,7 +163,7 @@ func (q *Queries) DeleteOrganizationInvitation(ctx context.Context, id uuid.UUID
 }
 
 const GetOrganizationInvitation = `-- name: GetOrganizationInvitation :one
-SELECT id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at FROM organization_invitations
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
 WHERE id = $1
 `
 
@@ -145,14 +176,13 @@ func (q *Queries) GetOrganizationInvitation(ctx context.Context, id uuid.UUID) (
 		&i.Email,
 		&i.Role,
 		&i.Status,
-		&i.InvitedBy,
+		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.AcceptedBy,
-		&i.AcceptedAt,
-		&i.RejectedBy,
-		&i.RejectedAt,
-		&i.RevokedBy,
+		&i.RespondedBy,
+		&i.RespondedAt,
+		&i.Response,
+		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
 	)
@@ -160,7 +190,7 @@ func (q *Queries) GetOrganizationInvitation(ctx context.Context, id uuid.UUID) (
 }
 
 const GetOrganizationInvitationByTokenHash = `-- name: GetOrganizationInvitationByTokenHash :one
-SELECT id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at FROM organization_invitations
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
 WHERE token_hash = $1
 `
 
@@ -173,14 +203,13 @@ func (q *Queries) GetOrganizationInvitationByTokenHash(ctx context.Context, toke
 		&i.Email,
 		&i.Role,
 		&i.Status,
-		&i.InvitedBy,
+		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.AcceptedBy,
-		&i.AcceptedAt,
-		&i.RejectedBy,
-		&i.RejectedAt,
-		&i.RevokedBy,
+		&i.RespondedBy,
+		&i.RespondedAt,
+		&i.Response,
+		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
 	)
@@ -188,7 +217,7 @@ func (q *Queries) GetOrganizationInvitationByTokenHash(ctx context.Context, toke
 }
 
 const GetOrganizationInvitationsByOrgID = `-- name: GetOrganizationInvitationsByOrgID :many
-SELECT id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at FROM organization_invitations
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
 WHERE organization_id = $1
 ORDER BY created_at DESC LIMIT $2 OFFSET $3
 `
@@ -214,14 +243,13 @@ func (q *Queries) GetOrganizationInvitationsByOrgID(ctx context.Context, arg Get
 			&i.Email,
 			&i.Role,
 			&i.Status,
-			&i.InvitedBy,
+			&i.InvitedByMemID,
 			&i.TokenHash,
 			&i.ExpiresAt,
-			&i.AcceptedBy,
-			&i.AcceptedAt,
-			&i.RejectedBy,
-			&i.RejectedAt,
-			&i.RevokedBy,
+			&i.RespondedBy,
+			&i.RespondedAt,
+			&i.Response,
+			&i.RevokedByMemID,
 			&i.RevokedAt,
 			&i.CreatedAt,
 		); err != nil {
@@ -236,7 +264,7 @@ func (q *Queries) GetOrganizationInvitationsByOrgID(ctx context.Context, arg Get
 }
 
 const GetOrganizationInvitationsByOrgIDAndStatus = `-- name: GetOrganizationInvitationsByOrgIDAndStatus :many
-SELECT id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at FROM organization_invitations
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
 WHERE organization_id = $1 AND status = $2
 ORDER BY created_at DESC LIMIT $3 OFFSET $4
 `
@@ -268,14 +296,13 @@ func (q *Queries) GetOrganizationInvitationsByOrgIDAndStatus(ctx context.Context
 			&i.Email,
 			&i.Role,
 			&i.Status,
-			&i.InvitedBy,
+			&i.InvitedByMemID,
 			&i.TokenHash,
 			&i.ExpiresAt,
-			&i.AcceptedBy,
-			&i.AcceptedAt,
-			&i.RejectedBy,
-			&i.RejectedAt,
-			&i.RevokedBy,
+			&i.RespondedBy,
+			&i.RespondedAt,
+			&i.Response,
+			&i.RevokedByMemID,
 			&i.RevokedAt,
 			&i.CreatedAt,
 		); err != nil {
@@ -289,55 +316,20 @@ func (q *Queries) GetOrganizationInvitationsByOrgIDAndStatus(ctx context.Context
 	return items, nil
 }
 
-const RejectOrganizationInvitation = `-- name: RejectOrganizationInvitation :one
-UPDATE organization_invitations
-SET status = 'rejected', rejected_by = $2, rejected_at = now()
-WHERE id = $1
-RETURNING id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at
-`
-
-type RejectOrganizationInvitationParams struct {
-	ID         uuid.UUID
-	RejectedBy uuid.UUID
-}
-
-func (q *Queries) RejectOrganizationInvitation(ctx context.Context, arg RejectOrganizationInvitationParams) (OrganizationInvitation, error) {
-	row := q.db.QueryRow(ctx, RejectOrganizationInvitation, arg.ID, arg.RejectedBy)
-	var i OrganizationInvitation
-	err := row.Scan(
-		&i.ID,
-		&i.OrganizationID,
-		&i.Email,
-		&i.Role,
-		&i.Status,
-		&i.InvitedBy,
-		&i.TokenHash,
-		&i.ExpiresAt,
-		&i.AcceptedBy,
-		&i.AcceptedAt,
-		&i.RejectedBy,
-		&i.RejectedAt,
-		&i.RevokedBy,
-		&i.RevokedAt,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
 const RevokeOrganizationInvitation = `-- name: RevokeOrganizationInvitation :one
 UPDATE organization_invitations
-SET status = 'revoked', revoked_by = $2, revoked_at = now()
+SET status = 'revoked', revoked_by_mem_id = $2, revoked_at = now()
 WHERE id = $1
-RETURNING id, organization_id, email, role, status, invited_by, token_hash, expires_at, accepted_by, accepted_at, rejected_by, rejected_at, revoked_by, revoked_at, created_at
+RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
 `
 
 type RevokeOrganizationInvitationParams struct {
-	ID        uuid.UUID
-	RevokedBy uuid.UUID
+	ID             uuid.UUID
+	RevokedByMemID uuid.UUID
 }
 
 func (q *Queries) RevokeOrganizationInvitation(ctx context.Context, arg RevokeOrganizationInvitationParams) (OrganizationInvitation, error) {
-	row := q.db.QueryRow(ctx, RevokeOrganizationInvitation, arg.ID, arg.RevokedBy)
+	row := q.db.QueryRow(ctx, RevokeOrganizationInvitation, arg.ID, arg.RevokedByMemID)
 	var i OrganizationInvitation
 	err := row.Scan(
 		&i.ID,
@@ -345,14 +337,13 @@ func (q *Queries) RevokeOrganizationInvitation(ctx context.Context, arg RevokeOr
 		&i.Email,
 		&i.Role,
 		&i.Status,
-		&i.InvitedBy,
+		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.AcceptedBy,
-		&i.AcceptedAt,
-		&i.RejectedBy,
-		&i.RejectedAt,
-		&i.RevokedBy,
+		&i.RespondedBy,
+		&i.RespondedAt,
+		&i.Response,
+		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
 	)
