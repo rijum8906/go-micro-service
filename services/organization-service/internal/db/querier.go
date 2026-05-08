@@ -21,6 +21,7 @@ type Querier interface {
 	CheckOrganizationInvitationExistsByTokenHash(ctx context.Context, tokenHash string) (bool, error)
 	// NOTE: get and update methods must use "status != 'left'"
 	CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error)
+	CountActiveOwnersByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error)
 	//
 	CreateOrganization(ctx context.Context, arg CreateOrganizationParams) (Organization, error)
 	CreateOrganizationInvitation(ctx context.Context, arg CreateOrganizationInvitationParams) (OrganizationInvitation, error)

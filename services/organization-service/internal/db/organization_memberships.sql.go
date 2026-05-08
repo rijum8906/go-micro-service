@@ -27,6 +27,18 @@ func (q *Queries) CheckOrganizationMembershipExists(ctx context.Context, id uuid
 	return exists, err
 }
 
+const CountActiveOwnersByOrgID = `-- name: CountActiveOwnersByOrgID :one
+SELECT COUNT(*) FROM organization_memberships
+WHERE organization_id = $1 AND role = 'owner' AND status != 'left'
+`
+
+func (q *Queries) CountActiveOwnersByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, CountActiveOwnersByOrgID, organizationID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const CreateOrganizationMembership = `-- name: CreateOrganizationMembership :one
 INSERT INTO organization_memberships (
     user_id, organization_id, role

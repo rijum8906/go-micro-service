@@ -104,6 +104,6 @@ type OrganizationTeamMembership struct {
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
 	// Soft delete timestamp. When non-NULL, the member is no longer in the team.
-	DeletedAt pgtype.Timestamptz
-	DeletedBy uuid.UUID
+	DeletedAt          pgtype.Timestamptz
+	DeletedByTeamMemID uuid.UUID
 }

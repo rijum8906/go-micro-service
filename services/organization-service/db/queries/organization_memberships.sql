@@ -48,6 +48,11 @@ SELECT * FROM organization_memberships
 WHERE organization_id = $1 AND status = $2
 ORDER BY created_at DESC LIMIT $3 OFFSET $4;
 
+
+-- name: CountActiveOwnersByOrgID :one
+SELECT COUNT(*) FROM organization_memberships
+WHERE organization_id = $1 AND role = 'owner' AND status != 'left';
+
 -- name: UpdateOrganizationMembershipRole :one
 UPDATE organization_memberships
 SET role = $2
