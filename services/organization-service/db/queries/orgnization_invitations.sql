@@ -36,13 +36,12 @@ SELECT EXISTS (
 
 -- name: AccecptOrganizationInvitation :one
 UPDATE organization_invitations
-SET status = 'accepted', accepted_by = $2, accepted_at = now()
+SET status = 'accepted', responded_by = $2, responded_at = now(), response = 'accept'
 WHERE id = $1
 RETURNING *;
 
--- name: RejectOrganizationInvitation :one
-UPDATE organization_invitations
-SET status = 'rejected', rejected_by = $2, rejected_at = now()
+-- name: DeclineOrganizationInvitation :one
+UPDATE organization_invitations SET status = 'declined', responded_by = $2, responded_at = now(), response = 'decline'
 WHERE id = $1
 RETURNING *;
 
