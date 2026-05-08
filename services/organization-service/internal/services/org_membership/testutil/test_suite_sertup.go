@@ -15,8 +15,8 @@ import (
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
 	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
+	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
 	orgmembership "github.com/rijum8906/relay/services/organization-service/internal/services/org_membership"
-	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/services/service_test_utils"
 )
 
 type TestSuite struct {

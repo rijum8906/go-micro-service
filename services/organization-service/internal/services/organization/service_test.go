@@ -21,8 +21,8 @@ import (
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
+	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/organization"
-	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/services/testutils"
 	grpcmetadata "google.golang.org/grpc/metadata"
 )
 
