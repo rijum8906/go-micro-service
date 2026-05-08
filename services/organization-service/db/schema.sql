@@ -61,7 +61,7 @@ CREATE TABLE organization_memberships (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid REFERENCES organization_memberships(id),
+    deleted_by_mem_id uuid REFERENCES organization_memberships(id),
 
     -- Prevents duplicate memberships for the same user in an organization
     CONSTRAINT uq_organization_memberships_org_user UNIQUE (organization_id, user_id)
@@ -95,7 +95,7 @@ CREATE TABLE organization_teams (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,
-    deleted_by uuid REFERENCES organization_memberships(id),
+    deleted_by_mem_id uuid REFERENCES organization_memberships(id),
 
     -- Team names must be unique within an organization (can't have two "Engineering" teams)
     CONSTRAINT uq_organization_teams_org_name UNIQUE (organization_id, name)
@@ -125,7 +125,7 @@ CREATE TABLE organization_team_memberships (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     deleted_at timestamptz,  -- Soft delete: when a member leaves a team
-    deleted_by uuid REFERENCES organization_team_memberships(id),
+    deleted_by_team_mem_id uuid REFERENCES organization_team_memberships(id),
 
     CONSTRAINT fk_organization_team_memberships_team
         FOREIGN KEY (team_id)
@@ -176,13 +176,13 @@ CREATE TABLE organization_invitations (
     role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'pending'
         CHECK (status IN ('pending', 'accepted', 'declined', 'revoked', 'expired')),
-    invited_by uuid NOT NULL REFERENCES organization_memberships(id),
+    invited_by_mem_id uuid NOT NULL REFERENCES organization_memberships(id),
     token_hash varchar(255) UNIQUE NOT NULL,  -- Store hash, not raw token for security
     expires_at timestamptz NOT NULL,           -- Tokens expire after N days
     responded_by uuid,
     responded_at timestamptz,
-    reposonse varchar(30) CHECK (response IN ('accept', 'decline')),
-    revoked_by uuid REFERENCES organization_memberships(id),
+    response varchar(30) CHECK (response IN ('accept', 'decline')),
+    revoked_by_mem_id uuid REFERENCES organization_memberships(id),
     revoked_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now()
 );
