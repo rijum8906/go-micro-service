@@ -175,14 +175,13 @@ CREATE TABLE organization_invitations (
     email varchar(320) NOT NULL,
     role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'pending'
-        CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
+        CHECK (status IN ('pending', 'accepted', 'declined', 'revoked', 'expired')),
     invited_by uuid NOT NULL REFERENCES organization_memberships(id),
     token_hash varchar(255) UNIQUE NOT NULL,  -- Store hash, not raw token for security
     expires_at timestamptz NOT NULL,           -- Tokens expire after N days
-    accepted_by uuid REFERENCES organization_memberships(id),
-    accepted_at timestamptz,
-    rejected_by uuid REFERENCES organization_memberships(id),
-    rejected_at timestamptz,
+    responded_by uuid,
+    responded_at timestamptz,
+    reposonse varchar(30) CHECK (response IN ('accept', 'decline')),
     revoked_by uuid REFERENCES organization_memberships(id),
     revoked_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now()
