@@ -13,6 +13,7 @@ import (
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
+	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	orgmembership "github.com/rijum8906/relay/services/organization-service/internal/services/org_membership"
 	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/services/service_test_utils"
@@ -30,7 +31,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	fgaClient := testutils.MustConnectFGAClient()
 	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
 	q := db.New(pool)
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient, nil)
+	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient, &config.Env{
+		InvitationTokenTTL: 7,
+	})
 
 	ctx := context.Background()
 

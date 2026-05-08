@@ -40,7 +40,7 @@ type Querier interface {
 	GetOrganizationInvitationsByOrgID(ctx context.Context, arg GetOrganizationInvitationsByOrgIDParams) ([]OrganizationInvitation, error)
 	GetOrganizationInvitationsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationInvitationsByOrgIDAndStatusParams) ([]OrganizationInvitation, error)
 	GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error)
-	GetOrganizationMembershipByIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByIDAndUserIDParams) (OrganizationMembership, error)
+	GetOrganizationMembershipByOrgIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByOrgIDAndUserIDParams) (OrganizationMembership, error)
 	GetOrganizationMembershipsByOrgID(ctx context.Context, arg GetOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndRoleParams) ([]OrganizationMembership, error)
 	// NOTE: this method also return deleted so do not use "status != 'left'"

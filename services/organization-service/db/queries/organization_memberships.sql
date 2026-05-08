@@ -23,9 +23,9 @@ SELECT EXISTS (
 SELECT * FROM organization_memberships
 WHERE id = $1 AND status != 'left';
 
--- name: GetOrganizationMembershipByIDAndUserID :one
+-- name: GetOrganizationMembershipByOrgIDAndUserID :one
 SELECT * FROM organization_memberships
-WHERE id = $1 AND user_id = $2 AND status != 'left';
+WHERE organization_id = $1 AND user_id = $2 AND status != 'left';
 
 -- name: GetOrganizationMembershipsByUserID :many
 SELECT * FROM organization_memberships

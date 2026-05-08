@@ -11,10 +11,14 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
+	"github.com/rijum8906/relay/packages/core/testutils"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
 	orgmembershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
+	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/org_membership/testutil"
+	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/services/service_test_utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/metadata"
@@ -1069,4 +1073,102 @@ func Test_GetOrganizationMembership_Integration_Success(t *testing.T) {
 	assert.Equal(t, orgSuite.OwnerMembership.ID.String(), membership.Id)
 	assert.Equal(t, permissions.RoleOwner, membership.Role)
 	assert.Equal(t, orgSuite.Org.ID.String(), membership.OrganizationId)
+}
+
+// =============================================================================
+// SendInvitation Tests
+// =============================================================================
+
+func Test_SendInvitation_Integration_Failure(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	ownerID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+
+	memberID := uuid.New()
+	orgSuite.CreateMember(t, memberID)
+
+	testCases := []struct {
+		name           string
+		setupContext   func() context.Context
+		organizationID string
+		email          string
+		emailExists    bool
+		role           string
+		expectedError  string
+	}{
+		{
+			name:           "whithout_contexted_user_info_returns_error",
+			setupContext:   func() context.Context { return suite.Ctx },
+			organizationID: orgSuite.Org.ID.String(),
+			email:          testutils.GenerateRandomEmail(),
+			emailExists:    true,
+			role:           "intern",
+			expectedError:  string(apperror.CodeInternal),
+		},
+		{
+			name: "non_existing_email_returns_error",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, ownerID.String(),
+				))
+			},
+			organizationID: orgSuite.Org.ID.String(),
+			email:          testutils.GenerateRandomEmail(),
+			emailExists:    false,
+			role:           "intern",
+			expectedError:  string(apperror.CodeNotFound),
+		},
+		{
+			name: "member_cannot_invite_member",
+			setupContext: func() context.Context {
+				return metadata.NewIncomingContext(context.Background(), metadata.Pairs(
+					dto.MetaUserIDKey, memberID.String(),
+				))
+			},
+			organizationID: orgSuite.Org.ID.String(),
+			email:          testutils.GenerateRandomEmail(),
+			emailExists:    true,
+			role:           "member",
+			expectedError:  string(apperror.CodePermissionDenied),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := tc.setupContext()
+			servicetestutils.MockUserServiceClient.On("CheckEmailExists", ctx, &corev1.EmailRequest{Email: tc.email}).Return(&userv1.CheckExistsResponse{Exists: tc.emailExists}, nil)
+			_, err := service.SendInvitation(ctx, &org_membershipv1.SendInvitationRequest{
+				Email:          tc.email,
+				Role:           tc.role,
+				OrganizationId: tc.organizationID,
+			})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tc.expectedError)
+		})
+	}
+}
+
+func Test_SendInvitation_Integration_Success(t *testing.T) {
+	suite := testutil.NewTestSuite(t)
+	service := suite.Service
+
+	ownerID := uuid.New()
+	orgSuite := suite.CreateOrg(t, ownerID)
+	orgSuite.CreateOwner(t, ownerID)
+	internEmail := testutils.GenerateRandomEmail()
+
+	ctx := metadata.NewIncomingContext(suite.Ctx, metadata.Pairs(
+		dto.MetaUserIDKey, ownerID.String(),
+	))
+
+	servicetestutils.MockUserServiceClient.On("CheckEmailExists", ctx, &corev1.EmailRequest{Email: internEmail}).Return(&userv1.CheckExistsResponse{Exists: true}, nil)
+
+	_, err := service.SendInvitation(ctx, &org_membershipv1.SendInvitationRequest{
+		Email:          internEmail,
+		Role:           "intern",
+		OrganizationId: orgSuite.Org.ID.String(),
+	})
+	require.NoError(t, err)
 }

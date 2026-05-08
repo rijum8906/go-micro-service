@@ -141,18 +141,18 @@ func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (
 	return i, err
 }
 
-const GetOrganizationMembershipByIDAndUserID = `-- name: GetOrganizationMembershipByIDAndUserID :one
+const GetOrganizationMembershipByOrgIDAndUserID = `-- name: GetOrganizationMembershipByOrgIDAndUserID :one
 SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by FROM organization_memberships
-WHERE id = $1 AND user_id = $2 AND status != 'left'
+WHERE organization_id = $1 AND user_id = $2 AND status != 'left'
 `
 
-type GetOrganizationMembershipByIDAndUserIDParams struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
+type GetOrganizationMembershipByOrgIDAndUserIDParams struct {
+	OrganizationID uuid.UUID
+	UserID         uuid.UUID
 }
 
-func (q *Queries) GetOrganizationMembershipByIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByIDAndUserIDParams) (OrganizationMembership, error) {
-	row := q.db.QueryRow(ctx, GetOrganizationMembershipByIDAndUserID, arg.ID, arg.UserID)
+func (q *Queries) GetOrganizationMembershipByOrgIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByOrgIDAndUserIDParams) (OrganizationMembership, error) {
+	row := q.db.QueryRow(ctx, GetOrganizationMembershipByOrgIDAndUserID, arg.OrganizationID, arg.UserID)
 	var i OrganizationMembership
 	err := row.Scan(
 		&i.ID,

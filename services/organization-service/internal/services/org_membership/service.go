@@ -354,7 +354,29 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 		return nil, apperror.ErrNotFound.WithMessage("email not found")
 	}
 
-	// 2. Create an invitation
+	// 3. Check If he has permission to send invitation
+	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+		User:     "user:" + inviteBy.String(),
+		Relation: permissions.PermissionCanAddMember,
+		Object:   "organization:" + req.OrganizationId,
+	})
+	if appErr != nil {
+		return nil, appErr
+	}
+	if !*checkRes.Allowed {
+		return nil, apperror.ErrPermissionDenied.WithMessage("user does not have permission to invite members")
+	}
+
+	// 4. Get This user's membership id
+	membership, err := s.q.GetOrganizationMembershipByOrgIDAndUserID(ctx, db.GetOrganizationMembershipByOrgIDAndUserIDParams{
+		UserID:         inviteBy,
+		OrganizationID: uuid.MustParse(req.OrganizationId),
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithDetail("error", "failed to fetch membership").WithDetail("db_error", err.Error())
+	}
+
+	// 5. Create an invitation
 	tokenHash, appErr := s.hashService.Generate(32)
 	if appErr != nil {
 		return nil, appErr
@@ -363,7 +385,7 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 		Email:          req.Email,
 		OrganizationID: uuid.MustParse(req.OrganizationId),
 		Role:           req.Role,
-		InvitedBy:      inviteBy,
+		InvitedBy:      membership.ID,
 		TokenHash:      tokenHash,
 		ExpiresAt: pgtype.Timestamptz{
 			Time:  time.Now().Add(time.Hour * 24 * time.Duration(s.config.InvitationTokenTTL)),
