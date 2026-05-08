@@ -385,7 +385,7 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 		Email:          req.Email,
 		OrganizationID: uuid.MustParse(req.OrganizationId),
 		Role:           req.Role,
-		InvitedBy:      membership.ID,
+		InvitedByMemID: membership.ID,
 		TokenHash:      tokenHash,
 		ExpiresAt: pgtype.Timestamptz{
 			Time:  time.Now().Add(time.Hour * 24 * time.Duration(s.config.InvitationTokenTTL)),
@@ -401,12 +401,145 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 	}, nil
 }
 
-func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1.IDRequest) (*corev1.SuccessResponse, error) {
-	return nil, nil
+func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1.TokenHashRequest) (*corev1.SuccessResponse, error) {
+	// 0. Validate request parameters
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("request body cannot be nil")
+	}
+	if req.TokenHash == "" {
+		return nil, apperror.ErrValidation.WithMessage("token hash cannot be empty")
+	}
+
+	// 1. Authenticate and extract user identity from context
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
+	}
+
+	// Fetch user details from user service to get email for validation
+	user, err := s.userClient.GetUser(ctx, &corev1.EmptyRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Retrieve invitation using the provided token hash
+	invitation, err := s.q.GetOrganizationInvitationByTokenHash(ctx, req.TokenHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("invitation not found or already expired")
+		}
+		return nil, apperror.ErrInternal.WithMessage("failed to fetch invitation").WithDetail("db_error", err.Error())
+	}
+
+	// 3. Validate invitation is still valid
+	// Check if invitation has expired
+	if time.Now().After(invitation.ExpiresAt.Time) {
+		return nil, apperror.ErrValidation.WithMessage("invitation has expired")
+	}
+	// Check if invitation is still in pending state (not accepted or cancelled)
+	if invitation.Status != "pending" {
+		return nil, apperror.ErrNotFound.WithMessage("invitation not found")
+	}
+
+	// 4. Verify the authenticated user's email matches the invitation recipient
+	if invitation.Email != user.Email {
+		return nil, apperror.ErrPermissionDenied.WithMessage("this invitation was sent to a different email address")
+	}
+
+	// 5. Create organization membership for the user
+	_, err = s.q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+		UserID:         uuid.MustParse(userInfo.UserID),
+		OrganizationID: invitation.OrganizationID,
+		Role:           invitation.Role,
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to create organization membership").WithDetail("db_error", err.Error())
+	}
+
+	// 6. Add user permissions to OpenFGA
+	if appErr := s.tuppleManager.Write(ctx, []client.ClientTupleKey{
+		{
+			User:     "user:" + userInfo.UserID,
+			Relation: permissions.RoleMember,
+			Object:   "organization:" + invitation.OrganizationID.String(),
+		},
+	}); appErr != nil {
+		return nil, appErr
+	}
+
+	// 7. Mark the invitation as accepted
+	_, err = s.q.AccecptOrganizationInvitation(ctx, db.AccecptOrganizationInvitationParams{
+		ID:          invitation.ID,
+		RespondedBy: uuid.MustParse(userInfo.UserID),
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to accept invitation").WithDetail("db_error", err.Error())
+	}
+
+	// Return success response
+	return &corev1.SuccessResponse{
+		Success: true,
+	}, nil
 }
 
-func (s *orgMembershipService) DeclineInvitation(ctx context.Context, req *corev1.IDRequest) (*corev1.SuccessResponse, error) {
-	return nil, nil
+func (s *orgMembershipService) DeclineInvitation(ctx context.Context, req *corev1.TokenHashRequest) (*corev1.SuccessResponse, error) {
+	// 0. Validate request parameters
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("request body cannot be nil")
+	}
+	if req.TokenHash == "" {
+		return nil, apperror.ErrValidation.WithMessage("token hash cannot be empty")
+	}
+
+	// 1. Authenticate and extract user identity from context
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
+	}
+
+	// Fetch user details from user service to get email for validation
+	user, err := s.userClient.GetUser(ctx, &corev1.EmptyRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Retrieve invitation using the provided token hash
+	invitation, err := s.q.GetOrganizationInvitationByTokenHash(ctx, req.TokenHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("invitation not found or already expired")
+		}
+		return nil, apperror.ErrInternal.WithMessage("failed to fetch invitation").WithDetail("db_error", err.Error())
+	}
+
+	// 3. Validate invitation is still valid
+	// Check if invitation has expired
+	if time.Now().After(invitation.ExpiresAt.Time) {
+		return nil, apperror.ErrValidation.WithMessage("invitation has expired")
+	}
+	// Check if invitation is still in pending state (not accepted or cancelled)
+	if invitation.Status != "pending" {
+		return nil, apperror.ErrNotFound.WithMessage("invitation not found")
+	}
+
+	// 4. Verify the authenticated user's email matches the invitation recipient
+	if invitation.Email != user.Email {
+		return nil, apperror.ErrPermissionDenied.WithMessage("this invitation was sent to a different email address")
+	}
+
+	// 7. Mark the invitation as rejected
+	_, err = s.q.DeclineOrganizationInvitation(ctx, db.DeclineOrganizationInvitationParams{
+		ID:          invitation.ID,
+		RespondedBy: uuid.MustParse(userInfo.UserID),
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to accept invitation").WithDetail("db_error", err.Error())
+	}
+
+	// Return success response
+	return &corev1.SuccessResponse{
+		Success: true,
+	}, nil
 }
 
 // ############################ USER'S MEMBERSHIP MANAGEMENT ############################
