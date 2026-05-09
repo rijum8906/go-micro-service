@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
@@ -20,16 +19,14 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
-	"github.com/rijum8906/relay/packages/pb/user_service/mocks"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/organization"
+	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/services/testutils"
 	grpcmetadata "google.golang.org/grpc/metadata"
 )
 
 // NOTE: do not perform any validation test here, as it has already been tested in validation_test.go
-
-var mockUserServiceClient = &mocks.MockUserServiceClient{}
 
 func TestMain(m *testing.M) {
 	// Load .env file before running tests
@@ -47,7 +44,9 @@ func TestMain(m *testing.M) {
 }
 
 func Test_CreateOrganization_Success_Integration(t *testing.T) {
-	service, q, pool, tuppleManager := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 
 	ctx := context.Background()
 
@@ -60,7 +59,7 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 		CreatedBy:   createdBy.String(),
 	}
 
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
 		Id: createdBy.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
@@ -113,7 +112,8 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Success_Integration(t *testing.T) {
-	service, q, pool, _ := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
@@ -127,7 +127,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !matchOrganization(fetchedOrg, org) {
+	if !servicetestutils.MatchOrganization(fetchedOrg, org) {
 		t.Errorf("expected organization to be %v but got %v", org, fetchedOrg)
 	}
 
@@ -137,7 +137,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !matchOrganization(fetchedOrg, org) {
+	if !servicetestutils.MatchOrganization(fetchedOrg, org) {
 		t.Errorf("expected organization to be %v but got %v", org, fetchedOrg)
 	}
 
@@ -164,7 +164,8 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Failure_Integration(t *testing.T) {
-	service, q, pool, _ := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
@@ -192,7 +193,8 @@ func Test_GetOrganization_Failure_Integration(t *testing.T) {
 }
 
 func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
-	service, q, pool, _ := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
@@ -204,7 +206,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 		dto.MetaUserIDKey, createdBy.String(),
 	))
 
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
 		Id: newOwner.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
@@ -244,7 +246,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
 		dto.MetaUserIDKey, createdBy.String(),
 	))
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
 		Id: newOwner.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
@@ -266,7 +268,9 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 }
 
 func Test_DeleteOrganization_Success_Integration(t *testing.T) {
-	service, q, pool, tuppleManager := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 
 	ctx := context.Background()
 
@@ -326,7 +330,8 @@ func Test_DeleteOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
-	service, _, pool, _ := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
@@ -386,7 +391,9 @@ func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
 }
 
 func Test_ArchiveOrganization_Success_integration(t *testing.T) {
-	service, q, pool, tuppleManager := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 
 	ctx := context.Background()
 
@@ -443,7 +450,8 @@ func Test_ArchiveOrganization_Success_integration(t *testing.T) {
 }
 
 func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
-	service, _, pool, _ := mustCreateService()
+	q, pool, fgaClient := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
@@ -503,10 +511,10 @@ func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
 
 func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServiceServer, req *organizationv1.CreateOrganizationRequest) *modelsv1.Organization {
 	// Normalize request with defaults
-	normalizedReq := normalizeCreateRequest(req)
+	normalizedReq := servicetestutils.NormalizeCreateRequest(req)
 
 	// Setup user existence mock
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
 		Id: normalizedReq.CreatedBy,
 	}).Return(&userv1.CheckExistsResponse{Exists: true}, nil)
 
@@ -517,79 +525,4 @@ func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServi
 	}
 
 	return org
-}
-
-func normalizeCreateRequest(req *organizationv1.CreateOrganizationRequest) *organizationv1.CreateOrganizationRequest {
-	// Handle nil request
-	if req == nil {
-		return &organizationv1.CreateOrganizationRequest{
-			Name:        testutils.GenerateRandomString(5),
-			Description: testutils.GenerateRandomString(20),
-			Slug:        strings.ToLower(testutils.GenerateRandomString(5)),
-			CreatedBy:   uuid.New().String(),
-		}
-	}
-
-	// Create a copy to avoid modifying original
-	normalized := &organizationv1.CreateOrganizationRequest{
-		Name:        req.Name,
-		Description: req.Description,
-		Slug:        req.Slug,
-		CreatedBy:   req.CreatedBy,
-	}
-
-	// Apply defaults for empty fields
-	if normalized.Name == "" {
-		normalized.Name = testutils.GenerateRandomString(5)
-	}
-	if normalized.Description == "" {
-		normalized.Description = testutils.GenerateRandomString(20)
-	}
-	if normalized.Slug == "" {
-		normalized.Slug = strings.ToLower(testutils.GenerateRandomString(5))
-	}
-	if normalized.CreatedBy == "" {
-		normalized.CreatedBy = uuid.New().String()
-	}
-
-	return normalized
-}
-
-func matchOrganization(a, b *modelsv1.Organization) bool {
-	return a.Id == b.Id &&
-		a.Name == b.Name &&
-		a.Slug == b.Slug &&
-		a.Status == b.Status
-}
-
-func mustCreateService() (organizationv1.OrganizationServiceServer, db.Querier, *pgxpool.Pool, coreopenfga.TuppleManager) {
-	apiURL := getEnv("OPENFGA_TEST_API_URL", "FGA_TEST_API_URL")
-	if apiURL == "" {
-		apiURL = "http://localhost:9000"
-	}
-	storeID := getEnv("OPENFGA_TEST_STORE_ID", "FGA_TEST_STORE_ID")
-	authModelID := getEnv("OPENFGA_TEST_AUTH_MODEL_ID", "FGA_TEST_AUTH_MODEL_ID")
-
-	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
-	q := db.New(pool)
-	fgaClient, err := coreopenfga.NewClient(apiURL)
-	if err != nil {
-		panic(apiURL)
-	}
-	fgaClient.StoreID = storeID
-	fgaClient.AuthorizationModelID = authModelID
-	service := organization.New(q, mockUserServiceClient, fgaClient)
-
-	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
-	return service, q, pool, tuppleManager
-}
-
-func getEnv(keys ...string) string {
-	for _, key := range keys {
-		if value, ok := os.LookupEnv(key); ok && value != "" {
-			return value
-		}
-	}
-
-	return ""
 }

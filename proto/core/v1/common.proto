@@ -29,3 +29,8 @@ message PaginationRequest {
   int32 page = 1;
   int32 limit = 2;
 }
+
+message IDWithPaginationReq {
+  string id = 1;
+  core.v1.PaginationRequest pagination = 2;
+}

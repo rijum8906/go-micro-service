@@ -76,8 +76,6 @@ Note: current assignment records do not grant access by themselves. Being an ass
 
 ## Draft Model
 
-The draft model lives at [task_model.fga](/home/legaz/relay/packages/core/coreopenfga/models/task_model.fga:1).
-
 Important choices in the draft:
 
 - `project` is the source of truth for project-scoped task access
