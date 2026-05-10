@@ -4,29 +4,65 @@ model
 type user
 
 type organization
-  relations
-    # Direct Roles
-    define owner: [user]
-    define admin: [user]
-    define member: [user]
+    relations
+        define owner: [user]
+        define admin: [user]
+        define member: [user, role#assignee, team#member]  # ← org member if in any team too
 
-    # Permission Logic
-    define can_delete: owner
-    define can_edit: can_delete or admin
-    define can_add_member: can_edit
-    define can_remove_member: can_add_member
-    define can_view_member: owner or admin or member
-    define can_create_team: owner or admin or member
+        # org permissions
+        define can_edit_organization:      owner
+        define can_delete_organization:    owner
+        define can_view_organization:      owner or admin or member
+        define can_transfer_ownership:     owner
+
+        # membership management
+        define can_add_member:             owner or admin
+        define can_remove_member:          owner or admin
+        define can_view_members:           owner or admin or member
+        define can_change_member_role:     owner or admin
+        define can_change_member_status:   owner or admin
+        define can_invite_member:          owner or admin
+        define can_approve_join_request:   owner or admin
+
+        # team management
+        define can_create_team:            owner or admin
+        define can_delete_team:            owner or admin
+        define can_view_teams:             owner or admin or member
+
+        # role management
+        define can_create_role:            owner or admin
+        define can_delete_role:            owner or admin
+        define can_view_roles:             owner or admin
+        define can_edit_role:              owner or admin
+        define can_assign_role:            owner or admin
 
 type team
-  relations
-    define parent_org: [organization]
-    define leader: [user]
-    define member: [user]
+    relations
+        define organization: [organization]
+        define owner: [user] or owner from organization or admin from organization
+        define admin: [user]
+        define member: [user, role#assignee]
 
-    # Inheritance: Org Owners/Admins are implicitly Team Leads
-    define can_delete: leader or owner from parent_org
-    define can_edit: can_delete
-    define can_add_member: leader or admin from parent_org
-    define can_remove_member: can_add_member
-    define can_view_member: leader or admin from parent_org or member
+        # team permissions
+        define can_edit_team:              owner or admin
+        define can_delete_team:            owner
+        define can_view_team:              owner or admin or member
+        define can_add_member:             owner or admin
+        define can_remove_member:          owner or admin
+        define can_view_members:           owner or admin or member
+        define can_invite_member:          owner or admin
+
+type role
+    relations
+        define organization: [organization]
+        define team: [team]                     # ← role can be org-level OR team-level
+        define assignee: [user]
+        define inherits: [role]
+        define effective_assignee: assignee or effective_assignee from inherits
+
+type permission
+    relations
+        define org_scope: [organization]
+        define team_scope: [team]               # ← permission can be scoped to a team
+        define granted_to: [role]
+        define allowed: effective_assignee from granted_to
