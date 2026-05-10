@@ -176,7 +176,7 @@ func (s *organizationService) UpdateOrganizationName(ctx context.Context, req *o
 	// Step 2. Check OpenFGA permission
 	res, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanEdit,
+		Relation: permissions.PermissionCanEditOrganization,
 		Object:   "organization:" + req.OrganizationId,
 	})
 	if appErr != nil {
@@ -240,7 +240,7 @@ func (s *organizationService) ChangeOrganizationOwnership(ctx context.Context, r
 	// Step 3. Check OpenFGA permission
 	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanDelete,
+		Relation: permissions.PermissionCanTransferOwnership,
 		Object:   "organization:" + req.OrganizationId,
 	})
 	if appErr != nil {
@@ -341,7 +341,7 @@ func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev
 	// Step 4. Check OpenFGA permission
 	res, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanDelete,
+		Relation: permissions.PermissionCanDeleteOrganization,
 		Object:   "organization:" + req.Id,
 	})
 	if appErr != nil {
@@ -409,7 +409,7 @@ func (s *organizationService) ArchiveOrganization(ctx context.Context, req *core
 	// Step 4. Check OpenFGA permission
 	res, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanDelete,
+		Relation: permissions.PermissionCanDeleteOrganization,
 		Object:   "organization:" + req.Id,
 	})
 	if appErr != nil {

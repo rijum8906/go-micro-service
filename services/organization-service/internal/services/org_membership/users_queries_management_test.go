@@ -15,7 +15,7 @@ import (
 )
 
 func Test_LeaveOrganization_Validation(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	testCases := []struct {
@@ -58,7 +58,7 @@ func Test_LeaveOrganization_Validation(t *testing.T) {
 }
 
 func Test_LeaveOrganization_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()

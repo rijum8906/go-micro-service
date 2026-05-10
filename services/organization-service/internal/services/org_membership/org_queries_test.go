@@ -23,7 +23,7 @@ import (
 // =============================================================================
 
 func Test_GetOrganizationMembership_Validation(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	tests := []struct {
@@ -58,7 +58,7 @@ func Test_GetOrganizationMembership_Validation(t *testing.T) {
 }
 
 func Test_GetOrganizationMembershipsByOrgID_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -121,7 +121,7 @@ func Test_GetOrganizationMembershipsByOrgID_Integration_Failure(t *testing.T) {
 }
 
 func Test_GetOrganizationMembershipsByOrgID_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -208,7 +208,7 @@ func Test_GetOrganizationMembershipsByOrgID_Integration_Success(t *testing.T) {
 // =============================================================================
 
 func Test_GetOrganizationMembershipsByRole_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -288,7 +288,7 @@ func Test_GetOrganizationMembershipsByRole_Integration_Success(t *testing.T) {
 }
 
 func Test_GetOrganizationMembershipsByRole_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -396,7 +396,7 @@ func Test_GetOrganizationMembershipsByRole_Integration_Failure(t *testing.T) {
 // =============================================================================
 
 func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -505,7 +505,7 @@ func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
 }
 
 func Test_GetOrganizationMembershipsByStatus_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -613,7 +613,7 @@ func Test_GetOrganizationMembershipsByStatus_Integration_Failure(t *testing.T) {
 // =============================================================================
 
 func Test_GetOrganizationMembership_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -691,7 +691,7 @@ func Test_GetOrganizationMembership_Integration_Failure(t *testing.T) {
 }
 
 func Test_GetOrganizationMembership_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	// Create organization

@@ -2,15 +2,17 @@ package orgmembership_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/dto"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
+	"github.com/rijum8906/relay/packages/core/testutils"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/org_membership/testutil"
@@ -19,19 +21,45 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+var (
+	fgaClient    *coreopenfga.Client
+	storeManager coreopenfga.StoreManager
+)
+
 func TestMain(m *testing.M) {
-	if err := godotenv.Load("../../../.env"); err != nil {
-		if err := godotenv.Load("../../.env.test"); err != nil {
-			if os.Getenv("CI") == "" {
-				panic("No .env file found")
-			}
-		}
+	f, err := coreopenfga.NewClient("http://localhost:9000")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create OpenFGA client:", err)
+		os.Exit(1)
 	}
-	os.Exit(m.Run())
+	fgaClient = f
+
+	ctx := context.Background()
+	sm := coreopenfga.NewStoreManager(f.Client)
+	if _, err = sm.Create(ctx, testutils.GenerateRandomString(10)); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create store:", err)
+		os.Exit(1)
+	}
+	storeManager = sm
+	f.StoreID = sm.GetStoreID()
+
+	mm := coreopenfga.NewModelManager(f.Client, sm)
+	if err = mm.Write(ctx, "organization"); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to write model:", err)
+		os.Exit(1)
+	}
+	f.AuthorizationModelID = mm.GetAuthorizationModelID()
+
+	code := m.Run()
+
+	// Best-effort cleanup — ignore errors so a failed store delete
+	// doesn't mask a real test failure.
+	_ = storeManager.Delete(ctx)
+	os.Exit(code)
 }
 
 func Test_GetMyMembership_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -90,7 +118,7 @@ func Test_GetMyMembership_Integration_Success(t *testing.T) {
 }
 
 func Test_GetMyMembership_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -187,7 +215,7 @@ func Test_GetMyMembership_Integration_Failure(t *testing.T) {
 }
 
 func Test_GetMyMemberships_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 	ownerID := uuid.New()
 	orgSuite := suite.CreateOrg(t, ownerID)
@@ -262,7 +290,7 @@ func Test_GetMyMemberships_Integration_Success(t *testing.T) {
 }
 
 func Test_GetMyMemberships_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
