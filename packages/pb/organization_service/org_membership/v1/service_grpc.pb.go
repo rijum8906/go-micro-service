@@ -48,11 +48,11 @@ type OrganizationMembershipServiceClient interface {
 	GetOrganizationMembershipsByStatus(ctx context.Context, in *GetOrgMembershipsByStatusReq, opts ...grpc.CallOption) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*OrgMembershipRes, error)
 	// ############################# INVITATION FLOW ############################
-	SendInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	AcceptInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	DeclineInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	SendInvitation(ctx context.Context, in *SendInvitationRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	AcceptInvitation(ctx context.Context, in *v1.TokenHashRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	DeclineInvitation(ctx context.Context, in *v1.TokenHashRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	// ############################ USER'S MEMBERSHIP MANAGEMENT ############################
-	LeaveOrganization(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	LeaveOrganization(ctx context.Context, in *v1.IDAndScopedTokenRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	// ############################ ORGANIZATION'S MEMBERSHIP MANAGEMENT ############################
 	ChangeOrganizationMembershipStatus(ctx context.Context, in *ChangeOrgMembershipStatusReq, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	ChangeOrganizationMembershipRole(ctx context.Context, in *ChangeOrgMembershipRoleReq, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
@@ -127,7 +127,7 @@ func (c *organizationMembershipServiceClient) GetOrganizationMembership(ctx cont
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) SendInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *organizationMembershipServiceClient) SendInvitation(ctx context.Context, in *SendInvitationRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationMembershipService_SendInvitation_FullMethodName, in, out, cOpts...)
@@ -137,7 +137,7 @@ func (c *organizationMembershipServiceClient) SendInvitation(ctx context.Context
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) AcceptInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *organizationMembershipServiceClient) AcceptInvitation(ctx context.Context, in *v1.TokenHashRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationMembershipService_AcceptInvitation_FullMethodName, in, out, cOpts...)
@@ -147,7 +147,7 @@ func (c *organizationMembershipServiceClient) AcceptInvitation(ctx context.Conte
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) DeclineInvitation(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *organizationMembershipServiceClient) DeclineInvitation(ctx context.Context, in *v1.TokenHashRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationMembershipService_DeclineInvitation_FullMethodName, in, out, cOpts...)
@@ -157,7 +157,7 @@ func (c *organizationMembershipServiceClient) DeclineInvitation(ctx context.Cont
 	return out, nil
 }
 
-func (c *organizationMembershipServiceClient) LeaveOrganization(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *organizationMembershipServiceClient) LeaveOrganization(ctx context.Context, in *v1.IDAndScopedTokenRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
 	err := c.cc.Invoke(ctx, OrganizationMembershipService_LeaveOrganization_FullMethodName, in, out, cOpts...)
@@ -210,11 +210,11 @@ type OrganizationMembershipServiceServer interface {
 	GetOrganizationMembershipsByStatus(context.Context, *GetOrgMembershipsByStatusReq) (*OrgMembershipsListRes, error)
 	GetOrganizationMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error)
 	// ############################# INVITATION FLOW ############################
-	SendInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
-	AcceptInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
-	DeclineInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
+	SendInvitation(context.Context, *SendInvitationRequest) (*v1.SuccessResponse, error)
+	AcceptInvitation(context.Context, *v1.TokenHashRequest) (*v1.SuccessResponse, error)
+	DeclineInvitation(context.Context, *v1.TokenHashRequest) (*v1.SuccessResponse, error)
 	// ############################ USER'S MEMBERSHIP MANAGEMENT ############################
-	LeaveOrganization(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error)
+	LeaveOrganization(context.Context, *v1.IDAndScopedTokenRequest) (*v1.SuccessResponse, error)
 	// ############################ ORGANIZATION'S MEMBERSHIP MANAGEMENT ############################
 	ChangeOrganizationMembershipStatus(context.Context, *ChangeOrgMembershipStatusReq) (*v1.SuccessResponse, error)
 	ChangeOrganizationMembershipRole(context.Context, *ChangeOrgMembershipRoleReq) (*v1.SuccessResponse, error)
@@ -246,16 +246,16 @@ func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembershi
 func (UnimplementedOrganizationMembershipServiceServer) GetOrganizationMembership(context.Context, *v1.IDRequest) (*OrgMembershipRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetOrganizationMembership not implemented")
 }
-func (UnimplementedOrganizationMembershipServiceServer) SendInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedOrganizationMembershipServiceServer) SendInvitation(context.Context, *SendInvitationRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendInvitation not implemented")
 }
-func (UnimplementedOrganizationMembershipServiceServer) AcceptInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedOrganizationMembershipServiceServer) AcceptInvitation(context.Context, *v1.TokenHashRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AcceptInvitation not implemented")
 }
-func (UnimplementedOrganizationMembershipServiceServer) DeclineInvitation(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedOrganizationMembershipServiceServer) DeclineInvitation(context.Context, *v1.TokenHashRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeclineInvitation not implemented")
 }
-func (UnimplementedOrganizationMembershipServiceServer) LeaveOrganization(context.Context, *v1.IDRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedOrganizationMembershipServiceServer) LeaveOrganization(context.Context, *v1.IDAndScopedTokenRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method LeaveOrganization not implemented")
 }
 func (UnimplementedOrganizationMembershipServiceServer) ChangeOrganizationMembershipStatus(context.Context, *ChangeOrgMembershipStatusReq) (*v1.SuccessResponse, error) {
@@ -396,7 +396,7 @@ func _OrganizationMembershipService_GetOrganizationMembership_Handler(srv interf
 }
 
 func _OrganizationMembershipService_SendInvitation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.IDRequest)
+	in := new(SendInvitationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -408,13 +408,13 @@ func _OrganizationMembershipService_SendInvitation_Handler(srv interface{}, ctx 
 		FullMethod: OrganizationMembershipService_SendInvitation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).SendInvitation(ctx, req.(*v1.IDRequest))
+		return srv.(OrganizationMembershipServiceServer).SendInvitation(ctx, req.(*SendInvitationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _OrganizationMembershipService_AcceptInvitation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.IDRequest)
+	in := new(v1.TokenHashRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -426,13 +426,13 @@ func _OrganizationMembershipService_AcceptInvitation_Handler(srv interface{}, ct
 		FullMethod: OrganizationMembershipService_AcceptInvitation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).AcceptInvitation(ctx, req.(*v1.IDRequest))
+		return srv.(OrganizationMembershipServiceServer).AcceptInvitation(ctx, req.(*v1.TokenHashRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _OrganizationMembershipService_DeclineInvitation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.IDRequest)
+	in := new(v1.TokenHashRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -444,13 +444,13 @@ func _OrganizationMembershipService_DeclineInvitation_Handler(srv interface{}, c
 		FullMethod: OrganizationMembershipService_DeclineInvitation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).DeclineInvitation(ctx, req.(*v1.IDRequest))
+		return srv.(OrganizationMembershipServiceServer).DeclineInvitation(ctx, req.(*v1.TokenHashRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _OrganizationMembershipService_LeaveOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.IDRequest)
+	in := new(v1.IDAndScopedTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -462,7 +462,7 @@ func _OrganizationMembershipService_LeaveOrganization_Handler(srv interface{}, c
 		FullMethod: OrganizationMembershipService_LeaveOrganization_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrganizationMembershipServiceServer).LeaveOrganization(ctx, req.(*v1.IDRequest))
+		return srv.(OrganizationMembershipServiceServer).LeaveOrganization(ctx, req.(*v1.IDAndScopedTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

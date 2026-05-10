@@ -262,6 +262,66 @@ func (x *ChangeOrgMembershipStatusReq) GetTokenScope() string {
 	return ""
 }
 
+type SendInvitationRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Email          string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Role           string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *SendInvitationRequest) Reset() {
+	*x = SendInvitationRequest{}
+	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendInvitationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendInvitationRequest) ProtoMessage() {}
+
+func (x *SendInvitationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendInvitationRequest.ProtoReflect.Descriptor instead.
+func (*SendInvitationRequest) Descriptor() ([]byte, []int) {
+	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SendInvitationRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *SendInvitationRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *SendInvitationRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
 var File_organization_service_org_membership_v1_request_proto protoreflect.FileDescriptor
 
 const file_organization_service_org_membership_v1_request_proto_rawDesc = "" +
@@ -289,7 +349,11 @@ const file_organization_service_org_membership_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"new_status\x18\x02 \x01(\tR\tnewStatus\x12\x1f\n" +
 	"\vtoken_scope\x18\x03 \x01(\tR\n" +
-	"tokenScopeB\xcc\x02\n" +
+	"tokenScope\"j\n" +
+	"\x15SendInvitationRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04roleB\xcc\x02\n" +
 	"*com.organization_service.org_membership.v1B\fRequestProtoP\x01Z^github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1;org_membershipv1\xa2\x02\x03OOX\xaa\x02$OrganizationService.OrgMembership.V1\xca\x02$OrganizationService\\OrgMembership\\V1\xe2\x020OrganizationService\\OrgMembership\\V1\\GPBMetadata\xea\x02&OrganizationService::OrgMembership::V1b\x06proto3"
 
 var (
@@ -304,17 +368,18 @@ func file_organization_service_org_membership_v1_request_proto_rawDescGZIP() []b
 	return file_organization_service_org_membership_v1_request_proto_rawDescData
 }
 
-var file_organization_service_org_membership_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_organization_service_org_membership_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_organization_service_org_membership_v1_request_proto_goTypes = []any{
 	(*GetOrgMembershipsByRoleReq)(nil),   // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq
 	(*GetOrgMembershipsByStatusReq)(nil), // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
 	(*ChangeOrgMembershipRoleReq)(nil),   // 2: organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
 	(*ChangeOrgMembershipStatusReq)(nil), // 3: organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
-	(*v1.PaginationRequest)(nil),         // 4: core.v1.PaginationRequest
+	(*SendInvitationRequest)(nil),        // 4: organization_service.org_membership.v1.SendInvitationRequest
+	(*v1.PaginationRequest)(nil),         // 5: core.v1.PaginationRequest
 }
 var file_organization_service_org_membership_v1_request_proto_depIdxs = []int32{
-	4, // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq.pagination:type_name -> core.v1.PaginationRequest
-	4, // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq.pagination:type_name -> core.v1.PaginationRequest
+	5, // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq.pagination:type_name -> core.v1.PaginationRequest
+	5, // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq.pagination:type_name -> core.v1.PaginationRequest
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -333,7 +398,7 @@ func file_organization_service_org_membership_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_organization_service_org_membership_v1_request_proto_rawDesc), len(file_organization_service_org_membership_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

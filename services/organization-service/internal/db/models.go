@@ -49,14 +49,17 @@ type OrganizationInvitation struct {
 	Email          string
 	Role           string
 	Status         string
-	InvitedBy      uuid.UUID
+	InvitedByMemID uuid.UUID
 	// SHA256 hash of the invitation token. Never store raw tokens.
 	TokenHash string
 	// Invitations are invalid after this timestamp (typically 7 days)
-	ExpiresAt  pgtype.Timestamptz
-	AcceptedBy uuid.UUID
-	AcceptedAt pgtype.Timestamptz
-	CreatedAt  pgtype.Timestamptz
+	ExpiresAt      pgtype.Timestamptz
+	RespondedBy    uuid.UUID
+	RespondedAt    pgtype.Timestamptz
+	Response       pgtype.Text
+	RevokedByMemID uuid.UUID
+	RevokedAt      pgtype.Timestamptz
+	CreatedAt      pgtype.Timestamptz
 }
 
 // Junction table linking users to organizations with role and status
@@ -67,13 +70,13 @@ type OrganizationMembership struct {
 	// owner=full org control, admin=manage members/teams, member=standard access
 	Role string
 	// active=current member, suspended=temporarily blocked, left=voluntarily departed
-	Status    string
-	JoinedAt  pgtype.Timestamptz
-	LeftAt    pgtype.Timestamptz
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
-	DeletedBy uuid.UUID
+	Status         string
+	JoinedAt       pgtype.Timestamptz
+	LeftAt         pgtype.Timestamptz
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
+	DeletedAt      pgtype.Timestamptz
+	DeletedByMemID uuid.UUID
 }
 
 // Teams are sub-groups within an organization for fine-grained access control
@@ -81,13 +84,13 @@ type OrganizationTeam struct {
 	ID             uuid.UUID
 	OrganizationID uuid.UUID
 	// Team name, must be unique per organization (e.g., "Engineering", "Sales")
-	Name        string
-	Description pgtype.Text
-	CreatedBy   uuid.UUID
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
-	DeletedAt   pgtype.Timestamptz
-	DeletedBy   uuid.UUID
+	Name           string
+	Description    pgtype.Text
+	CreatedBy      uuid.UUID
+	CreatedAt      pgtype.Timestamptz
+	UpdatedAt      pgtype.Timestamptz
+	DeletedAt      pgtype.Timestamptz
+	DeletedByMemID uuid.UUID
 }
 
 // Links organization members to teams. Uses membership_id (not user_id) to respect org-level roles.
@@ -101,6 +104,6 @@ type OrganizationTeamMembership struct {
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
 	// Soft delete timestamp. When non-NULL, the member is no longer in the team.
-	DeletedAt pgtype.Timestamptz
-	DeletedBy uuid.UUID
+	DeletedAt          pgtype.Timestamptz
+	DeletedByTeamMemID uuid.UUID
 }

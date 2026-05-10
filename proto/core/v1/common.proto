@@ -12,12 +12,16 @@ message SuccessResponse {
   bool success = 1;
 }
 
-message EmailInput {
+message EmailRequest {
   string email = 1;
 }
 
 message IDRequest {
   string id = 1;
+}
+
+message TokenHashRequest {
+  string token_hash = 1;
 }
 
 message IDAndScopedTokenRequest {
