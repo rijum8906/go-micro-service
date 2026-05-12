@@ -275,7 +275,7 @@ func Test_CustomRole_SinglePermission(t *testing.T) {
 	org := fmt.Sprintf("organization:%s", i.orgID)
 	user := fmt.Sprintf("user:%s", i.userID)
 	role := fmt.Sprintf("role:%s", i.roleID)
-	permObj := permissions.PermissionObject(i.orgID, permissions.PermissionCanViewMembers)
+	permObj := permissions.GeneratePermissionObject(i.orgID, permissions.PermissionCanViewMembers)
 
 	writeAndRequire(t, ctx, tm, []client.ClientTupleKey{
 		// Role belongs to org
@@ -298,7 +298,7 @@ func Test_CustomRole_SinglePermission(t *testing.T) {
 	})
 
 	t.Run("ungranted_permission_denied", func(t *testing.T) {
-		otherPerm := permissions.PermissionObject(i.orgID, permissions.PermissionCanDeleteOrganization)
+		otherPerm := permissions.GeneratePermissionObject(i.orgID, permissions.PermissionCanDeleteOrganization)
 		result, appErr := tm.Check(ctx, client.ClientCheckRequest{
 			User:     user,
 			Relation: "allowed",
@@ -342,7 +342,7 @@ func Test_CustomRole_MultiplePermissions(t *testing.T) {
 		tuples = append(tuples, client.ClientTupleKey{
 			User:     role,
 			Relation: "granted_to",
-			Object:   permissions.PermissionObject(i.orgID, p),
+			Object:   permissions.GeneratePermissionObject(i.orgID, p),
 		})
 	}
 	writeAndRequire(t, ctx, tm, tuples)
@@ -352,7 +352,7 @@ func Test_CustomRole_MultiplePermissions(t *testing.T) {
 			result, appErr := tm.Check(ctx, client.ClientCheckRequest{
 				User:     user,
 				Relation: "allowed",
-				Object:   permissions.PermissionObject(i.orgID, p),
+				Object:   permissions.GeneratePermissionObject(i.orgID, p),
 			})
 			require.Nil(t, appErr)
 			assert.True(t, *result.Allowed)
@@ -364,7 +364,7 @@ func Test_CustomRole_MultiplePermissions(t *testing.T) {
 			result, appErr := tm.Check(ctx, client.ClientCheckRequest{
 				User:     user,
 				Relation: "allowed",
-				Object:   permissions.PermissionObject(i.orgID, p),
+				Object:   permissions.GeneratePermissionObject(i.orgID, p),
 			})
 			require.Nil(t, appErr)
 			assert.False(t, *result.Allowed)
@@ -389,8 +389,8 @@ func Test_CustomRole_Inheritance(t *testing.T) {
 	parentRole := fmt.Sprintf("role:%s", parentRoleID)
 	childRole := fmt.Sprintf("role:%s", childRoleID)
 
-	parentPermObj := permissions.PermissionObject(i.orgID, permissions.PermissionCanViewMembers)
-	childPermObj := permissions.PermissionObject(i.orgID, permissions.PermissionCanInviteMember)
+	parentPermObj := permissions.GeneratePermissionObject(i.orgID, permissions.PermissionCanViewMembers)
+	childPermObj := permissions.GeneratePermissionObject(i.orgID, permissions.PermissionCanInviteMember)
 
 	writeAndRequire(t, ctx, tm, []client.ClientTupleKey{
 		// Roles belong to org
@@ -582,8 +582,8 @@ func Test_Permission_IsolatedAcrossOrgs(t *testing.T) {
 	role := fmt.Sprintf("role:%s", roleID)
 
 	// Grant permission only in org1
-	permObj1 := permissions.PermissionObject(org1ID, permissions.PermissionCanViewMembers)
-	permObj2 := permissions.PermissionObject(org2ID, permissions.PermissionCanViewMembers)
+	permObj1 := permissions.GeneratePermissionObject(org1ID, permissions.PermissionCanViewMembers)
+	permObj2 := permissions.GeneratePermissionObject(org2ID, permissions.PermissionCanViewMembers)
 
 	writeAndRequire(t, ctx, tm, []client.ClientTupleKey{
 		{User: org1, Relation: "organization", Object: role},
@@ -623,7 +623,7 @@ func Test_CustomRole_MultipleAssignees(t *testing.T) {
 
 	org := fmt.Sprintf("organization:%s", i.orgID)
 	role := fmt.Sprintf("role:%s", i.roleID)
-	permObj := permissions.PermissionObject(i.orgID, permissions.PermissionCanInviteMember)
+	permObj := permissions.GeneratePermissionObject(i.orgID, permissions.PermissionCanInviteMember)
 
 	writeAndRequire(t, ctx, tm, []client.ClientTupleKey{
 		{User: org, Relation: "organization", Object: role},
@@ -668,8 +668,8 @@ func Test_User_MultipleRoles_UnionOfPermissions(t *testing.T) {
 	roleA := fmt.Sprintf("role:%s", roleAID)
 	roleB := fmt.Sprintf("role:%s", roleBID)
 
-	permA := permissions.PermissionObject(i.orgID, permissions.PermissionCanViewMembers)
-	permB := permissions.PermissionObject(i.orgID, permissions.PermissionCanCreateTeam)
+	permA := permissions.GeneratePermissionObject(i.orgID, permissions.PermissionCanViewMembers)
+	permB := permissions.GeneratePermissionObject(i.orgID, permissions.PermissionCanCreateTeam)
 
 	writeAndRequire(t, ctx, tm, []client.ClientTupleKey{
 		{User: org, Relation: "organization", Object: roleA},

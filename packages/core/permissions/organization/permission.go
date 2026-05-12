@@ -228,51 +228,23 @@ func CanActorManageTarget(actorRole, targetRole string) bool {
 }
 
 // ============================================================================
-// Object ID Builders
+// Object ID Generator
 // ============================================================================
 
-// PermissionObjectID returns the OpenFGA object ID for a permission
-// scoped to an organization, e.g. "org123_can_edit_organization"
-func PermissionObjectID(orgID, permission string) string {
+func GenerateCustomRoleID(orgID, role string) string {
+	return orgID + "_" + role
+}
+
+func GenerateCustomRoleObject(orgID, role string) string {
+	return "role:" + GenerateCustomRoleID(orgID, role)
+}
+
+func GeneratePermissionID(orgID, permission string) string {
 	return orgID + "_" + permission
 }
 
-// PermissionObject returns the full OpenFGA object string for a permission,
-// e.g. "permission:org123_can_edit_organization"
-func PermissionObject(orgID, permission string) string {
-	return ResourcePermission + ":" + PermissionObjectID(orgID, permission)
-}
-
-// TeamPermissionObjectID returns the OpenFGA object ID for a permission
-// scoped to a team, e.g. "team123_can_edit_team"
-func TeamPermissionObjectID(teamID, permission string) string {
-	return teamID + "_" + permission
-}
-
-// TeamPermissionObject returns the full OpenFGA object string for a team permission,
-// e.g. "permission:team123_can_edit_team"
-func TeamPermissionObject(teamID, permission string) string {
-	return ResourcePermission + ":" + TeamPermissionObjectID(teamID, permission)
-}
-
-// OrganizationObject returns the full OpenFGA object string for an organization
-func OrganizationObject(orgID string) string {
-	return ResourceOrganization + ":" + orgID
-}
-
-// TeamObject returns the full OpenFGA object string for a team
-func TeamObject(teamID string) string {
-	return ResourceTeam + ":" + teamID
-}
-
-// UserObject returns the full OpenFGA object string for a user
-func UserObject(userID string) string {
-	return ResourceUser + ":" + userID
-}
-
-// RoleObject returns the full OpenFGA object string for a role
-func RoleObject(roleID string) string {
-	return ResourceRole + ":" + roleID
+func GeneratePermissionObject(orgID, permission string) string {
+	return "permission:" + GeneratePermissionID(orgID, permission)
 }
 
 // ============================================================================

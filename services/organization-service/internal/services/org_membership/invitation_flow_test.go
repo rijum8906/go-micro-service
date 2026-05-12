@@ -30,7 +30,7 @@ import (
 // =============================================================================
 
 func Test_SendInvitation_Validation_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	tests := []struct {
@@ -85,7 +85,7 @@ func Test_SendInvitation_Validation_Failure(t *testing.T) {
 }
 
 func Test_SendInvitation_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -156,7 +156,7 @@ func Test_SendInvitation_Integration_Failure(t *testing.T) {
 }
 
 func Test_SendInvitation_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -183,7 +183,7 @@ func Test_SendInvitation_Integration_Success(t *testing.T) {
 // =============================================================================
 
 func Test_AcceptInvitation_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	// Create an org
@@ -314,7 +314,7 @@ func Test_AcceptInvitation_Integration_Failure(t *testing.T) {
 }
 
 func Test_AcceptInvitation_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -363,7 +363,7 @@ func Test_AcceptInvitation_Integration_Success(t *testing.T) {
 // =============================================================================
 
 func Test_DeclineInvitation_Integration_Failure(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	// Create an org
@@ -537,7 +537,7 @@ func Test_DeclineInvitation_Integration_Failure(t *testing.T) {
 }
 
 func Test_DeclineInvitation_Integration_Success(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()
@@ -595,7 +595,7 @@ func Test_DeclineInvitation_Integration_Success(t *testing.T) {
 }
 
 func Test_DeclineInvitation_Integration_UserServiceError(t *testing.T) {
-	suite := testutil.NewTestSuite(t)
+	suite := testutil.NewTestSuite(t, fgaClient)
 	service := suite.Service
 
 	ownerID := uuid.New()

@@ -14,7 +14,9 @@ import (
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
+	"github.com/rijum8906/relay/services/organization-service/internal/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
+	"github.com/rijum8906/relay/services/organization-service/internal/utils"
 )
 
 // LeaveOrganization removes the authenticated user from an organization.
@@ -158,8 +160,101 @@ func (s *orgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 
 // ############################ ORGANIZATION'S MEMBERSHIP MANAGEMENT ############################
 
-func (s *orgMembershipService) ChangeOrganizationMembershipStatus(ctx context.Context, req *org_membershipv1.ChangeOrgMembershipStatusReq) (*corev1.SuccessResponse, error) {
-	return nil, nil
+// ChangeOrganizationMembershipStatus updates the status of an organization membership.
+//
+// This method handles all status transitions for organization memberships including leaving,
+// banning, unbanning, and removal. It enforces role-based access control, validates status
+// transitions, and maintains OpenFGA permission consistency.
+//
+// Execution Flow:
+//  1. Validate request parameters (membership ID, token scope, target status)
+//  2. Extract authenticated user identity from context
+//  3. Retrieve target and actor memberships from database
+//  4. Verify actor can manage target based on role hierarchy
+//  5. Validate custom role permissions via OpenFGA
+//  6. Update membership status in database
+//  7. Synchronize OpenFGA permissions (remove on deactivation, restore on activation)
+//  8. Return success response
+//
+// Status Transition Rules:
+//   - active  → left:     User-initiated leave (no admin permission required)
+//   - active  → removed:  Admin or owner action
+//   - active  → banned:   Admin or owner action
+//   - banned  → active:   Admin or owner action (unban)
+//   - left    → active:   Not allowed (requires new invitation)
+//   - removed → *:        Terminal state, no transitions allowed
+//
+// Security Constraints:
+//   - Actors cannot modify their own status except to 'left'
+//   - Owner status cannot be changed under any circumstances
+//   - Last owner cannot be removed or have status changed
+//   - Role hierarchy: owner > admin > member > custom roles
+//
+// Error Responses:
+//   - Validation:      Invalid parameters, status transition, or token scope
+//   - NotFound:        Target or actor membership does not exist
+//   - PermissionDenied: Actor lacks required permissions for this operation
+//   - Internal:        Database operation or OpenFGA synchronization failed
+//
+// TODO: Implement audit logging for compliance tracking
+func (s *orgMembershipService) ChangeOrganizationMembershipStatus(
+	ctx context.Context,
+	req *org_membershipv1.ChangeOrgMembershipStatusReq,
+) (*corev1.SuccessResponse, error) {
+	// Validate request parameters
+	if appErr := validateChangeOrganizationStatusReq(req); appErr != nil {
+		return nil, appErr
+	}
+	membershipID := uuid.MustParse(req.OrganizationMembershipId)
+
+	// Extract authenticated user identity
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
+	}
+
+	// Load target and actor memberships
+	membershipData, appErr := s.retrieveMemberships(ctx, membershipID, userInfo.UserID)
+	if appErr != nil {
+		return nil, appErr
+	}
+	actorMembership := membershipData.actor
+	targetMembership := membershipData.target
+
+	// Verify role-based access control (standard roles)
+	if permissions.IsValidRole(actorMembership.Role) {
+		if !permissions.CanActorManageTarget(actorMembership.Role, targetMembership.Role) {
+			return nil, apperror.ErrPermissionDenied.WithMessage("you do not have permission to change this membership's status")
+		}
+	}
+
+	// Verify custom role permissions via OpenFGA (handles cases standard RBAC misses)
+	if appErr := utils.CheckCanChangeMembershipStatus(
+		ctx, s.tuppleManager, actorMembership, targetMembership,
+	); appErr != nil {
+		return nil, appErr
+	}
+
+	// Persist status change to database
+	if _, err := s.q.UpdateOrganizationMembershipStatus(ctx, db.UpdateOrganizationMembershipStatusParams{
+		ID:     membershipID,
+		Status: req.NewStatus,
+	}); err != nil {
+		return nil, apperror.ErrInternal.
+			WithMessage("failed to update membership").
+			WithDetail("db_error", err.Error())
+	}
+
+	// Synchronize OpenFGA permissions based on new status
+	// - Non-active statuses (banned, left, removed): Remove all permissions
+	// - Active status (unban): Restore previous permissions
+	if req.NewStatus != constants.OrgMemStatusActive {
+		s.removeRole(ctx, targetMembership)
+	} else {
+		s.addRole(ctx, targetMembership)
+	}
+
+	return &corev1.SuccessResponse{Success: true}, nil
 }
 
 func (s *orgMembershipService) ChangeOrganizationMembershipRole(ctx context.Context, req *org_membershipv1.ChangeOrgMembershipRoleReq) (*corev1.SuccessResponse, error) {

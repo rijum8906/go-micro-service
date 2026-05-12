@@ -20,15 +20,15 @@ import (
 )
 
 type TestSuite struct {
-	Pool          *pgxpool.Pool
-	Q             db.Querier
-	TuppleManager coreopenfga.TuppleManager
-	Service       org_membershipv1.OrganizationMembershipServiceServer
-	Ctx           context.Context
+	Pool              *pgxpool.Pool
+	Q                 db.Querier
+	TuppleManager     coreopenfga.TuppleManager
+	PermissionManager *permissions.PermissionManager
+	Service           org_membershipv1.OrganizationMembershipServiceServer
+	Ctx               context.Context
 }
 
-func NewTestSuite(t *testing.T) *TestSuite {
-	fgaClient := testutils.MustConnectFGAClient()
+func NewTestSuite(t *testing.T, fgaClient *coreopenfga.Client) *TestSuite {
 	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
 	q := db.New(pool)
 	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient, &config.Env{
@@ -41,12 +41,15 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		pool.Close()
 	})
 
+	permissionManager := permissions.NewPermissionManager(fgaClient)
+
 	return &TestSuite{
-		Pool:          pool,
-		Q:             q,
-		TuppleManager: coreopenfga.NewTupleManager(fgaClient),
-		Service:       service,
-		Ctx:           ctx,
+		Pool:              pool,
+		Q:                 q,
+		TuppleManager:     coreopenfga.NewTupleManager(fgaClient),
+		PermissionManager: permissionManager,
+		Service:           service,
+		Ctx:               ctx,
 	}
 }
 

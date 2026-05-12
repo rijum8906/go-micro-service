@@ -13,6 +13,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/protoutils"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
+	"github.com/rijum8906/relay/services/organization-service/internal/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/utils"
 )
@@ -75,7 +76,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Con
 	// 3. Check if user has permission to view organization members via OpenFGA
 	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanViewMember,
+		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + req.Id,
 	})
 	if appErr != nil {
@@ -150,7 +151,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Con
 //   - Counting members by role for analytics
 func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Context, req *org_membershipv1.GetOrgMembershipsByRoleReq) (*org_membershipv1.OrgMembershipsListRes, error) {
 	// 0. Validate request parameters
-	if !permissions.ValidateRole(req.Role) {
+	if !permissions.IsValidRole(req.Role) {
 		return nil, apperror.ErrValidation.WithMessage("invalid role")
 	}
 	if appErr := protoutils.ValidatePaginationReq(req.Pagination); appErr != nil {
@@ -180,7 +181,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Cont
 	// 3. Check if user has permission to view organization members via OpenFGA
 	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanViewMember,
+		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + req.OrganizationId,
 	})
 	if appErr != nil {
@@ -251,7 +252,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Cont
 //   - Cleanup of removed members
 func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Context, req *org_membershipv1.GetOrgMembershipsByStatusReq) (*org_membershipv1.OrgMembershipsListRes, error) {
 	// 0. Validate request parameters
-	if !utils.ValidateOrgnaziationMembershipStatus(req.Status) {
+	if !constants.IsValidaOrgMemStatus(req.Status) {
 		return nil, apperror.ErrValidation.WithMessage("invalid status")
 	}
 	if appErr := protoutils.ValidatePaginationReq(req.Pagination); appErr != nil {
@@ -281,7 +282,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Co
 	// 3. Check permission via OpenFGA
 	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanViewMember,
+		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + req.OrganizationId,
 	})
 	if appErr != nil {
@@ -369,7 +370,7 @@ func (s *orgMembershipService) GetOrganizationMembership(ctx context.Context, re
 	// User must have can_view_member permission on the organization
 	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
-		Relation: permissions.PermissionCanViewMember,
+		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + membership.OrganizationID.String(),
 	})
 	if appErr != nil {

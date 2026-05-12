@@ -143,12 +143,12 @@ func (x *GetOrgMembershipsByStatusReq) GetPagination() *v1.PaginationRequest {
 }
 
 type ChangeOrgMembershipRoleReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NewRole       string                 `protobuf:"bytes,2,opt,name=new_role,json=newRole,proto3" json:"new_role,omitempty"`
-	TokenScope    string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationMembershipId string                 `protobuf:"bytes,1,opt,name=organization_membership_id,json=organizationMembershipId,proto3" json:"organization_membership_id,omitempty"`
+	NewRole                  string                 `protobuf:"bytes,2,opt,name=new_role,json=newRole,proto3" json:"new_role,omitempty"`
+	TokenScope               string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *ChangeOrgMembershipRoleReq) Reset() {
@@ -181,9 +181,9 @@ func (*ChangeOrgMembershipRoleReq) Descriptor() ([]byte, []int) {
 	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ChangeOrgMembershipRoleReq) GetId() string {
+func (x *ChangeOrgMembershipRoleReq) GetOrganizationMembershipId() string {
 	if x != nil {
-		return x.Id
+		return x.OrganizationMembershipId
 	}
 	return ""
 }
@@ -203,12 +203,12 @@ func (x *ChangeOrgMembershipRoleReq) GetTokenScope() string {
 }
 
 type ChangeOrgMembershipStatusReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NewStatus     string                 `protobuf:"bytes,2,opt,name=new_status,json=newStatus,proto3" json:"new_status,omitempty"`
-	TokenScope    string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationMembershipId string                 `protobuf:"bytes,1,opt,name=organization_membership_id,json=organizationMembershipId,proto3" json:"organization_membership_id,omitempty"`
+	NewStatus                string                 `protobuf:"bytes,2,opt,name=new_status,json=newStatus,proto3" json:"new_status,omitempty"`
+	TokenScope               string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *ChangeOrgMembershipStatusReq) Reset() {
@@ -241,9 +241,9 @@ func (*ChangeOrgMembershipStatusReq) Descriptor() ([]byte, []int) {
 	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ChangeOrgMembershipStatusReq) GetId() string {
+func (x *ChangeOrgMembershipStatusReq) GetOrganizationMembershipId() string {
 	if x != nil {
-		return x.Id
+		return x.OrganizationMembershipId
 	}
 	return ""
 }
@@ -338,14 +338,14 @@ const file_organization_service_org_membership_v1_request_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12:\n" +
 	"\n" +
 	"pagination\x18\x03 \x01(\v2\x1a.core.v1.PaginationRequestR\n" +
-	"pagination\"h\n" +
-	"\x1aChangeOrgMembershipRoleReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
+	"pagination\"\x96\x01\n" +
+	"\x1aChangeOrgMembershipRoleReq\x12<\n" +
+	"\x1aorganization_membership_id\x18\x01 \x01(\tR\x18organizationMembershipId\x12\x19\n" +
 	"\bnew_role\x18\x02 \x01(\tR\anewRole\x12\x1f\n" +
 	"\vtoken_scope\x18\x03 \x01(\tR\n" +
-	"tokenScope\"n\n" +
-	"\x1cChangeOrgMembershipStatusReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"tokenScope\"\x9c\x01\n" +
+	"\x1cChangeOrgMembershipStatusReq\x12<\n" +
+	"\x1aorganization_membership_id\x18\x01 \x01(\tR\x18organizationMembershipId\x12\x1d\n" +
 	"\n" +
 	"new_status\x18\x02 \x01(\tR\tnewStatus\x12\x1f\n" +
 	"\vtoken_scope\x18\x03 \x01(\tR\n" +
