@@ -2,13 +2,13 @@ package organization_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
@@ -28,23 +28,45 @@ import (
 
 // NOTE: do not perform any validation test here, as it has already been tested in validation_test.go
 
-func TestMain(m *testing.M) {
-	// Load .env file before running tests
-	if err := godotenv.Load("../../../.env"); err != nil {
-		// Optional: fall back to .env.test
-		if err := godotenv.Load("../../.env.test"); err != nil {
-			// Skip if no .env file (for CI)
-			if os.Getenv("CI") == "" {
-				panic("No .env file found")
-			}
-		}
-	}
+var (
+	fgaClient    *coreopenfga.Client
+	storeManager coreopenfga.StoreManager
+)
 
-	os.Exit(m.Run())
+func TestMain(m *testing.M) {
+	f, err := coreopenfga.NewClient("http://localhost:9000")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create OpenFGA client:", err)
+		os.Exit(1)
+	}
+	fgaClient = f
+
+	ctx := context.Background()
+	sm := coreopenfga.NewStoreManager(f.Client)
+	if _, err = sm.Create(ctx, testutils.GenerateRandomString(10)); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create store:", err)
+		os.Exit(1)
+	}
+	storeManager = sm
+	f.StoreID = sm.GetStoreID()
+
+	mm := coreopenfga.NewModelManager(f.Client, sm)
+	if err = mm.Write(ctx, "organization"); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to write model:", err)
+		os.Exit(1)
+	}
+	f.AuthorizationModelID = mm.GetAuthorizationModelID()
+
+	code := m.Run()
+
+	// Best-effort cleanup — ignore errors so a failed store delete
+	// doesn't mask a real test failure.
+	_ = storeManager.Delete(ctx)
+	os.Exit(code)
 }
 
 func Test_CreateOrganization_Success_Integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 
@@ -112,13 +134,13 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Success_Integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-4",
+		Slug: strings.ToLower(testutils.GenerateRandomString(5)),
 	})
 
 	fetchedOrg, err := service.GetOrganization(ctx, &corev1.IDRequest{
@@ -164,13 +186,13 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Failure_Integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-5",
+		Slug: strings.ToLower(testutils.GenerateRandomString(5)),
 	})
 	id, _ := uuid.Parse(org.Id)
 	err := q.DeleteOrganizationHard(ctx, id)
@@ -193,7 +215,7 @@ func Test_GetOrganization_Failure_Integration(t *testing.T) {
 }
 
 func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
@@ -268,7 +290,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 }
 
 func Test_DeleteOrganization_Success_Integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 
@@ -330,7 +352,7 @@ func Test_DeleteOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
@@ -391,7 +413,7 @@ func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
 }
 
 func Test_ArchiveOrganization_Success_integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 
@@ -450,7 +472,7 @@ func Test_ArchiveOrganization_Success_integration(t *testing.T) {
 }
 
 func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
-	q, pool, fgaClient := servicetestutils.MustCreateService()
+	q, pool, _ := servicetestutils.MustCreateService()
 	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
