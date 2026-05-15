@@ -15,6 +15,15 @@ func CheckCanChangeMembershipStatus(
 	tuppleManager coreopenfga.TuppleManager,
 	actorMembership, targetMembership *db.OrganizationMembership,
 ) *apperror.AppError {
+	return CheckMembershipPermission(ctx, tuppleManager, actorMembership, permissions.PermissionCanChangeMemberStatus)
+}
+
+func CheckMembershipPermission(
+	ctx context.Context,
+	tuppleManager coreopenfga.TuppleManager,
+	actorMembership *db.OrganizationMembership,
+	permission string,
+) *apperror.AppError {
 	checkReq := client.ClientCheckRequest{}
 	if permissions.IsValidRole(actorMembership.Role) {
 		checkReq = client.ClientCheckRequest{
@@ -26,7 +35,7 @@ func CheckCanChangeMembershipStatus(
 		checkReq = client.ClientCheckRequest{
 			User:     "user:" + actorMembership.UserID.String(),
 			Relation: "allowed",
-			Object:   permissions.GeneratePermissionObject(actorMembership.OrganizationID.String(), permissions.PermissionCanChangeMemberStatus),
+			Object:   permissions.GeneratePermissionObject(actorMembership.OrganizationID.String(), permission),
 		}
 	}
 	res, appErr := tuppleManager.Check(ctx, checkReq)
@@ -34,7 +43,7 @@ func CheckCanChangeMembershipStatus(
 		return appErr
 	}
 	if !*res.Allowed {
-		return apperror.ErrPermissionDenied.WithMessage("you do not have permission to change this membership's status")
+		return apperror.ErrPermissionDenied.WithMessage("you do not have permission to perform this membership operation")
 	}
 	return nil
 }

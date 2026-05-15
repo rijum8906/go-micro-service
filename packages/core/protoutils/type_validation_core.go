@@ -37,23 +37,24 @@ func ValidatePaginationReq(req *corev1.PaginationRequest) *apperror.AppError {
 	return nil
 }
 
-// ValidateIDAndScopedTokenReq ensures the ID is a valid UUID and the scope is provided.
-func ValidateIDAndScopedTokenReq(req *corev1.IDAndScopedTokenRequest) *apperror.AppError {
+// ParseIDAndScopedTokenReq ensures the ID is a valid UUID and the scope is provided.
+func ParseIDAndScopedTokenReq(req *corev1.IDAndScopedTokenRequest) (uuid.UUID, *apperror.AppError) {
 	if req == nil {
-		return apperror.ErrValidation.WithMessage("request body cannot be nil")
+		return uuid.UUID{}, apperror.ErrValidation.WithMessage("request body cannot be nil")
 	}
 
 	// Validate UUID format
-	if _, err := uuid.Parse(req.Id); err != nil {
-		return apperror.ErrValidation.WithMessage("provided id is not a valid uuid")
+	id, err := uuid.Parse(req.Id)
+	if err != nil {
+		return uuid.UUID{}, apperror.ErrValidation.WithMessage("provided id is not a valid uuid")
 	}
 
 	// Validate Token Scope
 	if !token.ValidateTokenScope(req.TokenScope) {
-		return apperror.ErrValidation.WithMessage("token scope must be provided")
+		return uuid.UUID{}, apperror.ErrValidation.WithMessage("token scope must be provided")
 	}
 
-	return nil
+	return id, nil
 }
 
 // ValidateEmailReq ensures the email is not empty and a proper email

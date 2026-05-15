@@ -48,7 +48,7 @@ CREATE TABLE "organization_memberships" (
   CONSTRAINT "uq_organization_memberships_org_user" UNIQUE ("organization_id", "user_id"),
   CONSTRAINT "organization_memberships_deleted_by_mem_id_fkey" FOREIGN KEY ("deleted_by_mem_id") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT "organization_memberships_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
-  CONSTRAINT "organization_memberships_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying, 'left'::character varying])::text[]))
+  CONSTRAINT "organization_memberships_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying, 'banned'::character varying, 'left'::character varying, 'removed'::character varying])::text[]))
 );
 -- Create index "idx_organization_memberships_organization_id" to table: "organization_memberships"
 CREATE INDEX "idx_organization_memberships_organization_id" ON "organization_memberships" ("organization_id");
@@ -59,7 +59,7 @@ COMMENT ON TABLE "organization_memberships" IS 'Junction table linking users to 
 -- Set comment to column: "role" on table: "organization_memberships"
 COMMENT ON COLUMN "organization_memberships"."role" IS 'owner=full org control, admin=manage members/teams, member=standard access';
 -- Set comment to column: "status" on table: "organization_memberships"
-COMMENT ON COLUMN "organization_memberships"."status" IS 'active=current member, suspended=temporarily blocked, left=voluntarily departed';
+COMMENT ON COLUMN "organization_memberships"."status" IS 'active=current member, suspended=temporarily blocked, banned=blocked from the organization, left=voluntarily departed, removed=administratively removed';
 -- Create trigger "trg_organization_memberships_updated_at"
 CREATE TRIGGER "trg_organization_memberships_updated_at" BEFORE UPDATE ON "organization_memberships" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();
 -- Create "organization_teams" table

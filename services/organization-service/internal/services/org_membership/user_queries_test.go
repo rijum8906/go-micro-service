@@ -153,7 +153,7 @@ func Test_GetMyMembership_Integration_Failure(t *testing.T) {
 				Object:   "organization:" + orgSuite.Org.ID.String(),
 			},
 		})
-		suite.Q.DeleteOrganizationMembershipHard(suite.Ctx, otherMembership.ID)
+		suite.Q.HardDeleteOrganizationMembership(suite.Ctx, otherMembership.ID)
 	})
 
 	testCases := []struct {

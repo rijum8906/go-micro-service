@@ -142,7 +142,7 @@ func TestValidateIDAndScopedTokenReq(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := protoutils.ValidateIDAndScopedTokenReq(tt.req)
+			_, err := protoutils.ParseIDAndScopedTokenReq(tt.req)
 
 			if tt.wantMessage == "" {
 				if err != nil {

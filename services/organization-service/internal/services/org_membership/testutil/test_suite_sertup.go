@@ -13,9 +13,7 @@ import (
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
-	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
-	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
 	orgmembership "github.com/rijum8906/relay/services/organization-service/internal/services/org_membership"
 )
 
@@ -29,23 +27,19 @@ type TestSuite struct {
 }
 
 func NewTestSuite(t *testing.T, fgaClient *coreopenfga.Client) *TestSuite {
-	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
-	q := db.New(pool)
-	service := orgmembership.New(q, servicetestutils.MockUserServiceClient, fgaClient, &config.Env{
-		InvitationTokenTTL: 7,
-	})
+	service := orgmembership.NewTestService(fgaClient)
 
 	ctx := context.Background()
 
 	t.Cleanup(func() {
-		pool.Close()
+		service.DBPool.Close()
 	})
 
 	permissionManager := permissions.NewPermissionManager(fgaClient)
 
 	return &TestSuite{
-		Pool:              pool,
-		Q:                 q,
+		Pool:              service.DBPool,
+		Q:                 service.DBQ,
 		TuppleManager:     coreopenfga.NewTupleManager(fgaClient),
 		PermissionManager: permissionManager,
 		Service:           service,
@@ -103,7 +97,7 @@ func (to *OrgTestSuite) CreateOwner(t *testing.T, ownerID uuid.UUID) {
 	}
 
 	t.Cleanup(func() {
-		to.Suite.Q.DeleteOrganizationMembershipHard(to.Suite.Ctx, membership.ID)
+		to.Suite.Q.HardDeleteOrganizationMembership(to.Suite.Ctx, membership.ID)
 		to.Suite.TuppleManager.Delete(to.Suite.Ctx, []client.ClientTupleKeyWithoutCondition{
 			{
 				User:     "user:" + ownerID.String(),
@@ -137,7 +131,7 @@ func (to *OrgTestSuite) CreateAdmin(t *testing.T, adminID uuid.UUID) {
 	}
 
 	t.Cleanup(func() {
-		to.Suite.Q.DeleteOrganizationMembershipHard(to.Suite.Ctx, membership.ID)
+		to.Suite.Q.HardDeleteOrganizationMembership(to.Suite.Ctx, membership.ID)
 		to.Suite.TuppleManager.Delete(to.Suite.Ctx, []client.ClientTupleKeyWithoutCondition{
 			{
 				User:     "user:" + adminID.String(),
@@ -171,7 +165,7 @@ func (to *OrgTestSuite) CreateMember(t *testing.T, memberID uuid.UUID) {
 	}
 
 	t.Cleanup(func() {
-		to.Suite.Q.DeleteOrganizationMembershipHard(to.Suite.Ctx, membership.ID)
+		to.Suite.Q.HardDeleteOrganizationMembership(to.Suite.Ctx, membership.ID)
 		to.Suite.TuppleManager.Delete(to.Suite.Ctx, []client.ClientTupleKeyWithoutCondition{
 			{
 				User:     "user:" + memberID.String(),
