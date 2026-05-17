@@ -69,7 +69,7 @@ type OrganizationMembership struct {
 	UserID         uuid.UUID
 	// owner=full org control, admin=manage members/teams, member=standard access
 	Role string
-	// active=current member, suspended=temporarily blocked, left=voluntarily departed
+	// active=current member, suspended=temporarily blocked, banned=blocked from the organization, left=voluntarily departed, removed=administratively removed
 	Status         string
 	JoinedAt       pgtype.Timestamptz
 	LeftAt         pgtype.Timestamptz

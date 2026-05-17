@@ -169,7 +169,7 @@ func Test_LeaveOrganization_Integration_Success(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		membership, err := suite.Q.GetOrganizationMembershipByIDWithAllStatuses(ctx, orgSuite.AdminMembership.ID)
+		membership, err := suite.Q.GetOrganizationMembershipWithAllStatuses(ctx, orgSuite.AdminMembership.ID)
 		require.False(t, errors.Is(err, sql.ErrNoRows))
 		require.Equal(t, constants.OrgMemStatusLeft, membership.Status)
 	})
@@ -186,7 +186,7 @@ func Test_LeaveOrganization_Integration_Success(t *testing.T) {
 			Id:         orgSuite.OwnerMembership.ID.String(),
 		})
 		require.NoError(t, err)
-		membership, err := suite.Q.GetOrganizationMembershipByIDWithAllStatuses(ctx, orgSuite.OwnerMembership.ID)
+		membership, err := suite.Q.GetOrganizationMembershipWithAllStatuses(ctx, orgSuite.OwnerMembership.ID)
 		require.False(t, errors.Is(err, sql.ErrNoRows))
 		require.Equal(t, constants.OrgMemStatusLeft, membership.Status)
 	})
@@ -1065,7 +1065,7 @@ func orgMembershipUserCtx(userID uuid.UUID) context.Context {
 func setOrgMembershipStatus(t *testing.T, suite *testutil.TestSuite, membershipID uuid.UUID, status string) {
 	t.Helper()
 
-	_, err := suite.Q.UpdateOrganizationMembershipStatusByID(suite.Ctx, db.UpdateOrganizationMembershipStatusByIDParams{
+	_, err := suite.Q.UpdateOrganizationMembershipStatus(suite.Ctx, db.UpdateOrganizationMembershipStatusParams{
 		ID:     membershipID,
 		Status: status,
 	})
@@ -1075,7 +1075,7 @@ func setOrgMembershipStatus(t *testing.T, suite *testutil.TestSuite, membershipI
 func requireOrgMembershipStatus(t *testing.T, suite *testutil.TestSuite, membershipID uuid.UUID, expectedStatus string) {
 	t.Helper()
 
-	membership, err := suite.Q.GetOrganizationMembershipByIDWithAllStatuses(suite.Ctx, membershipID)
+	membership, err := suite.Q.GetOrganizationMembershipWithAllStatuses(suite.Ctx, membershipID)
 	require.NoError(t, err)
 	require.Equal(t, expectedStatus, membership.Status)
 }
@@ -1083,7 +1083,7 @@ func requireOrgMembershipStatus(t *testing.T, suite *testutil.TestSuite, members
 func requireOrgMembershipRole(t *testing.T, suite *testutil.TestSuite, membershipID uuid.UUID, expectedRole string) {
 	t.Helper()
 
-	membership, err := suite.Q.GetOrganizationMembershipByIDWithAllStatuses(suite.Ctx, membershipID)
+	membership, err := suite.Q.GetOrganizationMembershipWithAllStatuses(suite.Ctx, membershipID)
 	require.NoError(t, err)
 	require.Equal(t, expectedRole, membership.Role)
 }
