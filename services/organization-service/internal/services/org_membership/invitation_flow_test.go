@@ -143,6 +143,9 @@ func Test_SendInvitation_Integration_Failure(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := tc.setupContext()
+			servicetestutils.MockUserServiceClient.On("GetUser", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
+				Id: uuid.NewString(),
+			}, nil)
 			servicetestutils.MockUserServiceClient.On("CheckEmailExists", ctx, &corev1.EmailRequest{Email: tc.email}).Return(&userv1.CheckExistsResponse{Exists: tc.emailExists}, nil)
 			_, err := service.SendInvitation(ctx, &org_membershipv1.SendInvitationRequest{
 				Email:          tc.email,
@@ -235,7 +238,7 @@ func Test_AcceptInvitation_Integration_Failure(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	_, err = suite.Q.AccecptOrganizationInvitation(suite.Ctx, db.AccecptOrganizationInvitationParams{
+	_, err = suite.Q.AcceptOrganizationInvitation(suite.Ctx, db.AcceptOrganizationInvitationParams{
 		ID:          invalidaInvitation2.ID,
 		RespondedBy: uuid.New(),
 	})
@@ -266,7 +269,7 @@ func Test_AcceptInvitation_Integration_Failure(t *testing.T) {
 			expectedUserEmail:   email2,
 			organizationID:      orgSuite.Org.ID.String(),
 			invitationTokenHash: invalidaInvitation.TokenHash,
-			expectedError:       string(apperror.CodeValidation),
+			expectedError:       string(apperror.CodeNotFound),
 		},
 		{
 			name: "accepted_invitation_won't_be_accepted_twice_returns_not_found_error",
@@ -352,7 +355,7 @@ func Test_AcceptInvitation_Integration_Success(t *testing.T) {
 	require.True(t, res.Success)
 
 	// Check the actual invitation
-	invitation, err = suite.Q.GetOrganizationInvitationByTokenHash(suite.Ctx, invitation.TokenHash)
+	invitation, err = suite.Q.GetOrganizationInvitationWithAllStatus(suite.Ctx, invitation.ID)
 	require.NoError(t, err)
 	require.Equal(t, invitation.RespondedAt.Valid, true)
 	require.Equal(t, invitation.RespondedBy.String(), userID.String())
@@ -417,7 +420,7 @@ func Test_DeclineInvitation_Integration_Failure(t *testing.T) {
 	require.NoError(t, err)
 
 	// Accept this invitation first
-	_, err = suite.Q.AccecptOrganizationInvitation(suite.Ctx, db.AccecptOrganizationInvitationParams{
+	_, err = suite.Q.AcceptOrganizationInvitation(suite.Ctx, db.AcceptOrganizationInvitationParams{
 		ID:          acceptedInvitation.ID,
 		RespondedBy: uuid.New(),
 	})
@@ -469,7 +472,7 @@ func Test_DeclineInvitation_Integration_Failure(t *testing.T) {
 			},
 			expectedUserEmail:   email2,
 			invitationTokenHash: expiredInvitation.TokenHash,
-			expectedError:       string(apperror.CodeValidation),
+			expectedError:       string(apperror.CodeNotFound),
 		},
 		{
 			name: "already_accepted_invitation_returns_not_found_error",
@@ -575,7 +578,7 @@ func Test_DeclineInvitation_Integration_Success(t *testing.T) {
 	require.True(t, res.Success)
 
 	// Verify the invitation was marked as declined
-	declinedInvitation, err := suite.Q.GetOrganizationInvitationByTokenHash(suite.Ctx, invitation.TokenHash)
+	declinedInvitation, err := suite.Q.GetOrganizationInvitationWithAllStatus(suite.Ctx, invitation.ID)
 	require.NoError(t, err)
 	require.True(t, declinedInvitation.RespondedAt.Valid, "RespondedAt should be set")
 	require.Equal(t, userID.String(), declinedInvitation.RespondedBy.String(), "RespondedBy should match the user who declined")
@@ -622,7 +625,7 @@ func Test_DeclineInvitation_Integration_UserServiceError(t *testing.T) {
 	))
 
 	// Mock user service error
-	expectedErr := apperror.ErrInternal.WithMessage("user service unavailable")
+	expectedErr := apperror.ErrThirdParty.WithMessage("user service unavailable")
 	servicetestutils.MockUserServiceClient.On("GetUser", ctx, &corev1.EmptyRequest{}).Return(nil, expectedErr)
 
 	_, err = service.DeclineInvitation(ctx, &corev1.TokenHashRequest{

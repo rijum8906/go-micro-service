@@ -58,4 +58,8 @@ var (
 		Code:    CodeValidation,
 		Message: "Validation Failed",
 	}
+	ErrConflict = &AppError{
+		Code:    CodeConflict,
+		Message: "Conflict",
+	}
 )

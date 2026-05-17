@@ -24,13 +24,9 @@ SELECT EXISTS (
 SELECT * FROM organization_memberships
 WHERE id = $1 AND status NOT IN ('left', 'removed');
 
--- name: GetOrganizationMembershipByUserIDAndOrgID :one
-SELECT * FROM organization_memberships
-WHERE user_id = $1 AND organization_id = $2 AND status NOT IN ('left', 'removed');
-
 -- name: GetOrganizationMembershipByOrgIDAndUserID :one
 SELECT * FROM organization_memberships
-WHERE organization_id = $1 AND user_id = $2 AND status NOT IN ('left', 'removed');
+WHERE user_id = $1 AND organization_id = $2 AND status NOT IN ('left', 'removed');
 
 -- name: GetOrganizationMembershipsByUserID :many
 SELECT * FROM organization_memberships
@@ -62,7 +58,7 @@ LIMIT $3 OFFSET $4;
 
 -- NOTE: This method returns membership regardless of status
 -- Use for operations that need to see left/removed memberships
--- name: GetOrganizationMembershipByIDWithAllStatuses :one
+-- name: GetOrganizationMembershipWithAllStatuses :one
 SELECT * FROM organization_memberships
 WHERE id = $1;
 
@@ -109,7 +105,7 @@ RETURNING *;
 
 -- NOTE: Use this when you need to update status without the active check
 -- For example, when undoing a soft delete or updating banned->active
--- name: UpdateOrganizationMembershipStatusByID :one
+-- name: UpdateOrganizationMembershipStatusWIthAllStatus :one
 UPDATE organization_memberships
 SET 
     status = $2,
@@ -137,7 +133,7 @@ SET
 WHERE id = $1 
     AND status NOT IN ('left', 'removed');
 
--- name: SoftDeleteOrganizationMembershipByUserAndOrg :exec
+-- name: SoftDeleteOrganizationMembershipByOrgIDAndUserID :exec
 UPDATE organization_memberships
 SET 
     status = 'left',

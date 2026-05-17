@@ -272,7 +272,7 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 
 	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership (allow all statuses for idempotency)
-		target, err := q.GetOrganizationMembershipByIDWithAllStatuses(ctx, membershipID)
+		target, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
 		if err != nil {
 			return coreutils.ParseDBError(err, "target membership")
 		}
@@ -451,7 +451,7 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 
 	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership (allow all statuses for idempotency)
-		target, err := q.GetOrganizationMembershipByIDWithAllStatuses(ctx, membershipID)
+		target, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
 		if err != nil {
 			return coreutils.ParseDBError(err, "target membership")
 		}
@@ -638,7 +638,7 @@ func (s *OrgMembershipService) SuspendOrganizationMembership(
 
 	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership (allow all statuses for idempotency)
-		target, err := q.GetOrganizationMembershipByIDWithAllStatuses(ctx, membershipID)
+		target, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
 		if err != nil {
 			return coreutils.ParseDBError(err, "target membership")
 		}
@@ -824,7 +824,7 @@ func (s *OrgMembershipService) ActivateOrganizationMembership(
 
 	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership (allow all statuses for idempotency)
-		target, err := q.GetOrganizationMembershipByIDWithAllStatuses(ctx, membershipID)
+		target, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
 		if err != nil {
 			return coreutils.ParseDBError(err, "target membership")
 		}
@@ -1052,7 +1052,7 @@ func (s *OrgMembershipService) ChangeOrganizationMembershipRole(
 	// Execute transaction
 	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership
-		targetMembership, err := q.GetOrganizationMembershipByIDWithAllStatuses(ctx, membershipID)
+		targetMembership, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
 		if err != nil {
 			return coreutils.ParseDBError(err, "target membership")
 		}
@@ -1293,7 +1293,7 @@ func (s *OrgMembershipService) RemoveOrganizationMember(
 	// Execute transaction
 	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership
-		targetMembership, err := q.GetOrganizationMembershipByIDWithAllStatuses(ctx, membershipID)
+		targetMembership, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
 		if err != nil {
 			return coreutils.ParseDBError(err, "target membership")
 		}

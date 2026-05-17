@@ -11,18 +11,26 @@ import (
 )
 
 type Querier interface {
-	AccecptOrganizationInvitation(ctx context.Context, arg AccecptOrganizationInvitationParams) (OrganizationInvitation, error)
+	// ===========================================
+	// UPDATE METHODS
+	// ===========================================
+	AcceptOrganizationInvitation(ctx context.Context, arg AcceptOrganizationInvitationParams) (OrganizationInvitation, error)
 	ArchiveOrganization(ctx context.Context, id uuid.UUID) error
 	ChangeOrganizationOwnership(ctx context.Context, arg ChangeOrganizationOwnershipParams) error
 	CheckOrganizationExists(ctx context.Context, id uuid.UUID) (bool, error)
 	// NOTE: exists check methods must not use 'deleted_at IS NULL'
 	CheckOrganizationExistsBySlug(ctx context.Context, slug string) (bool, error)
+	// ===========================================
+	// CHECK METHODS
+	// ===========================================
 	CheckOrganizationInvitationExists(ctx context.Context, id uuid.UUID) (bool, error)
 	CheckOrganizationInvitationExistsByTokenHash(ctx context.Context, tokenHash string) (bool, error)
 	// ============================================
 	// GET METHODS (exclude left/removed by default)
 	// ============================================
 	CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error)
+	// Check if there's a valid pending invitation for email+org
+	CheckPendingInvitationExists(ctx context.Context, arg CheckPendingInvitationExistsParams) (bool, error)
 	CountActiveMembersByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error)
 	// ============================================
 	// COUNT METHODS
@@ -35,9 +43,14 @@ type Querier interface {
 	CreateOrganizationMembership(ctx context.Context, arg CreateOrganizationMembershipParams) (OrganizationMembership, error)
 	CreateOrganizationMembershipOwner(ctx context.Context, arg CreateOrganizationMembershipOwnerParams) (OrganizationMembership, error)
 	DeclineOrganizationInvitation(ctx context.Context, arg DeclineOrganizationInvitationParams) (OrganizationInvitation, error)
+	// Clean up expired invitations permanently (background job)
+	DeleteExpiredInvitations(ctx context.Context) error
 	DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error
 	DeleteOrganizationHard(ctx context.Context, id uuid.UUID) error
+	// WARNING: Hard delete - use with caution
 	DeleteOrganizationInvitation(ctx context.Context, id uuid.UUID) error
+	// Clean up expired invitations (can be run as a background job)
+	ExpireOldInvitations(ctx context.Context) error
 	// ============================================
 	// BATCH METHODS
 	// ============================================
@@ -55,17 +68,20 @@ type Querier interface {
 	GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
 	GetOrganizationBySlug(ctx context.Context, slug string) (Organization, error)
 	GetOrganizationInvitation(ctx context.Context, id uuid.UUID) (OrganizationInvitation, error)
+	// ===========================================
+	// GET METHODS
+	// ===========================================
 	GetOrganizationInvitationByTokenHash(ctx context.Context, tokenHash string) (OrganizationInvitation, error)
+	GetOrganizationInvitationWithAllStatus(ctx context.Context, id uuid.UUID) (OrganizationInvitation, error)
 	GetOrganizationInvitationsByOrgID(ctx context.Context, arg GetOrganizationInvitationsByOrgIDParams) ([]OrganizationInvitation, error)
 	GetOrganizationInvitationsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationInvitationsByOrgIDAndStatusParams) ([]OrganizationInvitation, error)
 	GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error)
-	// NOTE: This method returns membership regardless of status
-	// Use for operations that need to see left/removed memberships
-	GetOrganizationMembershipByIDWithAllStatuses(ctx context.Context, id uuid.UUID) (OrganizationMembership, error)
 	GetOrganizationMembershipByOrgIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByOrgIDAndUserIDParams) (OrganizationMembership, error)
-	GetOrganizationMembershipByUserIDAndOrgID(ctx context.Context, arg GetOrganizationMembershipByUserIDAndOrgIDParams) (OrganizationMembership, error)
 	// NOTE: Get history of a user's memberships (including left/removed)
 	GetOrganizationMembershipHistory(ctx context.Context, arg GetOrganizationMembershipHistoryParams) ([]OrganizationMembership, error)
+	// NOTE: This method returns membership regardless of status
+	// Use for operations that need to see left/removed memberships
+	GetOrganizationMembershipWithAllStatuses(ctx context.Context, id uuid.UUID) (OrganizationMembership, error)
 	GetOrganizationMembershipsByOrgID(ctx context.Context, arg GetOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndRoleParams) ([]OrganizationMembership, error)
 	// NOTE: This method returns ALL statuses including 'left' and 'removed'
@@ -73,6 +89,10 @@ type Querier interface {
 	GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error)
 	GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error)
 	GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrganizationsByCreatedByParams) ([]Organization, error)
+	// Check for existing pending invitation (idempotency)
+	GetPendingInvitationByEmailAndOrg(ctx context.Context, arg GetPendingInvitationByEmailAndOrgParams) (OrganizationInvitation, error)
+	// Get all pending invitations for a user by email
+	GetPendingInvitationsByEmail(ctx context.Context, email string) ([]OrganizationInvitation, error)
 	// ============================================
 	// HARD DELETE METHODS (Use sparingly)
 	// ============================================
@@ -90,7 +110,7 @@ type Querier interface {
 	// SOFT DELETE METHODS
 	// ============================================
 	SoftDeleteOrganizationMembership(ctx context.Context, arg SoftDeleteOrganizationMembershipParams) error
-	SoftDeleteOrganizationMembershipByUserAndOrg(ctx context.Context, arg SoftDeleteOrganizationMembershipByUserAndOrgParams) error
+	SoftDeleteOrganizationMembershipByOrgIDAndUserID(ctx context.Context, arg SoftDeleteOrganizationMembershipByOrgIDAndUserIDParams) error
 	// NOTE: update methods must use 'deleted_at IS NULL'
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error)
 	// ============================================
@@ -100,7 +120,7 @@ type Querier interface {
 	UpdateOrganizationMembershipStatus(ctx context.Context, arg UpdateOrganizationMembershipStatusParams) (OrganizationMembership, error)
 	// NOTE: Use this when you need to update status without the active check
 	// For example, when undoing a soft delete or updating banned->active
-	UpdateOrganizationMembershipStatusByID(ctx context.Context, arg UpdateOrganizationMembershipStatusByIDParams) (OrganizationMembership, error)
+	UpdateOrganizationMembershipStatusWIthAllStatus(ctx context.Context, arg UpdateOrganizationMembershipStatusWIthAllStatusParams) (OrganizationMembership, error)
 }
 
 var _ Querier = (*Queries)(nil)
