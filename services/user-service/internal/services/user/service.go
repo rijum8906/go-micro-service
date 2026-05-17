@@ -7,6 +7,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreutils"
 	"github.com/rijum8906/relay/packages/core/dto"
+	"github.com/rijum8906/relay/packages/core/protoutils"
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
@@ -186,13 +187,23 @@ func (s *userService) CheckExists(ctx context.Context, id string) (bool, *apperr
 	if err != nil {
 		return false, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
 	}
-	user, appErr := s.repos.User.GetUser(ctx, useID)
+	exists, appErr := s.repos.User.CheckExists(ctx, useID)
 	if appErr != nil {
 		return false, appErr
 	}
-	if user == nil {
-		return false, nil
+
+	return exists, nil
+}
+
+func (s *userService) CheckEmailExists(ctx context.Context, email string) (bool, *apperror.AppError) {
+	if appErr := protoutils.ValidateEmailReq(&corev1.EmailRequest{Email: email}); appErr != nil {
+		return false, appErr
 	}
 
-	return true, nil
+	exists, err := s.repos.User.CheckEmailExists(ctx, email)
+	if err != nil {
+		return false, apperror.ErrInternal.WithMessage("Failed to check user exists").WithDetail("error", err.Error())
+	}
+
+	return exists, nil
 }

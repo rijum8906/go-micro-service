@@ -1,5 +1,5 @@
-// Package testutils
-package testutils
+// Package servicetestutils
+package servicetestutils
 
 import (
 	"context"

@@ -21,17 +21,18 @@ func main() {
 		log.Fatalf("failed to create application: %v\nDetails:%v", appErr, appErr.Details)
 	}
 
-	logger := application.GetLogger()
+	logger := application.Logger()
 
 	runErrCh := make(chan *apperror.AppError, 1)
 	go func() {
 		runErrCh <- application.Run()
 	}()
 
-	logger.Info("service started",
-		zap.String("service", application.GetConfig().AppName),
-		zap.String("env", application.GetConfig().AppEnv),
-		zap.Int("port", application.GetConfig().Port),
+	logger.Info(
+		"service started",
+		zap.String("service", application.Config().AppName),
+		zap.String("env", application.Config().AppEnv),
+		zap.Int("port", application.Config().Port),
 	)
 
 	signalCh := make(chan os.Signal, 1)
@@ -40,14 +41,16 @@ func main() {
 
 	select {
 	case sig := <-signalCh:
-		logger.Info("shutdown signal received",
+		logger.Info(
+			"shutdown signal received",
 			zap.String("signal", sig.String()),
 		)
 
-		application.Shutdown()
+		application.Cleanup()
 
 		if appErr = <-runErrCh; appErr != nil {
-			logger.Error("shutdown completed with server error",
+			logger.Error(
+				"shutdown completed with server error",
 				zap.Error(appErr),
 			)
 			os.Exit(1)
@@ -57,7 +60,8 @@ func main() {
 
 	case appErr = <-runErrCh:
 		if appErr != nil {
-			logger.Error("service stopped with error",
+			logger.Error(
+				"service stopped with error",
 				zap.Error(appErr),
 			)
 			os.Exit(1)

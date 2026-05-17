@@ -11,6 +11,8 @@ import (
 )
 
 type Querier interface {
+	CheckUserEmailExists(ctx context.Context, email string) (bool, error)
+	CheckUserExists(ctx context.Context, id uuid.UUID) (bool, error)
 	CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)

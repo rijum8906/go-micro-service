@@ -17,13 +17,13 @@ message GetOrgMembershipsByStatusReq {
 }
 
 message ChangeOrgMembershipRoleReq {
-  string id = 1;
+  string organization_membership_id = 1;
   string new_role = 2;
   string token_scope = 3;
 }
 
-message ChangeOrgMembershipStatusReq {
-  string id = 1;
-  string new_status = 2;
-  string token_scope = 3;
+message SendInvitationRequest {
+  string organization_id = 1;
+  string email = 2;
+  string role = 3;
 }

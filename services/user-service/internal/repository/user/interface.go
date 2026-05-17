@@ -18,6 +18,8 @@ type UserRepository interface {
 	GetUser(ctx context.Context, id uuid.UUID) (*db.User, *apperror.AppError)
 	GetUserByEmail(ctx context.Context, email string) (*db.User, *apperror.AppError)
 	DeleteUser(ctx context.Context, id uuid.UUID) *apperror.AppError
+	CheckExists(ctx context.Context, id uuid.UUID) (bool, *apperror.AppError)
+	CheckEmailExists(ctx context.Context, email string) (bool, *apperror.AppError)
 }
 
 type userRepository struct {

@@ -143,12 +143,12 @@ func (x *GetOrgMembershipsByStatusReq) GetPagination() *v1.PaginationRequest {
 }
 
 type ChangeOrgMembershipRoleReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NewRole       string                 `protobuf:"bytes,2,opt,name=new_role,json=newRole,proto3" json:"new_role,omitempty"`
-	TokenScope    string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationMembershipId string                 `protobuf:"bytes,1,opt,name=organization_membership_id,json=organizationMembershipId,proto3" json:"organization_membership_id,omitempty"`
+	NewRole                  string                 `protobuf:"bytes,2,opt,name=new_role,json=newRole,proto3" json:"new_role,omitempty"`
+	TokenScope               string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *ChangeOrgMembershipRoleReq) Reset() {
@@ -181,9 +181,9 @@ func (*ChangeOrgMembershipRoleReq) Descriptor() ([]byte, []int) {
 	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ChangeOrgMembershipRoleReq) GetId() string {
+func (x *ChangeOrgMembershipRoleReq) GetOrganizationMembershipId() string {
 	if x != nil {
-		return x.Id
+		return x.OrganizationMembershipId
 	}
 	return ""
 }
@@ -202,29 +202,29 @@ func (x *ChangeOrgMembershipRoleReq) GetTokenScope() string {
 	return ""
 }
 
-type ChangeOrgMembershipStatusReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	NewStatus     string                 `protobuf:"bytes,2,opt,name=new_status,json=newStatus,proto3" json:"new_status,omitempty"`
-	TokenScope    string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+type SendInvitationRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Email          string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Role           string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
-func (x *ChangeOrgMembershipStatusReq) Reset() {
-	*x = ChangeOrgMembershipStatusReq{}
+func (x *SendInvitationRequest) Reset() {
+	*x = SendInvitationRequest{}
 	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ChangeOrgMembershipStatusReq) String() string {
+func (x *SendInvitationRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ChangeOrgMembershipStatusReq) ProtoMessage() {}
+func (*SendInvitationRequest) ProtoMessage() {}
 
-func (x *ChangeOrgMembershipStatusReq) ProtoReflect() protoreflect.Message {
+func (x *SendInvitationRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -236,28 +236,28 @@ func (x *ChangeOrgMembershipStatusReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ChangeOrgMembershipStatusReq.ProtoReflect.Descriptor instead.
-func (*ChangeOrgMembershipStatusReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use SendInvitationRequest.ProtoReflect.Descriptor instead.
+func (*SendInvitationRequest) Descriptor() ([]byte, []int) {
 	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ChangeOrgMembershipStatusReq) GetId() string {
+func (x *SendInvitationRequest) GetOrganizationId() string {
 	if x != nil {
-		return x.Id
+		return x.OrganizationId
 	}
 	return ""
 }
 
-func (x *ChangeOrgMembershipStatusReq) GetNewStatus() string {
+func (x *SendInvitationRequest) GetEmail() string {
 	if x != nil {
-		return x.NewStatus
+		return x.Email
 	}
 	return ""
 }
 
-func (x *ChangeOrgMembershipStatusReq) GetTokenScope() string {
+func (x *SendInvitationRequest) GetRole() string {
 	if x != nil {
-		return x.TokenScope
+		return x.Role
 	}
 	return ""
 }
@@ -278,18 +278,16 @@ const file_organization_service_org_membership_v1_request_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12:\n" +
 	"\n" +
 	"pagination\x18\x03 \x01(\v2\x1a.core.v1.PaginationRequestR\n" +
-	"pagination\"h\n" +
-	"\x1aChangeOrgMembershipRoleReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
+	"pagination\"\x96\x01\n" +
+	"\x1aChangeOrgMembershipRoleReq\x12<\n" +
+	"\x1aorganization_membership_id\x18\x01 \x01(\tR\x18organizationMembershipId\x12\x19\n" +
 	"\bnew_role\x18\x02 \x01(\tR\anewRole\x12\x1f\n" +
 	"\vtoken_scope\x18\x03 \x01(\tR\n" +
-	"tokenScope\"n\n" +
-	"\x1cChangeOrgMembershipStatusReq\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
-	"\n" +
-	"new_status\x18\x02 \x01(\tR\tnewStatus\x12\x1f\n" +
-	"\vtoken_scope\x18\x03 \x01(\tR\n" +
-	"tokenScopeB\xcc\x02\n" +
+	"tokenScope\"j\n" +
+	"\x15SendInvitationRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04roleB\xcc\x02\n" +
 	"*com.organization_service.org_membership.v1B\fRequestProtoP\x01Z^github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1;org_membershipv1\xa2\x02\x03OOX\xaa\x02$OrganizationService.OrgMembership.V1\xca\x02$OrganizationService\\OrgMembership\\V1\xe2\x020OrganizationService\\OrgMembership\\V1\\GPBMetadata\xea\x02&OrganizationService::OrgMembership::V1b\x06proto3"
 
 var (
@@ -309,7 +307,7 @@ var file_organization_service_org_membership_v1_request_proto_goTypes = []any{
 	(*GetOrgMembershipsByRoleReq)(nil),   // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq
 	(*GetOrgMembershipsByStatusReq)(nil), // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
 	(*ChangeOrgMembershipRoleReq)(nil),   // 2: organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
-	(*ChangeOrgMembershipStatusReq)(nil), // 3: organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
+	(*SendInvitationRequest)(nil),        // 3: organization_service.org_membership.v1.SendInvitationRequest
 	(*v1.PaginationRequest)(nil),         // 4: core.v1.PaginationRequest
 }
 var file_organization_service_org_membership_v1_request_proto_depIdxs = []int32{
