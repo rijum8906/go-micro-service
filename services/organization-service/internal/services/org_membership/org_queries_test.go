@@ -429,7 +429,7 @@ func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	// Delete member membership
-	err = suite.Q.DeleteOrganizationMembership(suite.Ctx, db.DeleteOrganizationMembershipParams{
+	err = suite.Q.SoftDeleteOrganizationMembership(suite.Ctx, db.SoftDeleteOrganizationMembershipParams{
 		ID:             memberMembership.ID,
 		DeletedByMemID: orgSuite.OwnerMembership.ID,
 	})
@@ -447,8 +447,8 @@ func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
 			{User: "user:" + adminID.String(), Relation: permissions.RoleAdmin, Object: "organization:" + orgSuite.Org.ID.String()},
 			{User: "user:" + memberID.String(), Relation: permissions.RoleMember, Object: "organization:" + orgSuite.Org.ID.String()},
 		})
-		suite.Q.DeleteOrganizationMembershipHard(suite.Ctx, memberMembership.ID)
-		suite.Q.DeleteOrganizationMembershipHard(suite.Ctx, adminMembership.ID)
+		suite.Q.HardDeleteOrganizationMembership(suite.Ctx, memberMembership.ID)
+		suite.Q.HardDeleteOrganizationMembership(suite.Ctx, adminMembership.ID)
 	})
 
 	testCases := []struct {
@@ -627,7 +627,7 @@ func Test_GetOrganizationMembership_Integration_Failure(t *testing.T) {
 		OrganizationID: orgSuite.Org.ID,
 		Role:           permissions.RoleMember,
 	})
-	suite.Q.DeleteOrganizationMembership(suite.Ctx, db.DeleteOrganizationMembershipParams{
+	suite.Q.SoftDeleteOrganizationMembership(suite.Ctx, db.SoftDeleteOrganizationMembershipParams{
 		ID:             deletedMembership.ID,
 		DeletedByMemID: orgSuite.OwnerMembership.ID,
 	})

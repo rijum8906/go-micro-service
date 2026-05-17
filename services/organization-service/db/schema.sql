@@ -55,7 +55,7 @@ CREATE TABLE organization_memberships (
     user_id uuid NOT NULL,
     role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'active'
-        CHECK (status IN ('active', 'suspended', 'left')),
+        CHECK (status IN ('active', 'suspended', 'banned', 'left', 'removed')),
     joined_at timestamptz NOT NULL DEFAULT now(),
     left_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
@@ -69,7 +69,7 @@ CREATE TABLE organization_memberships (
 
 COMMENT ON TABLE organization_memberships IS 'Junction table linking users to organizations with role and status';
 COMMENT ON COLUMN organization_memberships.role IS 'owner=full org control, admin=manage members/teams, member=standard access';
-COMMENT ON COLUMN organization_memberships.status IS 'active=current member, suspended=temporarily blocked, left=voluntarily departed';
+COMMENT ON COLUMN organization_memberships.status IS 'active=current member, suspended=temporarily blocked, banned=blocked from the organization, left=voluntarily departed, removed=administratively removed';
 
 -- For finding all orgs a user belongs to
 CREATE INDEX idx_organization_memberships_user_id

@@ -47,7 +47,7 @@ import (
 //   - Internal: Database failure or missing user metadata
 //
 // Note: Returns empty list (not error) when organization has no members
-func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Context, req *corev1.IDWithPaginationReq) (*org_membershipv1.OrgMembershipsListRes, error) {
+func (s *OrgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Context, req *corev1.IDWithPaginationReq) (*org_membershipv1.OrgMembershipsListRes, error) {
 	// 0. Validate pagination parameters and organization ID
 	if appErr := protoutils.ValidatePaginationReq(req.Pagination); appErr != nil {
 		return nil, appErr
@@ -65,7 +65,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Con
 	}
 
 	// 2. Verify organization exists
-	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
+	exists, err := s.DBQ.CheckOrganizationExists(ctx, orgID)
 	if err != nil {
 		return nil, apperror.ErrInternal.WithDetail("error", err.Error()) // FIXED: Added return
 	}
@@ -74,7 +74,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Con
 	}
 
 	// 3. Check if user has permission to view organization members via OpenFGA
-	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+	checkRes, appErr := s.TuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
 		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + req.Id,
@@ -87,7 +87,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Con
 	}
 
 	// 4. Retrieve organization memberships with pagination
-	memberships, err := s.q.GetOrganizationMembershipsByOrgID(ctx, db.GetOrganizationMembershipsByOrgIDParams{
+	memberships, err := s.DBQ.GetOrganizationMembershipsByOrgID(ctx, db.GetOrganizationMembershipsByOrgIDParams{
 		OrganizationID: orgID,
 		Limit:          req.Pagination.Limit,
 		Offset:         (req.Pagination.Page - 1) * req.Pagination.Limit, // Page 1 = Offset 0
@@ -149,7 +149,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByOrgID(ctx context.Con
 //   - "View all owners" page for sensitive settings
 //   - "Member list" filtered by role in UI tabs
 //   - Counting members by role for analytics
-func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Context, req *org_membershipv1.GetOrgMembershipsByRoleReq) (*org_membershipv1.OrgMembershipsListRes, error) {
+func (s *OrgMembershipService) GetOrganizationMembershipsByRole(ctx context.Context, req *org_membershipv1.GetOrgMembershipsByRoleReq) (*org_membershipv1.OrgMembershipsListRes, error) {
 	// 0. Validate request parameters
 	if !permissions.IsValidRole(req.Role) {
 		return nil, apperror.ErrValidation.WithMessage("invalid role")
@@ -170,7 +170,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Cont
 	}
 
 	// 2. Verify organization exists
-	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
+	exists, err := s.DBQ.CheckOrganizationExists(ctx, orgID)
 	if err != nil {
 		return nil, apperror.ErrInternal.WithDetail("error", err.Error()) // FIXED: Added return
 	}
@@ -179,7 +179,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Cont
 	}
 
 	// 3. Check if user has permission to view organization members via OpenFGA
-	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+	checkRes, appErr := s.TuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
 		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + req.OrganizationId,
@@ -192,7 +192,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Cont
 	}
 
 	// 4. Retrieve organization memberships filtered by role with pagination
-	memberships, err := s.q.GetOrganizationMembershipsByOrgIDAndRole(ctx, db.GetOrganizationMembershipsByOrgIDAndRoleParams{
+	memberships, err := s.DBQ.GetOrganizationMembershipsByOrgIDAndRole(ctx, db.GetOrganizationMembershipsByOrgIDAndRoleParams{
 		OrganizationID: orgID,
 		Role:           req.Role,
 		Limit:          req.Pagination.Limit,
@@ -250,7 +250,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByRole(ctx context.Cont
 //   - Admin viewing only active members
 //   - Audit log showing members who left
 //   - Cleanup of removed members
-func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Context, req *org_membershipv1.GetOrgMembershipsByStatusReq) (*org_membershipv1.OrgMembershipsListRes, error) {
+func (s *OrgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Context, req *org_membershipv1.GetOrgMembershipsByStatusReq) (*org_membershipv1.OrgMembershipsListRes, error) {
 	// 0. Validate request parameters
 	if !constants.IsValidaOrgMemStatus(req.Status) {
 		return nil, apperror.ErrValidation.WithMessage("invalid status")
@@ -271,7 +271,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Co
 	}
 
 	// 2. Verify organization exists (returns 404 early if not found)
-	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
+	exists, err := s.DBQ.CheckOrganizationExists(ctx, orgID)
 	if err != nil {
 		return nil, apperror.ErrInternal.WithDetail("error", err.Error()) // Fixed: added return
 	}
@@ -280,7 +280,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Co
 	}
 
 	// 3. Check permission via OpenFGA
-	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+	checkRes, appErr := s.TuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
 		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + req.OrganizationId,
@@ -293,7 +293,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Co
 	}
 
 	// 4. Retrieve memberships filtered by organization ID and status with pagination
-	memberships, err := s.q.GetOrganizationMembershipsByOrgIDAndStatus(ctx, db.GetOrganizationMembershipsByOrgIDAndStatusParams{
+	memberships, err := s.DBQ.GetOrganizationMembershipsByOrgIDAndStatus(ctx, db.GetOrganizationMembershipsByOrgIDAndStatusParams{
 		OrganizationID: orgID,
 		Status:         req.Status,
 		Limit:          req.Pagination.Limit,
@@ -340,7 +340,7 @@ func (s *orgMembershipService) GetOrganizationMembershipsByStatus(ctx context.Co
 //
 // Idempotency:
 //   - Always returns same result for same membership ID (read-only operation)
-func (s *orgMembershipService) GetOrganizationMembership(ctx context.Context, req *corev1.IDRequest) (*org_membershipv1.OrgMembershipRes, error) {
+func (s *OrgMembershipService) GetOrganizationMembership(ctx context.Context, req *corev1.IDRequest) (*org_membershipv1.OrgMembershipRes, error) {
 	// 0. Validate request parameters
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("invalid request body")
@@ -358,7 +358,7 @@ func (s *orgMembershipService) GetOrganizationMembership(ctx context.Context, re
 	}
 
 	// 2. Retrieve membership from database
-	membership, err := s.q.GetOrganizationMembership(ctx, orgMemID)
+	membership, err := s.DBQ.GetOrganizationMembership(ctx, orgMemID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperror.ErrNotFound.WithMessage("membership not found")
@@ -368,7 +368,7 @@ func (s *orgMembershipService) GetOrganizationMembership(ctx context.Context, re
 
 	// 3. Check permission via OpenFGA
 	// User must have can_view_member permission on the organization
-	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+	checkRes, appErr := s.TuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + userInfo.UserID,
 		Relation: permissions.PermissionCanViewMembers,
 		Object:   "organization:" + membership.OrganizationID.String(),

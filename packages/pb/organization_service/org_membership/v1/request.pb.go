@@ -202,66 +202,6 @@ func (x *ChangeOrgMembershipRoleReq) GetTokenScope() string {
 	return ""
 }
 
-type ChangeOrgMembershipStatusReq struct {
-	state                    protoimpl.MessageState `protogen:"open.v1"`
-	OrganizationMembershipId string                 `protobuf:"bytes,1,opt,name=organization_membership_id,json=organizationMembershipId,proto3" json:"organization_membership_id,omitempty"`
-	NewStatus                string                 `protobuf:"bytes,2,opt,name=new_status,json=newStatus,proto3" json:"new_status,omitempty"`
-	TokenScope               string                 `protobuf:"bytes,3,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
-}
-
-func (x *ChangeOrgMembershipStatusReq) Reset() {
-	*x = ChangeOrgMembershipStatusReq{}
-	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ChangeOrgMembershipStatusReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ChangeOrgMembershipStatusReq) ProtoMessage() {}
-
-func (x *ChangeOrgMembershipStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ChangeOrgMembershipStatusReq.ProtoReflect.Descriptor instead.
-func (*ChangeOrgMembershipStatusReq) Descriptor() ([]byte, []int) {
-	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *ChangeOrgMembershipStatusReq) GetOrganizationMembershipId() string {
-	if x != nil {
-		return x.OrganizationMembershipId
-	}
-	return ""
-}
-
-func (x *ChangeOrgMembershipStatusReq) GetNewStatus() string {
-	if x != nil {
-		return x.NewStatus
-	}
-	return ""
-}
-
-func (x *ChangeOrgMembershipStatusReq) GetTokenScope() string {
-	if x != nil {
-		return x.TokenScope
-	}
-	return ""
-}
-
 type SendInvitationRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
@@ -273,7 +213,7 @@ type SendInvitationRequest struct {
 
 func (x *SendInvitationRequest) Reset() {
 	*x = SendInvitationRequest{}
-	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[4]
+	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -285,7 +225,7 @@ func (x *SendInvitationRequest) String() string {
 func (*SendInvitationRequest) ProtoMessage() {}
 
 func (x *SendInvitationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[4]
+	mi := &file_organization_service_org_membership_v1_request_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -298,7 +238,7 @@ func (x *SendInvitationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendInvitationRequest.ProtoReflect.Descriptor instead.
 func (*SendInvitationRequest) Descriptor() ([]byte, []int) {
-	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{4}
+	return file_organization_service_org_membership_v1_request_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SendInvitationRequest) GetOrganizationId() string {
@@ -343,12 +283,6 @@ const file_organization_service_org_membership_v1_request_proto_rawDesc = "" +
 	"\x1aorganization_membership_id\x18\x01 \x01(\tR\x18organizationMembershipId\x12\x19\n" +
 	"\bnew_role\x18\x02 \x01(\tR\anewRole\x12\x1f\n" +
 	"\vtoken_scope\x18\x03 \x01(\tR\n" +
-	"tokenScope\"\x9c\x01\n" +
-	"\x1cChangeOrgMembershipStatusReq\x12<\n" +
-	"\x1aorganization_membership_id\x18\x01 \x01(\tR\x18organizationMembershipId\x12\x1d\n" +
-	"\n" +
-	"new_status\x18\x02 \x01(\tR\tnewStatus\x12\x1f\n" +
-	"\vtoken_scope\x18\x03 \x01(\tR\n" +
 	"tokenScope\"j\n" +
 	"\x15SendInvitationRequest\x12'\n" +
 	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x14\n" +
@@ -368,18 +302,17 @@ func file_organization_service_org_membership_v1_request_proto_rawDescGZIP() []b
 	return file_organization_service_org_membership_v1_request_proto_rawDescData
 }
 
-var file_organization_service_org_membership_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_organization_service_org_membership_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_organization_service_org_membership_v1_request_proto_goTypes = []any{
 	(*GetOrgMembershipsByRoleReq)(nil),   // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq
 	(*GetOrgMembershipsByStatusReq)(nil), // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq
 	(*ChangeOrgMembershipRoleReq)(nil),   // 2: organization_service.org_membership.v1.ChangeOrgMembershipRoleReq
-	(*ChangeOrgMembershipStatusReq)(nil), // 3: organization_service.org_membership.v1.ChangeOrgMembershipStatusReq
-	(*SendInvitationRequest)(nil),        // 4: organization_service.org_membership.v1.SendInvitationRequest
-	(*v1.PaginationRequest)(nil),         // 5: core.v1.PaginationRequest
+	(*SendInvitationRequest)(nil),        // 3: organization_service.org_membership.v1.SendInvitationRequest
+	(*v1.PaginationRequest)(nil),         // 4: core.v1.PaginationRequest
 }
 var file_organization_service_org_membership_v1_request_proto_depIdxs = []int32{
-	5, // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq.pagination:type_name -> core.v1.PaginationRequest
-	5, // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq.pagination:type_name -> core.v1.PaginationRequest
+	4, // 0: organization_service.org_membership.v1.GetOrgMembershipsByRoleReq.pagination:type_name -> core.v1.PaginationRequest
+	4, // 1: organization_service.org_membership.v1.GetOrgMembershipsByStatusReq.pagination:type_name -> core.v1.PaginationRequest
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -398,7 +331,7 @@ func file_organization_service_org_membership_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_organization_service_org_membership_v1_request_proto_rawDesc), len(file_organization_service_org_membership_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

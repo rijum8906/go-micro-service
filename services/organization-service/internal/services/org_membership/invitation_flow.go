@@ -59,7 +59,7 @@ import (
 // TODO: Send invitation email via email service (currently missing)
 // TODO: Add idempotency check for duplicate pending invitations
 // TODO: Handle case where user already has a membership
-func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_membershipv1.SendInvitationRequest) (*corev1.SuccessResponse, error) {
+func (s *OrgMembershipService) SendInvitation(ctx context.Context, req *org_membershipv1.SendInvitationRequest) (*corev1.SuccessResponse, error) {
 	// 0. Validate request parameters
 	if appErr := protoutils.ValidateSendInvitationReq(req); appErr != nil {
 		return nil, appErr
@@ -79,7 +79,7 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 	}
 
 	// 2. Check if email exists in user service (must be registered user)
-	exists, err := s.userClient.CheckEmailExists(ctx, emailReq)
+	exists, err := s.UserClient.CheckEmailExists(ctx, emailReq)
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithDetail("error", err.Error())
 	}
@@ -88,7 +88,7 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 	}
 
 	// 3. Check if sender has permission to add members via OpenFGA
-	checkRes, appErr := s.tuppleManager.Check(ctx, client.ClientCheckRequest{
+	checkRes, appErr := s.TuppleManager.Check(ctx, client.ClientCheckRequest{
 		User:     "user:" + inviteBy.String(),
 		Relation: permissions.PermissionCanAddMember,
 		Object:   "organization:" + req.OrganizationId,
@@ -102,7 +102,7 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 
 	// 4. Fetch sender's membership to get invited_by_mem_id
 	// Required because invitation table references membership, not user directly
-	membership, err := s.q.GetOrganizationMembershipByOrgIDAndUserID(ctx, db.GetOrganizationMembershipByOrgIDAndUserIDParams{
+	membership, err := s.DBQ.GetOrganizationMembershipByOrgIDAndUserID(ctx, db.GetOrganizationMembershipByOrgIDAndUserIDParams{
 		UserID:         inviteBy,
 		OrganizationID: uuid.MustParse(req.OrganizationId),
 	})
@@ -114,20 +114,20 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 	}
 
 	// 5. Generate secure token hash for invitation
-	tokenHash, appErr := s.hashService.Generate(32)
+	tokenHash, appErr := s.HashService.Generate(32)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	// 6. Create invitation record in database
-	_, err = s.q.CreateOrganizationInvitation(ctx, db.CreateOrganizationInvitationParams{
+	_, err = s.DBQ.CreateOrganizationInvitation(ctx, db.CreateOrganizationInvitationParams{
 		Email:          req.Email,
 		OrganizationID: uuid.MustParse(req.OrganizationId),
 		Role:           req.Role,
 		InvitedByMemID: membership.ID, // Uses membership ID from step 4
 		TokenHash:      tokenHash,
 		ExpiresAt: pgtype.Timestamptz{
-			Time:  time.Now().Add(time.Hour * 24 * time.Duration(s.config.InvitationTokenTTL)),
+			Time:  time.Now().Add(time.Hour * 24 * time.Duration(s.Config.InvitationTokenTTL)),
 			Valid: true,
 		},
 	})
@@ -177,7 +177,7 @@ func (s *orgMembershipService) SendInvitation(ctx context.Context, req *org_memb
 //   - NotFound: Invitation not found, already accepted, or already declined
 //   - PermissionDenied: User email doesn't match invitation recipient
 //   - Internal: User service unavailable, database failure, or invalid UUID format
-func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1.TokenHashRequest) (*corev1.SuccessResponse, error) {
+func (s *OrgMembershipService) AcceptInvitation(ctx context.Context, req *corev1.TokenHashRequest) (*corev1.SuccessResponse, error) {
 	// 0. Validate request parameters
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("request body cannot be nil")
@@ -193,13 +193,13 @@ func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1
 	}
 
 	// 2. Fetch user details from user service to get email for validation
-	user, err := s.userClient.GetUser(ctx, &corev1.EmptyRequest{})
+	user, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
 	if err != nil {
 		return nil, err
 	}
 
 	// 3. Retrieve invitation using the provided token hash
-	invitation, err := s.q.GetOrganizationInvitationByTokenHash(ctx, req.TokenHash)
+	invitation, err := s.DBQ.GetOrganizationInvitationByTokenHash(ctx, req.TokenHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperror.ErrNotFound.WithMessage("invitation not found or already expired")
@@ -223,7 +223,7 @@ func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1
 	}
 
 	// 6. Create organization membership for the user
-	_, err = s.q.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
+	_, err = s.DBQ.CreateOrganizationMembership(ctx, db.CreateOrganizationMembershipParams{
 		UserID:         uuid.MustParse(userInfo.UserID),
 		OrganizationID: invitation.OrganizationID,
 		Role:           invitation.Role,
@@ -233,7 +233,7 @@ func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1
 	}
 
 	// 7. Add user permissions to OpenFGA
-	if appErr := s.tuppleManager.Write(ctx, []client.ClientTupleKey{
+	if appErr := s.TuppleManager.Write(ctx, []client.ClientTupleKey{
 		{
 			User:     "user:" + userInfo.UserID,
 			Relation: permissions.RoleMember,
@@ -244,7 +244,7 @@ func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1
 	}
 
 	// 8. Mark the invitation as accepted
-	_, err = s.q.AccecptOrganizationInvitation(ctx, db.AccecptOrganizationInvitationParams{
+	_, err = s.DBQ.AccecptOrganizationInvitation(ctx, db.AccecptOrganizationInvitationParams{
 		ID:          invitation.ID,
 		RespondedBy: uuid.MustParse(userInfo.UserID),
 	})
@@ -296,7 +296,7 @@ func (s *orgMembershipService) AcceptInvitation(ctx context.Context, req *corev1
 //   - Does NOT add any OpenFGA permissions
 //   - Only updates invitation status to 'declined'
 //   - Sets RespondedBy and RespondedAt timestamps
-func (s *orgMembershipService) DeclineInvitation(ctx context.Context, req *corev1.TokenHashRequest) (*corev1.SuccessResponse, error) {
+func (s *OrgMembershipService) DeclineInvitation(ctx context.Context, req *corev1.TokenHashRequest) (*corev1.SuccessResponse, error) {
 	// 0. Validate request parameters
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("request body cannot be nil")
@@ -312,13 +312,13 @@ func (s *orgMembershipService) DeclineInvitation(ctx context.Context, req *corev
 	}
 
 	// 2. Fetch user details from user service to get email for validation
-	user, err := s.userClient.GetUser(ctx, &corev1.EmptyRequest{})
+	user, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
 	if err != nil {
 		return nil, err
 	}
 
 	// 3. Retrieve invitation using the provided token hash
-	invitation, err := s.q.GetOrganizationInvitationByTokenHash(ctx, req.TokenHash)
+	invitation, err := s.DBQ.GetOrganizationInvitationByTokenHash(ctx, req.TokenHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperror.ErrNotFound.WithMessage("invitation not found or already expired")
@@ -341,7 +341,7 @@ func (s *orgMembershipService) DeclineInvitation(ctx context.Context, req *corev
 	}
 
 	// 6. Mark the invitation as declined
-	_, err = s.q.DeclineOrganizationInvitation(ctx, db.DeclineOrganizationInvitationParams{
+	_, err = s.DBQ.DeclineOrganizationInvitation(ctx, db.DeclineOrganizationInvitationParams{
 		ID:          invitation.ID,
 		RespondedBy: uuid.MustParse(userInfo.UserID),
 	})

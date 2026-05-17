@@ -61,7 +61,7 @@ import (
 //	    {"organization_id": "org2", "role": "member", "status": "active"}
 //	  ]
 //	}
-func (s *orgMembershipService) GetMyMemberships(ctx context.Context, req *corev1.PaginationRequest) (*org_membershipv1.OrgMembershipsListRes, error) {
+func (s *OrgMembershipService) GetMyMemberships(ctx context.Context, req *corev1.PaginationRequest) (*org_membershipv1.OrgMembershipsListRes, error) {
 	// 0. Validate pagination parameters
 	if appErr := protoutils.ValidatePaginationReq(req); appErr != nil {
 		return nil, appErr
@@ -84,7 +84,7 @@ func (s *orgMembershipService) GetMyMemberships(ctx context.Context, req *corev1
 	offset := (req.Page - 1) * req.Limit
 
 	// 4. Retrieve memberships from database filtered by user ID
-	memberships, err := s.q.GetOrganizationMembershipsByUserID(ctx, db.GetOrganizationMembershipsByUserIDParams{
+	memberships, err := s.DBQ.GetOrganizationMembershipsByUserID(ctx, db.GetOrganizationMembershipsByUserIDParams{
 		UserID: userID,
 		Limit:  req.Limit,
 		Offset: offset,
@@ -145,7 +145,7 @@ func (s *orgMembershipService) GetMyMemberships(ctx context.Context, req *corev1
 // Use Case:
 //   - User views their own membership details from a membership settings page
 //   - User updates their own role or status (not implemented here)
-func (s *orgMembershipService) GetMyMembership(ctx context.Context, req *corev1.IDRequest) (*org_membershipv1.OrgMembershipRes, error) {
+func (s *OrgMembershipService) GetMyMembership(ctx context.Context, req *corev1.IDRequest) (*org_membershipv1.OrgMembershipRes, error) {
 	// 0. Validate request
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("request body cannot be nil")
@@ -166,7 +166,7 @@ func (s *orgMembershipService) GetMyMembership(ctx context.Context, req *corev1.
 	// 3. Retrieve membership by ID
 	// We fetch by ID only (not by ID + UserID) to allow explicit ownership check.
 	// This gives us more control over error messaging (PermissionDenied vs NotFound).
-	membership, err := s.q.GetOrganizationMembership(ctx, membershipUUID)
+	membership, err := s.DBQ.GetOrganizationMembership(ctx, membershipUUID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperror.ErrNotFound.WithDetail("resource", "membership")
