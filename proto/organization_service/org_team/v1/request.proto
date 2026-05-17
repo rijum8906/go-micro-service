@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package organization_service.org_team.v1;
+
+message CreateOrgTeamRequest {}
+
+message UpdateOrgTeamNameRequest {}
