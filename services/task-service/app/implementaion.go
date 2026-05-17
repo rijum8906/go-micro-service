@@ -9,19 +9,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/app/config"
-	"github.com/rijum8906/relay/services/task-service/internal/authz"
-	taskdb "github.com/rijum8906/relay/services/task-service/internal/db"
-	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
-	projectRepo "github.com/rijum8906/relay/services/task-service/internal/repository/project"
-	projectmembershiprepo "github.com/rijum8906/relay/services/task-service/internal/repository/project_membership"
-	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
-	taskassignmentrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_assignment"
-	taskcommentrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task_comment"
-	projectservice "github.com/rijum8906/relay/services/task-service/internal/services/project"
-	projectmembershipservice "github.com/rijum8906/relay/services/task-service/internal/services/project_membership"
+	"github.com/rijum8906/relay/services/task-service/internal/db"
 	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
-	taskassigmentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_assigment"
-	taskcommentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_comment"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -72,61 +61,6 @@ func (a *Application) initUtils() *apperror.AppError {
 	return nil
 }
 
-func (a *Application) initServices() *apperror.AppError {
-	queries := taskdb.New(a.infra.database)
-	projectRepository := projectRepo.NewProjectRepository(queries)
-	projectMembershipRepository := projectmembershiprepo.NewProjectMembershipRepository(queries)
-	taskRepository := taskrepo.NewTaskRepository(queries)
-	taskAssignmentRepository := taskassignmentrepo.NewTaskAssignmentRepository(queries)
-	taskCommentRepository := taskcommentrepo.NewTaskCommentRepository(queries)
-	authorizer, appErr := authz.NewAuthorizer(projectMembershipRepository, taskRepository, a.infra.openFGATuples)
-	if appErr != nil {
-		return appErr
-	}
-
-	projectService, appErr := projectservice.NewProjectService(projectRepository, authorizer, a.infra.openFGATuples)
-	if appErr != nil {
-		return appErr
-	}
-	a.services.project = projectService
-
-	projectMembershipService, appErr := projectmembershipservice.NewProjectMembershipService(projectMembershipRepository, authorizer, a.infra.openFGATuples)
-	if appErr != nil {
-		return appErr
-	}
-	a.services.projectMembership = projectMembershipService
-
-	taskService, appErr := taskservice.NewTaskService(taskRepository, authorizer, a.infra.openFGATuples)
-	if appErr != nil {
-		return appErr
-	}
-	a.services.task = taskService
-
-	taskAssignmentService, appErr := taskassigmentservice.NewTaskAssignmentService(taskAssignmentRepository, authorizer, a.infra.openFGATuples)
-	if appErr != nil {
-		return appErr
-	}
-	a.services.taskAssignment = taskAssignmentService
-
-	taskCommentService, appErr := taskcommentservice.NewTaskCommentService(taskCommentRepository, authorizer, a.infra.openFGATuples)
-	if appErr != nil {
-		return appErr
-	}
-	a.services.taskComment = taskCommentService
-	return nil
-}
-
-func (a *Application) initHandler() *apperror.AppError {
-	a.services.taskHandler = handler.NewTaskHandler(
-		a.services.project,
-		a.services.projectMembership,
-		a.services.task,
-		a.services.taskAssignment,
-		a.services.taskComment,
-	)
-	return nil
-}
-
 func (a *Application) initGRPCServer() *apperror.AppError {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", a.config.Port))
 	if err != nil {
@@ -136,13 +70,25 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 
 	// Create and Register grpc server
 	server := grpc.NewServer()
+	taskv1.RegisterTaskServiceServer(server, a.services.TaskService)
 	a.server = server
 
 	if a.config.AppEnv == "development" {
 		reflection.Register(server)
 	}
 
-	taskv1.RegisterTaskServiceServer(server, a.services.taskHandler)
+	return nil
+}
+
+func (a *Application) initServices() *apperror.AppError {
+	queries := db.New(a.infra.database)
+
+	taskService, appErr := taskservice.New(queries, a.infra.openFGATuples)
+	if appErr != nil {
+		return appErr
+	}
+
+	a.services.TaskService = taskService
 
 	return nil
 }

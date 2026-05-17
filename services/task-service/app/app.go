@@ -10,13 +10,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
+	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/app/config"
-	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
-	projectservice "github.com/rijum8906/relay/services/task-service/internal/services/project"
-	projectmembershipservice "github.com/rijum8906/relay/services/task-service/internal/services/project_membership"
-	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
-	taskassigmentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_assigment"
-	taskcommentservice "github.com/rijum8906/relay/services/task-service/internal/services/task_comment"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -34,12 +29,7 @@ type ApplicationUtils struct {
 }
 
 type ApplicationServices struct {
-	project           projectservice.ProjectService
-	projectMembership projectmembershipservice.ProjectMembershipService
-	task              taskservice.TaskService
-	taskAssignment    taskassigmentservice.TaskAssignmentService
-	taskComment       taskcommentservice.TaskCommentService
-	taskHandler       *handler.TaskHandler
+	TaskService taskv1.TaskServiceServer
 }
 
 type Application struct {
@@ -77,11 +67,6 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	if appErr = app.initServices(); appErr != nil {
-		fmt.Println(appErr.Details)
-		return nil, appErr
-	}
-
-	if appErr = app.initHandler(); appErr != nil {
 		fmt.Println(appErr.Details)
 		return nil, appErr
 	}

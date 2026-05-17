@@ -1,10 +1,9 @@
-package projectmembership
+package task
 
 import (
 	"context"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
@@ -17,7 +16,7 @@ import (
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMemberRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError) {
+func (s *service) addProjectMember(ctx context.Context, req *taskv1.AddProjectMemberRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("add project member request is required")
 	}
@@ -49,20 +48,22 @@ func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMe
 		return nil, appErr
 	}
 
-	if _, appErr = s.repo.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
+	currentMembershipRow, err := s.q.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
 		ProjectID: projectID,
 		UserID:    userID,
-	}); appErr == nil {
+	})
+	if _, appErr = utils.QueryOne(currentMembershipRow, err, "project membership not found", "failed to get project membership"); appErr == nil {
 		return nil, apperror.ErrConflict.WithMessage("project member already exists")
 	} else if appErr.Code != apperror.CodeNotFound {
 		return nil, appErr
 	}
 
-	membership, appErr := s.repo.AddProjectMember(ctx, db.AddProjectMemberParams{
+	membershipRow, err := s.q.AddProjectMember(ctx, db.AddProjectMemberParams{
 		ProjectID: projectID,
 		UserID:    userID,
 		Role:      role,
 	})
+	membership, appErr := utils.QueryOne(membershipRow, err, "", "failed to add project member")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -78,7 +79,7 @@ func (s *service) AddProjectMember(ctx context.Context, req *taskv1.AddProjectMe
 	return mapProjectMembership(membership), nil
 }
 
-func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemoveProjectMemberRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *service) removeProjectMember(ctx context.Context, req *taskv1.RemoveProjectMemberRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("remove project member request is required")
 	}
@@ -103,10 +104,11 @@ func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemovePro
 		return nil, appErr
 	}
 
-	membership, appErr := s.repo.RemoveProjectMember(ctx, db.RemoveProjectMemberParams{
+	membershipRow, err := s.q.RemoveProjectMember(ctx, db.RemoveProjectMemberParams{
 		ProjectID: projectID,
 		UserID:    userID,
 	})
+	membership, appErr := utils.QueryOne(membershipRow, err, "project membership not found", "failed to remove project member")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -122,7 +124,7 @@ func (s *service) RemoveProjectMember(ctx context.Context, req *taskv1.RemovePro
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.UpdateProjectMemberRoleRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError) {
+func (s *service) updateProjectMemberRole(ctx context.Context, req *taskv1.UpdateProjectMemberRoleRequest, userInfo *dto.UserInfo) (*modelsv1.ProjectMembership, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update project member role request is required")
 	}
@@ -154,20 +156,22 @@ func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.Updat
 
 	var currentMembership *db.ProjectMembership
 	if s.tuples != nil {
-		currentMembership, appErr = s.repo.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
+		currentMembershipRow, err := s.q.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
 			ProjectID: projectID,
 			UserID:    userID,
 		})
+		currentMembership, appErr = utils.QueryOne(currentMembershipRow, err, "project membership not found", "failed to get project membership")
 		if appErr != nil {
 			return nil, appErr
 		}
 	}
 
-	membership, appErr := s.repo.UpdateProjectMemberRole(ctx, db.UpdateProjectMemberRoleParams{
+	membershipRow, err := s.q.UpdateProjectMemberRole(ctx, db.UpdateProjectMemberRoleParams{
 		ProjectID: projectID,
 		UserID:    userID,
 		Role:      role,
 	})
+	membership, appErr := utils.QueryOne(membershipRow, err, "project membership not found", "failed to update project member role")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -188,7 +192,7 @@ func (s *service) UpdateProjectMemberRole(ctx context.Context, req *taskv1.Updat
 	return mapProjectMembership(membership), nil
 }
 
-func (s *service) ListProjectMembers(ctx context.Context, req *taskv1.ListProjectMembersRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectMembersResponse, *apperror.AppError) {
+func (s *service) listProjectMembers(ctx context.Context, req *taskv1.ListProjectMembersRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectMembersResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list project members request is required")
 	}
@@ -208,7 +212,8 @@ func (s *service) ListProjectMembers(ctx context.Context, req *taskv1.ListProjec
 		return nil, appErr
 	}
 
-	members, appErr := s.repo.ListProjectMembers(ctx, projectID)
+	memberRows, err := s.q.ListProjectMembers(ctx, projectID)
+	members, appErr := utils.QueryMany(memberRows, err, "failed to list project members")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -216,19 +221,6 @@ func (s *service) ListProjectMembers(ctx context.Context, req *taskv1.ListProjec
 	return &taskv1.ListProjectMembersResponse{
 		Members: mapProjectMemberships(members),
 	}, nil
-}
-
-func requiredUUID(value, field, requiredMessage string) (uuid.UUID, *apperror.AppError) {
-	if strings.TrimSpace(value) == "" {
-		return uuid.UUID{}, apperror.ErrValidation.WithMessage(requiredMessage)
-	}
-
-	id, appErr := utils.NewUUID(value)
-	if appErr != nil {
-		return uuid.UUID{}, appErr.WithDetail("field", field)
-	}
-
-	return id, nil
 }
 
 func normalizeRole(value string) (string, *apperror.AppError) {

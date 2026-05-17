@@ -1,4 +1,4 @@
-package project
+package task
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) createProject(ctx context.Context, req *taskv1.CreateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("create project request is required")
 	}
@@ -37,12 +37,13 @@ func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRe
 		return nil, appErr
 	}
 
-	project, appErr := s.repo.CreateProject(ctx, db.CreateProjectParams{
+	projectRow, err := s.q.CreateProject(ctx, db.CreateProjectParams{
 		OrganizationID: organizationID,
 		CreatedBy:      createdBy,
 		Name:           req.GetName(),
 		Description:    req.GetDescription(),
 	})
+	project, appErr := utils.QueryOne(projectRow, err, "", "failed to create project")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -58,7 +59,7 @@ func (s *service) CreateProject(ctx context.Context, req *taskv1.CreateProjectRe
 	return mapProject(project), nil
 }
 
-func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) getProject(ctx context.Context, req *taskv1.GetProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("get project request is required")
 	}
@@ -82,7 +83,8 @@ func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest,
 		return nil, appErr
 	}
 
-	project, appErr := s.repo.GetProject(ctx, id)
+	projectRow, err := s.q.GetProject(ctx, id)
+	project, appErr := utils.QueryOne(projectRow, err, "project not found", "failed to get project")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -90,7 +92,7 @@ func (s *service) GetProject(ctx context.Context, req *taskv1.GetProjectRequest,
 	return mapProject(project), nil
 }
 
-func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) updateProject(ctx context.Context, req *taskv1.UpdateProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update project request is required")
 	}
@@ -117,11 +119,12 @@ func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRe
 		return nil, appErr
 	}
 
-	project, appErr := s.repo.UpdateProject(ctx, db.UpdateProjectParams{
+	projectRow, err := s.q.UpdateProject(ctx, db.UpdateProjectParams{
 		ID:          id,
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
 	})
+	project, appErr := utils.QueryOne(projectRow, err, "project not found", "failed to update project")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -129,7 +132,7 @@ func (s *service) UpdateProject(ctx context.Context, req *taskv1.UpdateProjectRe
 	return mapProject(project), nil
 }
 
-func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) completeProject(ctx context.Context, req *taskv1.CompleteProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("complete project request is required")
 	}
@@ -152,7 +155,8 @@ func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProje
 		return nil, appErr
 	}
 
-	project, appErr := s.repo.CompleteProject(ctx, id)
+	projectRow, err := s.q.CompleteProject(ctx, id)
+	project, appErr := utils.QueryOne(projectRow, err, "project not found", "failed to complete project")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -160,7 +164,7 @@ func (s *service) CompleteProject(ctx context.Context, req *taskv1.CompleteProje
 	return mapProject(project), nil
 }
 
-func (s *service) ArchiveProject(ctx context.Context, req *taskv1.ArchiveProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
+func (s *service) archiveProject(ctx context.Context, req *taskv1.ArchiveProjectRequest, userInfo *dto.UserInfo) (*modelsv1.Project, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("archive project request is required")
 	}
@@ -184,7 +188,8 @@ func (s *service) ArchiveProject(ctx context.Context, req *taskv1.ArchiveProject
 		return nil, appErr
 	}
 
-	project, appErr := s.repo.ArchiveProject(ctx, id)
+	projectRow, err := s.q.ArchiveProject(ctx, id)
+	project, appErr := utils.QueryOne(projectRow, err, "project not found", "failed to archive project")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -192,7 +197,7 @@ func (s *service) ArchiveProject(ctx context.Context, req *taskv1.ArchiveProject
 	return mapProject(project), nil
 }
 
-func (s *service) DeleteProject(ctx context.Context, req *taskv1.DeleteProjectRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *service) deleteProject(ctx context.Context, req *taskv1.DeleteProjectRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("delete project request is required")
 	}
@@ -217,10 +222,11 @@ func (s *service) DeleteProject(ctx context.Context, req *taskv1.DeleteProjectRe
 		return nil, appErr
 	}
 
-	_, appErr = s.repo.DeleteProject(ctx, db.DeleteProjectParams{
+	deletedProject, err := s.q.DeleteProject(ctx, db.DeleteProjectParams{
 		ID:        id,
 		DeletedBy: utils.PGUUID(deletedBy),
 	})
+	_, appErr = utils.QueryOne(deletedProject, err, "project not found", "failed to delete project")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -228,7 +234,7 @@ func (s *service) DeleteProject(ctx context.Context, req *taskv1.DeleteProjectRe
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) ListProjects(ctx context.Context, req *taskv1.ListProjectsRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectsResponse, *apperror.AppError) {
+func (s *service) listProjects(ctx context.Context, req *taskv1.ListProjectsRequest, userInfo *dto.UserInfo) (*taskv1.ListProjectsResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list projects request is required")
 	}
@@ -244,10 +250,11 @@ func (s *service) ListProjects(ctx context.Context, req *taskv1.ListProjectsRequ
 		return nil, appErr
 	}
 
-	projects, appErr := s.repo.ListProjects(ctx, db.ListProjectsParams{
+	projectRows, err := s.q.ListProjects(ctx, db.ListProjectsParams{
 		OrganizationID: organizationID,
 		Status:         req.GetStatus(),
 	})
+	projects, appErr := utils.QueryMany(projectRows, err, "failed to list projects")
 	if appErr != nil {
 		return nil, appErr
 	}

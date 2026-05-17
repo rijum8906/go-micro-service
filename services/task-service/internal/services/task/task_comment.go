@@ -1,10 +1,9 @@
-package taskcomment
+package task
 
 import (
 	"context"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
@@ -16,7 +15,7 @@ import (
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-func (s *service) CreateTaskComment(ctx context.Context, req *taskv1.CreateTaskCommentRequest, userInfo *dto.UserInfo) (*modelsv1.TaskComment, *apperror.AppError) {
+func (s *service) createTaskComment(ctx context.Context, req *taskv1.CreateTaskCommentRequest, userInfo *dto.UserInfo) (*modelsv1.TaskComment, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("create task comment request is required")
 	}
@@ -40,11 +39,12 @@ func (s *service) CreateTaskComment(ctx context.Context, req *taskv1.CreateTaskC
 		return nil, appErr
 	}
 
-	comment, appErr := s.repo.CreateTaskComment(ctx, db.CreateTaskCommentParams{
+	commentRow, err := s.q.CreateTaskComment(ctx, db.CreateTaskCommentParams{
 		TaskID:   taskID,
 		AuthorID: authorID,
 		Body:     req.GetBody(),
 	})
+	comment, appErr := utils.QueryOne(commentRow, err, "", "failed to create task comment")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -61,7 +61,7 @@ func (s *service) CreateTaskComment(ctx context.Context, req *taskv1.CreateTaskC
 	return mapTaskComment(comment), nil
 }
 
-func (s *service) UpdateTaskComment(ctx context.Context, req *taskv1.UpdateTaskCommentRequest, userInfo *dto.UserInfo) (*modelsv1.TaskComment, *apperror.AppError) {
+func (s *service) updateTaskComment(ctx context.Context, req *taskv1.UpdateTaskCommentRequest, userInfo *dto.UserInfo) (*modelsv1.TaskComment, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update task comment request is required")
 	}
@@ -77,7 +77,8 @@ func (s *service) UpdateTaskComment(ctx context.Context, req *taskv1.UpdateTaskC
 		return nil, appErr
 	}
 
-	comment, appErr := s.repo.GetTaskComment(ctx, id)
+	commentRow, err := s.q.GetTaskComment(ctx, id)
+	comment, appErr := utils.QueryOne(commentRow, err, "task comment not found", "failed to get task comment")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -93,10 +94,11 @@ func (s *service) UpdateTaskComment(ctx context.Context, req *taskv1.UpdateTaskC
 		return nil, apperror.ErrForbidden.WithMessage("only the comment author can update this comment")
 	}
 
-	comment, appErr = s.repo.UpdateTaskComment(ctx, db.UpdateTaskCommentParams{
+	commentRow, err = s.q.UpdateTaskComment(ctx, db.UpdateTaskCommentParams{
 		ID:   id,
 		Body: req.GetBody(),
 	})
+	comment, appErr = utils.QueryOne(commentRow, err, "task comment not found", "failed to update task comment")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -104,7 +106,7 @@ func (s *service) UpdateTaskComment(ctx context.Context, req *taskv1.UpdateTaskC
 	return mapTaskComment(comment), nil
 }
 
-func (s *service) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskCommentRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *service) deleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskCommentRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("delete task comment request is required")
 	}
@@ -117,7 +119,8 @@ func (s *service) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskC
 		return nil, appErr
 	}
 
-	comment, appErr := s.repo.GetTaskComment(ctx, id)
+	commentRow, err := s.q.GetTaskComment(ctx, id)
+	comment, appErr := utils.QueryOne(commentRow, err, "task comment not found", "failed to get task comment")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -133,10 +136,11 @@ func (s *service) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskC
 		return nil, apperror.ErrForbidden.WithMessage("only the comment author can delete this comment")
 	}
 
-	if _, appErr = s.repo.DeleteTaskComment(ctx, db.DeleteTaskCommentParams{
+	deletedCommentRow, err := s.q.DeleteTaskComment(ctx, db.DeleteTaskCommentParams{
 		ID:        id,
 		DeletedBy: utils.PGUUID(userID),
-	}); appErr != nil {
+	})
+	if _, appErr = utils.QueryOne(deletedCommentRow, err, "task comment not found", "failed to delete task comment"); appErr != nil {
 		return nil, appErr
 	}
 
@@ -152,7 +156,7 @@ func (s *service) DeleteTaskComment(ctx context.Context, req *taskv1.DeleteTaskC
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) ListTaskComments(ctx context.Context, req *taskv1.ListTaskCommentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskCommentsResponse, *apperror.AppError) {
+func (s *service) listTaskComments(ctx context.Context, req *taskv1.ListTaskCommentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskCommentsResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list task comments request is required")
 	}
@@ -168,7 +172,8 @@ func (s *service) ListTaskComments(ctx context.Context, req *taskv1.ListTaskComm
 		return nil, appErr
 	}
 
-	comments, appErr := s.repo.ListTaskComments(ctx, taskID)
+	commentRows, err := s.q.ListTaskComments(ctx, taskID)
+	comments, appErr := utils.QueryMany(commentRows, err, "failed to list task comments")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -176,17 +181,4 @@ func (s *service) ListTaskComments(ctx context.Context, req *taskv1.ListTaskComm
 	return &taskv1.ListTaskCommentsResponse{
 		Comments: mapTaskComments(comments),
 	}, nil
-}
-
-func requiredUUID(value, field, requiredMessage string) (uuid.UUID, *apperror.AppError) {
-	if strings.TrimSpace(value) == "" {
-		return uuid.UUID{}, apperror.ErrValidation.WithMessage(requiredMessage)
-	}
-
-	id, appErr := utils.NewUUID(value)
-	if appErr != nil {
-		return uuid.UUID{}, appErr.WithDetail("field", field)
-	}
-
-	return id, nil
 }

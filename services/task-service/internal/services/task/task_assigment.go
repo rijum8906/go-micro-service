@@ -1,4 +1,4 @@
-package taskassigment
+package task
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-func (s *service) AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest, userInfo *dto.UserInfo) (*modelsv1.TaskAssignment, *apperror.AppError) {
+func (s *service) assignTask(ctx context.Context, req *taskv1.AssignTaskRequest, userInfo *dto.UserInfo) (*modelsv1.TaskAssignment, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("assign task request is required")
 	}
@@ -32,11 +32,12 @@ func (s *service) AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest,
 		return nil, appErr
 	}
 
-	if _, appErr = s.repo.GetActiveTaskAssignment(ctx, db.GetActiveTaskAssignmentParams{
+	currentAssignmentRow, err := s.q.GetActiveTaskAssignment(ctx, db.GetActiveTaskAssignmentParams{
 		TaskID:       taskID,
 		AssigneeType: assigneeType,
 		AssigneeID:   assigneeID,
-	}); appErr == nil {
+	})
+	if _, appErr = utils.QueryOne(currentAssignmentRow, err, "task assignment not found", "failed to get task assignment"); appErr == nil {
 		return nil, apperror.ErrConflict.WithMessage("task assignment already exists")
 	} else if appErr.Code != apperror.CodeNotFound {
 		return nil, appErr
@@ -47,12 +48,13 @@ func (s *service) AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest,
 		return nil, appErr
 	}
 
-	assignment, appErr := s.repo.AssignTask(ctx, db.AssignTaskParams{
+	assignmentRow, err := s.q.AssignTask(ctx, db.AssignTaskParams{
 		TaskID:       taskID,
 		AssigneeType: assigneeType,
 		AssigneeID:   assigneeID,
 		AssignedBy:   assignedBy,
 	})
+	assignment, appErr := utils.QueryOne(assignmentRow, err, "", "failed to assign task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -68,7 +70,7 @@ func (s *service) AssignTask(ctx context.Context, req *taskv1.AssignTaskRequest,
 	return mapTaskAssignment(assignment), nil
 }
 
-func (s *service) UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *service) unassignTask(ctx context.Context, req *taskv1.UnassignTaskRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("unassign task request is required")
 	}
@@ -84,11 +86,12 @@ func (s *service) UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequ
 		return nil, appErr
 	}
 
-	assignment, appErr := s.repo.UnassignTask(ctx, db.UnassignTaskParams{
+	assignmentRow, err := s.q.UnassignTask(ctx, db.UnassignTaskParams{
 		TaskID:       taskID,
 		AssigneeType: assigneeType,
 		AssigneeID:   assigneeID,
 	})
+	assignment, appErr := utils.QueryOne(assignmentRow, err, "task assignment not found", "failed to unassign task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -104,7 +107,7 @@ func (s *service) UnassignTask(ctx context.Context, req *taskv1.UnassignTaskRequ
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequest, userInfo *dto.UserInfo) (*modelsv1.TaskAssignment, *apperror.AppError) {
+func (s *service) reassignTask(ctx context.Context, req *taskv1.ReassignTaskRequest, userInfo *dto.UserInfo) (*modelsv1.TaskAssignment, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("reassign task request is required")
 	}
@@ -134,7 +137,8 @@ func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 		AssigneeType: fromAssigneeType,
 		AssigneeID:   fromAssigneeID,
 	}
-	if _, appErr = s.repo.GetActiveTaskAssignment(ctx, fromParams); appErr != nil {
+	fromAssignmentRow, err := s.q.GetActiveTaskAssignment(ctx, fromParams)
+	if _, appErr = utils.QueryOne(fromAssignmentRow, err, "task assignment not found", "failed to get task assignment"); appErr != nil {
 		return nil, appErr
 	}
 
@@ -143,7 +147,8 @@ func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 		AssigneeType: toAssigneeType,
 		AssigneeID:   toAssigneeID,
 	}
-	if _, appErr = s.repo.GetActiveTaskAssignment(ctx, toParams); appErr == nil {
+	toAssignmentRow, err := s.q.GetActiveTaskAssignment(ctx, toParams)
+	if _, appErr = utils.QueryOne(toAssignmentRow, err, "task assignment not found", "failed to get task assignment"); appErr == nil {
 		return nil, apperror.ErrConflict.WithMessage("task assignment already exists")
 	} else if appErr.Code != apperror.CodeNotFound {
 		return nil, appErr
@@ -154,22 +159,24 @@ func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 		return nil, appErr
 	}
 
-	assignment, appErr := s.repo.AssignTask(ctx, db.AssignTaskParams{
+	assignmentRow, err := s.q.AssignTask(ctx, db.AssignTaskParams{
 		TaskID:       taskID,
 		AssigneeType: toAssigneeType,
 		AssigneeID:   toAssigneeID,
 		AssignedBy:   assignedBy,
 	})
+	assignment, appErr := utils.QueryOne(assignmentRow, err, "", "failed to assign task")
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	if _, appErr = s.repo.UnassignTask(ctx, db.UnassignTaskParams{
+	fromUnassignRow, err := s.q.UnassignTask(ctx, db.UnassignTaskParams{
 		TaskID:       taskID,
 		AssigneeType: fromAssigneeType,
 		AssigneeID:   fromAssigneeID,
-	}); appErr != nil {
-		_, _ = s.repo.UnassignTask(ctx, db.UnassignTaskParams{
+	})
+	if _, appErr = utils.QueryOne(fromUnassignRow, err, "task assignment not found", "failed to unassign task"); appErr != nil {
+		_, _ = s.q.UnassignTask(ctx, db.UnassignTaskParams{
 			TaskID:       taskID,
 			AssigneeType: toAssigneeType,
 			AssigneeID:   toAssigneeID,
@@ -193,7 +200,7 @@ func (s *service) ReassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 	return mapTaskAssignment(assignment), nil
 }
 
-func (s *service) ListTaskAssignments(ctx context.Context, req *taskv1.ListTaskAssignmentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskAssignmentsResponse, *apperror.AppError) {
+func (s *service) listTaskAssignments(ctx context.Context, req *taskv1.ListTaskAssignmentsRequest, userInfo *dto.UserInfo) (*taskv1.ListTaskAssignmentsResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list task assignments request is required")
 	}
@@ -209,7 +216,8 @@ func (s *service) ListTaskAssignments(ctx context.Context, req *taskv1.ListTaskA
 		return nil, appErr
 	}
 
-	assignments, appErr := s.repo.ListTaskAssignments(ctx, taskID)
+	assignmentRows, err := s.q.ListTaskAssignments(ctx, taskID)
+	assignments, appErr := utils.QueryMany(assignmentRows, err, "failed to list task assignments")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -236,19 +244,6 @@ func parseAssignment(taskIDValue, assigneeTypeValue, assigneeIDValue, taskField,
 	}
 
 	return taskID, assigneeType, assigneeID, nil
-}
-
-func requiredUUID(value, field, requiredMessage string) (uuid.UUID, *apperror.AppError) {
-	if strings.TrimSpace(value) == "" {
-		return uuid.UUID{}, apperror.ErrValidation.WithMessage(requiredMessage)
-	}
-
-	id, appErr := utils.NewUUID(value)
-	if appErr != nil {
-		return uuid.UUID{}, appErr.WithDetail("field", field)
-	}
-
-	return id, nil
 }
 
 func validateAssigneeType(value string) (string, *apperror.AppError) {

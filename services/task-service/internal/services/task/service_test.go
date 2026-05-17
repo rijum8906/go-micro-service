@@ -2,801 +2,375 @@ package task
 
 import (
 	"context"
-	"fmt"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/dto"
+	"github.com/jackc/pgx/v5"
 	coredto "github.com/rijum8906/relay/packages/core/dto"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/authz"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 	servicetestutil "github.com/rijum8906/relay/services/task-service/internal/services/testutil"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/grpc/codes"
+	grpcmetadata "google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
-type stubTaskRepository struct {
-	createTaskFn              func(context.Context, db.CreateTaskParams) (*db.Task, *apperror.AppError)
-	getTaskFn                 func(context.Context, uuid.UUID) (*db.Task, *apperror.AppError)
-	listTasksByProjectFn      func(context.Context, pgtype.UUID) ([]db.Task, *apperror.AppError)
-	updateTaskFn              func(context.Context, db.UpdateTaskParams) (*db.Task, *apperror.AppError)
-	deleteTaskFn              func(context.Context, db.DeleteTaskParams) (*db.Task, *apperror.AppError)
-	archiveTaskFn             func(context.Context, db.ArchiveTaskParams) (*db.Task, *apperror.AppError)
-	updateTaskStatusFn        func(context.Context, db.UpdateTaskStatusParams) (*db.Task, *apperror.AppError)
-	updateTaskProgressFn      func(context.Context, db.UpdateTaskProgressParams) (*db.Task, *apperror.AppError)
-	listTasksByOrganizationFn func(context.Context, db.ListTasksByOrganizationParams) ([]db.Task, *apperror.AppError)
-	listTasksByParentFn       func(context.Context, pgtype.UUID) ([]db.Task, *apperror.AppError)
-	listTasksByCreatorFn      func(context.Context, db.ListTasksByCreatorParams) ([]db.Task, *apperror.AppError)
+type stubQuerier struct {
+	db.Querier
+
+	createProjectFn           func(context.Context, db.CreateProjectParams) (db.Project, error)
+	getActiveMembershipFn     func(context.Context, db.GetActiveProjectMembershipParams) (db.ProjectMembership, error)
+	addProjectMemberFn        func(context.Context, db.AddProjectMemberParams) (db.ProjectMembership, error)
+	updateProjectMemberRoleFn func(context.Context, db.UpdateProjectMemberRoleParams) (db.ProjectMembership, error)
+	createTaskFn              func(context.Context, db.CreateTaskParams) (db.Task, error)
+	getActiveTaskAssignmentFn func(context.Context, db.GetActiveTaskAssignmentParams) (db.TaskAssignment, error)
+	assignTaskFn              func(context.Context, db.AssignTaskParams) (db.TaskAssignment, error)
+	createTaskCommentFn       func(context.Context, db.CreateTaskCommentParams) (db.TaskComment, error)
+	getTaskCommentFn          func(context.Context, uuid.UUID) (db.TaskComment, error)
+	deleteTaskCommentFn       func(context.Context, db.DeleteTaskCommentParams) (db.TaskComment, error)
 }
 
-type stubTaskAuthorizer struct {
-	requireProjectRoleFn func(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.ProjectMembership, *apperror.AppError)
-	requireTaskRoleFn    func(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.Task, *apperror.AppError)
-}
-
-func (s stubTaskAuthorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
-	if s.requireProjectRoleFn == nil {
-		panic("unexpected RequireProjectRole call")
+func (s stubQuerier) CreateProject(ctx context.Context, params db.CreateProjectParams) (db.Project, error) {
+	if s.createProjectFn == nil {
+		panic("unexpected CreateProject call")
 	}
-	return s.requireProjectRoleFn(ctx, projectID, userInfo, minRole)
+	return s.createProjectFn(ctx, params)
 }
 
-func (s stubTaskAuthorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
-	if s.requireTaskRoleFn == nil {
-		panic("unexpected RequireTaskRole call")
+func (s stubQuerier) GetActiveProjectMembership(ctx context.Context, params db.GetActiveProjectMembershipParams) (db.ProjectMembership, error) {
+	if s.getActiveMembershipFn == nil {
+		panic("unexpected GetActiveProjectMembership call")
 	}
-	return s.requireTaskRoleFn(ctx, taskID, userInfo, minRole)
+	return s.getActiveMembershipFn(ctx, params)
 }
 
-func (s *stubTaskRepository) CreateTask(ctx context.Context, params db.CreateTaskParams) (*db.Task, *apperror.AppError) {
+func (s stubQuerier) AddProjectMember(ctx context.Context, params db.AddProjectMemberParams) (db.ProjectMembership, error) {
+	if s.addProjectMemberFn == nil {
+		panic("unexpected AddProjectMember call")
+	}
+	return s.addProjectMemberFn(ctx, params)
+}
+
+func (s stubQuerier) UpdateProjectMemberRole(ctx context.Context, params db.UpdateProjectMemberRoleParams) (db.ProjectMembership, error) {
+	if s.updateProjectMemberRoleFn == nil {
+		panic("unexpected UpdateProjectMemberRole call")
+	}
+	return s.updateProjectMemberRoleFn(ctx, params)
+}
+
+func (s stubQuerier) CreateTask(ctx context.Context, params db.CreateTaskParams) (db.Task, error) {
 	if s.createTaskFn == nil {
 		panic("unexpected CreateTask call")
 	}
 	return s.createTaskFn(ctx, params)
 }
 
-func (s *stubTaskRepository) GetTask(ctx context.Context, id uuid.UUID) (*db.Task, *apperror.AppError) {
-	if s.getTaskFn == nil {
-		panic("unexpected GetTask call")
+func (s stubQuerier) GetActiveTaskAssignment(ctx context.Context, params db.GetActiveTaskAssignmentParams) (db.TaskAssignment, error) {
+	if s.getActiveTaskAssignmentFn == nil {
+		panic("unexpected GetActiveTaskAssignment call")
 	}
-	return s.getTaskFn(ctx, id)
+	return s.getActiveTaskAssignmentFn(ctx, params)
 }
 
-func (s *stubTaskRepository) ListTasksByProject(ctx context.Context, projectID pgtype.UUID) ([]db.Task, *apperror.AppError) {
-	if s.listTasksByProjectFn == nil {
-		panic("unexpected ListTasksByProject call")
+func (s stubQuerier) AssignTask(ctx context.Context, params db.AssignTaskParams) (db.TaskAssignment, error) {
+	if s.assignTaskFn == nil {
+		panic("unexpected AssignTask call")
 	}
-	return s.listTasksByProjectFn(ctx, projectID)
+	return s.assignTaskFn(ctx, params)
 }
 
-func (s *stubTaskRepository) UpdateTask(ctx context.Context, params db.UpdateTaskParams) (*db.Task, *apperror.AppError) {
-	if s.updateTaskFn == nil {
-		panic("unexpected UpdateTask call")
+func (s stubQuerier) CreateTaskComment(ctx context.Context, params db.CreateTaskCommentParams) (db.TaskComment, error) {
+	if s.createTaskCommentFn == nil {
+		panic("unexpected CreateTaskComment call")
 	}
-	return s.updateTaskFn(ctx, params)
+	return s.createTaskCommentFn(ctx, params)
 }
 
-func (s *stubTaskRepository) DeleteTask(ctx context.Context, params db.DeleteTaskParams) (*db.Task, *apperror.AppError) {
-	if s.deleteTaskFn == nil {
-		panic("unexpected DeleteTask call")
+func (s stubQuerier) GetTaskComment(ctx context.Context, id uuid.UUID) (db.TaskComment, error) {
+	if s.getTaskCommentFn == nil {
+		panic("unexpected GetTaskComment call")
 	}
-	return s.deleteTaskFn(ctx, params)
+	return s.getTaskCommentFn(ctx, id)
 }
 
-func (s *stubTaskRepository) ArchiveTask(ctx context.Context, params db.ArchiveTaskParams) (*db.Task, *apperror.AppError) {
-	if s.archiveTaskFn == nil {
-		panic("unexpected ArchiveTask call")
+func (s stubQuerier) DeleteTaskComment(ctx context.Context, params db.DeleteTaskCommentParams) (db.TaskComment, error) {
+	if s.deleteTaskCommentFn == nil {
+		panic("unexpected DeleteTaskComment call")
 	}
-	return s.archiveTaskFn(ctx, params)
+	return s.deleteTaskCommentFn(ctx, params)
 }
 
-func (s *stubTaskRepository) UpdateTaskStatus(ctx context.Context, params db.UpdateTaskStatusParams) (*db.Task, *apperror.AppError) {
-	if s.updateTaskStatusFn == nil {
-		panic("unexpected UpdateTaskStatus call")
-	}
-	return s.updateTaskStatusFn(ctx, params)
-}
-
-func (s *stubTaskRepository) UpdateTaskProgress(ctx context.Context, params db.UpdateTaskProgressParams) (*db.Task, *apperror.AppError) {
-	if s.updateTaskProgressFn == nil {
-		panic("unexpected UpdateTaskProgress call")
-	}
-	return s.updateTaskProgressFn(ctx, params)
-}
-
-func (s *stubTaskRepository) ListTasksByOrganization(ctx context.Context, params db.ListTasksByOrganizationParams) ([]db.Task, *apperror.AppError) {
-	if s.listTasksByOrganizationFn == nil {
-		panic("unexpected ListTasksByOrganization call")
-	}
-	return s.listTasksByOrganizationFn(ctx, params)
-}
-
-func (s *stubTaskRepository) ListTasksByParent(ctx context.Context, parentTaskID pgtype.UUID) ([]db.Task, *apperror.AppError) {
-	if s.listTasksByParentFn == nil {
-		panic("unexpected ListTasksByParent call")
-	}
-	return s.listTasksByParentFn(ctx, parentTaskID)
-}
-
-func (s *stubTaskRepository) ListTasksByCreator(ctx context.Context, params db.ListTasksByCreatorParams) ([]db.Task, *apperror.AppError) {
-	if s.listTasksByCreatorFn == nil {
-		panic("unexpected ListTasksByCreator call")
-	}
-	return s.listTasksByCreatorFn(ctx, params)
-}
-
-func TestNewTaskService(t *testing.T) {
-	svc, err := NewTaskService(nil, servicetestutil.NewAllowAuthorizer(), nil)
-	if err == nil {
-		t.Fatal("expected constructor error for nil repository")
+func TestNewRequiresQueries(t *testing.T) {
+	svc, appErr := New(nil, nil)
+	if appErr == nil {
+		t.Fatal("expected constructor error")
 	}
 	if svc != nil {
-		t.Fatal("expected nil service when repository is nil")
-	}
-	if err.Code != apperror.CodeInternal {
-		t.Fatalf("expected internal error, got %s", err.Code)
-	}
-
-	svc, err = NewTaskService(&stubTaskRepository{}, servicetestutil.NewAllowAuthorizer(), nil)
-	if err != nil {
-		t.Fatalf("expected constructor success, got error: %v", err)
-	}
-	if svc == nil {
-		t.Fatal("expected non-nil service")
+		t.Fatal("expected nil service")
 	}
 }
 
-func TestCreateTaskValidation(t *testing.T) {
-	validUser := &coredto.UserInfo{UserID: uuid.NewString()}
+func TestCreateProjectRequiresIncomingUserMetadata(t *testing.T) {
+	svc := newTestService(t, stubQuerier{
+		createProjectFn: func(context.Context, db.CreateProjectParams) (db.Project, error) {
+			t.Fatal("query should not be called")
+			return db.Project{}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), nil)
 
-	testCases := []struct {
-		name        string
-		req         *taskv1.CreateTaskRequest
-		userInfo    *coredto.UserInfo
-		wantMessage string
-	}{
-		{
-			name:        "nil request",
-			req:         nil,
-			userInfo:    validUser,
-			wantMessage: "create task request is required",
-		},
-		{
-			name:        "missing user metadata",
-			req:         &taskv1.CreateTaskRequest{Title: "Ship feature"},
-			userInfo:    nil,
-			wantMessage: "user metadata is required",
-		},
-		{
-			name:        "missing title",
-			req:         &taskv1.CreateTaskRequest{},
-			userInfo:    validUser,
-			wantMessage: "title is required",
-		},
-		{
-			name:        "invalid project uuid",
-			req:         &taskv1.CreateTaskRequest{Title: "Ship feature", ProjectId: "bad-uuid"},
-			userInfo:    validUser,
-			wantMessage: "invalid uuid",
-		},
-		{
-			name:        "invalid priority",
-			req:         &taskv1.CreateTaskRequest{Title: "Ship feature", Priority: "critical"},
-			userInfo:    validUser,
-			wantMessage: "invalid task priority",
-		},
+	res, err := svc.CreateProject(context.Background(), &taskv1.CreateProjectRequest{Name: "Platform"})
+	if res != nil {
+		t.Fatalf("expected nil response, got %#v", res)
 	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			repoCalled := false
-			svc := mustTaskService(t, &stubTaskRepository{
-				createTaskFn: func(context.Context, db.CreateTaskParams) (*db.Task, *apperror.AppError) {
-					repoCalled = true
-					return nil, nil
-				},
-			})
-
-			res, err := svc.CreateTask(context.Background(), tc.req, tc.userInfo)
-			if res != nil {
-				t.Fatalf("expected nil response, got %#v", res)
-			}
-			assertTaskAppError(t, err, apperror.CodeValidation, tc.wantMessage)
-			if repoCalled {
-				t.Fatal("expected repository not to be called for validation failure")
-			}
-		})
+	if status.Code(err) != codes.Unauthenticated {
+		t.Fatalf("expected unauthenticated error, got %v", err)
 	}
 }
 
-func TestCreateTaskSuccess(t *testing.T) {
+func TestCreateProjectWritesOwnerTuple(t *testing.T) {
 	userID := uuid.New()
 	projectID := uuid.New()
-	parentTaskID := uuid.New()
-	taskID := uuid.New()
-	dueAt := time.Date(2026, time.May, 2, 9, 30, 0, 0, time.UTC)
+	tuples := &servicetestutil.TupleManager{}
 
-	svc := mustTaskServiceWithAuthorizer(t, &stubTaskRepository{
-		createTaskFn: func(_ context.Context, params db.CreateTaskParams) (*db.Task, *apperror.AppError) {
-			if params.OrganizationID.Valid {
-				t.Fatalf("unexpected organization id: %#v", params.OrganizationID)
-			}
-			if !params.ProjectID.Valid || params.ProjectID.Bytes != projectID {
-				t.Fatalf("unexpected project id: %#v", params.ProjectID)
-			}
-			if !params.ParentTaskID.Valid || params.ParentTaskID.Bytes != parentTaskID {
-				t.Fatalf("unexpected parent task id: %#v", params.ParentTaskID)
-			}
-			if params.CreatedBy != userID {
-				t.Fatalf("unexpected created_by: %s", params.CreatedBy)
-			}
-			if params.Title != "Ship feature" {
-				t.Fatalf("unexpected title: %s", params.Title)
-			}
-			if params.Description != "Finish the service tests" {
-				t.Fatalf("unexpected description: %s", params.Description)
-			}
-			if params.Priority != "high" {
-				t.Fatalf("unexpected priority: %s", params.Priority)
-			}
-			if !params.DueAt.Valid || !params.DueAt.Time.Equal(dueAt) {
-				t.Fatalf("unexpected due_at: %#v", params.DueAt)
-			}
-
-			return &db.Task{
-				ID:             taskID,
-				OrganizationID: params.OrganizationID,
-				ProjectID:      params.ProjectID,
-				ParentTaskID:   params.ParentTaskID,
-				CreatedBy:      params.CreatedBy,
-				Title:          params.Title,
-				Description:    params.Description,
-				Status:         "pending",
-				Priority:       params.Priority,
-				DueAt:          params.DueAt,
+	svc := newTestService(t, stubQuerier{
+		createProjectFn: func(_ context.Context, params db.CreateProjectParams) (db.Project, error) {
+			return db.Project{
+				ID:        projectID,
+				CreatedBy: params.CreatedBy,
+				Name:      params.Name,
+				Status:    "active",
 			}, nil
 		},
-	}, stubTaskAuthorizer{
-		requireTaskRoleFn: func(_ context.Context, taskID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
-			if taskID != parentTaskID {
-				t.Fatalf("unexpected parent task id: %s", taskID)
-			}
-			if userInfo == nil || userInfo.UserID != userID.String() {
-				t.Fatalf("unexpected user info: %#v", userInfo)
-			}
-			if minRole != authz.RoleMember {
-				t.Fatalf("unexpected task role requirement: %s", minRole)
-			}
-			return &db.Task{
-				ID:        parentTaskID,
-				ProjectID: pgtype.UUID{Bytes: projectID, Valid: true},
-				CreatedBy: userID,
-			}, nil
-		},
-		requireProjectRoleFn: func(_ context.Context, gotProjectID uuid.UUID, userInfo *dto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
-			if gotProjectID != projectID {
-				t.Fatalf("unexpected project id: %s", gotProjectID)
-			}
-			if userInfo == nil || userInfo.UserID != userID.String() {
-				t.Fatalf("unexpected user info: %#v", userInfo)
-			}
-			if minRole != authz.RoleMember {
-				t.Fatalf("unexpected project role requirement: %s", minRole)
-			}
-			return &db.ProjectMembership{ProjectID: projectID, Role: string(minRole)}, nil
-		},
-	})
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
 
-	res, err := svc.CreateTask(context.Background(), &taskv1.CreateTaskRequest{
-		ProjectId:    projectID.String(),
-		ParentTaskId: parentTaskID.String(),
-		Title:        "Ship feature",
-		Description:  "Finish the service tests",
-		Priority:     "high",
-		DueAt:        timestamppb.New(dueAt),
-	}, &coredto.UserInfo{UserID: userID.String()})
+	_, err := svc.CreateProject(contextWithUser(userID), &taskv1.CreateProjectRequest{Name: "Platform"})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
-	if res == nil {
-		t.Fatal("expected non-nil response")
+	if !tuples.HasWrite(authz.ProjectRoleTuple(projectID, string(taskpermissions.RoleOwner), userID)) {
+		t.Fatalf("missing project owner tuple: %#v", tuples.Writes)
 	}
-	if res.Id != taskID.String() {
-		t.Fatalf("unexpected task id: %s", res.Id)
+}
+
+func TestAddProjectMemberWritesRoleTuple(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+
+	svc := newTestService(t, stubQuerier{
+		getActiveMembershipFn: func(context.Context, db.GetActiveProjectMembershipParams) (db.ProjectMembership, error) {
+			return db.ProjectMembership{}, pgx.ErrNoRows
+		},
+		addProjectMemberFn: func(_ context.Context, params db.AddProjectMemberParams) (db.ProjectMembership, error) {
+			return db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      params.Role,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+
+	_, err := svc.AddProjectMember(contextWithUser(uuid.New()), &taskv1.AddProjectMemberRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+		Role:      string(taskpermissions.RoleAdmin),
+	})
+	if err != nil {
+		t.Fatalf("expected success, got error: %v", err)
 	}
-	if res.ProjectId != projectID.String() {
-		t.Fatalf("unexpected project id: %s", res.ProjectId)
+	if !tuples.HasWrite(authz.ProjectRoleTuple(projectID, string(taskpermissions.RoleAdmin), userID)) {
+		t.Fatalf("missing project member tuple: %#v", tuples.Writes)
 	}
-	if res.ParentTaskId != parentTaskID.String() {
-		t.Fatalf("unexpected parent task id: %s", res.ParentTaskId)
+}
+
+func TestUpdateProjectMemberRoleReplacesTuple(t *testing.T) {
+	projectID := uuid.New()
+	userID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
+	lookupCount := 0
+
+	svc := newTestService(t, stubQuerier{
+		getActiveMembershipFn: func(_ context.Context, params db.GetActiveProjectMembershipParams) (db.ProjectMembership, error) {
+			lookupCount++
+			return db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      string(taskpermissions.RoleMember),
+			}, nil
+		},
+		updateProjectMemberRoleFn: func(_ context.Context, params db.UpdateProjectMemberRoleParams) (db.ProjectMembership, error) {
+			return db.ProjectMembership{
+				ID:        uuid.New(),
+				ProjectID: params.ProjectID,
+				UserID:    params.UserID,
+				Role:      params.Role,
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+
+	_, err := svc.UpdateProjectMemberRole(contextWithUser(uuid.New()), &taskv1.UpdateProjectMemberRoleRequest{
+		ProjectId: projectID.String(),
+		UserId:    userID.String(),
+		Role:      string(taskpermissions.RoleAdmin),
+	})
+	if err != nil {
+		t.Fatalf("expected success, got error: %v", err)
 	}
-	if res.CreatedBy != userID.String() {
-		t.Fatalf("unexpected created_by: %s", res.CreatedBy)
+	if lookupCount != 1 {
+		t.Fatalf("expected current membership lookup, got %d", lookupCount)
 	}
-	if res.Priority != "high" {
-		t.Fatalf("unexpected priority: %s", res.Priority)
+	if !tuples.HasDelete(authz.DeleteTuple(authz.ProjectRoleTuple(projectID, string(taskpermissions.RoleMember), userID))) {
+		t.Fatalf("missing old role delete: %#v", tuples.Deletes)
 	}
-	if res.DueAt == nil || !res.DueAt.AsTime().Equal(dueAt) {
-		t.Fatalf("unexpected due_at: %#v", res.DueAt)
+	if !tuples.HasWrite(authz.ProjectRoleTuple(projectID, string(taskpermissions.RoleAdmin), userID)) {
+		t.Fatalf("missing new role write: %#v", tuples.Writes)
 	}
 }
 
 func TestCreateTaskWritesCreatorAndProjectTuples(t *testing.T) {
 	userID := uuid.New()
-	projectID := uuid.New()
 	taskID := uuid.New()
+	projectID := uuid.New()
 	tuples := &servicetestutil.TupleManager{}
 
-	svc, err := NewTaskService(&stubTaskRepository{
-		createTaskFn: func(_ context.Context, params db.CreateTaskParams) (*db.Task, *apperror.AppError) {
-			return &db.Task{
+	svc := newTestService(t, stubQuerier{
+		createTaskFn: func(_ context.Context, params db.CreateTaskParams) (db.Task, error) {
+			if !params.ProjectID.Valid || params.ProjectID.Bytes != projectID {
+				t.Fatalf("unexpected project id: %#v", params.ProjectID)
+			}
+			return db.Task{
 				ID:        taskID,
 				ProjectID: params.ProjectID,
 				CreatedBy: params.CreatedBy,
 				Title:     params.Title,
-				Status:    "pending",
 				Priority:  params.Priority,
 			}, nil
 		},
 	}, servicetestutil.NewAllowAuthorizer(), tuples)
-	if err != nil {
-		t.Fatalf("failed to construct task service: %v", err)
-	}
 
-	_, appErr := svc.CreateTask(context.Background(), &taskv1.CreateTaskRequest{
+	_, err := svc.CreateTask(contextWithUser(userID), &taskv1.CreateTaskRequest{
 		ProjectId: projectID.String(),
-		Title:     "Ship feature",
-	}, &coredto.UserInfo{UserID: userID.String()})
-	if appErr != nil {
-		t.Fatalf("expected success, got error: %v", appErr)
-	}
-
-	if len(tuples.Writes) != 2 {
-		t.Fatalf("expected 2 tuple writes, got %d: %#v", len(tuples.Writes), tuples.Writes)
+		Title:     "Ship task-service",
+	})
+	if err != nil {
+		t.Fatalf("expected success, got error: %v", err)
 	}
 	if !tuples.HasWrite(authz.TaskCreatorTuple(taskID, userID)) {
-		t.Fatalf("missing task creator tuple write: %#v", tuples.Writes)
+		t.Fatalf("missing task creator tuple: %#v", tuples.Writes)
 	}
 	if !tuples.HasWrite(authz.TaskProjectTuple(taskID, projectID)) {
-		t.Fatalf("missing task project tuple write: %#v", tuples.Writes)
+		t.Fatalf("missing task project tuple: %#v", tuples.Writes)
 	}
 }
 
-func TestCreateTaskRejectsMismatchedParentProjectScope(t *testing.T) {
-	parentTaskID := uuid.New()
-	parentProjectID := uuid.New()
-	requestProjectID := uuid.New()
-
-	svc := mustTaskServiceWithAuthorizer(t, &stubTaskRepository{
-		createTaskFn: func(context.Context, db.CreateTaskParams) (*db.Task, *apperror.AppError) {
-			t.Fatal("repository should not be called for mismatched parent scope")
-			return nil, nil
-		},
-	}, stubTaskAuthorizer{
-		requireTaskRoleFn: func(_ context.Context, taskID uuid.UUID, _ *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
-			if taskID != parentTaskID {
-				t.Fatalf("unexpected parent task id: %s", taskID)
-			}
-			if minRole != authz.RoleMember {
-				t.Fatalf("unexpected role requirement: %s", minRole)
-			}
-			return &db.Task{
-				ID:        parentTaskID,
-				ProjectID: pgtype.UUID{Bytes: parentProjectID, Valid: true},
-				CreatedBy: uuid.New(),
-			}, nil
-		},
-		requireProjectRoleFn: func(context.Context, uuid.UUID, *dto.UserInfo, authz.Role) (*db.ProjectMembership, *apperror.AppError) {
-			t.Fatal("project authorization should not run after a parent scope mismatch")
-			return nil, nil
-		},
-	})
-
-	res, err := svc.CreateTask(context.Background(), &taskv1.CreateTaskRequest{
-		ProjectId:    requestProjectID.String(),
-		ParentTaskId: parentTaskID.String(),
-		Title:        "Ship feature",
-	}, &dto.UserInfo{UserID: uuid.NewString()})
-	if res != nil {
-		t.Fatalf("expected nil response, got %#v", res)
-	}
-	assertTaskAppError(t, err, apperror.CodeValidation, "child task scope must match parent task scope")
-}
-
-func TestGetTaskRepoError(t *testing.T) {
+func TestAssignTaskWritesAssigneeTuple(t *testing.T) {
 	taskID := uuid.New()
-	repoErr := &apperror.AppError{Code: apperror.CodeNotFound, Message: "task not found"}
+	assigneeID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
 
-	svc := mustTaskService(t, &stubTaskRepository{
-		getTaskFn: func(_ context.Context, id uuid.UUID) (*db.Task, *apperror.AppError) {
-			if id != taskID {
-				t.Fatalf("unexpected task id: %s", id)
-			}
-			return nil, repoErr
+	svc := newTestService(t, stubQuerier{
+		getActiveTaskAssignmentFn: func(context.Context, db.GetActiveTaskAssignmentParams) (db.TaskAssignment, error) {
+			return db.TaskAssignment{}, pgx.ErrNoRows
 		},
-	})
-
-	res, err := svc.GetTask(context.Background(), &taskv1.GetTaskRequest{Id: taskID.String()}, &dto.UserInfo{UserID: uuid.NewString()})
-	if res != nil {
-		t.Fatalf("expected nil response, got %#v", res)
-	}
-	if err != repoErr {
-		t.Fatalf("expected repo error to be returned unchanged, got %#v", err)
-	}
-}
-
-func TestListTasksByProjectFiltersByStatus(t *testing.T) {
-	projectID := uuid.New()
-	pendingID := uuid.New()
-	completedID := uuid.New()
-	creatorID := uuid.New()
-
-	svc := mustTaskService(t, &stubTaskRepository{
-		listTasksByProjectFn: func(_ context.Context, got pgtype.UUID) ([]db.Task, *apperror.AppError) {
-			if !got.Valid || got.Bytes != projectID {
-				t.Fatalf("unexpected project id: %#v", got)
-			}
-
-			return []db.Task{
-				{ID: pendingID, CreatedBy: creatorID, Title: "Pending", Status: "pending", Priority: "medium"},
-				{ID: completedID, CreatedBy: creatorID, Title: "Done", Status: "completed", Priority: "high"},
+		assignTaskFn: func(_ context.Context, params db.AssignTaskParams) (db.TaskAssignment, error) {
+			return db.TaskAssignment{
+				ID:           uuid.New(),
+				TaskID:       params.TaskID,
+				AssigneeType: params.AssigneeType,
+				AssigneeID:   params.AssigneeID,
+				AssignedBy:   params.AssignedBy,
 			}, nil
 		},
-	})
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
 
-	res, err := svc.ListTasksByProject(context.Background(), &taskv1.ListTasksByProjectRequest{
-		ProjectId: projectID.String(),
-		Status:    "completed",
-	}, &dto.UserInfo{UserID: uuid.NewString()})
+	_, err := svc.AssignTask(contextWithUser(uuid.New()), &taskv1.AssignTaskRequest{
+		TaskId:       taskID.String(),
+		AssigneeType: "user",
+		AssigneeId:   assigneeID.String(),
+	})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
-	if len(res.Tasks) != 1 {
-		t.Fatalf("expected 1 task, got %d", len(res.Tasks))
-	}
-	if res.Tasks[0].Id != completedID.String() {
-		t.Fatalf("unexpected task id: %s", res.Tasks[0].Id)
+	if !tuples.HasWrite(authz.TaskAssigneeTuple(taskID, "user", assigneeID)) {
+		t.Fatalf("missing assignee tuple: %#v", tuples.Writes)
 	}
 }
 
-func TestListTasksByProjectValidationAndRepoError(t *testing.T) {
-	svc := mustTaskService(t, &stubTaskRepository{
-		listTasksByProjectFn: func(context.Context, pgtype.UUID) ([]db.Task, *apperror.AppError) {
-			t.Fatal("repository should not be called for invalid request")
-			return nil, nil
-		},
-	})
-
-	res, err := svc.ListTasksByProject(context.Background(), &taskv1.ListTasksByProjectRequest{
-		ProjectId: uuid.NewString(),
-		Status:    "done",
-	}, &dto.UserInfo{UserID: uuid.NewString()})
-	if res != nil {
-		t.Fatalf("expected nil response, got %#v", res)
-	}
-	assertTaskAppError(t, err, apperror.CodeValidation, "invalid task status")
-
-	projectID := uuid.New()
-	repoErr := &apperror.AppError{Code: apperror.CodeInternal, Message: "failed to list tasks by project"}
-	svc = mustTaskService(t, &stubTaskRepository{
-		listTasksByProjectFn: func(_ context.Context, got pgtype.UUID) ([]db.Task, *apperror.AppError) {
-			if !got.Valid || got.Bytes != projectID {
-				t.Fatalf("unexpected project id: %#v", got)
-			}
-			return nil, repoErr
-		},
-	})
-
-	res, err = svc.ListTasksByProject(context.Background(), &taskv1.ListTasksByProjectRequest{
-		ProjectId: projectID.String(),
-		Status:    "pending",
-	}, &dto.UserInfo{UserID: uuid.NewString()})
-	if res != nil {
-		t.Fatalf("expected nil response, got %#v", res)
-	}
-	if err != repoErr {
-		t.Fatalf("expected repo error to be returned unchanged, got %#v", err)
-	}
-}
-
-func TestUpdateTaskStatusCompletedSetsStartedAndCompletedAt(t *testing.T) {
+func TestCreateAndDeleteTaskCommentSyncTuples(t *testing.T) {
 	taskID := uuid.New()
-	userID := uuid.New()
+	commentID := uuid.New()
+	authorID := uuid.New()
+	tuples := &servicetestutil.TupleManager{}
 
-	getTaskCalled := false
-	updateCalled := false
-
-	svc := mustTaskService(t, &stubTaskRepository{
-		getTaskFn: func(_ context.Context, got uuid.UUID) (*db.Task, *apperror.AppError) {
-			getTaskCalled = true
-			if got != taskID {
-				t.Fatalf("unexpected task id: %s", got)
-			}
-			return &db.Task{
-				ID:        taskID,
-				CreatedBy: uuid.New(),
-				Title:     "Ship feature",
-				Status:    "pending",
-				Priority:  "medium",
+	svc := newTestService(t, stubQuerier{
+		createTaskCommentFn: func(_ context.Context, params db.CreateTaskCommentParams) (db.TaskComment, error) {
+			return db.TaskComment{
+				ID:       commentID,
+				TaskID:   params.TaskID,
+				AuthorID: params.AuthorID,
+				Body:     params.Body,
 			}, nil
 		},
-		updateTaskStatusFn: func(_ context.Context, params db.UpdateTaskStatusParams) (*db.Task, *apperror.AppError) {
-			updateCalled = true
-			if params.ID != taskID {
-				t.Fatalf("unexpected task id: %s", params.ID)
-			}
-			if !params.UpdatedBy.Valid || params.UpdatedBy.Bytes != userID {
-				t.Fatalf("unexpected updated_by: %#v", params.UpdatedBy)
-			}
-			if params.Status != "completed" {
-				t.Fatalf("unexpected status: %s", params.Status)
-			}
-			if !params.StartedAt.Valid {
-				t.Fatal("expected started_at to be set")
-			}
-			if !params.CompletedAt.Valid {
-				t.Fatal("expected completed_at to be set")
-			}
-			if params.CompletedAt.Time.Before(params.StartedAt.Time) {
-				t.Fatalf("expected completed_at >= started_at, got %v < %v", params.CompletedAt.Time, params.StartedAt.Time)
-			}
-
-			return &db.Task{
-				ID:          taskID,
-				CreatedBy:   uuid.New(),
-				UpdatedBy:   params.UpdatedBy,
-				Title:       "Ship feature",
-				Status:      params.Status,
-				Priority:    "medium",
-				StartedAt:   params.StartedAt,
-				CompletedAt: params.CompletedAt,
+		getTaskCommentFn: func(_ context.Context, id uuid.UUID) (db.TaskComment, error) {
+			return db.TaskComment{
+				ID:       id,
+				TaskID:   taskID,
+				AuthorID: authorID,
+				Body:     "Looks good",
 			}, nil
 		},
+		deleteTaskCommentFn: func(_ context.Context, params db.DeleteTaskCommentParams) (db.TaskComment, error) {
+			return db.TaskComment{
+				ID:       params.ID,
+				TaskID:   taskID,
+				AuthorID: authorID,
+				Body:     "Looks good",
+			}, nil
+		},
+	}, servicetestutil.NewAllowAuthorizer(), tuples)
+
+	_, err := svc.CreateTaskComment(contextWithUser(authorID), &taskv1.CreateTaskCommentRequest{
+		TaskId: taskID.String(),
+		Body:   "Looks good",
 	})
-
-	res, err := svc.UpdateTaskStatus(context.Background(), &taskv1.UpdateTaskStatusRequest{
-		Id:     taskID.String(),
-		Status: "completed",
-	}, &coredto.UserInfo{UserID: userID.String()})
 	if err != nil {
 		t.Fatalf("expected success, got error: %v", err)
 	}
-	if !getTaskCalled {
-		t.Fatal("expected GetTask to be called")
+	if !tuples.HasWrite(authz.CommentAuthorTuple(commentID, authorID)) || !tuples.HasWrite(authz.CommentTaskTuple(commentID, taskID)) {
+		t.Fatalf("missing comment tuple writes: %#v", tuples.Writes)
 	}
-	if !updateCalled {
-		t.Fatal("expected UpdateTaskStatus to be called")
-	}
-	if res == nil {
-		t.Fatal("expected non-nil response")
-	}
-	if res.Status != "completed" {
-		t.Fatalf("unexpected status: %s", res.Status)
-	}
-	if res.StartedAt == nil {
-		t.Fatal("expected started_at in response")
-	}
-	if res.CompletedAt == nil {
-		t.Fatal("expected completed_at in response")
-	}
-}
 
-func TestUpdateTaskStatusInvalidStatus(t *testing.T) {
-	svc := mustTaskService(t, &stubTaskRepository{
-		getTaskFn: func(context.Context, uuid.UUID) (*db.Task, *apperror.AppError) {
-			t.Fatal("repository should not be called for invalid status")
-			return nil, nil
-		},
-	})
-
-	res, err := svc.UpdateTaskStatus(context.Background(), &taskv1.UpdateTaskStatusRequest{
-		Id:     uuid.NewString(),
-		Status: "done",
-	}, &coredto.UserInfo{UserID: uuid.NewString()})
-	if res != nil {
-		t.Fatalf("expected nil response, got %#v", res)
-	}
-	assertTaskAppError(t, err, apperror.CodeValidation, "invalid task status")
-}
-
-func TestUpdateTaskProgressRejectsOutOfRange(t *testing.T) {
-	testCases := []int32{-1, 101}
-
-	for _, progress := range testCases {
-		t.Run(fmt.Sprintf("progress_%d", progress), func(t *testing.T) {
-			repoCalled := false
-			svc := mustTaskService(t, &stubTaskRepository{
-				getTaskFn: func(context.Context, uuid.UUID) (*db.Task, *apperror.AppError) {
-					repoCalled = true
-					return nil, nil
-				},
-				updateTaskProgressFn: func(context.Context, db.UpdateTaskProgressParams) (*db.Task, *apperror.AppError) {
-					repoCalled = true
-					return nil, nil
-				},
-			})
-
-			res, err := svc.UpdateTaskProgress(context.Background(), &taskv1.UpdateTaskProgressRequest{
-				Id:              uuid.NewString(),
-				ProgressPercent: progress,
-			}, &coredto.UserInfo{UserID: uuid.NewString()})
-			if res != nil {
-				t.Fatalf("expected nil response, got %#v", res)
-			}
-			assertTaskAppError(t, err, apperror.CodeValidation, "progress_percent must be between 0 and 100")
-			if repoCalled {
-				t.Fatal("expected repository not to be called for invalid progress")
-			}
-		})
-	}
-}
-
-func TestUpdateTaskProgressRepoError(t *testing.T) {
-	taskID := uuid.New()
-	userID := uuid.New()
-	repoErr := &apperror.AppError{Code: apperror.CodeInternal, Message: "failed to update task progress"}
-
-	svc := mustTaskService(t, &stubTaskRepository{
-		getTaskFn: func(_ context.Context, id uuid.UUID) (*db.Task, *apperror.AppError) {
-			if id != taskID {
-				t.Fatalf("unexpected task id: %s", id)
-			}
-			return &db.Task{ID: taskID, CreatedBy: uuid.New(), Title: "Ship feature", Priority: "medium"}, nil
-		},
-		updateTaskProgressFn: func(_ context.Context, params db.UpdateTaskProgressParams) (*db.Task, *apperror.AppError) {
-			if params.ID != taskID {
-				t.Fatalf("unexpected task id: %s", params.ID)
-			}
-			if !params.UpdatedBy.Valid || params.UpdatedBy.Bytes != userID {
-				t.Fatalf("unexpected updated_by: %#v", params.UpdatedBy)
-			}
-			if params.ProgressPercent != 55 {
-				t.Fatalf("unexpected progress: %d", params.ProgressPercent)
-			}
-			return nil, repoErr
-		},
-	})
-
-	res, err := svc.UpdateTaskProgress(context.Background(), &taskv1.UpdateTaskProgressRequest{
-		Id:              taskID.String(),
-		ProgressPercent: 55,
-	}, &coredto.UserInfo{UserID: userID.String()})
-	if res != nil {
-		t.Fatalf("expected nil response, got %#v", res)
-	}
-	if err != repoErr {
-		t.Fatalf("expected repo error to be returned unchanged, got %#v", err)
-	}
-}
-
-func TestListTasksByOrganizationAndCreatorValidation(t *testing.T) {
-	svc := mustTaskService(t, &stubTaskRepository{
-		listTasksByOrganizationFn: func(context.Context, db.ListTasksByOrganizationParams) ([]db.Task, *apperror.AppError) {
-			t.Fatal("repository should not be called for invalid organization id")
-			return nil, nil
-		},
-		listTasksByCreatorFn: func(context.Context, db.ListTasksByCreatorParams) ([]db.Task, *apperror.AppError) {
-			t.Fatal("repository should not be called for invalid creator id")
-			return nil, nil
-		},
-	})
-
-	orgRes, orgErr := svc.ListTasksByOrganization(context.Background(), &taskv1.ListTasksByOrganizationRequest{
-		OrganizationId: "bad-uuid",
-	}, &coredto.UserInfo{UserID: uuid.NewString()})
-	if orgRes != nil {
-		t.Fatalf("expected nil response, got %#v", orgRes)
-	}
-	assertTaskAppError(t, orgErr, apperror.CodeValidation, "invalid uuid")
-
-	creatorRes, creatorErr := svc.ListTasksByCreator(context.Background(), &taskv1.ListTasksByCreatorRequest{
-		CreatedBy: "bad-uuid",
-	}, &coredto.UserInfo{UserID: uuid.NewString()})
-	if creatorRes != nil {
-		t.Fatalf("expected nil response, got %#v", creatorRes)
-	}
-	assertTaskAppError(t, creatorErr, apperror.CodeValidation, "invalid uuid")
-}
-
-func TestListTasksByParentFiltersMismatchedChildren(t *testing.T) {
-	parentTaskID := uuid.New()
-	projectID := uuid.New()
-	userID := uuid.New()
-	keptTaskID := uuid.New()
-	wrongProjectTaskID := uuid.New()
-	personalTaskID := uuid.New()
-
-	svc := mustTaskServiceWithAuthorizer(t, &stubTaskRepository{
-		listTasksByParentFn: func(_ context.Context, parent pgtype.UUID) ([]db.Task, *apperror.AppError) {
-			if !parent.Valid || parent.Bytes != parentTaskID {
-				t.Fatalf("unexpected parent task id: %#v", parent)
-			}
-			return []db.Task{
-				{
-					ID:        keptTaskID,
-					ProjectID: pgtype.UUID{Bytes: projectID, Valid: true},
-					CreatedBy: userID,
-					Title:     "Kept",
-					Priority:  "medium",
-				},
-				{
-					ID:        wrongProjectTaskID,
-					ProjectID: pgtype.UUID{Bytes: uuid.New(), Valid: true},
-					CreatedBy: userID,
-					Title:     "Wrong project",
-					Priority:  "medium",
-				},
-				{
-					ID:        personalTaskID,
-					CreatedBy: userID,
-					Title:     "Wrong scope",
-					Priority:  "medium",
-				},
-			}, nil
-		},
-	}, stubTaskAuthorizer{
-		requireTaskRoleFn: func(_ context.Context, taskID uuid.UUID, gotUserInfo *dto.UserInfo, minRole authz.Role) (*db.Task, *apperror.AppError) {
-			if taskID != parentTaskID {
-				t.Fatalf("unexpected parent task id: %s", taskID)
-			}
-			if gotUserInfo == nil || gotUserInfo.UserID != userID.String() {
-				t.Fatalf("unexpected user info: %#v", gotUserInfo)
-			}
-			if minRole != authz.RoleMember {
-				t.Fatalf("unexpected role requirement: %s", minRole)
-			}
-			return &db.Task{
-				ID:        parentTaskID,
-				ProjectID: pgtype.UUID{Bytes: projectID, Valid: true},
-				CreatedBy: userID,
-			}, nil
-		},
-	})
-
-	res, err := svc.ListTasksByParent(context.Background(), &taskv1.ListTasksByParentRequest{
-		ParentTaskId: parentTaskID.String(),
-	}, &dto.UserInfo{UserID: userID.String()})
+	_, err = svc.DeleteTaskComment(contextWithUser(authorID), &taskv1.DeleteTaskCommentRequest{Id: commentID.String()})
 	if err != nil {
-		t.Fatalf("expected success, got error: %v", err)
+		t.Fatalf("expected delete success, got error: %v", err)
 	}
-	if len(res.Tasks) != 1 {
-		t.Fatalf("expected 1 task after filtering, got %d", len(res.Tasks))
+	if !tuples.HasDelete(authz.DeleteTuple(authz.CommentAuthorTuple(commentID, authorID))) {
+		t.Fatalf("missing comment author delete: %#v", tuples.Deletes)
 	}
-	if res.Tasks[0].Id != keptTaskID.String() {
-		t.Fatalf("unexpected task kept after filtering: %s", res.Tasks[0].Id)
+	if !tuples.HasDelete(authz.DeleteTuple(authz.CommentTaskTuple(commentID, taskID))) {
+		t.Fatalf("missing comment task delete: %#v", tuples.Deletes)
 	}
 }
 
-func mustTaskService(t *testing.T, repo *stubTaskRepository) TaskService {
+func newTestService(t *testing.T, q db.Querier, authorizer authz.Authorizer, tuples *servicetestutil.TupleManager) *service {
 	t.Helper()
 
-	return mustTaskServiceWithAuthorizer(t, repo, servicetestutil.NewAllowAuthorizer())
-}
-
-func mustTaskServiceWithAuthorizer(t *testing.T, repo *stubTaskRepository, authorizer authz.Authorizer) TaskService {
-	t.Helper()
-
-	svc, err := NewTaskService(repo, authorizer, nil)
-	if err != nil {
-		t.Fatalf("failed to construct task service: %v", err)
+	svc, appErr := newService(q, authorizer, tuples)
+	if appErr != nil {
+		t.Fatalf("failed to construct service: %v", appErr)
 	}
 
 	return svc
 }
 
-func assertTaskAppError(t *testing.T, err *apperror.AppError, code apperror.ErrorCode, message string) {
-	t.Helper()
-
-	if err == nil {
-		t.Fatal("expected app error, got nil")
-	}
-	if err.Code != code {
-		t.Fatalf("expected error code %s, got %s", code, err.Code)
-	}
-	if err.Message != message {
-		t.Fatalf("expected error message %q, got %q", message, err.Message)
-	}
+func contextWithUser(userID uuid.UUID) context.Context {
+	return grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
+		coredto.MetaUserIDKey, userID.String(),
+	))
 }
+
+var _ db.Querier = stubQuerier{}

@@ -18,7 +18,7 @@ import (
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
+func (s *service) createTask(ctx context.Context, req *taskv1.CreateTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("create task request is required")
 	}
@@ -74,7 +74,7 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 		return nil, appErr
 	}
 
-	task, appErr := s.repo.CreateTask(ctx, db.CreateTaskParams{
+	taskRow, err := s.q.CreateTask(ctx, db.CreateTaskParams{
 		OrganizationID: organizationID,
 		ProjectID:      projectID,
 		ParentTaskID:   parentTaskID,
@@ -84,6 +84,7 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 		Priority:       priority,
 		DueAt:          dueAt,
 	})
+	task, appErr := utils.QueryOne(taskRow, err, "", "failed to create task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -103,7 +104,7 @@ func (s *service) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 	return mapTask(task), nil
 }
 
-func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
+func (s *service) getTask(ctx context.Context, req *taskv1.GetTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("get task request is required")
 	}
@@ -126,7 +127,8 @@ func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest, userI
 		return nil, appErr
 	}
 
-	task, appErr := s.repo.GetTask(ctx, id)
+	taskRow, err := s.q.GetTask(ctx, id)
+	task, appErr := utils.QueryOne(taskRow, err, "task not found", "failed to get task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -134,7 +136,7 @@ func (s *service) GetTask(ctx context.Context, req *taskv1.GetTaskRequest, userI
 	return mapTask(task), nil
 }
 
-func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksByProjectRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByProjectResponse, *apperror.AppError) {
+func (s *service) listTasksByProject(ctx context.Context, req *taskv1.ListTasksByProjectRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByProjectResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by project request is required")
 	}
@@ -162,10 +164,11 @@ func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksB
 		return nil, appErr
 	}
 
-	tasks, appErr := s.repo.ListTasksByProject(ctx, pgtype.UUID{
+	taskRows, err := s.q.ListTasksByProject(ctx, pgtype.UUID{
 		Bytes: projectUUID,
 		Valid: true,
 	})
+	tasks, appErr := utils.QueryMany(taskRows, err, "failed to list project tasks")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -175,7 +178,7 @@ func (s *service) ListTasksByProject(ctx context.Context, req *taskv1.ListTasksB
 	}, nil
 }
 
-func (s *service) UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
+func (s *service) updateTask(ctx context.Context, req *taskv1.UpdateTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update task request is required")
 	}
@@ -194,7 +197,8 @@ func (s *service) UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequest,
 		return nil, appErr
 	}
 
-	existingTask, appErr := s.repo.GetTask(ctx, id)
+	existingTaskRow, err := s.q.GetTask(ctx, id)
+	existingTask, appErr := utils.QueryOne(existingTaskRow, err, "task not found", "failed to get task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -214,7 +218,7 @@ func (s *service) UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequest,
 		return nil, appErr
 	}
 
-	task, appErr := s.repo.UpdateTask(ctx, db.UpdateTaskParams{
+	taskRow, err := s.q.UpdateTask(ctx, db.UpdateTaskParams{
 		ID:          id,
 		UpdatedBy:   utils.PGUUID(updatedBy),
 		Title:       req.GetTitle(),
@@ -222,6 +226,7 @@ func (s *service) UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequest,
 		Priority:    priority,
 		DueAt:       dueAt,
 	})
+	task, appErr := utils.QueryOne(taskRow, err, "task not found", "failed to update task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -229,7 +234,7 @@ func (s *service) UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequest,
 	return mapTask(task), nil
 }
 
-func (s *service) DeleteTask(ctx context.Context, req *taskv1.DeleteTaskRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *service) deleteTask(ctx context.Context, req *taskv1.DeleteTaskRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("delete task request is required")
 	}
@@ -250,17 +255,18 @@ func (s *service) DeleteTask(ctx context.Context, req *taskv1.DeleteTaskRequest,
 		return nil, appErr
 	}
 
-	if _, appErr = s.repo.DeleteTask(ctx, db.DeleteTaskParams{
+	deletedTaskRow, err := s.q.DeleteTask(ctx, db.DeleteTaskParams{
 		ID:        id,
 		UpdatedBy: utils.PGUUID(updatedBy),
-	}); appErr != nil {
+	})
+	if _, appErr = utils.QueryOne(deletedTaskRow, err, "task not found", "failed to delete task"); appErr != nil {
 		return nil, appErr
 	}
 
 	return &corev1.SuccessResponse{Success: true}, nil
 }
 
-func (s *service) ArchiveTask(ctx context.Context, req *taskv1.ArchiveTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
+func (s *service) archiveTask(ctx context.Context, req *taskv1.ArchiveTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("archive task request is required")
 	}
@@ -281,10 +287,11 @@ func (s *service) ArchiveTask(ctx context.Context, req *taskv1.ArchiveTaskReques
 		return nil, appErr
 	}
 
-	task, appErr := s.repo.ArchiveTask(ctx, db.ArchiveTaskParams{
+	taskRow, err := s.q.ArchiveTask(ctx, db.ArchiveTaskParams{
 		ID:        id,
 		UpdatedBy: utils.PGUUID(updatedBy),
 	})
+	task, appErr := utils.QueryOne(taskRow, err, "task not found", "failed to archive task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -292,7 +299,7 @@ func (s *service) ArchiveTask(ctx context.Context, req *taskv1.ArchiveTaskReques
 	return mapTask(task), nil
 }
 
-func (s *service) UpdateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskStatusRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
+func (s *service) updateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskStatusRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update task status request is required")
 	}
@@ -313,7 +320,8 @@ func (s *service) UpdateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskSt
 		return nil, appErr
 	}
 
-	existingTask, appErr := s.repo.GetTask(ctx, id)
+	existingTaskRow, err := s.q.GetTask(ctx, id)
+	existingTask, appErr := utils.QueryOne(existingTaskRow, err, "task not found", "failed to get task")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -345,13 +353,14 @@ func (s *service) UpdateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskSt
 		completedAt = pgtype.Timestamptz{}
 	}
 
-	task, appErr := s.repo.UpdateTaskStatus(ctx, db.UpdateTaskStatusParams{
+	taskRow, err := s.q.UpdateTaskStatus(ctx, db.UpdateTaskStatusParams{
 		ID:          id,
 		UpdatedBy:   utils.PGUUID(updatedBy),
 		Status:      status,
 		StartedAt:   startedAt,
 		CompletedAt: completedAt,
 	})
+	task, appErr := utils.QueryOne(taskRow, err, "task not found", "failed to update task status")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -359,7 +368,7 @@ func (s *service) UpdateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskSt
 	return mapTask(task), nil
 }
 
-func (s *service) UpdateTaskProgress(ctx context.Context, req *taskv1.UpdateTaskProgressRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
+func (s *service) updateTaskProgress(ctx context.Context, req *taskv1.UpdateTaskProgressRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update task progress request is required")
 	}
@@ -383,11 +392,12 @@ func (s *service) UpdateTaskProgress(ctx context.Context, req *taskv1.UpdateTask
 		return nil, appErr
 	}
 
-	task, appErr := s.repo.UpdateTaskProgress(ctx, db.UpdateTaskProgressParams{
+	taskRow, err := s.q.UpdateTaskProgress(ctx, db.UpdateTaskProgressParams{
 		ID:              id,
 		UpdatedBy:       utils.PGUUID(updatedBy),
 		ProgressPercent: int16(req.GetProgressPercent()),
 	})
+	task, appErr := utils.QueryOne(taskRow, err, "task not found", "failed to update task progress")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -395,7 +405,7 @@ func (s *service) UpdateTaskProgress(ctx context.Context, req *taskv1.UpdateTask
 	return mapTask(task), nil
 }
 
-func (s *service) ListTasksByOrganization(ctx context.Context, req *taskv1.ListTasksByOrganizationRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByOrganizationResponse, *apperror.AppError) {
+func (s *service) listTasksByOrganization(ctx context.Context, req *taskv1.ListTasksByOrganizationRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByOrganizationResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by organization request is required")
 	}
@@ -412,10 +422,11 @@ func (s *service) ListTasksByOrganization(ctx context.Context, req *taskv1.ListT
 		return nil, appErr
 	}
 
-	tasks, appErr := s.repo.ListTasksByOrganization(ctx, db.ListTasksByOrganizationParams{
+	taskRows, err := s.q.ListTasksByOrganization(ctx, db.ListTasksByOrganizationParams{
 		OrganizationID: utils.PGUUID(organizationID),
 		Column2:        req.GetStatus(),
 	})
+	tasks, appErr := utils.QueryMany(taskRows, err, "failed to list organization tasks")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -425,7 +436,7 @@ func (s *service) ListTasksByOrganization(ctx context.Context, req *taskv1.ListT
 	}, nil
 }
 
-func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksByParentRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByParentResponse, *apperror.AppError) {
+func (s *service) listTasksByParent(ctx context.Context, req *taskv1.ListTasksByParentRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByParentResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by parent request is required")
 	}
@@ -443,7 +454,8 @@ func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksBy
 		return nil, appErr
 	}
 
-	tasks, appErr := s.repo.ListTasksByParent(ctx, utils.PGUUID(parentTaskID))
+	taskRows, err := s.q.ListTasksByParent(ctx, utils.PGUUID(parentTaskID))
+	tasks, appErr := utils.QueryMany(taskRows, err, "failed to list child tasks")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -453,7 +465,7 @@ func (s *service) ListTasksByParent(ctx context.Context, req *taskv1.ListTasksBy
 	}, nil
 }
 
-func (s *service) ListTasksByCreator(ctx context.Context, req *taskv1.ListTasksByCreatorRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByCreatorResponse, *apperror.AppError) {
+func (s *service) listTasksByCreator(ctx context.Context, req *taskv1.ListTasksByCreatorRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByCreatorResponse, *apperror.AppError) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("list tasks by creator request is required")
 	}
@@ -470,10 +482,11 @@ func (s *service) ListTasksByCreator(ctx context.Context, req *taskv1.ListTasksB
 		return nil, appErr
 	}
 
-	tasks, appErr := s.repo.ListTasksByCreator(ctx, db.ListTasksByCreatorParams{
+	taskRows, err := s.q.ListTasksByCreator(ctx, db.ListTasksByCreatorParams{
 		CreatedBy: createdBy,
 		Column2:   req.GetStatus(),
 	})
+	tasks, appErr := utils.QueryMany(taskRows, err, "failed to list creator tasks")
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -481,19 +494,6 @@ func (s *service) ListTasksByCreator(ctx context.Context, req *taskv1.ListTasksB
 	return &taskv1.ListTasksByCreatorResponse{
 		Tasks: mapTasks(tasks),
 	}, nil
-}
-
-func requiredUUID(value, field, requiredMessage string) (uuid.UUID, *apperror.AppError) {
-	if strings.TrimSpace(value) == "" {
-		return uuid.UUID{}, apperror.ErrValidation.WithMessage(requiredMessage)
-	}
-
-	id, appErr := utils.NewUUID(value)
-	if appErr != nil {
-		return uuid.UUID{}, appErr.WithDetail("field", field)
-	}
-
-	return id, nil
 }
 
 func normalizeTaskPriority(value, fallback string) (string, *apperror.AppError) {

@@ -11,8 +11,6 @@ import (
 	coredto "github.com/rijum8906/relay/packages/core/dto"
 	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
-	projectmembershiprepo "github.com/rijum8906/relay/services/task-service/internal/repository/project_membership"
-	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
@@ -36,20 +34,18 @@ type Authorizer interface {
 }
 
 type authorizer struct {
-	memberships projectmembershiprepo.ProjectMembershipRepository
-	tasks       taskrepo.TaskRepository
-	tuples      coreopenfga.TuppleManager
+	q      db.Querier
+	tuples coreopenfga.TuppleManager
 }
 
-func NewAuthorizer(memberships projectmembershiprepo.ProjectMembershipRepository, tasks taskrepo.TaskRepository, tuples coreopenfga.TuppleManager) (Authorizer, *apperror.AppError) {
-	if memberships == nil || tasks == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize authorizer")
+func NewAuthorizer(q db.Querier, tuples coreopenfga.TuppleManager) (Authorizer, *apperror.AppError) {
+	if q == nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to initialize authorizer").WithDetail("queries", "task queries must be configured")
 	}
 
 	return &authorizer{
-		memberships: memberships,
-		tasks:       tasks,
-		tuples:      tuples,
+		q:      q,
+		tuples: tuples,
 	}, nil
 }
 
@@ -70,11 +66,11 @@ func (a *authorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID
 		}, nil
 	}
 
-	memberships, appErr := a.memberships.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
+	membershipRow, err := a.q.GetActiveProjectMembership(ctx, db.GetActiveProjectMembershipParams{
 		ProjectID: projectID,
 		UserID:    userID,
 	})
-
+	membership, appErr := utils.QueryOne(membershipRow, err, "project membership not found", "failed to get project membership")
 	if appErr != nil {
 		if appErr.Code == apperror.CodeNotFound {
 			return nil, apperror.ErrForbidden.WithMessage("you do not have access to this project")
@@ -82,11 +78,11 @@ func (a *authorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID
 		return nil, appErr
 	}
 
-	if !hasMinRole(memberships.Role, minRole) {
+	if !hasMinRole(membership.Role, minRole) {
 		return nil, apperror.ErrForbidden.WithMessage("insufficient project role")
 	}
 
-	return memberships, nil
+	return membership, nil
 }
 
 func (a *authorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, userInfo *coredto.UserInfo, minRole Role) (*db.Task, *apperror.AppError) {
@@ -95,7 +91,8 @@ func (a *authorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, user
 		return nil, appErr
 	}
 
-	task, appErr := a.tasks.GetTask(ctx, taskID)
+	taskRow, err := a.q.GetTask(ctx, taskID)
+	task, appErr := utils.QueryOne(taskRow, err, "task not found", "failed to get task")
 	if appErr != nil {
 		return nil, appErr
 	}

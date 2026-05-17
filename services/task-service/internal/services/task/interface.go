@@ -1,46 +1,38 @@
 package task
 
 import (
-	"context"
-
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
-	"github.com/rijum8906/relay/packages/core/dto"
-	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
-	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/internal/authz"
-	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
+	"github.com/rijum8906/relay/services/task-service/internal/db"
 )
 
-type TaskService interface {
-	CreateTask(ctx context.Context, req *taskv1.CreateTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError)
-	GetTask(ctx context.Context, req *taskv1.GetTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError)
-	ListTasksByProject(ctx context.Context, req *taskv1.ListTasksByProjectRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByProjectResponse, *apperror.AppError)
-	UpdateTask(ctx context.Context, req *taskv1.UpdateTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError)
-	DeleteTask(ctx context.Context, req *taskv1.DeleteTaskRequest, userInfo *dto.UserInfo) (*corev1.SuccessResponse, *apperror.AppError)
-	ArchiveTask(ctx context.Context, req *taskv1.ArchiveTaskRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError)
-	UpdateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskStatusRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError)
-	UpdateTaskProgress(ctx context.Context, req *taskv1.UpdateTaskProgressRequest, userInfo *dto.UserInfo) (*modelsv1.Task, *apperror.AppError)
-	ListTasksByOrganization(ctx context.Context, req *taskv1.ListTasksByOrganizationRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByOrganizationResponse, *apperror.AppError)
-	ListTasksByParent(ctx context.Context, req *taskv1.ListTasksByParentRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByParentResponse, *apperror.AppError)
-	ListTasksByCreator(ctx context.Context, req *taskv1.ListTasksByCreatorRequest, userInfo *dto.UserInfo) (*taskv1.ListTasksByCreatorResponse, *apperror.AppError)
-}
-
 type service struct {
-	repo  taskrepo.TaskRepository
-	authz authz.Authorizer
+	taskv1.UnimplementedTaskServiceServer
+
+	q      db.Querier
+	authz  authz.Authorizer
 	tuples coreopenfga.TuppleManager
 }
 
-func NewTaskService(repo taskrepo.TaskRepository, authz authz.Authorizer, tuples coreopenfga.TuppleManager) (TaskService, *apperror.AppError) {
-	if repo == nil || authz == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize task service").WithDetail("repo", "task repository must be configured")
+func New(q db.Querier, tuples coreopenfga.TuppleManager) (taskv1.TaskServiceServer, *apperror.AppError) {
+	authorizer, appErr := authz.NewAuthorizer(q, tuples)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return newService(q, authorizer, tuples)
+}
+
+func newService(q db.Querier, authorizer authz.Authorizer, tuples coreopenfga.TuppleManager) (*service, *apperror.AppError) {
+	if q == nil || authorizer == nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to initialize task service").WithDetail("queries", "task queries must be configured")
 	}
 
 	return &service{
-		repo:  repo,
-		authz: authz,
-		tuples:  tuples,
+		q:      q,
+		authz:  authorizer,
+		tuples: tuples,
 	}, nil
 }
