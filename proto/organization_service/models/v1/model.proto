@@ -11,11 +11,11 @@ message Organization {
   string slug = 4;
   string description = 5;
   string logo_url = 6;
-  string created_by = 7;
+  string created_by_user_id = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
   google.protobuf.Timestamp deleted_at = 10;
-  string deleted_by = 11;
+  google.protobuf.Timestamp archived_at = 11;
 }
 
 message OrganizationMembership {
@@ -24,13 +24,9 @@ message OrganizationMembership {
   string user_id = 3;
   string role = 4;
   string status = 5;
-  string invited_by = 6;
-  google.protobuf.Timestamp joined_at = 7;
-  google.protobuf.Timestamp left_at = 8;
-  google.protobuf.Timestamp created_at = 9;
-  google.protobuf.Timestamp updated_at = 10;
-  google.protobuf.Timestamp deleted_at = 11;
-  string deleted_by = 12;
+  google.protobuf.Timestamp joined_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
 }
 
 message OrganizationTeam {
@@ -38,21 +34,21 @@ message OrganizationTeam {
   string organization_id = 2;
   string name = 3;
   string description = 4;
-  string created_by = 5;
+  string created_by_mem_id = 5;
   google.protobuf.Timestamp created_at = 6;
   google.protobuf.Timestamp updated_at = 7;
   google.protobuf.Timestamp deleted_at = 8;
-  string deleted_by = 9;
+  google.protobuf.Timestamp archived_at = 9;
 }
 
 message OrganizationTeamMembership {
   string id = 1;
   string organization_team_id = 2;
-  string tesm_id = 3;
+  string team_id = 3;
   string membership_id = 4;
   string role = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
-  google.protobuf.Timestamp deleted_at = 8;
-  string deleted_by = 9;
+  string status = 6;
+  google.protobuf.Timestamp joined_at = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
 }

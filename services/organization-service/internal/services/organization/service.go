@@ -319,11 +319,6 @@ func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev
 		return nil, apperror.ErrInternal.WithDetail("error", "failed to extract user id from context")
 	}
 
-	deletedBy, err := uuid.Parse(userInfo.UserID)
-	if err != nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to parse user id").WithDetail("error", err.Error())
-	}
-
 	// Step 2. Check if organization exists
 	exists, err := s.q.CheckOrganizationExists(ctx, orgID)
 	if err != nil {
@@ -352,10 +347,7 @@ func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev
 	}
 
 	// Step 5. Delete
-	err = s.q.DeleteOrganization(ctx, db.DeleteOrganizationParams{
-		ID:        orgID,
-		DeletedBy: deletedBy,
-	})
+	err = s.q.DeleteOrganization(ctx, orgID)
 	if err != nil {
 		return nil, apperror.New(apperror.CodeInternal, "couldn't delete organization").WithDetail("error", err.Error())
 	}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package organization_service.org_team.v1;
+
+import "core/v1/common.proto";
+import "organization_service/models/v1/model.proto";
+import "organization_service/org_team/v1/request.proto";
+import "organization_service/org_team/v1/response.proto";
+
+service OrganizationTeamService {
+  // =========================== CRUD ===========================
+  rpc CreateTeam(CreateOrgTeamRequest) returns (OrgTeamRes);
+  rpc UpdateTeamName(UpdateOrgTeamNameRequest) returns (core.v1.SuccessResponse);
+  rpc DeleteTeam(core.v1.IDAndScopedTokenRequest) returns (core.v1.SuccessResponse);
+
+  // =========================== ORGANIZATION QUERIES ==========================
+  rpc GetOrganizationTeamsByOrgID(core.v1.IDWithPaginationReq) returns (OrgTeamListRes);
+  rpc GetOrganizationTeam(core.v1.IDRequest) returns (OrgTeamRes);
+  rpc GeOrganizationTeamWithMeta(core.v1.IDRequest) returns (organization_service.models.v1.OrganizationTeam); // aslo returns created_at, updated_at etc
+
+  // =========================== VALIDATION ==========================
+  rpc ValidateTeamAccess(core.v1.IDRequest) returns (core.v1.SuccessResponse);
+  rpc GetTeamPermissions(core.v1.IDRequest) returns (TeamPermissionsRes);
+}

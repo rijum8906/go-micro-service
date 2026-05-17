@@ -14,8 +14,13 @@ import (
 
 const ArchiveOrganization = `-- name: ArchiveOrganization :exec
 UPDATE organizations
-SET status = 'archived', archived_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+SET
+    status = 'archived',
+    archived_at = NOW(),
+    updated_at = NOW()
+WHERE id = $1
+  AND deleted_at IS NULL
+  AND status = 'active'
 `
 
 func (q *Queries) ArchiveOrganization(ctx context.Context, id uuid.UUID) error {
@@ -25,23 +30,28 @@ func (q *Queries) ArchiveOrganization(ctx context.Context, id uuid.UUID) error {
 
 const ChangeOrganizationOwnership = `-- name: ChangeOrganizationOwnership :exec
 UPDATE organizations
-SET created_by = $2
-WHERE id = $1 AND deleted_at IS NULL
+SET
+    created_by_user_id = $1,
+    updated_at = NOW()
+WHERE id = $2
+  AND deleted_at IS NULL
 `
 
 type ChangeOrganizationOwnershipParams struct {
-	ID        uuid.UUID
 	CreatedBy uuid.UUID
+	ID        uuid.UUID
 }
 
 func (q *Queries) ChangeOrganizationOwnership(ctx context.Context, arg ChangeOrganizationOwnershipParams) error {
-	_, err := q.db.Exec(ctx, ChangeOrganizationOwnership, arg.ID, arg.CreatedBy)
+	_, err := q.db.Exec(ctx, ChangeOrganizationOwnership, arg.CreatedBy, arg.ID)
 	return err
 }
 
 const CheckOrganizationExists = `-- name: CheckOrganizationExists :one
-SELECT EXISTS(
-    SELECT 1 FROM organizations WHERE id = $1
+SELECT EXISTS (
+    SELECT 1 FROM organizations
+    WHERE id = $1
+      AND deleted_at IS NULL
 ) AS exists
 `
 
@@ -53,13 +63,12 @@ func (q *Queries) CheckOrganizationExists(ctx context.Context, id uuid.UUID) (bo
 }
 
 const CheckOrganizationExistsBySlug = `-- name: CheckOrganizationExistsBySlug :one
-
-SELECT EXISTS(
-    SELECT 1 FROM organizations WHERE slug = $1
+SELECT EXISTS (
+    SELECT 1 FROM organizations
+    WHERE slug = $1
 ) AS exists
 `
 
-// NOTE: exists check methods must not use 'deleted_at IS NULL'
 func (q *Queries) CheckOrganizationExistsBySlug(ctx context.Context, slug string) (bool, error) {
 	row := q.db.QueryRow(ctx, CheckOrganizationExistsBySlug, slug)
 	var exists bool
@@ -68,16 +77,15 @@ func (q *Queries) CheckOrganizationExistsBySlug(ctx context.Context, slug string
 }
 
 const CreateOrganization = `-- name: CreateOrganization :one
-
 INSERT INTO organizations (
     name,
     slug,
     description,
-    created_by
+    created_by_user_id
 ) VALUES (
     $1, $2, $3, $4
 )
-RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at
+RETURNING id, name, slug, description, logo_url, status, created_by_user_id, created_at, updated_at, archived_at, deleted_at
 `
 
 type CreateOrganizationParams struct {
@@ -98,33 +106,31 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Status,
 		&i.Slug,
 		&i.Description,
 		&i.LogoUrl,
-		&i.CreatedBy,
+		&i.Status,
+		&i.CreatedByUserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedBy,
 		&i.ArchivedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const DeleteOrganization = `-- name: DeleteOrganization :exec
 UPDATE organizations
-SET status = 'deleted', deleted_by = $2, deleted_at = now()
-WHERE id = $1 AND deleted_at IS NULL
+SET
+    status = 'deleted',
+    deleted_at = NOW(),
+    updated_at = NOW()
+WHERE id = $1
+  AND deleted_at IS NULL
 `
 
-type DeleteOrganizationParams struct {
-	ID        uuid.UUID
-	DeletedBy uuid.UUID
-}
-
-func (q *Queries) DeleteOrganization(ctx context.Context, arg DeleteOrganizationParams) error {
-	_, err := q.db.Exec(ctx, DeleteOrganization, arg.ID, arg.DeletedBy)
+func (q *Queries) DeleteOrganization(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, DeleteOrganization, id)
 	return err
 }
 
@@ -139,8 +145,9 @@ func (q *Queries) DeleteOrganizationHard(ctx context.Context, id uuid.UUID) erro
 }
 
 const GetDeletedOrganization = `-- name: GetDeletedOrganization :one
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
-WHERE id = $1 AND deleted_at IS NOT NULL
+SELECT id, name, slug, description, logo_url, status, created_by_user_id, created_at, updated_at, archived_at, deleted_at FROM organizations
+WHERE id = $1
+  AND deleted_at IS NOT NULL
 LIMIT 1
 `
 
@@ -150,51 +157,49 @@ func (q *Queries) GetDeletedOrganization(ctx context.Context, id uuid.UUID) (Org
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Status,
 		&i.Slug,
 		&i.Description,
 		&i.LogoUrl,
-		&i.CreatedBy,
+		&i.Status,
+		&i.CreatedByUserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedBy,
 		&i.ArchivedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const GetOrganization = `-- name: GetOrganization :one
-
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
-WHERE id = $1 AND deleted_at IS NULL
+SELECT id, name, slug, description, logo_url, status, created_by_user_id, created_at, updated_at, archived_at, deleted_at FROM organizations
+WHERE id = $1
+  AND deleted_at IS NULL
 LIMIT 1
 `
 
-// NOTE: get methods must use 'deleted_at IS NULL'
 func (q *Queries) GetOrganization(ctx context.Context, id uuid.UUID) (Organization, error) {
 	row := q.db.QueryRow(ctx, GetOrganization, id)
 	var i Organization
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Status,
 		&i.Slug,
 		&i.Description,
 		&i.LogoUrl,
-		&i.CreatedBy,
+		&i.Status,
+		&i.CreatedByUserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedBy,
 		&i.ArchivedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const GetOrganizationBySlug = `-- name: GetOrganizationBySlug :one
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
-WHERE slug = $1 AND deleted_at IS NULL
+SELECT id, name, slug, description, logo_url, status, created_by_user_id, created_at, updated_at, archived_at, deleted_at FROM organizations
+WHERE slug = $1
+  AND deleted_at IS NULL
 LIMIT 1
 `
 
@@ -204,34 +209,35 @@ func (q *Queries) GetOrganizationBySlug(ctx context.Context, slug string) (Organ
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Status,
 		&i.Slug,
 		&i.Description,
 		&i.LogoUrl,
-		&i.CreatedBy,
+		&i.Status,
+		&i.CreatedByUserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedBy,
 		&i.ArchivedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const GetOrganizationsByCreatedBy = `-- name: GetOrganizationsByCreatedBy :many
-SELECT id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at FROM organizations
-WHERE created_by = $1 AND deleted_at IS NULL
-ORDER BY created_at DESC LIMIT $2 OFFSET $3
+SELECT id, name, slug, description, logo_url, status, created_by_user_id, created_at, updated_at, archived_at, deleted_at FROM organizations
+WHERE created_by_user_id = $3
+  AND deleted_at IS NULL
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
 `
 
 type GetOrganizationsByCreatedByParams struct {
-	CreatedBy uuid.UUID
 	Limit     int32
 	Offset    int32
+	CreatedBy uuid.UUID
 }
 
 func (q *Queries) GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrganizationsByCreatedByParams) ([]Organization, error) {
-	rows, err := q.db.Query(ctx, GetOrganizationsByCreatedBy, arg.CreatedBy, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, GetOrganizationsByCreatedBy, arg.Limit, arg.Offset, arg.CreatedBy)
 	if err != nil {
 		return nil, err
 	}
@@ -242,16 +248,15 @@ func (q *Queries) GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrgani
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
-			&i.Status,
 			&i.Slug,
 			&i.Description,
 			&i.LogoUrl,
-			&i.CreatedBy,
+			&i.Status,
+			&i.CreatedByUserID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedBy,
 			&i.ArchivedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -263,12 +268,30 @@ func (q *Queries) GetOrganizationsByCreatedBy(ctx context.Context, arg GetOrgani
 	return items, nil
 }
 
-const UpdateOrganization = `-- name: UpdateOrganization :one
-
+const RestoreArchivedOrganization = `-- name: RestoreArchivedOrganization :exec
 UPDATE organizations
-SET name = $2, description = $3
-WHERE id = $1 AND deleted_at IS NULL
-RETURNING id, name, status, slug, description, logo_url, created_by, created_at, updated_at, deleted_at, deleted_by, archived_at
+SET
+    status = 'active',
+    archived_at = NULL,
+    updated_at = NOW()
+WHERE id = $1
+  AND deleted_at IS NULL
+  AND status = 'archived'
+`
+
+func (q *Queries) RestoreArchivedOrganization(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, RestoreArchivedOrganization, id)
+	return err
+}
+
+const UpdateOrganization = `-- name: UpdateOrganization :one
+UPDATE organizations
+SET
+    name = $2,
+    description = $3
+WHERE id = $1
+  AND deleted_at IS NULL
+RETURNING id, name, slug, description, logo_url, status, created_by_user_id, created_at, updated_at, archived_at, deleted_at
 `
 
 type UpdateOrganizationParams struct {
@@ -277,23 +300,21 @@ type UpdateOrganizationParams struct {
 	Description pgtype.Text
 }
 
-// NOTE: update methods must use 'deleted_at IS NULL'
 func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error) {
 	row := q.db.QueryRow(ctx, UpdateOrganization, arg.ID, arg.Name, arg.Description)
 	var i Organization
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
-		&i.Status,
 		&i.Slug,
 		&i.Description,
 		&i.LogoUrl,
-		&i.CreatedBy,
+		&i.Status,
+		&i.CreatedByUserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedBy,
 		&i.ArchivedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

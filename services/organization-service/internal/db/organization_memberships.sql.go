@@ -12,16 +12,13 @@ import (
 )
 
 const CheckOrganizationMembershipExists = `-- name: CheckOrganizationMembershipExists :one
-
 SELECT EXISTS (
     SELECT 1 FROM organization_memberships
-    WHERE id = $1 AND status NOT IN ('left', 'removed')
-)
+    WHERE id = $1
+      AND status NOT IN ('left', 'removed')
+) AS exists
 `
 
-// ============================================
-// GET METHODS (exclude left/removed by default)
-// ============================================
 func (q *Queries) CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error) {
 	row := q.db.QueryRow(ctx, CheckOrganizationMembershipExists, id)
 	var exists bool
@@ -31,8 +28,8 @@ func (q *Queries) CheckOrganizationMembershipExists(ctx context.Context, id uuid
 
 const CountActiveMembersByOrgID = `-- name: CountActiveMembersByOrgID :one
 SELECT COUNT(*) FROM organization_memberships
-WHERE organization_id = $1 
-    AND status = 'active'
+WHERE organization_id = $1
+  AND status = 'active'
 `
 
 func (q *Queries) CountActiveMembersByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error) {
@@ -43,16 +40,12 @@ func (q *Queries) CountActiveMembersByOrgID(ctx context.Context, organizationID 
 }
 
 const CountActiveOwnersByOrgID = `-- name: CountActiveOwnersByOrgID :one
-
 SELECT COUNT(*) FROM organization_memberships
-WHERE organization_id = $1 
-    AND role = 'owner' 
-    AND status NOT IN ('left', 'removed')
+WHERE organization_id = $1
+  AND role = 'owner'
+  AND status NOT IN ('left', 'removed')
 `
 
-// ============================================
-// COUNT METHODS
-// ============================================
 func (q *Queries) CountActiveOwnersByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error) {
 	row := q.db.QueryRow(ctx, CountActiveOwnersByOrgID, organizationID)
 	var count int64
@@ -62,7 +55,8 @@ func (q *Queries) CountActiveOwnersByOrgID(ctx context.Context, organizationID u
 
 const CountMembersByOrgIDAndStatus = `-- name: CountMembersByOrgIDAndStatus :one
 SELECT COUNT(*) FROM organization_memberships
-WHERE organization_id = $1 AND status = $2
+WHERE organization_id = $1
+  AND status = $2
 `
 
 type CountMembersByOrgIDAndStatusParams struct {
@@ -79,9 +73,13 @@ func (q *Queries) CountMembersByOrgIDAndStatus(ctx context.Context, arg CountMem
 
 const CreateOrganizationMembership = `-- name: CreateOrganizationMembership :one
 INSERT INTO organization_memberships (
-    user_id, organization_id, role
-) VALUES ( $1, $2, $3 )
-    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
+    user_id,
+    organization_id,
+    role
+) VALUES (
+    $1, $2, $3
+)
+RETURNING id, organization_id, user_id, role, status, joined_at, created_at, updated_at
 `
 
 type CreateOrganizationMembershipParams struct {
@@ -100,20 +98,21 @@ func (q *Queries) CreateOrganizationMembership(ctx context.Context, arg CreateOr
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const CreateOrganizationMembershipOwner = `-- name: CreateOrganizationMembershipOwner :one
 INSERT INTO organization_memberships (
-    user_id, organization_id, role
-) VALUES ( $1, $2, $3 )
-    RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
+    user_id,
+    organization_id,
+    role
+) VALUES (
+    $1, $2, $3
+)
+RETURNING id, organization_id, user_id, role, status, joined_at, created_at, updated_at
 `
 
 type CreateOrganizationMembershipOwnerParams struct {
@@ -132,26 +131,19 @@ func (q *Queries) CreateOrganizationMembershipOwner(ctx context.Context, arg Cre
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const GetActiveMembershipsByOrgID = `-- name: GetActiveMembershipsByOrgID :many
-
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE organization_id = $1 
-    AND status = 'active'
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE organization_id = $1
+  AND status = 'active'
 ORDER BY created_at DESC
 `
 
-// ============================================
-// BATCH METHODS
-// ============================================
 func (q *Queries) GetActiveMembershipsByOrgID(ctx context.Context, organizationID uuid.UUID) ([]OrganizationMembership, error) {
 	rows, err := q.db.Query(ctx, GetActiveMembershipsByOrgID, organizationID)
 	if err != nil {
@@ -168,11 +160,8 @@ func (q *Queries) GetActiveMembershipsByOrgID(ctx context.Context, organizationI
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -185,10 +174,9 @@ func (q *Queries) GetActiveMembershipsByOrgID(ctx context.Context, organizationI
 }
 
 const GetAllOrganizationMembershipsByOrgID = `-- name: GetAllOrganizationMembershipsByOrgID :many
-
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
 WHERE organization_id = $1
-ORDER BY created_at DESC 
+ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
 
@@ -198,10 +186,6 @@ type GetAllOrganizationMembershipsByOrgIDParams struct {
 	Offset         int32
 }
 
-// ============================================
-// ADMIN METHODS (Include all statuses)
-// ============================================
-// NOTE: This returns ALL memberships including deleted ones (for admin audit)
 func (q *Queries) GetAllOrganizationMembershipsByOrgID(ctx context.Context, arg GetAllOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error) {
 	rows, err := q.db.Query(ctx, GetAllOrganizationMembershipsByOrgID, arg.OrganizationID, arg.Limit, arg.Offset)
 	if err != nil {
@@ -218,11 +202,8 @@ func (q *Queries) GetAllOrganizationMembershipsByOrgID(ctx context.Context, arg 
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -235,9 +216,9 @@ func (q *Queries) GetAllOrganizationMembershipsByOrgID(ctx context.Context, arg 
 }
 
 const GetBannedMembershipsByOrgID = `-- name: GetBannedMembershipsByOrgID :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE organization_id = $1 
-    AND status = 'banned'
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE organization_id = $1
+  AND status = 'banned'
 ORDER BY created_at DESC
 `
 
@@ -257,11 +238,8 @@ func (q *Queries) GetBannedMembershipsByOrgID(ctx context.Context, organizationI
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -274,9 +252,9 @@ func (q *Queries) GetBannedMembershipsByOrgID(ctx context.Context, organizationI
 }
 
 const GetMembershipsByOrgIDs = `-- name: GetMembershipsByOrgIDs :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE organization_id = ANY($1::uuid[]) 
-    AND status NOT IN ('left', 'removed')
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE organization_id = ANY($1::uuid[])
+  AND status NOT IN ('left', 'removed')
 `
 
 func (q *Queries) GetMembershipsByOrgIDs(ctx context.Context, dollar_1 []uuid.UUID) ([]OrganizationMembership, error) {
@@ -295,11 +273,8 @@ func (q *Queries) GetMembershipsByOrgIDs(ctx context.Context, dollar_1 []uuid.UU
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -312,9 +287,9 @@ func (q *Queries) GetMembershipsByOrgIDs(ctx context.Context, dollar_1 []uuid.UU
 }
 
 const GetMembershipsByUserIDs = `-- name: GetMembershipsByUserIDs :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE user_id = ANY($1::uuid[]) 
-    AND status NOT IN ('left', 'removed')
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE user_id = ANY($1::uuid[])
+  AND status NOT IN ('left', 'removed')
 `
 
 func (q *Queries) GetMembershipsByUserIDs(ctx context.Context, dollar_1 []uuid.UUID) ([]OrganizationMembership, error) {
@@ -333,11 +308,8 @@ func (q *Queries) GetMembershipsByUserIDs(ctx context.Context, dollar_1 []uuid.U
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -350,8 +322,10 @@ func (q *Queries) GetMembershipsByUserIDs(ctx context.Context, dollar_1 []uuid.U
 }
 
 const GetOrganizationMembership = `-- name: GetOrganizationMembership :one
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE id = $1 AND status NOT IN ('left', 'removed')
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE id = $1
+  AND status NOT IN ('left', 'removed')
+LIMIT 1
 `
 
 func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error) {
@@ -364,27 +338,27 @@ func (q *Queries) GetOrganizationMembership(ctx context.Context, id uuid.UUID) (
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const GetOrganizationMembershipByOrgIDAndUserID = `-- name: GetOrganizationMembershipByOrgIDAndUserID :one
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE user_id = $1 AND organization_id = $2 AND status NOT IN ('left', 'removed')
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE organization_id = $1
+  AND user_id = $2
+  AND status NOT IN ('left', 'removed')
+LIMIT 1
 `
 
 type GetOrganizationMembershipByOrgIDAndUserIDParams struct {
-	UserID         uuid.UUID
 	OrganizationID uuid.UUID
+	UserID         uuid.UUID
 }
 
 func (q *Queries) GetOrganizationMembershipByOrgIDAndUserID(ctx context.Context, arg GetOrganizationMembershipByOrgIDAndUserIDParams) (OrganizationMembership, error) {
-	row := q.db.QueryRow(ctx, GetOrganizationMembershipByOrgIDAndUserID, arg.UserID, arg.OrganizationID)
+	row := q.db.QueryRow(ctx, GetOrganizationMembershipByOrgIDAndUserID, arg.OrganizationID, arg.UserID)
 	var i OrganizationMembership
 	err := row.Scan(
 		&i.ID,
@@ -393,17 +367,43 @@ func (q *Queries) GetOrganizationMembershipByOrgIDAndUserID(ctx context.Context,
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
+	)
+	return i, err
+}
+
+const GetOrganizationMembershipByUserIDAndOrgID = `-- name: GetOrganizationMembershipByUserIDAndOrgID :one
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE user_id = $1
+  AND organization_id = $2
+  AND status NOT IN ('left', 'removed')
+LIMIT 1
+`
+
+type GetOrganizationMembershipByUserIDAndOrgIDParams struct {
+	UserID         uuid.UUID
+	OrganizationID uuid.UUID
+}
+
+func (q *Queries) GetOrganizationMembershipByUserIDAndOrgID(ctx context.Context, arg GetOrganizationMembershipByUserIDAndOrgIDParams) (OrganizationMembership, error) {
+	row := q.db.QueryRow(ctx, GetOrganizationMembershipByUserIDAndOrgID, arg.UserID, arg.OrganizationID)
+	var i OrganizationMembership
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.Status,
+		&i.JoinedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const GetOrganizationMembershipHistory = `-- name: GetOrganizationMembershipHistory :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
 WHERE user_id = $1
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -415,7 +415,6 @@ type GetOrganizationMembershipHistoryParams struct {
 	Offset int32
 }
 
-// NOTE: Get history of a user's memberships (including left/removed)
 func (q *Queries) GetOrganizationMembershipHistory(ctx context.Context, arg GetOrganizationMembershipHistoryParams) ([]OrganizationMembership, error) {
 	rows, err := q.db.Query(ctx, GetOrganizationMembershipHistory, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
@@ -432,11 +431,8 @@ func (q *Queries) GetOrganizationMembershipHistory(ctx context.Context, arg GetO
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -449,12 +445,11 @@ func (q *Queries) GetOrganizationMembershipHistory(ctx context.Context, arg GetO
 }
 
 const GetOrganizationMembershipWithAllStatuses = `-- name: GetOrganizationMembershipWithAllStatuses :one
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
 WHERE id = $1
+LIMIT 1
 `
 
-// NOTE: This method returns membership regardless of status
-// Use for operations that need to see left/removed memberships
 func (q *Queries) GetOrganizationMembershipWithAllStatuses(ctx context.Context, id uuid.UUID) (OrganizationMembership, error) {
 	row := q.db.QueryRow(ctx, GetOrganizationMembershipWithAllStatuses, id)
 	var i OrganizationMembership
@@ -465,19 +460,17 @@ func (q *Queries) GetOrganizationMembershipWithAllStatuses(ctx context.Context, 
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const GetOrganizationMembershipsByOrgID = `-- name: GetOrganizationMembershipsByOrgID :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE organization_id = $1 AND status NOT IN ('left', 'removed')
-ORDER BY created_at DESC 
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE organization_id = $1
+  AND status NOT IN ('left', 'removed')
+ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
 
@@ -503,11 +496,8 @@ func (q *Queries) GetOrganizationMembershipsByOrgID(ctx context.Context, arg Get
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -520,11 +510,11 @@ func (q *Queries) GetOrganizationMembershipsByOrgID(ctx context.Context, arg Get
 }
 
 const GetOrganizationMembershipsByOrgIDAndRole = `-- name: GetOrganizationMembershipsByOrgIDAndRole :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE organization_id = $1 
-    AND role = $2 
-    AND status NOT IN ('left', 'removed')
-ORDER BY created_at DESC 
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE organization_id = $1
+  AND role = $2
+  AND status NOT IN ('left', 'removed')
+ORDER BY created_at DESC
 LIMIT $3 OFFSET $4
 `
 
@@ -556,11 +546,8 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, 
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -573,9 +560,10 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndRole(ctx context.Context, 
 }
 
 const GetOrganizationMembershipsByOrgIDAndStatus = `-- name: GetOrganizationMembershipsByOrgIDAndStatus :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE organization_id = $1 AND status = $2
-ORDER BY created_at DESC 
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE organization_id = $1
+  AND status = $2
+ORDER BY created_at DESC
 LIMIT $3 OFFSET $4
 `
 
@@ -586,8 +574,6 @@ type GetOrganizationMembershipsByOrgIDAndStatusParams struct {
 	Offset         int32
 }
 
-// NOTE: This method returns ALL statuses including 'left' and 'removed'
-// Use for admin operations where you need to see deleted memberships
 func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationMembershipsByOrgIDAndStatusParams) ([]OrganizationMembership, error) {
 	rows, err := q.db.Query(ctx, GetOrganizationMembershipsByOrgIDAndStatus,
 		arg.OrganizationID,
@@ -609,11 +595,8 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -626,9 +609,10 @@ func (q *Queries) GetOrganizationMembershipsByOrgIDAndStatus(ctx context.Context
 }
 
 const GetOrganizationMembershipsByUserID = `-- name: GetOrganizationMembershipsByUserID :many
-SELECT id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id FROM organization_memberships
-WHERE user_id = $1 AND status NOT IN ('left', 'removed')
-ORDER BY created_at DESC 
+SELECT id, organization_id, user_id, role, status, joined_at, created_at, updated_at FROM organization_memberships
+WHERE user_id = $1
+  AND status NOT IN ('left', 'removed')
+ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
 
@@ -654,11 +638,8 @@ func (q *Queries) GetOrganizationMembershipsByUserID(ctx context.Context, arg Ge
 			&i.Role,
 			&i.Status,
 			&i.JoinedAt,
-			&i.LeftAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.DeletedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -671,15 +652,10 @@ func (q *Queries) GetOrganizationMembershipsByUserID(ctx context.Context, arg Ge
 }
 
 const HardDeleteOrganizationMembership = `-- name: HardDeleteOrganizationMembership :exec
-
 DELETE FROM organization_memberships
 WHERE id = $1
 `
 
-// ============================================
-// HARD DELETE METHODS (Use sparingly)
-// ============================================
-// WARNING: This permanently deletes the record. Use only for testing or cleanup.
 func (q *Queries) HardDeleteOrganizationMembership(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, HardDeleteOrganizationMembership, id)
 	return err
@@ -690,7 +666,6 @@ DELETE FROM organization_memberships
 WHERE organization_id = $1
 `
 
-// WARNING: This permanently deletes all memberships for an organization.
 func (q *Queries) HardDeleteOrganizationMembershipByOrgID(ctx context.Context, organizationID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, HardDeleteOrganizationMembershipByOrgID, organizationID)
 	return err
@@ -711,38 +686,28 @@ func (q *Queries) LockOrganizationMembershipForUpdate(ctx context.Context, id uu
 
 const RemoveOrganizationMembership = `-- name: RemoveOrganizationMembership :exec
 UPDATE organization_memberships
-SET 
+SET
     status = 'removed',
-    deleted_by_mem_id = $2,
-    deleted_at = NOW(),
     updated_at = NOW()
-WHERE id = $1 
-    AND status NOT IN ('left', 'removed')
+WHERE id = $1
+  AND status NOT IN ('left', 'removed')
 `
 
-type RemoveOrganizationMembershipParams struct {
-	ID             uuid.UUID
-	DeletedByMemID uuid.UUID
-}
-
-// NOTE: This sets status to 'removed' (terminal state, cannot be undone)
-func (q *Queries) RemoveOrganizationMembership(ctx context.Context, arg RemoveOrganizationMembershipParams) error {
-	_, err := q.db.Exec(ctx, RemoveOrganizationMembership, arg.ID, arg.DeletedByMemID)
+func (q *Queries) RemoveOrganizationMembership(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, RemoveOrganizationMembership, id)
 	return err
 }
 
 const RestoreOrganizationMembership = `-- name: RestoreOrganizationMembership :one
 UPDATE organization_memberships
-SET 
+SET
     status = 'active',
-    deleted_by_mem_id = NULL,
-    deleted_at = NULL,
     updated_at = NOW()
-WHERE id = $1 AND status = 'left'
-RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
+WHERE id = $1
+  AND status = 'left'
+RETURNING id, organization_id, user_id, role, status, joined_at, created_at, updated_at
 `
 
-// NOTE: Restore a soft-deleted membership (status 'left' -> 'active')
 func (q *Queries) RestoreOrganizationMembership(ctx context.Context, id uuid.UUID) (OrganizationMembership, error) {
 	row := q.db.QueryRow(ctx, RestoreOrganizationMembership, id)
 	var i OrganizationMembership
@@ -753,72 +718,54 @@ func (q *Queries) RestoreOrganizationMembership(ctx context.Context, id uuid.UUI
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const SoftDeleteOrganizationMembership = `-- name: SoftDeleteOrganizationMembership :exec
-
 UPDATE organization_memberships
-SET 
+SET
     status = 'left',
-    deleted_by_mem_id = $2,
-    deleted_at = NOW(),
     updated_at = NOW()
-WHERE id = $1 
-    AND status NOT IN ('left', 'removed')
+WHERE id = $1
+  AND status NOT IN ('left', 'removed')
 `
 
-type SoftDeleteOrganizationMembershipParams struct {
-	ID             uuid.UUID
-	DeletedByMemID uuid.UUID
-}
-
-// ============================================
-// SOFT DELETE METHODS
-// ============================================
-func (q *Queries) SoftDeleteOrganizationMembership(ctx context.Context, arg SoftDeleteOrganizationMembershipParams) error {
-	_, err := q.db.Exec(ctx, SoftDeleteOrganizationMembership, arg.ID, arg.DeletedByMemID)
+func (q *Queries) SoftDeleteOrganizationMembership(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, SoftDeleteOrganizationMembership, id)
 	return err
 }
 
 const SoftDeleteOrganizationMembershipByOrgIDAndUserID = `-- name: SoftDeleteOrganizationMembershipByOrgIDAndUserID :exec
 UPDATE organization_memberships
-SET 
+SET
     status = 'left',
-    deleted_by_mem_id = $3,
-    deleted_at = NOW(),
     updated_at = NOW()
-WHERE user_id = $1 
-    AND organization_id = $2 
-    AND status NOT IN ('left', 'removed')
+WHERE organization_id = $1
+  AND user_id = $2
+  AND status NOT IN ('left', 'removed')
 `
 
 type SoftDeleteOrganizationMembershipByOrgIDAndUserIDParams struct {
-	UserID         uuid.UUID
 	OrganizationID uuid.UUID
-	DeletedByMemID uuid.UUID
+	UserID         uuid.UUID
 }
 
 func (q *Queries) SoftDeleteOrganizationMembershipByOrgIDAndUserID(ctx context.Context, arg SoftDeleteOrganizationMembershipByOrgIDAndUserIDParams) error {
-	_, err := q.db.Exec(ctx, SoftDeleteOrganizationMembershipByOrgIDAndUserID, arg.UserID, arg.OrganizationID, arg.DeletedByMemID)
+	_, err := q.db.Exec(ctx, SoftDeleteOrganizationMembershipByOrgIDAndUserID, arg.OrganizationID, arg.UserID)
 	return err
 }
 
 const UpdateOrganizationMembershipRole = `-- name: UpdateOrganizationMembershipRole :one
-
 UPDATE organization_memberships
-SET 
+SET
     role = $2,
     updated_at = NOW()
-WHERE id = $1 
-    AND status NOT IN ('left', 'removed')
-RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
+WHERE id = $1
+  AND status = 'active'
+RETURNING id, organization_id, user_id, role, status, joined_at, created_at, updated_at
 `
 
 type UpdateOrganizationMembershipRoleParams struct {
@@ -826,9 +773,6 @@ type UpdateOrganizationMembershipRoleParams struct {
 	Role string
 }
 
-// ============================================
-// UPDATE METHODS
-// ============================================
 func (q *Queries) UpdateOrganizationMembershipRole(ctx context.Context, arg UpdateOrganizationMembershipRoleParams) (OrganizationMembership, error) {
 	row := q.db.QueryRow(ctx, UpdateOrganizationMembershipRole, arg.ID, arg.Role)
 	var i OrganizationMembership
@@ -839,23 +783,20 @@ func (q *Queries) UpdateOrganizationMembershipRole(ctx context.Context, arg Upda
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
 const UpdateOrganizationMembershipStatus = `-- name: UpdateOrganizationMembershipStatus :one
 UPDATE organization_memberships
-SET 
+SET
     status = $2,
     updated_at = NOW()
-WHERE id = $1 
-    AND status NOT IN ('left', 'removed')
-RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
+WHERE id = $1
+  AND status NOT IN ('left', 'removed')
+RETURNING id, organization_id, user_id, role, status, joined_at, created_at, updated_at
 `
 
 type UpdateOrganizationMembershipStatusParams struct {
@@ -873,33 +814,28 @@ func (q *Queries) UpdateOrganizationMembershipStatus(ctx context.Context, arg Up
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }
 
-const UpdateOrganizationMembershipStatusWIthAllStatus = `-- name: UpdateOrganizationMembershipStatusWIthAllStatus :one
+const UpdateOrganizationMembershipStatusWithAllStatuses = `-- name: UpdateOrganizationMembershipStatusWithAllStatuses :one
 UPDATE organization_memberships
-SET 
+SET
     status = $2,
     updated_at = NOW()
 WHERE id = $1
-RETURNING id, organization_id, user_id, role, status, joined_at, left_at, created_at, updated_at, deleted_at, deleted_by_mem_id
+RETURNING id, organization_id, user_id, role, status, joined_at, created_at, updated_at
 `
 
-type UpdateOrganizationMembershipStatusWIthAllStatusParams struct {
+type UpdateOrganizationMembershipStatusWithAllStatusesParams struct {
 	ID     uuid.UUID
 	Status string
 }
 
-// NOTE: Use this when you need to update status without the active check
-// For example, when undoing a soft delete or updating banned->active
-func (q *Queries) UpdateOrganizationMembershipStatusWIthAllStatus(ctx context.Context, arg UpdateOrganizationMembershipStatusWIthAllStatusParams) (OrganizationMembership, error) {
-	row := q.db.QueryRow(ctx, UpdateOrganizationMembershipStatusWIthAllStatus, arg.ID, arg.Status)
+func (q *Queries) UpdateOrganizationMembershipStatusWithAllStatuses(ctx context.Context, arg UpdateOrganizationMembershipStatusWithAllStatusesParams) (OrganizationMembership, error) {
+	row := q.db.QueryRow(ctx, UpdateOrganizationMembershipStatusWithAllStatuses, arg.ID, arg.Status)
 	var i OrganizationMembership
 	err := row.Scan(
 		&i.ID,
@@ -908,11 +844,8 @@ func (q *Queries) UpdateOrganizationMembershipStatusWIthAllStatus(ctx context.Co
 		&i.Role,
 		&i.Status,
 		&i.JoinedAt,
-		&i.LeftAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.DeletedByMemID,
 	)
 	return i, err
 }

@@ -70,7 +70,7 @@ func initFgaClient(ctx context.Context, config *config.Env) (*coreopenfga.Client
 	fgaClient.StoreID = res.Id
 
 	modelManager := coreopenfga.NewModelManager(fgaClient.Client, storeManager)
-	err = modelManager.Write(ctx, config.AppName+"_auth")
+	err = modelManager.Write(ctx, "organization")
 	if err != nil {
 		return nil, apperror.ErrInternal.WithMessage("failed to create FGA model").WithDetail("error", err.Error())
 	}

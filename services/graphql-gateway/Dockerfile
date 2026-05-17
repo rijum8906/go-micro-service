@@ -18,7 +18,12 @@ RUN go mod download
 # Now copy source code - but only the necessary directories
 COPY packages/core/ ./packages/core/
 COPY packages/pb/ ./packages/pb/
-COPY services/graphql-gateway/ ./services/graphql-gateway/
+
+COPY services/graphql-gateway/go.mod ./services/graphql-gateway/go.mod
+COPY services/graphql-gateway/internal ./services/graphql-gateway/internal
+COPY services/graphql-gateway/app ./services/graphql-gateway/app
+COPY services/graphql-gateway/cmd ./services/graphql-gateway/cmd
+COPY services/graphql-gateway/graph ./services/graphql-gateway/graph
 
 # Build
 RUN go build -o graphql-gateway services/graphql-gateway/cmd/main.go
@@ -28,8 +33,8 @@ FROM alpine:3.10
 WORKDIR /app
 
 COPY --from=builder /app/graphql-gateway .
-COPY services/graphql-gateway/.env .
+COPY services/graphql-gateway/.env.example .env
 
-EXPOSE 8081
+EXPOSE 8080
 
 CMD ["./graphql-gateway"]

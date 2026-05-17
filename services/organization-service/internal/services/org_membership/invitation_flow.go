@@ -147,7 +147,7 @@ func (s *OrgMembershipService) SendInvitation(
 	var tokenHash string
 	var invitedByMemID uuid.UUID
 
-	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
+	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Fetch sender's membership to get invited_by_mem_id
 		membership, err := q.GetOrganizationMembershipByOrgIDAndUserID(ctx, db.GetOrganizationMembershipByOrgIDAndUserIDParams{
 			UserID:         inviteBy,
@@ -400,7 +400,7 @@ func (s *OrgMembershipService) AcceptInvitation(
 	var membershipID uuid.UUID
 	var membershipRole string
 
-	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
+	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// TODO: Add idempotency check for existing membership
 		// Check if user is already a member (prev duplicate membership)
 		existingMembership, err := q.GetOrganizationMembershipByOrgIDAndUserID(ctx, db.GetOrganizationMembershipByOrgIDAndUserIDParams{
@@ -624,7 +624,7 @@ func (s *OrgMembershipService) DeclineInvitation(
 	}
 
 	// Execute decline in transaction
-	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
+	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Mark the invitation as declined
 		_, err := q.DeclineOrganizationInvitation(ctx, db.DeclineOrganizationInvitationParams{
 			ID:          invitation.ID,
