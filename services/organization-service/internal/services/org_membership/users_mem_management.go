@@ -1406,10 +1406,7 @@ func (s *OrgMembershipService) RemoveOrganizationMember(
 		}
 
 		// Update membership status to 'removed' (terminal state)
-		if err := q.RemoveOrganizationMembership(ctx, db.RemoveOrganizationMembershipParams{
-			ID:             membershipID,
-			DeletedByMemID: actorMembership.ID,
-		}); err != nil {
+		if err := q.RemoveOrganizationMembership(ctx, membershipID); err != nil {
 			// CRITICAL: OpenFGA permissions removed but DB update failed
 			// TODO: This should trigger an alert and manual reconciliation
 			s.Logger.Error("CRITICAL: Failed to update membership status after OpenFGA removal",

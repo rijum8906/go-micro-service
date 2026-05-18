@@ -45,3 +45,11 @@ func IsValidaOrgStatus(status string) bool {
 func IsStandardOrgRole(role string) bool {
 	return slices.Contains(OrgRoles, role)
 }
+
+// Organization Teams Table
+const (
+	// Statues
+	OrgTeamStatusActive   = "active"
+	OrgTeamStatusArchived = "archived"
+	OrgTeamStatusDeleted  = "deleted"
+)

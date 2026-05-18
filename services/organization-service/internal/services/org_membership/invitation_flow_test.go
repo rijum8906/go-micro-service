@@ -172,10 +172,14 @@ func Test_SendInvitation_Integration_Success(t *testing.T) {
 	))
 
 	servicetestutils.MockUserServiceClient.On("CheckEmailExists", ctx, &corev1.EmailRequest{Email: internEmail}).Return(&userv1.CheckExistsResponse{Exists: true}, nil)
+	servicetestutils.MockUserServiceClient.On("GetUser", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
+		Id:    uuid.NewString(),
+		Email: internEmail,
+	}, nil)
 
 	_, err := service.SendInvitation(ctx, &org_membershipv1.SendInvitationRequest{
 		Email:          internEmail,
-		Role:           "intern",
+		Role:           "member",
 		OrganizationId: orgSuite.Org.ID.String(),
 	})
 	require.NoError(t, err)
@@ -358,7 +362,7 @@ func Test_AcceptInvitation_Integration_Success(t *testing.T) {
 	invitation, err = suite.Q.GetOrganizationInvitationWithAllStatus(suite.Ctx, invitation.ID)
 	require.NoError(t, err)
 	require.Equal(t, invitation.RespondedAt.Valid, true)
-	require.Equal(t, invitation.RespondedBy.String(), userID.String())
+	require.Equal(t, invitation.RespondedByUserID.String(), userID.String())
 }
 
 // =============================================================================
@@ -581,7 +585,7 @@ func Test_DeclineInvitation_Integration_Success(t *testing.T) {
 	declinedInvitation, err := suite.Q.GetOrganizationInvitationWithAllStatus(suite.Ctx, invitation.ID)
 	require.NoError(t, err)
 	require.True(t, declinedInvitation.RespondedAt.Valid, "RespondedAt should be set")
-	require.Equal(t, userID.String(), declinedInvitation.RespondedBy.String(), "RespondedBy should match the user who declined")
+	require.Equal(t, userID.String(), declinedInvitation.RespondedByUserID.String(), "RespondedBy should match the user who declined")
 
 	// Verify the invitation status is no longer "pending"
 	// Note: This depends on your DeclineOrganizationInvitation implementation

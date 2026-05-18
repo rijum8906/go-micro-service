@@ -5,40 +5,49 @@
 package db
 
 import (
+	"net/netip"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // Core tenant/workspace entity that contains teams and members
 type Organization struct {
-	ID     uuid.UUID
-	Name   string
-	Status string
+	ID   uuid.UUID
+	Name string
 	// URL-friendly identifier, unique across all organizations
 	Slug        string
 	Description pgtype.Text
 	LogoUrl     pgtype.Text
-	// User ID who created this organization
-	CreatedBy  uuid.UUID
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	DeletedAt  pgtype.Timestamptz
-	DeletedBy  uuid.UUID
-	ArchivedAt pgtype.Timestamptz
+	// active=normal operation, archived=read-only/hidden, deleted=soft-deleted
+	Status string
+	// User ID who created this organization (references external users table)
+	CreatedByUserID uuid.UUID
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	ArchivedAt      pgtype.Timestamptz
+	DeletedAt       pgtype.Timestamptz
 }
 
 // Immutable audit trail for security, compliance, and debugging
 type OrganizationAuditLog struct {
 	ID             uuid.UUID
 	OrganizationID uuid.UUID
-	ActorUserID    uuid.UUID
-	// Verb like "member_added", "role_changed", "settings_updated"
+	// Membership ID of who performed action. NULL = system action (cleanup, migration)
+	ActorMemID uuid.UUID
+	// Verb like "member.added", "role.changed", "team.archived"
 	Action string
-	// Entity type: "user", "team", "membership", "organization"
+	// Entity type: "organization", "membership", "team", "invitation"
 	TargetType pgtype.Text
 	TargetID   uuid.UUID
-	// Additional context like {old_role: "member", new_role: "admin"}
+	// Previous state (for updates/changes)
+	OldValue []byte
+	// New state (for updates/changes)
+	NewValue []byte
+	// Additional context like {reason: "violation", source: "admin_api"}
 	Metadata  []byte
+	IpAddress *netip.Addr
+	UserAgent pgtype.Text
 	CreatedAt pgtype.Timestamptz
 }
 
@@ -48,18 +57,19 @@ type OrganizationInvitation struct {
 	OrganizationID uuid.UUID
 	Email          string
 	Role           string
+	// pending=waiting, accepted=user joined, declined=user refused, revoked=admin cancelled, expired=auto after expires_at
 	Status         string
 	InvitedByMemID uuid.UUID
 	// SHA256 hash of the invitation token. Never store raw tokens.
 	TokenHash string
 	// Invitations are invalid after this timestamp (typically 7 days)
-	ExpiresAt      pgtype.Timestamptz
-	RespondedBy    uuid.UUID
-	RespondedAt    pgtype.Timestamptz
-	Response       pgtype.Text
-	RevokedByMemID uuid.UUID
-	RevokedAt      pgtype.Timestamptz
-	CreatedAt      pgtype.Timestamptz
+	ExpiresAt         pgtype.Timestamptz
+	RespondedAt       pgtype.Timestamptz
+	Response          pgtype.Text
+	RevokedAt         pgtype.Timestamptz
+	CreatedAt         pgtype.Timestamptz
+	RespondedByUserID uuid.UUID
+	RevokedByMemID    uuid.UUID
 }
 
 // Junction table linking users to organizations with role and status
@@ -69,28 +79,27 @@ type OrganizationMembership struct {
 	UserID         uuid.UUID
 	// owner=full org control, admin=manage members/teams, member=standard access
 	Role string
-	// active=current member, suspended=temporarily blocked, banned=blocked from the organization, left=voluntarily departed, removed=administratively removed
-	Status         string
-	JoinedAt       pgtype.Timestamptz
-	LeftAt         pgtype.Timestamptz
-	CreatedAt      pgtype.Timestamptz
-	UpdatedAt      pgtype.Timestamptz
-	DeletedAt      pgtype.Timestamptz
-	DeletedByMemID uuid.UUID
+	// active=current member, suspended=temporarily blocked, banned=permanently blocked, left=voluntary departure, removed=admin removal
+	Status    string
+	JoinedAt  pgtype.Timestamptz
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
 
 // Teams are sub-groups within an organization for fine-grained access control
 type OrganizationTeam struct {
 	ID             uuid.UUID
 	OrganizationID uuid.UUID
-	// Team name, must be unique per organization (e.g., "Engineering", "Sales")
-	Name           string
-	Description    pgtype.Text
-	CreatedBy      uuid.UUID
+	// Team name, must be unique per organization (excluding deleted teams)
+	Name        string
+	Description pgtype.Text
+	// active=normal, archived=hidden/read-only, deleted=soft-deleted
+	Status         string
+	CreatedByMemID uuid.UUID
 	CreatedAt      pgtype.Timestamptz
 	UpdatedAt      pgtype.Timestamptz
+	ArchivedAt     pgtype.Timestamptz
 	DeletedAt      pgtype.Timestamptz
-	DeletedByMemID uuid.UUID
 }
 
 // Links organization members to teams. Uses membership_id (not user_id) to respect org-level roles.
@@ -101,9 +110,9 @@ type OrganizationTeamMembership struct {
 	// References organization_memberships.id - a user must be an org member before joining a team
 	MembershipID uuid.UUID
 	Role         string
+	Status       string
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
-	// Soft delete timestamp. When non-NULL, the member is no longer in the team.
-	DeletedAt          pgtype.Timestamptz
-	DeletedByTeamMemID uuid.UUID
+	// Soft delete timestamp. When non-NULL, the member is no longer in the team. Audit log contains who/when/why.
+	DeletedAt pgtype.Timestamptz
 }

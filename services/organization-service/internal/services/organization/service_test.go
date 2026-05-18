@@ -259,8 +259,8 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if fetchedOrg.CreatedBy.String() != newOwner.String() {
-		t.Errorf("expected organization owner to be %s but got %s", newOwner.String(), fetchedOrg.CreatedBy.String())
+	if fetchedOrg.CreatedByUserID.String() != newOwner.String() {
+		t.Errorf("expected organization owner to be %s but got %s", newOwner.String(), fetchedOrg.CreatedByUserID.String())
 	}
 
 	// Try to again change the ownership
@@ -324,9 +324,6 @@ func Test_DeleteOrganization_Success_Integration(t *testing.T) {
 	deletedOrg, err := q.GetDeletedOrganization(ctx, id)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if deletedOrg.DeletedBy.String() != org.CreatedBy {
-		t.Errorf("expected deleted by to be %s but got %s", org.CreatedBy, deletedOrg.DeletedBy.String())
 	}
 	if deletedOrg.DeletedAt.Time.After(time.Now()) {
 		t.Errorf("deleted_at should be in the past (already deleted), but got future time: %v", deletedOrg.DeletedAt.Time)

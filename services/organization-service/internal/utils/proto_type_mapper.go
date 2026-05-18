@@ -17,11 +17,10 @@ func MapOrganization(org *db.Organization) *modelsv1.Organization {
 		Description: org.Description.String,
 		Status:      org.Status,
 		LogoUrl:     org.LogoUrl.String,
-		CreatedBy:   org.CreatedBy.String(),
+		CreatedBy:   org.CreatedByUserID.String(),
 		CreatedAt:   protoutils.MapTimestamp(org.CreatedAt),
 		UpdatedAt:   protoutils.MapTimestamp(org.UpdatedAt),
 		DeletedAt:   protoutils.MapTimestamp(org.DeletedAt),
-		DeletedBy:   org.DeletedBy.String(),
 	}
 }
 
@@ -42,6 +41,5 @@ func MapOrgMembershipRes(membership *db.OrganizationMembership) *org_membershipv
 		Role:           membership.Role,
 		Status:         membership.Status,
 		JoinedAt:       protoutils.MapTimestamp(membership.JoinedAt),
-		LeftAt:         protoutils.MapTimestamp(membership.LeftAt),
 	}
 }

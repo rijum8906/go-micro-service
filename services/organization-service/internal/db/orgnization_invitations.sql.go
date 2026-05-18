@@ -13,29 +13,25 @@ import (
 )
 
 const AcceptOrganizationInvitation = `-- name: AcceptOrganizationInvitation :one
-
 UPDATE organization_invitations
-SET 
-    status = 'accepted', 
-    responded_by = $2, 
-    responded_at = NOW(), 
+SET
+    status = 'accepted',
+    responded_by_user_id = $1,
+    responded_at = NOW(),
     response = 'accept'
-WHERE id = $1 
-    AND status = 'pending'  -- Only accept pending invitations
-    AND expires_at > NOW()   -- Only accept if not expired
-RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
+WHERE id = $2
+  AND status = 'pending'
+  AND expires_at > NOW()
+RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id
 `
 
 type AcceptOrganizationInvitationParams struct {
-	ID          uuid.UUID
 	RespondedBy uuid.UUID
+	ID          uuid.UUID
 }
 
-// ===========================================
-// UPDATE METHODS
-// ===========================================
 func (q *Queries) AcceptOrganizationInvitation(ctx context.Context, arg AcceptOrganizationInvitationParams) (OrganizationInvitation, error) {
-	row := q.db.QueryRow(ctx, AcceptOrganizationInvitation, arg.ID, arg.RespondedBy)
+	row := q.db.QueryRow(ctx, AcceptOrganizationInvitation, arg.RespondedBy, arg.ID)
 	var i OrganizationInvitation
 	err := row.Scan(
 		&i.ID,
@@ -46,27 +42,23 @@ func (q *Queries) AcceptOrganizationInvitation(ctx context.Context, arg AcceptOr
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }
 
 const CheckOrganizationInvitationExists = `-- name: CheckOrganizationInvitationExists :one
-
 SELECT EXISTS (
     SELECT 1 FROM organization_invitations
     WHERE id = $1
-)
+) AS exists
 `
 
-// ===========================================
-// CHECK METHODS
-// ===========================================
 func (q *Queries) CheckOrganizationInvitationExists(ctx context.Context, id uuid.UUID) (bool, error) {
 	row := q.db.QueryRow(ctx, CheckOrganizationInvitationExists, id)
 	var exists bool
@@ -77,8 +69,10 @@ func (q *Queries) CheckOrganizationInvitationExists(ctx context.Context, id uuid
 const CheckOrganizationInvitationExistsByTokenHash = `-- name: CheckOrganizationInvitationExistsByTokenHash :one
 SELECT EXISTS (
     SELECT 1 FROM organization_invitations
-    WHERE token_hash = $1 AND expires_at > NOW() AND status = 'pending'
-)
+    WHERE token_hash = $1
+      AND expires_at > NOW()
+      AND status = 'pending'
+) AS exists
 `
 
 func (q *Queries) CheckOrganizationInvitationExistsByTokenHash(ctx context.Context, tokenHash string) (bool, error) {
@@ -91,11 +85,11 @@ func (q *Queries) CheckOrganizationInvitationExistsByTokenHash(ctx context.Conte
 const CheckPendingInvitationExists = `-- name: CheckPendingInvitationExists :one
 SELECT EXISTS (
     SELECT 1 FROM organization_invitations
-    WHERE email = $1 
-        AND organization_id = $2 
-        AND status = 'pending' 
-        AND expires_at > NOW()
-)
+    WHERE email = $1
+      AND organization_id = $2
+      AND status = 'pending'
+      AND expires_at > NOW()
+) AS exists
 `
 
 type CheckPendingInvitationExistsParams struct {
@@ -103,7 +97,6 @@ type CheckPendingInvitationExistsParams struct {
 	OrganizationID uuid.UUID
 }
 
-// Check if there's a valid pending invitation for email+org
 func (q *Queries) CheckPendingInvitationExists(ctx context.Context, arg CheckPendingInvitationExistsParams) (bool, error) {
 	row := q.db.QueryRow(ctx, CheckPendingInvitationExists, arg.Email, arg.OrganizationID)
 	var exists bool
@@ -113,15 +106,16 @@ func (q *Queries) CheckPendingInvitationExists(ctx context.Context, arg CheckPen
 
 const CreateOrganizationInvitation = `-- name: CreateOrganizationInvitation :one
 INSERT INTO organization_invitations (
-    organization_id, 
-    email, 
-    role, 
-    invited_by_mem_id, 
-    token_hash, 
-    expires_at,
-    status  -- Added default status
-) VALUES ( $1, $2, $3, $4, $5, $6, 'pending')
-RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
+    organization_id,
+    email,
+    role,
+    invited_by_mem_id,
+    token_hash,
+    expires_at
+) VALUES (
+    $1, $2, $3, $4, $5, $6
+)
+RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id
 `
 
 type CreateOrganizationInvitationParams struct {
@@ -152,36 +146,36 @@ func (q *Queries) CreateOrganizationInvitation(ctx context.Context, arg CreateOr
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }
 
 const DeclineOrganizationInvitation = `-- name: DeclineOrganizationInvitation :one
 UPDATE organization_invitations
-SET 
-    status = 'declined', 
-    responded_by = $2, 
-    responded_at = NOW(), 
+SET
+    status = 'declined',
+    responded_by_user_id = $1,
+    responded_at = NOW(),
     response = 'decline'
-WHERE id = $1 
-    AND status = 'pending'  -- Only decline pending invitations
-    AND expires_at > NOW()   -- Only decline if not expired
-RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
+WHERE id = $2
+  AND status = 'pending'
+  AND expires_at > NOW()
+RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id
 `
 
 type DeclineOrganizationInvitationParams struct {
-	ID          uuid.UUID
 	RespondedBy uuid.UUID
+	ID          uuid.UUID
 }
 
 func (q *Queries) DeclineOrganizationInvitation(ctx context.Context, arg DeclineOrganizationInvitationParams) (OrganizationInvitation, error) {
-	row := q.db.QueryRow(ctx, DeclineOrganizationInvitation, arg.ID, arg.RespondedBy)
+	row := q.db.QueryRow(ctx, DeclineOrganizationInvitation, arg.RespondedBy, arg.ID)
 	var i OrganizationInvitation
 	err := row.Scan(
 		&i.ID,
@@ -192,12 +186,12 @@ func (q *Queries) DeclineOrganizationInvitation(ctx context.Context, arg Decline
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }
@@ -205,10 +199,13 @@ func (q *Queries) DeclineOrganizationInvitation(ctx context.Context, arg Decline
 const DeleteExpiredInvitations = `-- name: DeleteExpiredInvitations :exec
 DELETE FROM organization_invitations
 WHERE status IN ('expired', 'accepted', 'declined', 'revoked')
-    AND (expires_at < NOW() - INTERVAL '90 days' OR responded_at < NOW() - INTERVAL '90 days')
+  AND (
+    expires_at < NOW() - INTERVAL '90 days'
+    OR responded_at < NOW() - INTERVAL '90 days'
+    OR revoked_at < NOW() - INTERVAL '90 days'
+  )
 `
 
-// Clean up expired invitations permanently (background job)
 func (q *Queries) DeleteExpiredInvitations(ctx context.Context) error {
 	_, err := q.db.Exec(ctx, DeleteExpiredInvitations)
 	return err
@@ -219,7 +216,6 @@ DELETE FROM organization_invitations
 WHERE id = $1
 `
 
-// WARNING: Hard delete - use with caution
 func (q *Queries) DeleteOrganizationInvitation(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, DeleteOrganizationInvitation, id)
 	return err
@@ -228,18 +224,20 @@ func (q *Queries) DeleteOrganizationInvitation(ctx context.Context, id uuid.UUID
 const ExpireOldInvitations = `-- name: ExpireOldInvitations :exec
 UPDATE organization_invitations
 SET status = 'expired'
-WHERE status = 'pending' AND expires_at <= NOW()
+WHERE status = 'pending'
+  AND expires_at <= NOW()
 `
 
-// Clean up expired invitations (can be run as a background job)
 func (q *Queries) ExpireOldInvitations(ctx context.Context) error {
 	_, err := q.db.Exec(ctx, ExpireOldInvitations)
 	return err
 }
 
 const GetOrganizationInvitation = `-- name: GetOrganizationInvitation :one
-SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id FROM organization_invitations
 WHERE id = $1
+  AND status = 'pending'
+LIMIT 1
 `
 
 func (q *Queries) GetOrganizationInvitation(ctx context.Context, id uuid.UUID) (OrganizationInvitation, error) {
@@ -254,25 +252,24 @@ func (q *Queries) GetOrganizationInvitation(ctx context.Context, id uuid.UUID) (
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }
 
 const GetOrganizationInvitationByTokenHash = `-- name: GetOrganizationInvitationByTokenHash :one
-
-SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
-WHERE token_hash = $1 AND expires_at > NOW() AND status = 'pending'
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id FROM organization_invitations
+WHERE token_hash = $1
+  AND expires_at > NOW()
+  AND status = 'pending'
+LIMIT 1
 `
 
-// ===========================================
-// GET METHODS
-// ===========================================
 func (q *Queries) GetOrganizationInvitationByTokenHash(ctx context.Context, tokenHash string) (OrganizationInvitation, error) {
 	row := q.db.QueryRow(ctx, GetOrganizationInvitationByTokenHash, tokenHash)
 	var i OrganizationInvitation
@@ -285,19 +282,20 @@ func (q *Queries) GetOrganizationInvitationByTokenHash(ctx context.Context, toke
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }
 
 const GetOrganizationInvitationWithAllStatus = `-- name: GetOrganizationInvitationWithAllStatus :one
-SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id FROM organization_invitations
 WHERE id = $1
+LIMIT 1
 `
 
 func (q *Queries) GetOrganizationInvitationWithAllStatus(ctx context.Context, id uuid.UUID) (OrganizationInvitation, error) {
@@ -312,20 +310,20 @@ func (q *Queries) GetOrganizationInvitationWithAllStatus(ctx context.Context, id
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }
 
 const GetOrganizationInvitationsByOrgID = `-- name: GetOrganizationInvitationsByOrgID :many
-SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id FROM organization_invitations
 WHERE organization_id = $1
-ORDER BY created_at DESC 
+ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
 
@@ -353,12 +351,12 @@ func (q *Queries) GetOrganizationInvitationsByOrgID(ctx context.Context, arg Get
 			&i.InvitedByMemID,
 			&i.TokenHash,
 			&i.ExpiresAt,
-			&i.RespondedBy,
 			&i.RespondedAt,
 			&i.Response,
-			&i.RevokedByMemID,
 			&i.RevokedAt,
 			&i.CreatedAt,
+			&i.RespondedByUserID,
+			&i.RevokedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -371,9 +369,10 @@ func (q *Queries) GetOrganizationInvitationsByOrgID(ctx context.Context, arg Get
 }
 
 const GetOrganizationInvitationsByOrgIDAndStatus = `-- name: GetOrganizationInvitationsByOrgIDAndStatus :many
-SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
-WHERE organization_id = $1 AND status = $2
-ORDER BY created_at DESC 
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id FROM organization_invitations
+WHERE organization_id = $1
+  AND status = $2
+ORDER BY created_at DESC
 LIMIT $3 OFFSET $4
 `
 
@@ -407,12 +406,12 @@ func (q *Queries) GetOrganizationInvitationsByOrgIDAndStatus(ctx context.Context
 			&i.InvitedByMemID,
 			&i.TokenHash,
 			&i.ExpiresAt,
-			&i.RespondedBy,
 			&i.RespondedAt,
 			&i.Response,
-			&i.RevokedByMemID,
 			&i.RevokedAt,
 			&i.CreatedAt,
+			&i.RespondedByUserID,
+			&i.RevokedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -425,11 +424,11 @@ func (q *Queries) GetOrganizationInvitationsByOrgIDAndStatus(ctx context.Context
 }
 
 const GetPendingInvitationByEmailAndOrg = `-- name: GetPendingInvitationByEmailAndOrg :one
-SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
-WHERE email = $1 
-    AND organization_id = $2 
-    AND status = 'pending' 
-    AND expires_at > NOW()
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id FROM organization_invitations
+WHERE email = $1
+  AND organization_id = $2
+  AND status = 'pending'
+  AND expires_at > NOW()
 LIMIT 1
 `
 
@@ -438,7 +437,6 @@ type GetPendingInvitationByEmailAndOrgParams struct {
 	OrganizationID uuid.UUID
 }
 
-// Check for existing pending invitation (idempotency)
 func (q *Queries) GetPendingInvitationByEmailAndOrg(ctx context.Context, arg GetPendingInvitationByEmailAndOrgParams) (OrganizationInvitation, error) {
 	row := q.db.QueryRow(ctx, GetPendingInvitationByEmailAndOrg, arg.Email, arg.OrganizationID)
 	var i OrganizationInvitation
@@ -451,25 +449,24 @@ func (q *Queries) GetPendingInvitationByEmailAndOrg(ctx context.Context, arg Get
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }
 
 const GetPendingInvitationsByEmail = `-- name: GetPendingInvitationsByEmail :many
-SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at FROM organization_invitations
-WHERE email = $1 
-    AND status = 'pending' 
-    AND expires_at > NOW()
+SELECT id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id FROM organization_invitations
+WHERE email = $1
+  AND status = 'pending'
+  AND expires_at > NOW()
 ORDER BY created_at DESC
 `
 
-// Get all pending invitations for a user by email
 func (q *Queries) GetPendingInvitationsByEmail(ctx context.Context, email string) ([]OrganizationInvitation, error) {
 	rows, err := q.db.Query(ctx, GetPendingInvitationsByEmail, email)
 	if err != nil {
@@ -488,12 +485,12 @@ func (q *Queries) GetPendingInvitationsByEmail(ctx context.Context, email string
 			&i.InvitedByMemID,
 			&i.TokenHash,
 			&i.ExpiresAt,
-			&i.RespondedBy,
 			&i.RespondedAt,
 			&i.Response,
-			&i.RevokedByMemID,
 			&i.RevokedAt,
 			&i.CreatedAt,
+			&i.RespondedByUserID,
+			&i.RevokedByMemID,
 		); err != nil {
 			return nil, err
 		}
@@ -507,14 +504,14 @@ func (q *Queries) GetPendingInvitationsByEmail(ctx context.Context, email string
 
 const RevokeOrganizationInvitation = `-- name: RevokeOrganizationInvitation :one
 UPDATE organization_invitations
-SET 
-    status = 'revoked', 
-    revoked_by_mem_id = $2, 
+SET
+    status = 'revoked',
+    revoked_by_mem_id = $2,
     revoked_at = NOW()
-WHERE id = $1 
-    AND status = 'pending'  -- Only revoke pending invitations
-    AND expires_at > NOW()   -- Only revoke if not expired
-RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_by, responded_at, response, revoked_by_mem_id, revoked_at, created_at
+WHERE id = $1
+  AND status = 'pending'
+  AND expires_at > NOW()
+RETURNING id, organization_id, email, role, status, invited_by_mem_id, token_hash, expires_at, responded_at, response, revoked_at, created_at, responded_by_user_id, revoked_by_mem_id
 `
 
 type RevokeOrganizationInvitationParams struct {
@@ -534,12 +531,12 @@ func (q *Queries) RevokeOrganizationInvitation(ctx context.Context, arg RevokeOr
 		&i.InvitedByMemID,
 		&i.TokenHash,
 		&i.ExpiresAt,
-		&i.RespondedBy,
 		&i.RespondedAt,
 		&i.Response,
-		&i.RevokedByMemID,
 		&i.RevokedAt,
 		&i.CreatedAt,
+		&i.RespondedByUserID,
+		&i.RevokedByMemID,
 	)
 	return i, err
 }

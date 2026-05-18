@@ -429,10 +429,7 @@ func Test_GetOrganizationMembershipsByStatus_Integration_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	// Delete member membership
-	err = suite.Q.SoftDeleteOrganizationMembership(suite.Ctx, db.SoftDeleteOrganizationMembershipParams{
-		ID:             memberMembership.ID,
-		DeletedByMemID: orgSuite.OwnerMembership.ID,
-	})
+	err = suite.Q.SoftDeleteOrganizationMembership(suite.Ctx, memberMembership.ID)
 	require.NoError(t, err)
 
 	// Write FGA tuples
@@ -627,10 +624,7 @@ func Test_GetOrganizationMembership_Integration_Failure(t *testing.T) {
 		OrganizationID: orgSuite.Org.ID,
 		Role:           permissions.RoleMember,
 	})
-	suite.Q.SoftDeleteOrganizationMembership(suite.Ctx, db.SoftDeleteOrganizationMembershipParams{
-		ID:             deletedMembership.ID,
-		DeletedByMemID: orgSuite.OwnerMembership.ID,
-	})
+	suite.Q.SoftDeleteOrganizationMembership(suite.Ctx, deletedMembership.ID)
 
 	testCases := []struct {
 		name          string
