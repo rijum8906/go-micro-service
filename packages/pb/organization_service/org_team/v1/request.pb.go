@@ -22,9 +22,12 @@ const (
 )
 
 type CreateOrgTeamRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CreateOrgTeamRequest) Reset() {
@@ -57,10 +60,34 @@ func (*CreateOrgTeamRequest) Descriptor() ([]byte, []int) {
 	return file_organization_service_org_team_v1_request_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *CreateOrgTeamRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *CreateOrgTeamRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateOrgTeamRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
 type UpdateOrgTeamNameRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	TeamId         string                 `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
+	NewName        string                 `protobuf:"bytes,2,opt,name=new_name,json=newName,proto3" json:"new_name,omitempty"`
+	NewDescription string                 `protobuf:"bytes,3,opt,name=new_description,json=newDescription,proto3" json:"new_description,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *UpdateOrgTeamNameRequest) Reset() {
@@ -93,13 +120,40 @@ func (*UpdateOrgTeamNameRequest) Descriptor() ([]byte, []int) {
 	return file_organization_service_org_team_v1_request_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *UpdateOrgTeamNameRequest) GetTeamId() string {
+	if x != nil {
+		return x.TeamId
+	}
+	return ""
+}
+
+func (x *UpdateOrgTeamNameRequest) GetNewName() string {
+	if x != nil {
+		return x.NewName
+	}
+	return ""
+}
+
+func (x *UpdateOrgTeamNameRequest) GetNewDescription() string {
+	if x != nil {
+		return x.NewDescription
+	}
+	return ""
+}
+
 var File_organization_service_org_team_v1_request_proto protoreflect.FileDescriptor
 
 const file_organization_service_org_team_v1_request_proto_rawDesc = "" +
 	"\n" +
-	".organization_service/org_team/v1/request.proto\x12 organization_service.org_team.v1\"\x16\n" +
-	"\x14CreateOrgTeamRequest\"\x1a\n" +
-	"\x18UpdateOrgTeamNameRequestB\xa2\x02\n" +
+	".organization_service/org_team/v1/request.proto\x12 organization_service.org_team.v1\"u\n" +
+	"\x14CreateOrgTeamRequest\x12'\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"w\n" +
+	"\x18UpdateOrgTeamNameRequest\x12\x17\n" +
+	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12\x19\n" +
+	"\bnew_name\x18\x02 \x01(\tR\anewName\x12'\n" +
+	"\x0fnew_description\x18\x03 \x01(\tR\x0enewDescriptionB\xa2\x02\n" +
 	"$com.organization_service.org_team.v1B\fRequestProtoP\x01ZRgithub.com/rijum8906/relay/packages/pb/organization_service/org_team/v1;org_teamv1\xa2\x02\x03OOX\xaa\x02\x1eOrganizationService.OrgTeam.V1\xca\x02\x1eOrganizationService\\OrgTeam\\V1\xe2\x02*OrganizationService\\OrgTeam\\V1\\GPBMetadata\xea\x02 OrganizationService::OrgTeam::V1b\x06proto3"
 
 var (

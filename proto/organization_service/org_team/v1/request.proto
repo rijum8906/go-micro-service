@@ -2,6 +2,14 @@ syntax = "proto3";
 
 package organization_service.org_team.v1;
 
-message CreateOrgTeamRequest {}
+message CreateOrgTeamRequest {
+  string organization_id = 1;
+  string name = 2;
+  string description = 3;
+}
 
-message UpdateOrgTeamNameRequest {}
+message UpdateOrgTeamNameRequest {
+  string team_id = 1;
+  string new_name = 2;
+  string new_description = 3;
+}
