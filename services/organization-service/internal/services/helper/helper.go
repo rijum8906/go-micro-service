@@ -1,21 +1,74 @@
-package orgmembership
+// Package helper
+package helper
 
 import (
 	"context"
 	"runtime/debug"
+	"sync"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
+	"github.com/rijum8906/relay/services/organization-service/app"
 	"github.com/rijum8906/relay/services/organization-service/internal/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"go.uber.org/zap"
 )
 
-// removeRole removes the role from the user
+var (
+	instance  *ServiceHelper
+	once      sync.Once
+	helperErr *apperror.AppError
+)
+
+type ServiceHelper struct {
+	DBPool            *pgxpool.Pool
+	DBQ               *db.Queries
+	TuppleManager     coreopenfga.TuppleManager
+	PermissionManager *permissions.PermissionManager
+	Logger            *zap.Logger
+}
+
+func initHelper() (*ServiceHelper, *apperror.AppError) {
+	application, appErr := app.GetInstance()
+	if appErr != nil {
+		return nil, appErr
+	}
+	q := db.New(application.DB())
+
+	fgaClient, appErr := coreopenfga.NewClient(application.Config().FGAAPIURL)
+	if appErr != nil {
+		return nil, appErr
+	}
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+	permissionManager := permissions.NewPermissionManager(fgaClient)
+	instance = &ServiceHelper{
+		DBPool:            application.DB(),
+		DBQ:               q,
+		TuppleManager:     tuppleManager,
+		PermissionManager: permissionManager,
+	}
+	return nil, nil
+}
+
+func GetHelper() (*ServiceHelper, *apperror.AppError) {
+	once.Do(func() {
+		instance, helperErr = initHelper()
+	})
+
+	if helperErr != nil {
+		return nil, helperErr
+	}
+
+	return instance, nil
+}
+
+// RemoveRole removes the role from the user
 // whether the role is a standard role or custom role
-func (s *OrgMembershipService) removeRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
+func (s *ServiceHelper) RemoveRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
 	if constants.IsStandardOrgRole(targetMembership.Role) {
 		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
 			{
@@ -36,7 +89,7 @@ func (s *OrgMembershipService) removeRole(ctx context.Context, targetMembership 
 	return nil
 }
 
-func (s *OrgMembershipService) addRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
+func (s *ServiceHelper) AddRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
 	if constants.IsStandardOrgRole(targetMembership.Role) {
 		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
 			{
@@ -57,7 +110,7 @@ func (s *OrgMembershipService) addRole(ctx context.Context, targetMembership *db
 	return nil
 }
 
-func (s *OrgMembershipService) runInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) (err error) {
+func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) (err error) {
 	tx, err := s.DBPool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.Serializable,
 	})

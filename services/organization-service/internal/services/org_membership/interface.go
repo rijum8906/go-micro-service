@@ -14,6 +14,7 @@ import (
 	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
+	"github.com/rijum8906/relay/services/organization-service/internal/services/helper"
 	"go.uber.org/zap"
 )
 
@@ -26,6 +27,7 @@ type OrgMembershipService struct {
 	HashService   hash.HashService
 	Logger        *zap.Logger
 	Config        *config.Env
+	Helper        *helper.ServiceHelper
 }
 
 func New() (*apperror.AppError, org_membershipv1.OrganizationMembershipServiceServer) {
@@ -43,6 +45,11 @@ func New() (*apperror.AppError, org_membershipv1.OrganizationMembershipServiceSe
 	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 	permissionManager := permissions.NewPermissionManager(fgaClient)
 
+	helper, appErr := helper.GetHelper()
+	if appErr != nil {
+		return appErr, nil
+	}
+
 	return nil, &OrgMembershipService{
 		DBPool:        application.DB(),
 		DBQ:           q,
@@ -54,6 +61,7 @@ func New() (*apperror.AppError, org_membershipv1.OrganizationMembershipServiceSe
 		}),
 		Logger: application.Logger(),
 		Config: application.Config(),
+		Helper: helper,
 	}
 }
 
