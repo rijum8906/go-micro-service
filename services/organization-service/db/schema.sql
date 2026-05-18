@@ -134,9 +134,9 @@ CREATE TABLE organization_team_memberships (
     role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) not null default 'active'
         check (status in ('active', 'suspended', 'banned', 'left', 'removed')),
+    joined_at timestamptz NOT NULL DEFAULT now(),
     created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now(),
-    deleted_at timestamptz -- Added missing column referenced below
+    updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 -- Use case: Prevent duplicate active or suspended team memberships for the same org member.
@@ -146,7 +146,6 @@ CREATE UNIQUE INDEX uq_team_memberships_active
 
 COMMENT ON TABLE organization_team_memberships IS 'Links organization members to teams. Uses membership_id (not user_id) to respect org-level roles.';
 COMMENT ON COLUMN organization_team_memberships.membership_id IS 'References organization_memberships.id - a user must be an org member before joining a team';
-COMMENT ON COLUMN organization_team_memberships.deleted_at IS 'Soft delete timestamp. When non-NULL, the member is no longer in the team. Audit log contains who/when/why.';
 
 -- Use case: Find all active/suspended teams that an organization member belongs to.
 CREATE INDEX idx_team_memberships_user_lookup
@@ -158,11 +157,6 @@ CREATE INDEX idx_team_memberships_user_lookup
 CREATE INDEX idx_team_memberships_team_lookup
     ON organization_team_memberships (team_id)
     INCLUDE (membership_id, role)
-    WHERE status IN ('active', 'suspended');
-
--- Use case: Find team memberships with a deletion timestamp for cleanup and audit review.
-CREATE INDEX idx_team_memberships_deleted
-    ON organization_team_memberships (deleted_at)
     WHERE status IN ('active', 'suspended');
 
 CREATE TRIGGER trg_organization_team_memberships_updated_at

@@ -108,17 +108,15 @@ CREATE TABLE "organization_team_memberships" (
   "membership_id" uuid NOT NULL,
   "role" character varying(30) NOT NULL DEFAULT 'member',
   "status" character varying(30) NOT NULL DEFAULT 'active',
+  "joined_at" timestamptz NOT NULL DEFAULT now(),
   "created_at" timestamptz NOT NULL DEFAULT now(),
   "updated_at" timestamptz NOT NULL DEFAULT now(),
-  "deleted_at" timestamptz NULL,
   PRIMARY KEY ("id"),
   CONSTRAINT "organization_team_memberships_membership_id_fkey" FOREIGN KEY ("membership_id") REFERENCES "organization_memberships" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "organization_team_memberships_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "organization_team_memberships_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "organization_teams" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "organization_team_memberships_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying, 'banned'::character varying, 'left'::character varying, 'removed'::character varying])::text[]))
 );
--- Create index "idx_team_memberships_deleted" to table: "organization_team_memberships"
-CREATE INDEX "idx_team_memberships_deleted" ON "organization_team_memberships" ("deleted_at") WHERE ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying])::text[]));
 -- Create index "idx_team_memberships_team_lookup" to table: "organization_team_memberships"
 CREATE INDEX "idx_team_memberships_team_lookup" ON "organization_team_memberships" ("team_id") INCLUDE ("membership_id", "role") WHERE ((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying])::text[]));
 -- Create index "idx_team_memberships_user_lookup" to table: "organization_team_memberships"
@@ -129,8 +127,6 @@ CREATE UNIQUE INDEX "uq_team_memberships_active" ON "organization_team_membershi
 COMMENT ON TABLE "organization_team_memberships" IS 'Links organization members to teams. Uses membership_id (not user_id) to respect org-level roles.';
 -- Set comment to column: "membership_id" on table: "organization_team_memberships"
 COMMENT ON COLUMN "organization_team_memberships"."membership_id" IS 'References organization_memberships.id - a user must be an org member before joining a team';
--- Set comment to column: "deleted_at" on table: "organization_team_memberships"
-COMMENT ON COLUMN "organization_team_memberships"."deleted_at" IS 'Soft delete timestamp. When non-NULL, the member is no longer in the team. Audit log contains who/when/why.';
 -- Create trigger "trg_organization_team_memberships_updated_at"
 CREATE TRIGGER "trg_organization_team_memberships_updated_at" BEFORE UPDATE ON "organization_team_memberships" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();
 -- Create trigger "trg_organization_teams_updated_at"
