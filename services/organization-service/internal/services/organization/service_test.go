@@ -164,7 +164,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 	}
 
 	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
-		dto.MetaUserIDKey, org.CreatedBy,
+		dto.MetaUserIDKey, org.CreatedByUserId,
 	))
 	fetchedOrgs, err := service.GetOrganizationsListByCreatedBy(ctx, &corev1.EmptyRequest{})
 	if err != nil {
@@ -305,7 +305,7 @@ func Test_DeleteOrganization_Success_Integration(t *testing.T) {
 
 	// Update Context With UserInfo
 	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
-		dto.MetaUserIDKey, org.CreatedBy,
+		dto.MetaUserIDKey, org.CreatedByUserId,
 	))
 
 	// Delete organization
@@ -330,7 +330,7 @@ func Test_DeleteOrganization_Success_Integration(t *testing.T) {
 	}
 
 	check, appErr := tuppleManager.Check(ctx, client.ClientCheckRequest{
-		User:     "user:" + org.CreatedBy,
+		User:     "user:" + org.CreatedByUserId,
 		Relation: permissions.RoleOwner,
 		Object:   "organization:" + org.Id,
 	})
@@ -372,7 +372,7 @@ func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
 
 	t.Run("With invalid organization id", func(t *testing.T) {
 		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
-			dto.MetaUserIDKey, org.CreatedBy,
+			dto.MetaUserIDKey, org.CreatedByUserId,
 		))
 
 		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
@@ -389,7 +389,7 @@ func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
 
 	t.Run("Delete with wrong token scope", func(t *testing.T) {
 		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
-			dto.MetaUserIDKey, org.CreatedBy,
+			dto.MetaUserIDKey, org.CreatedByUserId,
 		))
 
 		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
@@ -421,7 +421,7 @@ func Test_ArchiveOrganization_Success_integration(t *testing.T) {
 
 	// Update Context With UserInfo
 	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
-		dto.MetaUserIDKey, org.CreatedBy,
+		dto.MetaUserIDKey, org.CreatedByUserId,
 	))
 
 	// Archive
@@ -450,7 +450,7 @@ func Test_ArchiveOrganization_Success_integration(t *testing.T) {
 	}
 
 	check, appErr := tuppleManager.Check(ctx, client.ClientCheckRequest{
-		User:     "user:" + org.CreatedBy,
+		User:     "user:" + org.CreatedByUserId,
 		Relation: permissions.RoleOwner,
 		Object:   "organization:" + org.Id,
 	})
@@ -491,7 +491,7 @@ func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
 
 	t.Run("With invalid organization id", func(t *testing.T) {
 		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
-			dto.MetaUserIDKey, org.CreatedBy,
+			dto.MetaUserIDKey, org.CreatedByUserId,
 		))
 
 		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
@@ -508,7 +508,7 @@ func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
 
 	t.Run("Delete with wrong token scope", func(t *testing.T) {
 		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
-			dto.MetaUserIDKey, org.CreatedBy,
+			dto.MetaUserIDKey, org.CreatedByUserId,
 		))
 
 		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{

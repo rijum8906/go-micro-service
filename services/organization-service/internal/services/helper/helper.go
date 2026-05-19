@@ -66,9 +66,9 @@ func GetHelper() (*ServiceHelper, *apperror.AppError) {
 	return instance, nil
 }
 
-// RemoveRole removes the role from the user
+// RemoveOrgMemRole removes the role from the user
 // whether the role is a standard role or custom role
-func (s *ServiceHelper) RemoveRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
+func (s *ServiceHelper) RemoveOrgMemRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
 	if constants.IsStandardOrgRole(targetMembership.Role) {
 		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
 			{
@@ -89,7 +89,7 @@ func (s *ServiceHelper) RemoveRole(ctx context.Context, targetMembership *db.Org
 	return nil
 }
 
-func (s *ServiceHelper) AddRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
+func (s *ServiceHelper) AddOrgMemRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
 	if constants.IsStandardOrgRole(targetMembership.Role) {
 		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
 			{
@@ -104,6 +104,48 @@ func (s *ServiceHelper) AddRole(ctx context.Context, targetMembership *db.Organi
 				User:     "user:" + targetMembership.UserID.String(),
 				Relation: "allowed",
 				Object:   permissions.GenerateCustomRoleObject(targetMembership.OrganizationID.String(), targetMembership.Role),
+			},
+		})
+	}
+	return nil
+}
+
+func (s *ServiceHelper) AddTeamMemRole(ctx context.Context, targetMembership *db.OrganizationTeamMembership) *apperror.AppError {
+	if constants.IsStandardOrgTeamRole(targetMembership.Role) {
+		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
+			{
+				User:     "user:" + targetMembership.MembershipID.String(),
+				Relation: targetMembership.Role,
+				Object:   "team:" + targetMembership.TeamID.String(),
+			},
+		})
+	} else {
+		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
+			{
+				User:     "user:" + targetMembership.MembershipID.String(),
+				Relation: "allowed",
+				Object:   permissions.GenerateCustomRoleObject(targetMembership.TeamID.String(), targetMembership.Role),
+			},
+		})
+	}
+	return nil
+}
+
+func (s *ServiceHelper) RemoveTeamMemRole(ctx context.Context, targetMembership *db.OrganizationTeamMembership) *apperror.AppError {
+	if constants.IsStandardOrgTeamRole(targetMembership.Role) {
+		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
+			{
+				User:     "user:" + targetMembership.MembershipID.String(),
+				Relation: targetMembership.Role,
+				Object:   "team:" + targetMembership.TeamID.String(),
+			},
+		})
+	} else {
+		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
+			{
+				User:     "user:" + targetMembership.MembershipID.String(),
+				Relation: "allowed",
+				Object:   permissions.GenerateCustomRoleObject(targetMembership.TeamID.String(), targetMembership.Role),
 			},
 		})
 	}
