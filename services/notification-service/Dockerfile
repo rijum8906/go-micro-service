@@ -18,7 +18,12 @@ RUN go mod download
 # Now copy source code - but only the necessary directories
 COPY packages/core/ ./packages/core/
 COPY packages/pb/ ./packages/pb/
-COPY services/notification-service/ ./services/notification-service/
+
+COPY services/notification-service/go.mod ./services/notification-service/go.mod
+COPY services/notification-service/internal ./services/notification-service/internal
+COPY services/notification-service/app ./services/notification-service/app
+COPY services/notification-service/cmd ./services/notification-service/cmd
+
 
 # Build
 RUN go build -o service-notification services/notification-service/cmd/app/main.go

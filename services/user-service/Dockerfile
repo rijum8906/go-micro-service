@@ -18,7 +18,12 @@ RUN go mod download
 # Now copy source code - but only the necessary directories
 COPY packages/core/ ./packages/core/
 COPY packages/pb/ ./packages/pb/
-COPY services/user-service/ ./services/user-service/
+
+COPY services/user-service/go.mod ./services/user-service/go.mod
+COPY services/user-service/internal ./services/user-service/internal
+COPY services/user-service/app ./services/user-service/app
+COPY services/user-service/cmd ./services/user-service/cmd
+
 
 # Build
 RUN go build -o service-user services/user-service/cmd/main.go
