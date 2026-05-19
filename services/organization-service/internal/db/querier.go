@@ -21,10 +21,12 @@ type Querier interface {
 	CheckOrganizationInvitationExistsByTokenHash(ctx context.Context, tokenHash string) (bool, error)
 	CheckOrganizationMembershipExists(ctx context.Context, id uuid.UUID) (bool, error)
 	CheckOrganizationTeamExists(ctx context.Context, id uuid.UUID) (bool, error)
+	CheckOrganizationTeamMembershipExists(ctx context.Context, id uuid.UUID) (bool, error)
 	CheckOrganizationTeamNameExists(ctx context.Context, arg CheckOrganizationTeamNameExistsParams) (bool, error)
 	CheckPendingInvitationExists(ctx context.Context, arg CheckPendingInvitationExistsParams) (bool, error)
 	CountActiveMembersByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error)
 	CountActiveOwnersByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error)
+	CountActiveTeamMembersByTeamID(ctx context.Context, teamID uuid.UUID) (int64, error)
 	CountMembersByOrgIDAndStatus(ctx context.Context, arg CountMembersByOrgIDAndStatusParams) (int64, error)
 	CountOrganizationTeamsByOrgID(ctx context.Context, organizationID uuid.UUID) (int64, error)
 	CountOrganizationTeamsByOrgIDAndStatus(ctx context.Context, arg CountOrganizationTeamsByOrgIDAndStatusParams) (int64, error)
@@ -34,6 +36,7 @@ type Querier interface {
 	CreateOrganizationMembership(ctx context.Context, arg CreateOrganizationMembershipParams) (OrganizationMembership, error)
 	CreateOrganizationMembershipOwner(ctx context.Context, arg CreateOrganizationMembershipOwnerParams) (OrganizationMembership, error)
 	CreateOrganizationTeam(ctx context.Context, arg CreateOrganizationTeamParams) (OrganizationTeam, error)
+	CreateOrganizationTeamMembership(ctx context.Context, arg CreateOrganizationTeamMembershipParams) (OrganizationTeamMembership, error)
 	DeclineOrganizationInvitation(ctx context.Context, arg DeclineOrganizationInvitationParams) (OrganizationInvitation, error)
 	DeleteExpiredInvitations(ctx context.Context) error
 	DeleteOrganization(ctx context.Context, id uuid.UUID) error
@@ -45,7 +48,9 @@ type Querier interface {
 	DeleteOrganizationTeamsByOrgIDHard(ctx context.Context, organizationID uuid.UUID) error
 	ExpireOldInvitations(ctx context.Context) error
 	GetActiveMembershipsByOrgID(ctx context.Context, organizationID uuid.UUID) ([]OrganizationMembership, error)
+	GetActiveTeamMembershipsByTeamID(ctx context.Context, teamID uuid.UUID) ([]OrganizationTeamMembership, error)
 	GetAllOrganizationMembershipsByOrgID(ctx context.Context, arg GetAllOrganizationMembershipsByOrgIDParams) ([]OrganizationMembership, error)
+	GetAllOrganizationTeamMembershipsByTeamID(ctx context.Context, arg GetAllOrganizationTeamMembershipsByTeamIDParams) ([]OrganizationTeamMembership, error)
 	GetBannedMembershipsByOrgID(ctx context.Context, organizationID uuid.UUID) ([]OrganizationMembership, error)
 	GetDeletedOrganization(ctx context.Context, id uuid.UUID) (Organization, error)
 	GetDeletedOrganizationTeam(ctx context.Context, id uuid.UUID) (OrganizationTeam, error)
@@ -74,6 +79,11 @@ type Querier interface {
 	GetOrganizationMembershipsByUserID(ctx context.Context, arg GetOrganizationMembershipsByUserIDParams) ([]OrganizationMembership, error)
 	GetOrganizationTeam(ctx context.Context, id uuid.UUID) (OrganizationTeam, error)
 	GetOrganizationTeamByOrgIDAndName(ctx context.Context, arg GetOrganizationTeamByOrgIDAndNameParams) (OrganizationTeam, error)
+	GetOrganizationTeamMembership(ctx context.Context, id uuid.UUID) (OrganizationTeamMembership, error)
+	GetOrganizationTeamMembershipByTeamIDAndMembershipID(ctx context.Context, arg GetOrganizationTeamMembershipByTeamIDAndMembershipIDParams) (OrganizationTeamMembership, error)
+	GetOrganizationTeamMembershipWithAllStatuses(ctx context.Context, id uuid.UUID) (OrganizationTeamMembership, error)
+	GetOrganizationTeamMembershipsByMembershipID(ctx context.Context, arg GetOrganizationTeamMembershipsByMembershipIDParams) ([]OrganizationTeamMembership, error)
+	GetOrganizationTeamMembershipsByTeamID(ctx context.Context, arg GetOrganizationTeamMembershipsByTeamIDParams) ([]OrganizationTeamMembership, error)
 	GetOrganizationTeamsByCreatedBy(ctx context.Context, arg GetOrganizationTeamsByCreatedByParams) ([]OrganizationTeam, error)
 	GetOrganizationTeamsByOrgID(ctx context.Context, arg GetOrganizationTeamsByOrgIDParams) ([]OrganizationTeam, error)
 	GetOrganizationTeamsByOrgIDAndStatus(ctx context.Context, arg GetOrganizationTeamsByOrgIDAndStatusParams) ([]OrganizationTeam, error)
@@ -81,9 +91,14 @@ type Querier interface {
 	GetPendingInvitationByEmailAndOrg(ctx context.Context, arg GetPendingInvitationByEmailAndOrgParams) (OrganizationInvitation, error)
 	GetPendingInvitationsByEmail(ctx context.Context, email string) ([]OrganizationInvitation, error)
 	GetRecentOrganizationAuditLogs(ctx context.Context, arg GetRecentOrganizationAuditLogsParams) ([]OrganizationAuditLog, error)
+	GetTeamMembershipsByMembershipIDs(ctx context.Context, dollar_1 []uuid.UUID) ([]OrganizationTeamMembership, error)
+	GetTeamMembershipsByTeamIDs(ctx context.Context, dollar_1 []uuid.UUID) ([]OrganizationTeamMembership, error)
 	HardDeleteOrganizationMembership(ctx context.Context, id uuid.UUID) error
 	HardDeleteOrganizationMembershipByOrgID(ctx context.Context, organizationID uuid.UUID) error
+	HardDeleteOrganizationTeamMembership(ctx context.Context, id uuid.UUID) error
+	HardDeleteOrganizationTeamMembershipsByTeamID(ctx context.Context, teamID uuid.UUID) error
 	LockOrganizationMembershipForUpdate(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
+	LockOrganizationTeamMembershipForUpdate(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	RemoveOrganizationMembership(ctx context.Context, id uuid.UUID) error
 	RestoreArchivedOrganization(ctx context.Context, id uuid.UUID) error
 	RestoreArchivedOrganizationTeam(ctx context.Context, id uuid.UUID) error
@@ -91,11 +106,16 @@ type Querier interface {
 	RevokeOrganizationInvitation(ctx context.Context, arg RevokeOrganizationInvitationParams) (OrganizationInvitation, error)
 	SoftDeleteOrganizationMembership(ctx context.Context, id uuid.UUID) error
 	SoftDeleteOrganizationMembershipByOrgIDAndUserID(ctx context.Context, arg SoftDeleteOrganizationMembershipByOrgIDAndUserIDParams) error
+	SoftDeleteOrganizationTeamMembership(ctx context.Context, id uuid.UUID) error
+	SoftDeleteOrganizationTeamMembershipByTeamIDAndMembershipID(ctx context.Context, arg SoftDeleteOrganizationTeamMembershipByTeamIDAndMembershipIDParams) error
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error)
 	UpdateOrganizationMembershipRole(ctx context.Context, arg UpdateOrganizationMembershipRoleParams) (OrganizationMembership, error)
 	UpdateOrganizationMembershipStatus(ctx context.Context, arg UpdateOrganizationMembershipStatusParams) (OrganizationMembership, error)
 	UpdateOrganizationMembershipStatusWithAllStatuses(ctx context.Context, arg UpdateOrganizationMembershipStatusWithAllStatusesParams) (OrganizationMembership, error)
 	UpdateOrganizationTeam(ctx context.Context, arg UpdateOrganizationTeamParams) (OrganizationTeam, error)
+	UpdateOrganizationTeamMembershipRole(ctx context.Context, arg UpdateOrganizationTeamMembershipRoleParams) (OrganizationTeamMembership, error)
+	UpdateOrganizationTeamMembershipStatus(ctx context.Context, arg UpdateOrganizationTeamMembershipStatusParams) (OrganizationTeamMembership, error)
+	UpdateOrganizationTeamMembershipStatusWithAllStatuses(ctx context.Context, arg UpdateOrganizationTeamMembershipStatusWithAllStatusesParams) (OrganizationTeamMembership, error)
 }
 
 var _ Querier = (*Queries)(nil)

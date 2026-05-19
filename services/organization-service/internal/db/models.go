@@ -111,8 +111,7 @@ type OrganizationTeamMembership struct {
 	MembershipID uuid.UUID
 	Role         string
 	Status       string
+	JoinedAt     pgtype.Timestamptz
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
-	// Soft delete timestamp. When non-NULL, the member is no longer in the team. Audit log contains who/when/why.
-	DeletedAt pgtype.Timestamptz
 }
