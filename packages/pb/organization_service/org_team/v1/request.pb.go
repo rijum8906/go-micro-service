@@ -24,8 +24,9 @@ const (
 type CreateOrgTeamRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	Name           string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	MembershipId   string                 `protobuf:"bytes,2,opt,name=membership_id,json=membershipId,proto3" json:"membership_id,omitempty"`
+	Name           string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -63,6 +64,13 @@ func (*CreateOrgTeamRequest) Descriptor() ([]byte, []int) {
 func (x *CreateOrgTeamRequest) GetOrganizationId() string {
 	if x != nil {
 		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *CreateOrgTeamRequest) GetMembershipId() string {
+	if x != nil {
+		return x.MembershipId
 	}
 	return ""
 }
@@ -145,11 +153,12 @@ var File_organization_service_org_team_v1_request_proto protoreflect.FileDescrip
 
 const file_organization_service_org_team_v1_request_proto_rawDesc = "" +
 	"\n" +
-	".organization_service/org_team/v1/request.proto\x12 organization_service.org_team.v1\"u\n" +
+	".organization_service/org_team/v1/request.proto\x12 organization_service.org_team.v1\"\x9a\x01\n" +
 	"\x14CreateOrgTeamRequest\x12'\n" +
-	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"w\n" +
+	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12#\n" +
+	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"w\n" +
 	"\x18UpdateOrgTeamNameRequest\x12\x17\n" +
 	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12\x19\n" +
 	"\bnew_name\x18\x02 \x01(\tR\anewName\x12'\n" +

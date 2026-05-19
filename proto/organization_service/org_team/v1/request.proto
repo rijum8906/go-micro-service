@@ -4,8 +4,9 @@ package organization_service.org_team.v1;
 
 message CreateOrgTeamRequest {
   string organization_id = 1;
-  string name = 2;
-  string description = 3;
+  string membership_id = 2;
+  string name = 3;
+  string description = 4;
 }
 
 message UpdateOrgTeamNameRequest {
