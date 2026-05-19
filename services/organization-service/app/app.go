@@ -50,7 +50,7 @@ var (
 	instance *Application
 	once     sync.Once
 	mu       sync.RWMutex
-	initErr  error
+	initErr  *apperror.AppError
 )
 
 // GetInstance safely fetches the singleton instance.
