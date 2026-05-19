@@ -13,17 +13,19 @@ import (
 	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
+	"github.com/rijum8906/relay/services/organization-service/internal/services/helper"
 	"go.uber.org/zap"
 )
 
 type OrgTeamService struct {
-	DBPool        *pgxpool.Pool
-	DBQ           *db.Queries
-	UserClient    userv1.UserServiceClient
-	TuppleManager coreopenfga.TuppleManager
-	Permission    *permissions.PermissionManager
-	Logger        *zap.Logger
-	Config        *config.Env
+	DBPool            *pgxpool.Pool
+	DBQ               *db.Queries
+	UserClient        userv1.UserServiceClient
+	TuppleManager     coreopenfga.TuppleManager
+	PermissionManager *permissions.PermissionManager
+	Logger            *zap.Logger
+	Config            *config.Env
+	Helper            *helper.ServiceHelper
 }
 
 func New() (*apperror.AppError, org_teamv1.OrganizationTeamServiceServer) {
@@ -41,14 +43,20 @@ func New() (*apperror.AppError, org_teamv1.OrganizationTeamServiceServer) {
 	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 	permissionManager := permissions.NewPermissionManager(fgaClient)
 
+	helper, appErr := helper.GetHelper()
+	if appErr != nil {
+		return appErr, nil
+	}
+
 	return nil, &OrgTeamService{
-		DBPool:        application.DB(),
-		DBQ:           q,
-		UserClient:    application.UserClient(),
-		TuppleManager: tuppleManager,
-		Permission:    permissionManager,
-		Logger:        application.Logger(),
-		Config:        application.Config(),
+		DBPool:            application.DB(),
+		DBQ:               q,
+		UserClient:        application.UserClient(),
+		TuppleManager:     tuppleManager,
+		PermissionManager: permissionManager,
+		Logger:            application.Logger(),
+		Config:            application.Config(),
+		Helper:            helper,
 	}
 }
 
@@ -60,12 +68,12 @@ func NewTestService(fgaClient *coreopenfga.Client) *OrgTeamService {
 	logger := testApp.TestLogger()
 
 	return &OrgTeamService{
-		DBPool:        dbPool,
-		DBQ:           dbq,
-		UserClient:    servicetestutils.MockUserServiceClient,
-		TuppleManager: coreopenfga.NewTupleManager(fgaClient),
-		Permission:    permissions.NewPermissionManager(fgaClient),
-		Logger:        logger,
-		Config:        &config.Env{},
+		DBPool:            dbPool,
+		DBQ:               dbq,
+		UserClient:        servicetestutils.MockUserServiceClient,
+		TuppleManager:     coreopenfga.NewTupleManager(fgaClient),
+		PermissionManager: permissions.NewPermissionManager(fgaClient),
+		Logger:            logger,
+		Config:            &config.Env{},
 	}
 }
