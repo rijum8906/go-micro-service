@@ -9,7 +9,6 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/mailer"
-	"github.com/rijum8906/relay/services/notification-service/app/config"
 	"github.com/rijum8906/relay/services/notification-service/internal/handler/handler"
 	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
 	"go.uber.org/zap"
@@ -37,14 +36,14 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 	a.infra.cache = cache
 
 	// NATS
-	nats, appErr := initNATSClient(ctx, a.config)
+	nats, appErr := initNATSClient(a.config)
 	if appErr != nil {
 		return appErr
 	}
 	a.infra.brokerClient = nats
 
 	// Mailer
-	mailer, appErr := initMailer(ctx, a.config)
+	mailer, appErr := initMailer(a.config)
 	if appErr != nil {
 		return appErr
 	}
@@ -61,7 +60,7 @@ func (a *Application) initUtils() *apperror.AppError {
 	}
 	a.utils.logger = logger
 
-	tm, appErr := initTemplateManager(a.config)
+	tm, appErr := initTemplateManager()
 	if appErr != nil {
 		return appErr
 	}
@@ -156,12 +155,4 @@ func (a *Application) Shutdown() {
 	if a.infra != nil && a.infra.brokerClient != nil {
 		_ = a.infra.brokerClient.Drain()
 	}
-}
-
-func (a *Application) GetLogger() *zap.Logger {
-	return a.utils.logger
-}
-
-func (a *Application) GetConfig() *config.Env {
-	return a.config
 }

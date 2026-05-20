@@ -2,8 +2,8 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"net"
+	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -15,6 +15,12 @@ import (
 	"github.com/wneessen/go-mail"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+)
+
+var (
+	instance *Application
+	once     sync.Once
+	appErr   *apperror.AppError
 )
 
 type ApplicationInfra struct {
@@ -33,7 +39,12 @@ type ApplicationServices struct {
 	subscriberService subscriber.Service
 }
 
+type ApplicationState struct {
+	isLogggerLoaded bool
+}
+
 type Application struct {
+	state    *ApplicationState
 	config   *config.Env
 	infra    *ApplicationInfra
 	utils    *ApplicationUtils
@@ -42,11 +53,25 @@ type Application struct {
 	server   *grpc.Server
 }
 
-func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
+func GetInstance() (*Application, *apperror.AppError) {
+	once.Do(func() {
+		instance, appErr = newApplication(context.Background())
+	})
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return instance, nil
+}
+
+func newApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	app := &Application{
 		infra:    &ApplicationInfra{},
 		utils:    &ApplicationUtils{},
 		services: &ApplicationServices{},
+		state: &ApplicationState{
+			isLogggerLoaded: false,
+		},
 	}
 
 	var appErr *apperror.AppError
@@ -57,28 +82,24 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Initialize Dependencies
-	if appErr = app.initInfra(ctx); appErr != nil {
-		fmt.Println(appErr.Details)
+
+	if appErr = app.initUtils(); appErr != nil {
 		return nil, appErr
 	}
 
-	if appErr = app.initUtils(); appErr != nil {
-		fmt.Println(appErr.Details)
+	if appErr = app.initInfra(ctx); appErr != nil {
 		return nil, appErr
 	}
 
 	if appErr = app.initServices(); appErr != nil {
-		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
 	if appErr = app.initHandler(); appErr != nil {
-		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 
 	if appErr = app.initGRPCServer(); appErr != nil {
-		fmt.Println(appErr.Details)
 		return nil, appErr
 	}
 

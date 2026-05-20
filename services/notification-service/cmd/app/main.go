@@ -1,37 +1,42 @@
 package main
 
 import (
-	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/corelogger"
 	"github.com/rijum8906/relay/services/notification-service/app"
 	"go.uber.org/zap"
 )
 
 func main() {
-	ctx := context.Background()
+	application, appErr := app.GetInstance()
+	var logger *zap.Logger
 
-	application, appErr := app.NewApplication(ctx)
 	if appErr != nil {
-		// If logger is nil, fallback to standard log
-		log.Fatalf("failed to create application: %v\nDetails:%v", appErr, appErr.Details)
+		logger = corelogger.NewDevLogger()
+		// If logger is nil, create a default development logger
+		logger.Error(
+			"failed to initialize application",
+			zap.String("error", appErr.Message),
+			zap.Any("details", appErr.Details),
+		)
 	}
 
-	logger := application.GetLogger()
+	logger = application.Logger()
 
 	runErrCh := make(chan *apperror.AppError, 1)
 	go func() {
 		runErrCh <- application.Run()
 	}()
 
-	logger.Info("service started",
-		zap.String("service", application.GetConfig().AppName),
-		zap.String("env", application.GetConfig().AppEnv),
-		zap.Int("port", application.GetConfig().Port),
+	logger.Info(
+		"service started",
+		zap.String("service", application.Config().AppName),
+		zap.String("env", application.Config().AppEnv),
+		zap.Int("port", application.Config().Port),
 	)
 
 	signalCh := make(chan os.Signal, 1)
@@ -40,14 +45,16 @@ func main() {
 
 	select {
 	case sig := <-signalCh:
-		logger.Info("shutdown signal received",
+		logger.Info(
+			"shutdown signal received",
 			zap.String("signal", sig.String()),
 		)
 
 		application.Shutdown()
 
 		if appErr = <-runErrCh; appErr != nil {
-			logger.Error("shutdown completed with server error",
+			logger.Error(
+				"shutdown completed with server error",
 				zap.Error(appErr),
 			)
 			os.Exit(1)
@@ -57,7 +64,8 @@ func main() {
 
 	case appErr = <-runErrCh:
 		if appErr != nil {
-			logger.Error("service stopped with error",
+			logger.Error(
+				"service stopped with error",
 				zap.Error(appErr),
 			)
 			os.Exit(1)
