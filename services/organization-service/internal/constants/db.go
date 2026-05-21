@@ -45,3 +45,29 @@ func IsValidaOrgStatus(status string) bool {
 func IsStandardOrgRole(role string) bool {
 	return slices.Contains(OrgRoles, role)
 }
+
+// Organization Teams Table
+const (
+	// Statues
+	OrgTeamStatusActive   = "active"
+	OrgTeamStatusArchived = "archived"
+	OrgTeamStatusDeleted  = "deleted"
+
+	// Roles
+	OrgTeamRoleOwner  = "owner"
+	OrgTeamRoleAdmin  = "admin"
+	OrgTeamRoleMember = "member"
+)
+
+var (
+	OrgTeamStatuses = []string{OrgTeamStatusActive, OrgTeamStatusArchived, OrgTeamStatusDeleted}
+	OrgTeamRoles    = []string{OrgTeamRoleOwner, OrgTeamRoleAdmin, OrgTeamRoleMember}
+)
+
+func IsValidaOrgTeamStatus(status string) bool {
+	return slices.Contains(OrgTeamStatuses, status)
+}
+
+func IsStandardOrgTeamRole(role string) bool {
+	return slices.Contains(OrgTeamRoles, role)
+}

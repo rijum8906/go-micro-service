@@ -48,14 +48,14 @@ func initCache(ctx context.Context, config *config.Env) (*redis.Client, *apperro
 	return cache, nil
 }
 
-func initNATSClient(ctx context.Context, config *config.Env) (broker.Client, *apperror.AppError) {
+func initNATSClient(config *config.Env) (broker.Client, *apperror.AppError) {
 	client := broker.NewClient()
 	client.Connect(config.NATSURL)
 
 	return client, nil
 }
 
-func initMailer(ctx context.Context, config *config.Env) (*mail.Client, *apperror.AppError) {
+func initMailer(config *config.Env) (*mail.Client, *apperror.AppError) {
 	mailer, appErr := mailer.Connect(getMailerConfig(config))
 
 	if appErr != nil {

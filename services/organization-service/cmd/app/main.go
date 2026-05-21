@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -13,9 +12,7 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-
-	application, appErr := app.NewApplication(ctx)
+	application, appErr := app.GetInstance()
 	if appErr != nil {
 		// If logger is nil, fallback to standard log
 		log.Fatalf("failed to create application: %v\nDetails:%v", appErr, appErr.Details)

@@ -59,7 +59,7 @@ func Test_CreateCustomRole(t *testing.T) {
 	orgID := uuid.NewString()
 	role := "custom_role"
 
-	appErr := permissionManager.CreateCustomRole(ctx, userID, orgID, role, permissions.PermissionCanChangeMemberStatus)
+	appErr := permissionManager.CreateCustomOrgRole(ctx, userID, orgID, role, permissions.PermissionCanChangeMemberStatus)
 	require.Nil(t, appErr)
 
 	res, appErr := tuppleManager.Check(ctx, client.ClientCheckRequest{

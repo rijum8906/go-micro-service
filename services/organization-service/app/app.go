@@ -50,7 +50,7 @@ var (
 	instance *Application
 	once     sync.Once
 	mu       sync.RWMutex
-	initErr  error
+	initErr  *apperror.AppError
 )
 
 // GetInstance safely fetches the singleton instance.
@@ -75,7 +75,7 @@ func GetInstance() (*Application, *apperror.AppError) {
 
 	once.Do(func() {
 		ctx := context.Background()
-		instance, initErr = NewApplication(ctx)
+		instance, initErr = newApplication(ctx)
 	})
 
 	if initErr != nil {
@@ -87,7 +87,7 @@ func GetInstance() (*Application, *apperror.AppError) {
 
 // NewApplication is now unexported. Global application creation should exclusively
 // flow through GetInstance to guarantee singleton sanctity.
-func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
+func newApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	app := &Application{
 		infra:    &ApplicationInfra{},
 		utils:    &ApplicationUtils{},
