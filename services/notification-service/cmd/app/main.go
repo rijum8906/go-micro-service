@@ -8,6 +8,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/corelogger"
 	"github.com/rijum8906/relay/services/notification-service/app"
+	"github.com/rijum8906/relay/services/notification-service/app/registry"
 	"go.uber.org/zap"
 )
 
@@ -29,7 +30,7 @@ func main() {
 
 	runErrCh := make(chan *apperror.AppError, 1)
 	go func() {
-		runErrCh <- application.Run()
+		runErrCh <- registry.Run(application)
 	}()
 
 	logger.Info(

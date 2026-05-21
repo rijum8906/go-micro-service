@@ -9,9 +9,9 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
+	"github.com/rijum8906/relay/packages/core/mailer"
 	"github.com/rijum8906/relay/packages/core/template"
 	"github.com/rijum8906/relay/services/notification-service/app/config"
-	"github.com/rijum8906/relay/services/notification-service/internal/services/subscriber"
 	"github.com/wneessen/go-mail"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -31,12 +31,9 @@ type ApplicationInfra struct {
 }
 
 type ApplicationUtils struct {
-	logger *zap.Logger
-	tm     template.TemplateManager
-}
-
-type ApplicationServices struct {
-	subscriberService subscriber.Service
+	logger       *zap.Logger
+	tm           template.TemplateManager
+	mailerConfig mailer.Config
 }
 
 type ApplicationState struct {
@@ -48,7 +45,6 @@ type Application struct {
 	config   *config.Env
 	infra    *ApplicationInfra
 	utils    *ApplicationUtils
-	services *ApplicationServices
 	listener net.Listener
 	server   *grpc.Server
 }
@@ -66,9 +62,8 @@ func GetInstance() (*Application, *apperror.AppError) {
 
 func newApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	app := &Application{
-		infra:    &ApplicationInfra{},
-		utils:    &ApplicationUtils{},
-		services: &ApplicationServices{},
+		infra: &ApplicationInfra{},
+		utils: &ApplicationUtils{},
 		state: &ApplicationState{
 			isLogggerLoaded: false,
 		},
@@ -88,14 +83,6 @@ func newApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	if appErr = app.initInfra(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initServices(); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initHandler(); appErr != nil {
 		return nil, appErr
 	}
 

@@ -2,9 +2,11 @@
 package constants
 
 const (
-	StreamUser = "user"
+	StreamUser         = "user"
+	StreamOrganization = "organization"
 )
 
 const (
-	ConsumerUserAuth = "auth"
+	ConsumerUserAuth         = "auth"
+	ConsumerOrganizationAuth = "auth"
 )
