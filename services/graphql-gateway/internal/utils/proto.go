@@ -7,7 +7,11 @@ import (
 )
 
 func ParseAuthMethod(method token.AuthMethod) (corev1.AuthMethod, *apperror.AppError) {
-	m, ok := corev1.AuthMethod_value[string(method)]
+	key := string(method)
+	m, ok := corev1.AuthMethod_value[key]
+	if !ok {
+		m, ok = corev1.AuthMethod_value["AUTH_METHOD_"+key]
+	}
 	if !ok {
 		return corev1.AuthMethod_AUTH_METHOD_UNSPECIFIED, apperror.ErrValidation
 	}
@@ -15,7 +19,11 @@ func ParseAuthMethod(method token.AuthMethod) (corev1.AuthMethod, *apperror.AppE
 }
 
 func ParseScope(scope token.TokenScope) (corev1.TokenScope, *apperror.AppError) {
-	s, ok := corev1.TokenScope_value[string(scope)]
+	key := string(scope)
+	s, ok := corev1.TokenScope_value[key]
+	if !ok {
+		s, ok = corev1.TokenScope_value["TOKEN_SCOPE_"+key]
+	}
 	if !ok {
 		return corev1.TokenScope_TOKEN_SCOPE_UNSPECIFIED, apperror.ErrValidation
 	}

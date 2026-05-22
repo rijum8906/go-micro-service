@@ -28,7 +28,11 @@ func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.Gener
 		return nil, apperror.ErrValidation.WithMessage("invalid auth method")
 	}
 
-	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, token.TokenScope(req.GetScope()))
+	scope, appErr := token.TokenScopeFromProto(req.GetScope())
+	if appErr != nil {
+		return nil, appErr
+	}
+	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, scope)
 	if appErr != nil {
 		return nil, appErr
 	}
