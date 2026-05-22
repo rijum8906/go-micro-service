@@ -69,6 +69,8 @@ services:
     ports:
       - "8000:8000" # HTTP API
       - "8001:8001" # gRPC
+    volumes:
+      - openfga:/var/lib/openfga/data
 
   # graphql-gateway
   graphql-gateway:
@@ -181,3 +183,4 @@ services:
 volumes:
   pg_data:
   redis:
+  openfga:

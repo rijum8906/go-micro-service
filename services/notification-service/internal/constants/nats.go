@@ -7,6 +7,7 @@ const (
 )
 
 const (
-	ConsumerUserAuth         = "auth"
-	ConsumerOrganizationAuth = "auth"
+	ConsumerUserAuth            = "auth"
+	ConsumerOrganizationAuth    = "auth"
+	ConsumerOrganizationOpenFGA = "openfga"
 )

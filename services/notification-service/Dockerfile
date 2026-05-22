@@ -6,6 +6,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 COPY packages/core/go.mod packages/core/go.sum ./packages/core/
 COPY packages/pb/go.mod packages/pb/go.sum ./packages/pb/
+COPY services/organization-service/go.mod services/organization-service/go.sum ./services/organization-service/
 COPY services/notification-service/go.mod services/notification-service/go.sum ./services/notification-service/
 
 RUN go work init
@@ -18,6 +19,7 @@ RUN go mod download
 # Now copy source code - but only the necessary directories
 COPY packages/core/ ./packages/core/
 COPY packages/pb/ ./packages/pb/
+COPY services/organization-service/app/constants/ ./services/organization-service/app/constants/
 
 COPY services/notification-service/go.mod ./services/notification-service/go.mod
 COPY services/notification-service/internal ./services/notification-service/internal

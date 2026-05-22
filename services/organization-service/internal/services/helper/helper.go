@@ -8,12 +8,11 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/services/organization-service/app"
-	"github.com/rijum8906/relay/services/organization-service/internal/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"go.uber.org/zap"
 )
@@ -25,11 +24,12 @@ var (
 )
 
 type ServiceHelper struct {
-	DBPool            *pgxpool.Pool
-	DBQ               *db.Queries
-	TuppleManager     coreopenfga.TuppleManager
-	PermissionManager *permissions.PermissionManager
-	Logger            *zap.Logger
+	DBPool              *pgxpool.Pool
+	DBQ                 *db.Queries
+	TuppleManager       coreopenfga.TuppleManager
+	PermissionManager   *permissions.PermissionManager
+	Logger              *zap.Logger
+	OrgOpenFGAPublisher broker.Publisher
 }
 
 func initHelper() (*ServiceHelper, *apperror.AppError) {
@@ -45,11 +45,15 @@ func initHelper() (*ServiceHelper, *apperror.AppError) {
 	}
 	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 	permissionManager := permissions.NewPermissionManager(fgaClient)
+
+	publisher := broker.NewPublisher(application.BrokerCLient().GetClient())
+
 	instance = &ServiceHelper{
-		DBPool:            application.DB(),
-		DBQ:               q,
-		TuppleManager:     tuppleManager,
-		PermissionManager: permissionManager,
+		DBPool:              application.DB(),
+		DBQ:                 q,
+		TuppleManager:       tuppleManager,
+		OrgOpenFGAPublisher: publisher,
+		PermissionManager:   permissionManager,
 	}
 	return nil, nil
 }
@@ -64,92 +68,6 @@ func GetHelper() (*ServiceHelper, *apperror.AppError) {
 	}
 
 	return instance, nil
-}
-
-// RemoveOrgMemRole removes the role from the user
-// whether the role is a standard role or custom role
-func (s *ServiceHelper) RemoveOrgMemRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
-	if constants.IsStandardOrgRole(targetMembership.Role) {
-		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + targetMembership.UserID.String(),
-				Relation: targetMembership.Role,
-				Object:   "organization:" + targetMembership.OrganizationID.String(),
-			},
-		})
-	} else {
-		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + targetMembership.UserID.String(),
-				Relation: "allowed",
-				Object:   permissions.GenerateCustomRoleObject(targetMembership.OrganizationID.String(), targetMembership.Role),
-			},
-		})
-	}
-	return nil
-}
-
-func (s *ServiceHelper) AddOrgMemRole(ctx context.Context, targetMembership *db.OrganizationMembership) *apperror.AppError {
-	if constants.IsStandardOrgRole(targetMembership.Role) {
-		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
-			{
-				User:     "user:" + targetMembership.UserID.String(),
-				Relation: targetMembership.Role,
-				Object:   "organization:" + targetMembership.OrganizationID.String(),
-			},
-		})
-	} else {
-		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
-			{
-				User:     "user:" + targetMembership.UserID.String(),
-				Relation: "allowed",
-				Object:   permissions.GenerateCustomRoleObject(targetMembership.OrganizationID.String(), targetMembership.Role),
-			},
-		})
-	}
-	return nil
-}
-
-func (s *ServiceHelper) AddTeamMemRole(ctx context.Context, targetMembership *db.OrganizationTeamMembership) *apperror.AppError {
-	if constants.IsStandardOrgTeamRole(targetMembership.Role) {
-		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
-			{
-				User:     "user:" + targetMembership.MembershipID.String(),
-				Relation: targetMembership.Role,
-				Object:   "team:" + targetMembership.TeamID.String(),
-			},
-		})
-	} else {
-		s.TuppleManager.Write(ctx, []client.ClientTupleKey{
-			{
-				User:     "user:" + targetMembership.MembershipID.String(),
-				Relation: "allowed",
-				Object:   permissions.GenerateCustomRoleObject(targetMembership.TeamID.String(), targetMembership.Role),
-			},
-		})
-	}
-	return nil
-}
-
-func (s *ServiceHelper) RemoveTeamMemRole(ctx context.Context, targetMembership *db.OrganizationTeamMembership) *apperror.AppError {
-	if constants.IsStandardOrgTeamRole(targetMembership.Role) {
-		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + targetMembership.MembershipID.String(),
-				Relation: targetMembership.Role,
-				Object:   "team:" + targetMembership.TeamID.String(),
-			},
-		})
-	} else {
-		s.TuppleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
-			{
-				User:     "user:" + targetMembership.MembershipID.String(),
-				Relation: "allowed",
-				Object:   permissions.GenerateCustomRoleObject(targetMembership.TeamID.String(), targetMembership.Role),
-			},
-		})
-	}
-	return nil
 }
 
 func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) (err error) {

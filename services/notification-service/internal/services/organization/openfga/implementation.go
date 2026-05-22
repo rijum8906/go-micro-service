@@ -1,5 +1,4 @@
-// Package userauth
-package userauth
+package openfga
 
 import (
 	"time"
@@ -7,26 +6,28 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/jobs"
+	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/services/notification-service/internal/constants"
 	"go.uber.org/zap"
 )
 
 // CreateConsumer creates a consumer for the user auth email jobs
-func (s *UserAuthEmailService) CreateConsumer() *apperror.AppError {
+func (s *OrgPermissionService) CreateConsumer() *apperror.AppError {
 	consumerManager := broker.NewConsumerManager(s.BrokerClient.GetClient())
 
-	config := broker.NewConsumerConfig(constants.ConsumerUserAuth).AddDeliverPolicy(nats.DeliverAllPolicy).
-		WithFilterSubject(jobs.JobUserAuthWildcard).
+	config := broker.NewConsumerConfig(constants.ConsumerOrganizationOpenFGA).AddDeliverPolicy(nats.DeliverAllPolicy).
+		WithFilterSubject(jobs.JobOrganizationRoleWildcard).
 		AddMaxDelivery(3)
 	// TODO: make the config with env variables
 
-	exists, appErr := consumerManager.Exists(constants.StreamUser, constants.ConsumerUserAuth)
+	exists, appErr := consumerManager.Exists(constants.StreamOrganization, constants.ConsumerOrganizationOpenFGA)
 	if appErr != nil {
 		return appErr
 	}
 	if exists {
-		consumerInfo, appErr := consumerManager.Update(constants.StreamUser, config)
+		consumerInfo, appErr := consumerManager.Update(constants.StreamOrganization, config)
 		if appErr != nil {
 			return appErr
 		}
@@ -38,7 +39,7 @@ func (s *UserAuthEmailService) CreateConsumer() *apperror.AppError {
 		return nil
 	}
 
-	info, appErr := consumerManager.Create(constants.StreamUser, config)
+	info, appErr := consumerManager.Create(constants.StreamOrganization, config)
 	if appErr != nil {
 		return appErr
 	}
@@ -48,10 +49,26 @@ func (s *UserAuthEmailService) CreateConsumer() *apperror.AppError {
 	return nil
 }
 
-func (s *UserAuthEmailService) ListenMessage() {
+func (s *OrgPermissionService) InitOpenFGA() *apperror.AppError {
+	client, appErr := coreopenfga.NewClient(s.AppConfig.FGAAPIURL)
+	if appErr != nil {
+		return appErr
+	}
+	s.FgaClient = client
+
+	tupleManager := coreopenfga.NewTupleManager(s.FgaClient)
+	s.TupleManager = tupleManager
+
+	permissionManager := permissions.NewPermissionManager(s.FgaClient)
+	s.PermissionManager = permissionManager
+
+	return nil
+}
+
+func (s *OrgPermissionService) ListenMessage() {
 	subscriber := broker.NewSubscriber(s.BrokerClient.GetClient())
 
-	subscription, appErr := subscriber.PullSubscribe(jobs.JobUserAuthWildcard, constants.ConsumerUserAuth)
+	subscription, appErr := subscriber.PullSubscribe(jobs.JobOrganizationRoleWildcard, constants.ConsumerOrganizationOpenFGA)
 	if appErr != nil {
 		s.Logger.Error("failed to subscribe", zap.String("error_message", appErr.Message), zap.Any("details", appErr.Details))
 	}
@@ -77,7 +94,7 @@ func (s *UserAuthEmailService) ListenMessage() {
 	}
 }
 
-func (s *UserAuthEmailService) processMessage(msg *nats.Msg) {
+func (s *OrgPermissionService) processMessage(msg *nats.Msg) {
 	// Check retry count
 	metadata, err := msg.Metadata()
 	if err == nil && metadata.NumDelivered > uint64(s.ConsumerInfo.Config.MaxDeliver) {
@@ -92,10 +109,18 @@ func (s *UserAuthEmailService) processMessage(msg *nats.Msg) {
 	var processErr *apperror.AppError
 	// Process message
 	switch msg.Subject {
-	case jobs.JobUserRequestedPasswordReset:
-		processErr = s.processPasswordReset(msg)
-	case jobs.JobUserRequestedEmailVerification:
-		processErr = s.processEmailVerification(msg)
+	case jobs.JobOrganizationMemRoleUpdated:
+		processErr = s.processUpdateOrgMemRole(msg)
+	case jobs.JobOrganizationMemRoleRevoked:
+		processErr = s.processRevokeOrgMemRole(msg)
+	case jobs.JobOrganizationMemRoleAssigned:
+		processErr = s.processAssignOrgMemRole(msg)
+	case jobs.JobOrganizationTeamMemRoleAssigned:
+		processErr = s.processAssignTeamMemRole(msg)
+	case jobs.JobOrganizationTeamMemRoleRevoked:
+		processErr = s.processRevokeTeamMemRole(msg)
+	case jobs.JobOrganizationTeamMemRoleUpdated:
+		processErr = s.processUpdateTeamMemRole(msg)
 	default:
 		s.Logger.Warn("unknown job subject", zap.String("subject", msg.Subject))
 		_ = msg.Ack() // IMPORTANT: Ack unknown to avoid infinite retries

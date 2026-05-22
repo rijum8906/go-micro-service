@@ -1,4 +1,4 @@
-package userservice
+package organizationservice
 
 import (
 	"github.com/nats-io/nats.go"
@@ -8,24 +8,24 @@ import (
 	"go.uber.org/zap"
 )
 
-type UserService struct {
-	// Core
+type OrganizationService struct {
+	// core
 	BrokerClient broker.Client
 
-	// Utilities
+	// utilities
 	Logger *zap.Logger
 
-	// Config
+	// config
 	StreamInfo *nats.StreamInfo
 }
 
-func New() (*UserService, *apperror.AppError) {
+func New() (*OrganizationService, *apperror.AppError) {
 	application, appErr := app.GetInstance()
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	return &UserService{
+	return &OrganizationService{
 		BrokerClient: application.BrokerClient(),
 		Logger:       application.Logger(),
 	}, nil

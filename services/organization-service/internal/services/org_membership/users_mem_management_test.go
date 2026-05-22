@@ -12,7 +12,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
-	"github.com/rijum8906/relay/services/organization-service/internal/constants"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/org_membership/testutil"
 	"github.com/stretchr/testify/require"
