@@ -26,14 +26,16 @@ type Subscriber interface {
 
 type StreamManager interface {
 	Create(config *StreamConfig) (*nats.StreamInfo, *apperror.AppError)
-	Update(streamName string, config *StreamConfig) *apperror.AppError
+	Update(config *StreamConfig) (*nats.StreamInfo, *apperror.AppError)
 	Delete(streamName string) *apperror.AppError
 	Get(streamName string) (*nats.StreamInfo, *apperror.AppError)
-	Exists(streamName string) bool
+	Exists(streamName string) (bool, *apperror.AppError)
 }
 
 type ConsumerManager interface {
 	Create(streamName string, config *ConsumerConfig) (*nats.ConsumerInfo, *apperror.AppError)
+	Update(streamName string, config *ConsumerConfig) (*nats.ConsumerInfo, *apperror.AppError)
 	Delete(streamName, consumerName string) *apperror.AppError
 	Get(streamName, consumerName string) (*nats.ConsumerInfo, *apperror.AppError)
+	Exists(streamName, consumerName string) (bool, *apperror.AppError)
 }

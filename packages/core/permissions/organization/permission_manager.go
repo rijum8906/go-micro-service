@@ -18,21 +18,21 @@ func NewPermissionManager(fgaClient *coreopenfga.Client) *PermissionManager {
 	}
 }
 
-func (pm *PermissionManager) CreateOrgRole(ctx context.Context, userID, orgID, permission string) *apperror.AppError {
+func (pm *PermissionManager) CreateOrgRole(ctx context.Context, userID, orgID, role string) *apperror.AppError {
 	return pm.tupleManager.Write(ctx, []client.ClientTupleKey{
 		{
 			User:     "user:" + userID,
-			Relation: permission,
+			Relation: role,
 			Object:   "organization:" + orgID,
 		},
 	})
 }
 
-func (pm *PermissionManager) DeleteOrgRole(ctx context.Context, userID, orgID, permission string) *apperror.AppError {
+func (pm *PermissionManager) DeleteOrgRole(ctx context.Context, userID, orgID, role string) *apperror.AppError {
 	return pm.tupleManager.Delete(ctx, []client.ClientTupleKeyWithoutCondition{
 		{
 			User:     "user:" + userID,
-			Relation: permission,
+			Relation: role,
 			Object:   "organization:" + orgID,
 		},
 	})

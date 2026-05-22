@@ -4,7 +4,9 @@ package orgteam
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
+	"github.com/rijum8906/relay/packages/core/hash"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	org_teamv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_team/v1"
@@ -12,20 +14,31 @@ import (
 	"github.com/rijum8906/relay/services/organization-service/app"
 	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
+	"github.com/rijum8906/relay/services/organization-service/internal/repositories/openfga"
 	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/helper"
 	"go.uber.org/zap"
 )
 
 type OrgTeamService struct {
-	DBPool            *pgxpool.Pool
-	DBQ               *db.Queries
-	UserClient        userv1.UserServiceClient
+	// Core
+	DBPool              *pgxpool.Pool
+	DBQ                 *db.Queries
+	UserClient          userv1.UserServiceClient
+	OrgOpenFGAPublisher broker.Publisher
+	Helper              *helper.ServiceHelper
+
+	// Repositories
+	OpenFGARepo *openfga.Repository
+
+	// Utils
 	TuppleManager     coreopenfga.TuppleManager
 	PermissionManager *permissions.PermissionManager
+	HashService       hash.HashService
 	Logger            *zap.Logger
-	Config            *config.Env
-	Helper            *helper.ServiceHelper
+
+	// Config
+	Config *config.Env
 }
 
 func New() (*apperror.AppError, org_teamv1.OrganizationTeamServiceServer) {
@@ -48,6 +61,11 @@ func New() (*apperror.AppError, org_teamv1.OrganizationTeamServiceServer) {
 		return appErr, nil
 	}
 
+	repo, appErr := openfga.GetHelper()
+	if appErr != nil {
+		return appErr, nil
+	}
+
 	return nil, &OrgTeamService{
 		DBPool:            application.DB(),
 		DBQ:               q,
@@ -57,6 +75,7 @@ func New() (*apperror.AppError, org_teamv1.OrganizationTeamServiceServer) {
 		Logger:            application.Logger(),
 		Config:            application.Config(),
 		Helper:            helper,
+		OpenFGARepo:       repo,
 	}
 }
 

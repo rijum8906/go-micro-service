@@ -13,15 +13,28 @@ import (
 func (s *UserService) CreateStream() *apperror.AppError {
 	streamManager := broker.NewStreamManager(s.BrokerClient.GetClient())
 
-	if streamManager.Exists(constants.StreamUser) {
-		return nil
-	}
-
 	config := broker.NewStreamConfig(constants.StreamUser).
 		AddStorageType(nats.FileStorage).
 		AddSubjects(jobs.GetDomainWildcard(jobs.JobUserRequestedEmailVerification))
 
-	_, appErr := streamManager.Create(config)
+	exists, appErr := streamManager.Exists(constants.StreamUser)
+	if appErr != nil {
+		return appErr
+	}
+	if exists {
+		streamInfo, appErr := streamManager.Update(config)
+		if appErr != nil {
+			return appErr
+		}
+		if streamInfo != nil {
+			s.StreamInfo = streamInfo
+			return nil
+		}
+
+		return nil
+	}
+
+	_, appErr = streamManager.Create(config)
 	if appErr != nil {
 		return appErr
 	}

@@ -1,5 +1,5 @@
-// Package userauth
-package userauth
+// Package orgauth
+package orgauth
 
 import (
 	"time"
@@ -13,20 +13,20 @@ import (
 )
 
 // CreateConsumer creates a consumer for the user auth email jobs
-func (s *UserAuthEmailService) CreateConsumer() *apperror.AppError {
+func (s *OrgAuthEmailService) CreateConsumer() *apperror.AppError {
 	consumerManager := broker.NewConsumerManager(s.BrokerClient.GetClient())
 
-	config := broker.NewConsumerConfig(constants.ConsumerUserAuth).AddDeliverPolicy(nats.DeliverAllPolicy).
-		WithFilterSubject(jobs.JobUserAuthWildcard).
+	config := broker.NewConsumerConfig(constants.ConsumerOrganizationAuth).AddDeliverPolicy(nats.DeliverAllPolicy).
+		WithFilterSubject(jobs.JobOrganizationAuthWildcard).
 		AddMaxDelivery(3)
 	// TODO: make the config with env variables
 
-	exists, appErr := consumerManager.Exists(constants.StreamUser, constants.ConsumerUserAuth)
+	exists, appErr := consumerManager.Exists(constants.StreamOrganization, constants.ConsumerOrganizationAuth)
 	if appErr != nil {
 		return appErr
 	}
 	if exists {
-		consumerInfo, appErr := consumerManager.Update(constants.StreamUser, config)
+		consumerInfo, appErr := consumerManager.Update(constants.StreamOrganization, config)
 		if appErr != nil {
 			return appErr
 		}
@@ -38,7 +38,7 @@ func (s *UserAuthEmailService) CreateConsumer() *apperror.AppError {
 		return nil
 	}
 
-	info, appErr := consumerManager.Create(constants.StreamUser, config)
+	info, appErr := consumerManager.Create(constants.StreamOrganization, config)
 	if appErr != nil {
 		return appErr
 	}
@@ -48,10 +48,10 @@ func (s *UserAuthEmailService) CreateConsumer() *apperror.AppError {
 	return nil
 }
 
-func (s *UserAuthEmailService) ListenMessage() {
+func (s *OrgAuthEmailService) ListenMessage() {
 	subscriber := broker.NewSubscriber(s.BrokerClient.GetClient())
 
-	subscription, appErr := subscriber.PullSubscribe(jobs.JobUserAuthWildcard, constants.ConsumerUserAuth)
+	subscription, appErr := subscriber.PullSubscribe(jobs.JobOrganizationAuthWildcard, constants.ConsumerOrganizationAuth)
 	if appErr != nil {
 		s.Logger.Error("failed to subscribe", zap.String("error_message", appErr.Message), zap.Any("details", appErr.Details))
 	}
@@ -77,7 +77,7 @@ func (s *UserAuthEmailService) ListenMessage() {
 	}
 }
 
-func (s *UserAuthEmailService) processMessage(msg *nats.Msg) {
+func (s *OrgAuthEmailService) processMessage(msg *nats.Msg) {
 	// Check retry count
 	metadata, err := msg.Metadata()
 	if err == nil && metadata.NumDelivered > uint64(s.ConsumerInfo.Config.MaxDeliver) {
@@ -92,10 +92,6 @@ func (s *UserAuthEmailService) processMessage(msg *nats.Msg) {
 	var processErr *apperror.AppError
 	// Process message
 	switch msg.Subject {
-	case jobs.JobUserRequestedPasswordReset:
-		processErr = s.processPasswordReset(msg)
-	case jobs.JobUserRequestedEmailVerification:
-		processErr = s.processEmailVerification(msg)
 	default:
 		s.Logger.Warn("unknown job subject", zap.String("subject", msg.Subject))
 		_ = msg.Ack() // IMPORTANT: Ack unknown to avoid infinite retries

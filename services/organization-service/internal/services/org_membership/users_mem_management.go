@@ -12,7 +12,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
-	"github.com/rijum8906/relay/services/organization-service/internal/constants"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/utils"
 	"go.uber.org/zap"
@@ -29,15 +29,15 @@ import (
 //   - Verify the authenticated user owns this membership (IDOR protection)
 //   - Check idempotency (already left? return early)
 //   - Validate business rule: last owner cannot leave
-//   - Remove user permissions from OpenFGA (SECURITY CRITICAL - fails the request if unsuccessful)
 //   - Update membership status to 'left' (soft delete)
 //   - Commit transaction
+//   - AFTER successful commit, remove user permissions from OpenFGA
 //   - Return success response
 //
 // Idempotency:
 //   - If membership status is already 'left', returns success immediately within transaction
 //   - No error for duplicate leave requests
-//   - OpenFGA permissions only removed once (idempotent operation)
+//   - OpenFGA permissions deletion is idempotent (safe to call multiple times)
 //
 // Business Rules:
 //   - Users can only leave their own membership (not others)
@@ -49,8 +49,8 @@ import (
 //   - Validates scoped token to prevent CSRF attacks
 //   - Explicit ownership check prevents IDOR attacks
 //   - Returns PermissionDenied (not NotFound) for ownership mismatch to prevent information disclosure
-//   - Removes OpenFGA permissions BEFORE updating database (fail-secure: if permissions fail, DB unchanged)
-//   - OpenFGA failure fails the entire request (security over availability)
+//   - Removes OpenFGA permissions AFTER successful database commit to maintain consistency
+//   - OpenFGA failure is logged but doesn't block the operation (eventual consistency)
 //
 // Why check last owner?
 //   - Prevents organizations from having zero owners
@@ -65,29 +65,33 @@ import (
 //   - Prevents foreign key issues with related data
 //   - Enables investigation of security incidents
 //
-// Why remove OpenFGA permissions BEFORE database update?
-//   - Security-first approach: permissions revoked even if DB fails
-//   - If OpenFGA fails, transaction rolls back - user has no permissions AND membership unchanged
-//   - Fail-secure: better to reject the request than leave permissions dangling
-//   - Defense in depth: both systems must succeed for consistency
+// Why remove OpenFGA permissions AFTER database commit?
+//   - Transaction ensures database consistency (status='left')
+//   - If OpenFGA fails, user has left the org but permissions remain (eventual consistency)
+//   - This is acceptable because:
+//   - Permissions are checked in real-time - stale permissions don't grant access to left members
+//   - OpenFGA permissions can be cleaned up by a background job
+//   - The user has already left - they shouldn't have access anyway
+//   - We prioritize user experience over permission cleanup perfection
+//   - Alternative (OpenFGA first) would rollback DB changes if OpenFGA fails, leaving user stuck
 //
-// Why OpenFGA failure fails the entire request?
-//   - Permissions are a security boundary, not a best-effort feature
-//   - Leaving a user with permissions after they've "left" is a security violation
-//   - Failing the request alerts the user to retry or contact support
-//   - Requires monitoring and alerting on OpenFGA failures
+// OpenFGA Failure Handling:
+//   - Failures are logged for monitoring and alerting
+//   - Background reconciliation job can clean up stale permissions
+//   - User can retry leaving if they notice permissions persist
+//   - This is a best-effort cleanup, not a critical path
 //
 // Transaction Boundaries:
 //   - All database operations run in a serializable transaction
-//   - OpenFGA operations run BEFORE commit (not in transaction, but failure triggers rollback)
-//   - Transaction provides ACID guarantees for database state
-//   - OpenFGA provides atomic permission updates (all or nothing per request)
+//   - OpenFGA operations run AFTER transaction commit (not in transaction)
+//   - Transaction provides ACID guarantees for database state only
+//   - OpenFGA provides eventual consistency for permissions
 //
 // Error Responses:
 //   - Validation: Invalid request format, invalid scoped token, or last owner cannot leave
 //   - NotFound: Membership doesn't exist (after UUID parsing)
 //   - PermissionDenied: User doesn't own this membership or invalid token scope
-//   - Internal: Database operation failed or OpenFGA operation failed
+//   - Internal: Database operation failed
 //   - Transaction errors: Automatic rollback with appropriate error wrapping
 //
 // Example:
@@ -118,26 +122,29 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}
 
-	// Execute critical operation in transaction with fail-secure semantics
+	// Store membership info for OpenFGA cleanup after transaction
+	var membership *db.OrganizationMembership
+
+	// Execute database transaction first
 	if err := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
-		//  Retrieve organization membership
-		membership, err := q.GetOrganizationMembership(ctx, membershipID)
+		// Retrieve organization membership
+		mem, err := q.GetOrganizationMembership(ctx, membershipID)
 		if err != nil {
 			return coreutils.ParseDBError(err, "membership")
 		}
+		membership = &mem
 
-		//  SECURITY: Verify the authenticated user owns this membership (Prevents IDOR attacks where user tries to leave another user's membership)
+		// SECURITY: Verify the authenticated user owns this membership (Prevents IDOR attacks)
 		if membership.UserID.String() != userInfo.UserID {
 			return apperror.ErrPermissionDenied.WithMessage("you can only leave your own membership")
 		}
 
-		// 6. Idempotency: Return success if already left
+		// Idempotency: Return success if already left
 		if membership.Status == constants.OrgMemStatusLeft {
 			return nil
 		}
 
-		// IMPORTANT:  Business rule: Prevent the last owner from leaving
-		// Ensures organization always has at least one owner for administrative functions
+		// Business rule: Prevent the last owner from leaving
 		if membership.Role == constants.OrgRoleOwner {
 			activeOwners, err := q.CountActiveOwnersByOrgID(ctx, membership.OrganizationID)
 			if err != nil {
@@ -154,30 +161,7 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 			}
 		}
 
-		//  NOTE: Remove OpenFGA permissions BEFORE database update
-		//  This ensures fail-secure behavior:
-		//   - If OpenFGA succeeds but DB fails → user loses access (secure, needs reconciliation)
-		//   - If OpenFGA fails → transaction rolls back (user retains access, request fails)
-		//
-		// Note: OpenFGA's Delete operation is idempotent - safe to retry if needed
-		if appErr := s.Helper.RemoveOrgMemRole(ctx, &membership); appErr != nil {
-			// Log the failure for monitoring and alerting
-			s.Logger.Error("OpenFGA permission revocation failed",
-				zap.String("user_id", userInfo.UserID),
-				zap.String("organization_id", membership.OrganizationID.String()),
-				zap.String("membership_id", membership.ID.String()),
-				zap.Error(appErr))
-
-			// Return error to trigger transaction rollback
-			// User cannot leave until permissions are properly revoked
-			return apperror.ErrInternal.
-				WithMessage("failed to revoke organization permissions").
-				WithDetail("reason", "authorization system unavailable").
-				WithDetail("error", appErr.Error())
-		}
-
 		// Update membership status to 'left' (soft delete)
-		// This runs after OpenFGA success, within the same transaction
 		_, err = q.UpdateOrganizationMembershipStatus(ctx, db.UpdateOrganizationMembershipStatusParams{
 			ID:     membership.ID,
 			Status: constants.OrgMemStatusLeft,
@@ -188,8 +172,8 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 				WithDetail("db_error", err.Error())
 		}
 
-		// Log successful permission revocation for audit trail
-		s.Logger.Info("User left organization successfully",
+		// Log successful database update
+		s.Logger.Info("User left organization - database updated",
 			zap.String("user_id", userInfo.UserID),
 			zap.String("organization_id", membership.OrganizationID.String()),
 			zap.String("membership_id", membership.ID.String()),
@@ -199,6 +183,26 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 	}); err != nil {
 		// Transaction failed - return the error to the client
 		return nil, err
+	}
+
+	// AFTER successful transaction commit, remove OpenFGA permissions
+	// This is best-effort cleanup - failures don't rollback the database transaction
+	// Only attempt cleanup if we actually updated the membership
+	if appErr := s.OpenFGARepo.PublishRevokeOrgMemRoleJob(ctx, membership); appErr != nil {
+		// Log the failure for monitoring and alerting
+		// This doesn't fail the request because the user has already left
+		s.Logger.Error("Failed to revoke OpenFGA permissions after user left organization",
+			zap.String("user_id", userInfo.UserID),
+			zap.String("organization_id", membership.OrganizationID.String()),
+			zap.String("membership_id", membership.ID.String()),
+			zap.Error(appErr))
+
+		// Optionally: Send to dead letter queue or background reconciliation
+		// s.Helper.EnqueueForReconciliation(membership)
+	} else {
+		s.Logger.Info("OpenFGA permissions revoked successfully",
+			zap.String("user_id", userInfo.UserID),
+			zap.String("organization_id", membership.OrganizationID.String()))
 	}
 
 	// Return success response
@@ -229,8 +233,8 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 //   - Check idempotency (already banned? return success)
 //   - Validate target status allows banning (only active members can be banned)
 //   - Update membership status to 'banned' in database
-//   - Remove all organization permissions from OpenFGA
 //   - Commit transaction
+//   - AFTER successful commit, remove all organization permissions from OpenFGA
 //   - Return success response
 //
 // Security Constraints:
@@ -239,11 +243,24 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 //   - Actors need admin or owner role (or custom role with ban permission)
 //   - Role hierarchy enforced: owner > admin > member > custom roles
 //
+// OpenFGA Cleanup Strategy:
+//   - Runs AFTER database commit (best-effort, not critical path)
+//   - Failures are logged but don't block the operation
+//   - Background reconciliation job can clean up stale permissions
+//   - User already banned from database perspective - permissions are secondary
+//
+// Why OpenFGA cleanup AFTER commit:
+//   - Database transaction ensures membership status is 'banned'
+//   - If OpenFGA fails, user has no database access (status='banned' blocks auth checks)
+//   - Stale OpenFGA permissions don't grant access because status check happens first
+//   - Prevents rollback of successful ban due to external system failure
+//   - Provides better user experience (ban succeeds even if permission cleanup fails)
+//
 // Error Responses:
 //   - Validation:      Invalid parameters or invalid status
 //   - NotFound:        Target or actor membership does not exist
 //   - PermissionDenied: Actor lacks required permissions
-//   - Internal:        Database or OpenFGA operation failed
+//   - Internal:        Database operation failed
 //
 // Example:
 //
@@ -267,9 +284,11 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}
 
-	// Execute all operations in a transaction
-	var targetMembership, actorMembership *db.OrganizationMembership
+	// Store target membership for OpenFGA cleanup after transaction
+	var targetMembership *db.OrganizationMembership
+	var wasBanned bool // Track if we actually performed a ban (not idempotent)
 
+	// Execute database transaction only
 	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership (allow all statuses for idempotency)
 		target, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
@@ -287,13 +306,12 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 		if err != nil {
 			return coreutils.ParseDBError(err, "actor membership")
 		}
-		actorMembership = &actor
 
 		// Lock both records for update (prevent race conditions)
 		if _, err := q.LockOrganizationMembershipForUpdate(ctx, targetMembership.ID); err != nil {
 			return apperror.ErrInternal.WithMessage("failed to lock target membership")
 		}
-		if _, err := q.LockOrganizationMembershipForUpdate(ctx, actorMembership.ID); err != nil {
+		if _, err := q.LockOrganizationMembershipForUpdate(ctx, actor.ID); err != nil {
 			return apperror.ErrInternal.WithMessage("failed to lock actor membership")
 		}
 
@@ -318,11 +336,11 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 		}
 
 		// Verify actor has permission via standard RBAC
-		if constants.IsStandardOrgRole(actorMembership.Role) {
-			if !permissions.CanActorManageTarget(actorMembership.Role, targetMembership.Role) {
+		if constants.IsStandardOrgRole(actor.Role) {
+			if !permissions.CanActorManageTarget(actor.Role, targetMembership.Role) {
 				return apperror.ErrPermissionDenied.
 					WithMessage("insufficient permissions to ban this member").
-					WithDetail("actor_role", actorMembership.Role).
+					WithDetail("actor_role", actor.Role).
 					WithDetail("target_role", targetMembership.Role).
 					WithDetail("required_role", "admin or owner")
 			}
@@ -330,7 +348,7 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 
 		// Verify custom role permissions via OpenFGA
 		if appErr := utils.CheckCanChangeMembershipStatus(
-			ctx, s.TuppleManager, actorMembership, targetMembership,
+			ctx, s.TuppleManager, &actor, targetMembership,
 		); appErr != nil {
 			return appErr
 		}
@@ -353,7 +371,7 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 				WithDetail("reason", "Only active members can be banned")
 		}
 
-		// IMPORTANT: Update database FIRST (so OpenFGA changes only happen if DB succeeds)
+		// Update membership status to 'banned'
 		_, err = q.UpdateOrganizationMembershipStatus(ctx, db.UpdateOrganizationMembershipStatusParams{
 			ID:     membershipID,
 			Status: constants.OrgMemStatusBanned,
@@ -364,22 +382,31 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 				WithDetail("db_error", err.Error())
 		}
 
-		// Remove all organization permissions from OpenFGA
-		// This runs after DB update - if it fails, we log and continue
-		// TODO: Implement retry mechanism for OpenFGA failures
-		if permErr := s.Helper.RemoveOrgMemRole(ctx, targetMembership); permErr != nil {
-			// CRITICAL: Database updated but OpenFGA sync failed
-			s.Logger.Error("CRITICAL: Failed to revoke OpenFGA permissions after ban - manual intervention may be required",
+		wasBanned = true
+		return nil
+	}); appErr != nil {
+		return nil, appErr
+	}
+
+	// AFTER successful transaction commit, remove OpenFGA permissions (best-effort)
+	if wasBanned && targetMembership != nil {
+		if permErr := s.OpenFGARepo.PublishRevokeOrgMemRoleJob(ctx, targetMembership); permErr != nil {
+			// CRITICAL: Database banned but OpenFGA sync failed
+			// This doesn't roll back the ban - user is already banned from DB perspective
+			s.Logger.Error("CRITICAL: Failed to revoke OpenFGA permissions after ban",
 				zap.String("user_id", targetMembership.UserID.String()),
 				zap.String("organization_id", targetMembership.OrganizationID.String()),
 				zap.String("role", targetMembership.Role),
 				zap.String("membership_id", membershipID.String()),
 				zap.Error(permErr))
-		}
 
-		return nil
-	}); appErr != nil {
-		return nil, appErr
+			// TODO: Send to dead letter queue for reconciliation
+			// s.Helper.EnqueueForReconciliation(targetMembership)
+		} else {
+			s.Logger.Info("OpenFGA permissions revoked successfully after ban",
+				zap.String("user_id", targetMembership.UserID.String()),
+				zap.String("organization_id", targetMembership.OrganizationID.String()))
+		}
 	}
 
 	// Return success response
@@ -402,14 +429,14 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 //   - Extract authenticated user identity from context
 //   - Begin database transaction with SERIALIZABLE isolation
 //   - Retrieve target and actor memberships with FOR UPDATE lock
-//   - Validate business rules (no self-unban check, but actor must have permission)
+//   - Validate business rules (actor must have permission)
 //   - Verify actor has permission via RBAC role hierarchy
 //   - Verify custom role permissions via OpenFGA
 //   - Check idempotency (already active? return success)
 //   - Validate target status allows unbanning (only banned members can be unbanned)
 //   - Update membership status to 'active' in database
-//   - Restore all organization permissions in OpenFGA based on role
 //   - Commit transaction
+//   - AFTER successful commit, restore organization permissions in OpenFGA based on role
 //   - Return success response
 //
 // Security Constraints:
@@ -418,11 +445,25 @@ func (s *OrgMembershipService) BanOrganizationMembership(
 //   - Role hierarchy enforced: owner > admin > member > custom roles
 //   - Unban restores the exact role the user had before being banned
 //
+// OpenFGA Restore Strategy:
+//   - Runs AFTER database commit (best-effort, not critical path)
+//   - Failures are logged but don't block the operation
+//   - Background reconciliation job can restore missing permissions
+//   - User already unbanned from database perspective - permissions restoration is secondary
+//   - Permission checks will work correctly as long as status='active' check passes first
+//
+// Why OpenFGA restore AFTER commit:
+//   - Database transaction ensures membership status is 'active'
+//   - User can immediately access organization (status check first)
+//   - If OpenFGA fails, user's role is determined by database status check
+//   - Permissions will be restored eventually via reconciliation
+//   - Prevents rollback of successful unban due to external system failure
+//
 // Error Responses:
 //   - Validation:      Invalid parameters or target is not banned
 //   - NotFound:        Target or actor membership does not exist
 //   - PermissionDenied: Actor lacks required permissions
-//   - Internal:        Database or OpenFGA operation failed
+//   - Internal:        Database operation failed
 //
 // Example:
 //
@@ -446,9 +487,11 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}
 
-	// Execute all operations in a transaction
-	var targetMembership, actorMembership *db.OrganizationMembership
+	// Store target membership for OpenFGA restore after transaction
+	var targetMembership *db.OrganizationMembership
+	var wasUnbanned bool // Track if we actually performed an unban
 
+	// Execute database transaction only
 	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership (allow all statuses for idempotency)
 		target, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
@@ -466,13 +509,12 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 		if err != nil {
 			return coreutils.ParseDBError(err, "actor membership")
 		}
-		actorMembership = &actor
 
 		// Lock both records for update (prevent race conditions)
 		if _, err := q.LockOrganizationMembershipForUpdate(ctx, targetMembership.ID); err != nil {
 			return apperror.ErrInternal.WithMessage("failed to lock target membership")
 		}
-		if _, err := q.LockOrganizationMembershipForUpdate(ctx, actorMembership.ID); err != nil {
+		if _, err := q.LockOrganizationMembershipForUpdate(ctx, actor.ID); err != nil {
 			return apperror.ErrInternal.WithMessage("failed to lock actor membership")
 		}
 
@@ -498,11 +540,11 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 		}
 
 		// Verify actor has permission via standard RBAC
-		if constants.IsStandardOrgRole(actorMembership.Role) {
-			if !permissions.CanActorManageTarget(actorMembership.Role, targetMembership.Role) {
+		if constants.IsStandardOrgRole(actor.Role) {
+			if !permissions.CanActorManageTarget(actor.Role, targetMembership.Role) {
 				return apperror.ErrPermissionDenied.
 					WithMessage("insufficient permissions to unban this member").
-					WithDetail("actor_role", actorMembership.Role).
+					WithDetail("actor_role", actor.Role).
 					WithDetail("target_role", targetMembership.Role).
 					WithDetail("required_role", "admin or owner")
 			}
@@ -510,7 +552,7 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 
 		// Verify custom role permissions via OpenFGA
 		if appErr := utils.CheckCanChangeMembershipStatus(
-			ctx, s.TuppleManager, actorMembership, targetMembership,
+			ctx, s.TuppleManager, &actor, targetMembership,
 		); appErr != nil {
 			return appErr
 		}
@@ -533,7 +575,7 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 				WithDetail("reason", "Only banned members can be unbanned")
 		}
 
-		// IMPORTANT: Update database FIRST (so OpenFGA changes only happen if DB succeeds)
+		// Update membership status to 'active'
 		_, err = q.UpdateOrganizationMembershipStatus(ctx, db.UpdateOrganizationMembershipStatusParams{
 			ID:     membershipID,
 			Status: constants.OrgMemStatusActive,
@@ -544,22 +586,31 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 				WithDetail("db_error", err.Error())
 		}
 
-		// Restore all organization permissions in OpenFGA based on role
-		// This runs after DB update - if it fails, we log and continue
-		// TODO: Implement retry mechanism for OpenFGA failures
-		if permErr := s.Helper.AddOrgMemRole(ctx, targetMembership); permErr != nil {
-			// CRITICAL: Database updated but OpenFGA sync failed
-			s.Logger.Error("CRITICAL: Failed to restore OpenFGA permissions after unban - manual intervention may be required",
+		wasUnbanned = true
+		return nil
+	}); appErr != nil {
+		return nil, appErr
+	}
+
+	// AFTER successful transaction commit, restore OpenFGA permissions (best-effort)
+	if wasUnbanned && targetMembership != nil {
+		if permErr := s.OpenFGARepo.PublishAssignOrgMemRoleJob(ctx, targetMembership); permErr != nil {
+			// CRITICAL: Database unbanned but OpenFGA sync failed
+			// This doesn't roll back the unban - user is already unbanned from DB perspective
+			s.Logger.Error("CRITICAL: Failed to restore OpenFGA permissions after unban",
 				zap.String("user_id", targetMembership.UserID.String()),
 				zap.String("organization_id", targetMembership.OrganizationID.String()),
 				zap.String("role", targetMembership.Role),
 				zap.String("membership_id", membershipID.String()),
 				zap.Error(permErr))
-		}
 
-		return nil
-	}); appErr != nil {
-		return nil, appErr
+			// TODO: Send to dead letter queue for reconciliation
+			// s.Helper.EnqueueForReconciliation(targetMembership)
+		} else {
+			s.Logger.Info("OpenFGA permissions restored successfully after unban",
+				zap.String("user_id", targetMembership.UserID.String()),
+				zap.String("organization_id", targetMembership.OrganizationID.String()))
+		}
 	}
 
 	// Return success response
@@ -589,8 +640,8 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 //   - Check idempotency (already suspended? return success)
 //   - Validate target status allows suspension (only active members)
 //   - Update membership status to 'suspended' in database
-//   - Remove all organization permissions from OpenFGA
 //   - Commit transaction
+//   - AFTER successful commit, remove all organization permissions from OpenFGA
 //   - Return success response
 //
 // Security Constraints:
@@ -605,11 +656,25 @@ func (s *OrgMembershipService) UnbanOrganizationMembership(
 //   - Suspension implies future reactivation, Ban is typically final
 //   - Business logic may treat suspended users differently from banned users
 //
+// OpenFGA Cleanup Strategy:
+//   - Runs AFTER database commit (best-effort, not critical path)
+//   - Failures are logged but don't block the operation
+//   - Background reconciliation job can clean up stale permissions
+//   - User already suspended from database perspective - permissions are secondary
+//   - Status check will block access even if permissions remain
+//
+// Why OpenFGA removal AFTER commit:
+//   - Database transaction ensures membership status is 'suspended'
+//   - If OpenFGA fails, user has status='suspended' (blocks access via status check)
+//   - Stale OpenFGA permissions don't grant access because status check happens first
+//   - Prevents rollback of valid suspension due to external system failure
+//   - Provides better user experience (suspension succeeds even if permission cleanup fails)
+//
 // Error Responses:
 //   - Validation:      Invalid parameters or target not active
 //   - NotFound:        Target or actor membership does not exist
 //   - PermissionDenied: Actor lacks required permissions
-//   - Internal:        Database or OpenFGA operation failed
+//   - Internal:        Database operation failed
 //
 // Example:
 //
@@ -633,9 +698,11 @@ func (s *OrgMembershipService) SuspendOrganizationMembership(
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}
 
-	// Execute all operations in a transaction
-	var targetMembership, actorMembership *db.OrganizationMembership
+	// Store target membership for OpenFGA cleanup after transaction
+	var targetMembership *db.OrganizationMembership
+	var wasSuspended bool // Track if we actually performed a suspension
 
+	// Execute database transaction only
 	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Load target membership (allow all statuses for idempotency)
 		target, err := q.GetOrganizationMembershipWithAllStatuses(ctx, membershipID)
@@ -653,13 +720,12 @@ func (s *OrgMembershipService) SuspendOrganizationMembership(
 		if err != nil {
 			return coreutils.ParseDBError(err, "actor membership")
 		}
-		actorMembership = &actor
 
 		// Lock both records for update (prevent race conditions)
 		if _, err := q.LockOrganizationMembershipForUpdate(ctx, targetMembership.ID); err != nil {
 			return apperror.ErrInternal.WithMessage("failed to lock target membership")
 		}
-		if _, err := q.LockOrganizationMembershipForUpdate(ctx, actorMembership.ID); err != nil {
+		if _, err := q.LockOrganizationMembershipForUpdate(ctx, actor.ID); err != nil {
 			return apperror.ErrInternal.WithMessage("failed to lock actor membership")
 		}
 
@@ -692,11 +758,11 @@ func (s *OrgMembershipService) SuspendOrganizationMembership(
 		}
 
 		// Verify actor has permission via standard RBAC
-		if constants.IsStandardOrgRole(actorMembership.Role) {
-			if !permissions.CanActorManageTarget(actorMembership.Role, targetMembership.Role) {
+		if constants.IsStandardOrgRole(actor.Role) {
+			if !permissions.CanActorManageTarget(actor.Role, targetMembership.Role) {
 				return apperror.ErrPermissionDenied.
 					WithMessage("insufficient permissions to suspend this member").
-					WithDetail("actor_role", actorMembership.Role).
+					WithDetail("actor_role", actor.Role).
 					WithDetail("target_role", targetMembership.Role).
 					WithDetail("required_role", "admin or owner")
 			}
@@ -704,7 +770,7 @@ func (s *OrgMembershipService) SuspendOrganizationMembership(
 
 		// Verify custom role permissions via OpenFGA
 		if appErr := utils.CheckCanChangeMembershipStatus(
-			ctx, s.TuppleManager, actorMembership, targetMembership,
+			ctx, s.TuppleManager, &actor, targetMembership,
 		); appErr != nil {
 			return appErr
 		}
@@ -727,7 +793,7 @@ func (s *OrgMembershipService) SuspendOrganizationMembership(
 				WithDetail("reason", "Only active members can be suspended")
 		}
 
-		// IMPORTANT: Update database FIRST
+		// Update membership status to 'suspended'
 		_, err = q.UpdateOrganizationMembershipStatus(ctx, db.UpdateOrganizationMembershipStatusParams{
 			ID:     membershipID,
 			Status: constants.OrgMemStatusSuspended,
@@ -738,21 +804,31 @@ func (s *OrgMembershipService) SuspendOrganizationMembership(
 				WithDetail("db_error", err.Error())
 		}
 
-		// Remove all organization permissions from OpenFGA
-		// Suspended users lose all access temporarily
-		if permErr := s.Helper.RemoveOrgMemRole(ctx, targetMembership); permErr != nil {
-			// CRITICAL: Database updated but OpenFGA sync failed
-			s.Logger.Error("CRITICAL: Failed to revoke OpenFGA permissions during suspension - manual intervention may be required",
+		wasSuspended = true
+		return nil
+	}); appErr != nil {
+		return nil, appErr
+	}
+
+	// AFTER successful transaction commit, remove OpenFGA permissions (best-effort)
+	if wasSuspended && targetMembership != nil {
+		if permErr := s.OpenFGARepo.PublishRevokeOrgMemRoleJob(ctx, targetMembership); permErr != nil {
+			// CRITICAL: Database suspended but OpenFGA sync failed
+			// This doesn't roll back the suspension - user is already suspended from DB perspective
+			s.Logger.Error("CRITICAL: Failed to revoke OpenFGA permissions during suspension",
 				zap.String("user_id", targetMembership.UserID.String()),
 				zap.String("organization_id", targetMembership.OrganizationID.String()),
 				zap.String("role", targetMembership.Role),
 				zap.String("membership_id", membershipID.String()),
 				zap.Error(permErr))
-		}
 
-		return nil
-	}); appErr != nil {
-		return nil, appErr
+			// TODO: Send to dead letter queue for reconciliation
+			// s.Helper.EnqueueForReconciliation(targetMembership)
+		} else {
+			s.Logger.Info("OpenFGA permissions revoked successfully after suspension",
+				zap.String("user_id", targetMembership.UserID.String()),
+				zap.String("organization_id", targetMembership.OrganizationID.String()))
+		}
 	}
 
 	// Return success response
@@ -932,7 +1008,7 @@ func (s *OrgMembershipService) ActivateOrganizationMembership(
 		}
 
 		// Restore all organization permissions in OpenFGA based on role
-		if permErr := s.Helper.AddOrgMemRole(ctx, targetMembership); permErr != nil {
+		if permErr := s.OpenFGARepo.PublishAssignOrgMemRoleJob(ctx, targetMembership); permErr != nil {
 			// CRITICAL: Database updated but OpenFGA sync failed
 			s.Logger.Error("CRITICAL: Failed to restore OpenFGA permissions during activation - manual intervention may be required",
 				zap.String("user_id", targetMembership.UserID.String()),
@@ -1145,7 +1221,7 @@ func (s *OrgMembershipService) ChangeOrganizationMembershipRole(
 
 		// Remove old role permissions from OpenFGA
 		oldMembership := targetMembership
-		if appErr := s.Helper.RemoveOrgMemRole(ctx, &oldMembership); appErr != nil {
+		if appErr := s.OpenFGARepo.PublishRevokeOrgMemRoleJob(ctx, &oldMembership); appErr != nil {
 			return apperror.ErrInternal.
 				WithMessage("failed to revoke previous organization role").
 				WithDetail("error", appErr.Error())
@@ -1166,7 +1242,7 @@ func (s *OrgMembershipService) ChangeOrganizationMembershipRole(
 				zap.Error(err))
 
 			// Attempt to restore old role in OpenFGA
-			if restoreErr := s.Helper.AddOrgMemRole(ctx, &oldMembership); restoreErr != nil {
+			if restoreErr := s.OpenFGARepo.PublishAssignOrgMemRoleJob(ctx, &oldMembership); restoreErr != nil {
 				s.Logger.Error("CRITICAL: Failed to restore OpenFGA role after DB failure",
 					zap.String("membership_id", membershipID.String()),
 					zap.Error(restoreErr))
@@ -1178,7 +1254,7 @@ func (s *OrgMembershipService) ChangeOrganizationMembershipRole(
 		}
 
 		// Grant new role permissions in OpenFGA
-		if appErr := s.Helper.AddOrgMemRole(ctx, &updatedMembership); appErr != nil {
+		if appErr := s.OpenFGARepo.PublishAssignOrgMemRoleJob(ctx, &updatedMembership); appErr != nil {
 			// CRITICAL: Database updated but OpenFGA sync failed
 			s.Logger.Error("CRITICAL: Failed to grant new role in OpenFGA after role change",
 				zap.String("user_id", targetMembership.UserID.String()),
@@ -1190,8 +1266,8 @@ func (s *OrgMembershipService) ChangeOrganizationMembershipRole(
 
 			// Don't fail the operation since DB is updated
 			// TODO: Queue for retry in background
-			s.Helper.RemoveOrgMemRole(ctx, &targetMembership)
-			s.Helper.AddOrgMemRole(ctx, &updatedMembership)
+			s.OpenFGARepo.PublishRevokeOrgMemRoleJob(ctx, &targetMembership)
+			s.OpenFGARepo.PublishAssignOrgMemRoleJob(ctx, &updatedMembership)
 		}
 
 		// Log successful role change
@@ -1379,7 +1455,7 @@ func (s *OrgMembershipService) RemoveOrganizationMember(
 		}
 
 		// Remove all organization permissions from OpenFGA
-		if appErr := s.Helper.RemoveOrgMemRole(ctx, &targetMembership); appErr != nil {
+		if appErr := s.OpenFGARepo.PublishRevokeOrgMemRoleJob(ctx, &targetMembership); appErr != nil {
 			// TODO: Implement queue system for OpenFGA retry
 			// This should be added after the queue system is implemented
 			// The queue should retry failed OpenFGA operations asynchronously

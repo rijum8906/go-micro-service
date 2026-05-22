@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
+	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/coreenv"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/app/config"
@@ -16,6 +17,7 @@ func (a *Application) Logger() *zap.Logger                  { return a.utils.log
 func (a *Application) Config() *config.Env                  { return a.config }
 func (a *Application) GRPCServer() *grpc.Server             { return a.server }
 func (a *Application) UserClient() userv1.UserServiceClient { return a.clients.UserClient }
+func (a *Application) BrokerCLient() broker.Client          { return a.infra.brokerClient }
 
 // Testing
 

@@ -12,6 +12,7 @@ import (
 
 type Env struct {
 	coreenv.CoreEnv
+	FGAAPIURL string `env:"FGA_API_URL" envDefault:"localhost:8000"`
 
 	// SMTP
 	SMTPHost        string `env:"SMTP_HOST,required"`
