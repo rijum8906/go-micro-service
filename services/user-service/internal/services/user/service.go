@@ -24,8 +24,23 @@ func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.Gener
 		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
 	}
 
+	if req.AuthMethod != corev1.AuthMethod_AUTH_METHOD_PASSWORD {
+		return nil, apperror.ErrValidation.WithMessage("invalid auth method")
+	}
+
 	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, token.TokenScope(req.GetScope()))
 	if appErr != nil {
+		return nil, appErr
+	}
+
+	userID, _ := uuid.Parse(user.UserID)
+
+	userInfo, appErr := s.repos.User.GetUser(ctx, userID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if appErr = s.utils.HashService.Verify(userInfo.PasswordHash.String, req.AuthValue); appErr != nil {
 		return nil, appErr
 	}
 
