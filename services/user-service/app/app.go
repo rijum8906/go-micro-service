@@ -4,6 +4,7 @@ package app
 import (
 	"context"
 	"net"
+	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -15,6 +16,13 @@ import (
 	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+)
+
+var (
+	instance *Application
+	once     sync.Once
+	mu       sync.RWMutex
+	initErr  *apperror.AppError
 )
 
 type ApplicationInfra struct {
@@ -44,7 +52,22 @@ type Application struct {
 	server   *grpc.Server
 }
 
-func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
+// GetInstance safely fetches the singleton instance.
+// Thread-safe via double-checked locking idiom combined with sync.Once.
+func GetInstance() (*Application, *apperror.AppError) {
+	once.Do(func() {
+		ctx := context.Background()
+		instance, initErr = newApplication(ctx)
+	})
+
+	if initErr != nil {
+		return nil, initErr
+	}
+
+	return instance, nil
+}
+
+func newApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	app := &Application{
 		infra:    &ApplicationInfra{},
 		utils:    &ApplicationUtils{},
@@ -59,23 +82,12 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Initialize Dependencies
-	if appErr = app.initLogger(); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initDB(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initCache(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initNATS(); appErr != nil {
-		return nil, appErr
-	}
 
 	if appErr = app.initUtils(); appErr != nil {
+		return nil, appErr
+	}
+
+	if appErr = app.initInfra(ctx); appErr != nil {
 		return nil, appErr
 	}
 
