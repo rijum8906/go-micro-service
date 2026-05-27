@@ -61,6 +61,12 @@ func (a *Application) initUtils() *apperror.AppError {
 	}
 	a.utils.logger = logger
 
+	tm, appErr := initTemplateManager()
+	if appErr != nil {
+		return appErr
+	}
+	a.utils.tm = tm
+
 	return nil
 }
 

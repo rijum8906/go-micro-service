@@ -18,6 +18,7 @@ import (
 	"github.com/rijum8906/relay/services/organization-service/internal/services/org_membership/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -27,6 +28,14 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	// AppError logs internal and third-party errors from Error(). Tests need a
+	// logger before setup errors can be printed safely.
+	apperror.SetConfig(&apperror.Config{
+		Logger: zap.NewNop(),
+		AppEnv: "test",
+		Debug:  true,
+	})
+
 	f, err := coreopenfga.NewClient("http://localhost:9000")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "failed to create OpenFGA client:", err)
@@ -52,8 +61,8 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	// Best-effort cleanup — ignore errors so a failed store delete
-	// doesn't mask a real test failure.
+	// Ignore cleanup errors so a failed store delete does not mask a real test
+	// failure.
 	_ = storeManager.Delete(ctx)
 	os.Exit(code)
 }

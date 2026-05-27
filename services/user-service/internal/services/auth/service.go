@@ -284,6 +284,12 @@ func (s *AuthService) Register(ctx context.Context, req *authv1.RegisterRequest)
 	}
 
 	// TODO: Send verification email
+	if _, err = s.RequestEmailVerification(ctx, &authv1.RequestEmailVerificationRequest{
+		Email: user.Email,
+	}); err != nil {
+		s.Logger.Error("failed to send verification email",
+			zap.Error(err))
+	}
 
 	// Build and return authentication response
 	return utils.MapAuthResponse(user, profile, accessToken, refreshTokenHash), nil
