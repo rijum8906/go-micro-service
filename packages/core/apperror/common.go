@@ -26,14 +26,14 @@ const (
 	CodeTokenInvalidSignature ErrorCode = "INVALID_SIGNATURE"
 	CodeTokenExpired          ErrorCode = "TOKEN_EXPIRED"
 	CodeTokenInvalid          ErrorCode = "INVALID_TOKEN"
+	CodeTokenMalformed        ErrorCode = "TOKEN_MALFORMED"
 )
 
 // Common Errors
 var (
-	ErrInternal = &AppError{
-		Code:    CodeInternal,
-		Message: "Internal Server Error",
-	}
+	ErrInternal   = NewWithFrame(CodeInternal, "Internal Server Error", 1)
+	ErrThirdParty = NewWithFrame(CodeInternal, "Third Party Service Error", 1)
+
 	ErrForbidden = &AppError{
 		Code:    CodeForbidden,
 		Message: "Forbidden",
@@ -49,10 +49,6 @@ var (
 	ErrUnAuthenticated = &AppError{
 		Code:    CodeUnAuthenticated,
 		Message: "Unauthenticated",
-	}
-	ErrThirdParty = &AppError{
-		Code:    CodeThirdParty,
-		Message: "External Service Error",
 	}
 	ErrValidation = &AppError{
 		Code:    CodeValidation,

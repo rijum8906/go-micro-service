@@ -2,11 +2,11 @@ package utils
 
 import (
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/token"
+	coreconstants "github.com/rijum8906/relay/packages/core/constants"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 )
 
-func ParseAuthMethod(method token.AuthMethod) (corev1.AuthMethod, *apperror.AppError) {
+func ParseAuthMethod(method coreconstants.AuthMethod) (corev1.AuthMethod, *apperror.AppError) {
 	key := string(method)
 	m, ok := corev1.AuthMethod_value[key]
 	if !ok {
@@ -18,8 +18,8 @@ func ParseAuthMethod(method token.AuthMethod) (corev1.AuthMethod, *apperror.AppE
 	return corev1.AuthMethod(m), nil
 }
 
-func ParseScope(scope token.TokenScope) (corev1.TokenScope, *apperror.AppError) {
-	key := string(scope)
+func ParseScope(scope string) (corev1.TokenScope, *apperror.AppError) {
+	key := scope
 	s, ok := corev1.TokenScope_value[key]
 	if !ok {
 		s, ok = corev1.TokenScope_value["TOKEN_SCOPE_"+key]

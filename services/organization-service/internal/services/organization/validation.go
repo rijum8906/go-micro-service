@@ -26,7 +26,7 @@ func validateUpdateOrganizationName(req *organizationv1.UpdateOrganizationNameRe
 	if err := uuid.Validate(req.OrganizationId); err != nil {
 		return apperror.New(apperror.CodeValidation, "invalid organization id")
 	}
-	isValid := token.ValidateTokenScope(req.TokenScope)
+	isValid := token.IsValidTokenScope(req.TokenScope)
 	if !isValid {
 		return apperror.New(apperror.CodeValidation, "invalid token scope")
 	}
@@ -44,7 +44,7 @@ func validateChangeOwnershipRequst(req *organizationv1.ChangeOrganizationOwnersh
 	if err := uuid.Validate(req.OrganizationId); err != nil {
 		return apperror.ErrValidation.WithMessage("invalid organization id")
 	}
-	if !token.ValidateTokenScope(req.TokenScope) {
+	if !token.IsValidTokenScope(req.TokenScope) {
 		return apperror.ErrValidation.WithMessage("invalid token scope")
 	}
 

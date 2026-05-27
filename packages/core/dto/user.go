@@ -1,10 +1,9 @@
 package dto
 
 type UserInfo struct {
-	UserID      string
-	AccessToken string
-	SessionID   string
-	Role        string
+	UserID    string
+	TokenID   string
+	SessionID string
 }
 
 type ClientInfo struct {
@@ -18,4 +17,9 @@ type ClientInfo struct {
 	SessionID  string
 	TraceID    string
 	Locale     string
+}
+
+type AuthTokens struct {
+	AccessToken  string
+	RefreshToken string
 }

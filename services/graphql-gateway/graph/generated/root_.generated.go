@@ -25,6 +25,7 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	GenerateScopedTokenInput() GenerateScopedTokenInputResolver
 }
 
 type DirectiveRoot struct {
@@ -894,6 +895,10 @@ enum TokenScope {
   RECOVERY          # Account recovery
   UPDATE_ORG_NAME
   CHANGE_ORG_OWNER
+  DELETE_ORG
+  ARCHIVE_ORG
+  LEAVE_ORG
+  UPDATE_ORG_MEMBERSHIP
 }
 
 # AuthMethod defines how the user authenticated
@@ -1051,7 +1056,7 @@ type MutationResponse {
 }
 
 input RevokeOthersSessionInput {
-  scopedToken: String!
+ scopedToken: String!
   token: String!
 }
 
@@ -1061,9 +1066,9 @@ input RevokeSessionInput {
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/mutations.graphqls", Input: `extend type Mutation {
-  RevokeSession(input: RevokeSessionInput): MutationResponse!
-  RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
-  RevokeOthersSession(input: RevokeOthersSessionInput!): MutationResponse!
+    RevokeSession(input: RevokeSessionInput): MutationResponse!
+    RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
+    RevokeOthersSession(input: RevokeOthersSessionInput!): AuthResponse!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/queries.graphqls", Input: `extend type Query {

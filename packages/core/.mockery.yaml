@@ -9,8 +9,6 @@ packages:
   github.com/rijum8906/relay/packages/core/broker:
     config:
       dir: ./broker/mocks
-      outpkg: mocks
-      with-expecter: true
 
     interfaces:
       Publisher:

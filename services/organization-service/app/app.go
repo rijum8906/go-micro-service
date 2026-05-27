@@ -108,7 +108,7 @@ func newApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Set the error config
-	apperror.SetConfig(apperror.Config{
+	apperror.SetConfig(&apperror.Config{
 		AppEnv: app.config.AppEnv,
 		Debug:  true,
 		Logger: app.utils.logger,

@@ -36,12 +36,12 @@ const (
 type SessionServiceClient interface {
 	// Retrieval
 	GetCurrentSession(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Session, error)
-	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
-	GetActiveSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error)
+	GetSessions(ctx context.Context, in *v1.PaginationRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
+	GetActiveSessions(ctx context.Context, in *v1.PaginationRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error)
 	// Revocation
 	RevokeSession(ctx context.Context, in *RevokeSessionRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	RevokeAllSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	RevokeOtherSessions(ctx context.Context, in *RevokeOtherSessionsRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	RevokeOtherSessions(ctx context.Context, in *RevokeOtherSessionsRequest, opts ...grpc.CallOption) (*v11.AuthToken, error)
 	// Termination
 	TerminateExpiredSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 }
@@ -64,7 +64,7 @@ func (c *sessionServiceClient) GetCurrentSession(ctx context.Context, in *v1.Emp
 	return out, nil
 }
 
-func (c *sessionServiceClient) GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error) {
+func (c *sessionServiceClient) GetSessions(ctx context.Context, in *v1.PaginationRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetSessionsResponse)
 	err := c.cc.Invoke(ctx, SessionService_GetSessions_FullMethodName, in, out, cOpts...)
@@ -74,7 +74,7 @@ func (c *sessionServiceClient) GetSessions(ctx context.Context, in *GetSessionsR
 	return out, nil
 }
 
-func (c *sessionServiceClient) GetActiveSessions(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error) {
+func (c *sessionServiceClient) GetActiveSessions(ctx context.Context, in *v1.PaginationRequest, opts ...grpc.CallOption) (*GetActiveSessionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetActiveSessionsResponse)
 	err := c.cc.Invoke(ctx, SessionService_GetActiveSessions_FullMethodName, in, out, cOpts...)
@@ -104,9 +104,9 @@ func (c *sessionServiceClient) RevokeAllSessions(ctx context.Context, in *v1.Emp
 	return out, nil
 }
 
-func (c *sessionServiceClient) RevokeOtherSessions(ctx context.Context, in *RevokeOtherSessionsRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *sessionServiceClient) RevokeOtherSessions(ctx context.Context, in *RevokeOtherSessionsRequest, opts ...grpc.CallOption) (*v11.AuthToken, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SuccessResponse)
+	out := new(v11.AuthToken)
 	err := c.cc.Invoke(ctx, SessionService_RevokeOtherSessions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -130,12 +130,12 @@ func (c *sessionServiceClient) TerminateExpiredSessions(ctx context.Context, in 
 type SessionServiceServer interface {
 	// Retrieval
 	GetCurrentSession(context.Context, *v1.EmptyRequest) (*v11.Session, error)
-	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
-	GetActiveSessions(context.Context, *v1.EmptyRequest) (*GetActiveSessionsResponse, error)
+	GetSessions(context.Context, *v1.PaginationRequest) (*GetSessionsResponse, error)
+	GetActiveSessions(context.Context, *v1.PaginationRequest) (*GetActiveSessionsResponse, error)
 	// Revocation
 	RevokeSession(context.Context, *RevokeSessionRequest) (*v1.SuccessResponse, error)
 	RevokeAllSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
-	RevokeOtherSessions(context.Context, *RevokeOtherSessionsRequest) (*v1.SuccessResponse, error)
+	RevokeOtherSessions(context.Context, *RevokeOtherSessionsRequest) (*v11.AuthToken, error)
 	// Termination
 	TerminateExpiredSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
 }
@@ -150,10 +150,10 @@ type UnimplementedSessionServiceServer struct{}
 func (UnimplementedSessionServiceServer) GetCurrentSession(context.Context, *v1.EmptyRequest) (*v11.Session, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCurrentSession not implemented")
 }
-func (UnimplementedSessionServiceServer) GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error) {
+func (UnimplementedSessionServiceServer) GetSessions(context.Context, *v1.PaginationRequest) (*GetSessionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSessions not implemented")
 }
-func (UnimplementedSessionServiceServer) GetActiveSessions(context.Context, *v1.EmptyRequest) (*GetActiveSessionsResponse, error) {
+func (UnimplementedSessionServiceServer) GetActiveSessions(context.Context, *v1.PaginationRequest) (*GetActiveSessionsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetActiveSessions not implemented")
 }
 func (UnimplementedSessionServiceServer) RevokeSession(context.Context, *RevokeSessionRequest) (*v1.SuccessResponse, error) {
@@ -162,7 +162,7 @@ func (UnimplementedSessionServiceServer) RevokeSession(context.Context, *RevokeS
 func (UnimplementedSessionServiceServer) RevokeAllSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RevokeAllSessions not implemented")
 }
-func (UnimplementedSessionServiceServer) RevokeOtherSessions(context.Context, *RevokeOtherSessionsRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedSessionServiceServer) RevokeOtherSessions(context.Context, *RevokeOtherSessionsRequest) (*v11.AuthToken, error) {
 	return nil, status.Error(codes.Unimplemented, "method RevokeOtherSessions not implemented")
 }
 func (UnimplementedSessionServiceServer) TerminateExpiredSessions(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
@@ -207,7 +207,7 @@ func _SessionService_GetCurrentSession_Handler(srv interface{}, ctx context.Cont
 }
 
 func _SessionService_GetSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSessionsRequest)
+	in := new(v1.PaginationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -219,13 +219,13 @@ func _SessionService_GetSessions_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: SessionService_GetSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServiceServer).GetSessions(ctx, req.(*GetSessionsRequest))
+		return srv.(SessionServiceServer).GetSessions(ctx, req.(*v1.PaginationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _SessionService_GetActiveSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmptyRequest)
+	in := new(v1.PaginationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -237,7 +237,7 @@ func _SessionService_GetActiveSessions_Handler(srv interface{}, ctx context.Cont
 		FullMethod: SessionService_GetActiveSessions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SessionServiceServer).GetActiveSessions(ctx, req.(*v1.EmptyRequest))
+		return srv.(SessionServiceServer).GetActiveSessions(ctx, req.(*v1.PaginationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

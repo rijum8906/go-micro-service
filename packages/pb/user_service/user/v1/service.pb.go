@@ -26,7 +26,7 @@ var File_user_service_user_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_user_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\xf8\x05\n" +
+	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\xe2\x05\n" +
 	"\vUserService\x12z\n" +
 	"\x13GenerateScopedToken\x120.user_service.user.v1.GenerateScopedTokenRequest\x1a1.user_service.user.v1.GenerateScopedTokenResponse\x12n\n" +
 	"\x16UpdateProfileAvatarUrl\x123.user_service.user.v1.UpdateProfileAvatarUrlRequest\x1a\x1f.user_service.models.v1.Profile\x12d\n" +
@@ -34,8 +34,8 @@ const file_user_service_user_v1_service_proto_rawDesc = "" +
 	"\x0eChangePassword\x12+.user_service.user.v1.ChangePasswordRequest\x1a\x18.core.v1.SuccessResponse\x12D\n" +
 	"\n" +
 	"GetProfile\x12\x15.core.v1.EmptyRequest\x1a\x1f.user_service.models.v1.Profile\x12>\n" +
-	"\aGetUser\x12\x15.core.v1.EmptyRequest\x1a\x1c.user_service.models.v1.User\x12b\n" +
-	"\vCheckExists\x12(.user_service.user.v1.CheckExistsRequest\x1a).user_service.user.v1.CheckExistsResponse\x12T\n" +
+	"\aGetUser\x12\x15.core.v1.EmptyRequest\x1a\x1c.user_service.models.v1.User\x12L\n" +
+	"\vCheckExists\x12\x12.core.v1.IDRequest\x1a).user_service.user.v1.CheckExistsResponse\x12T\n" +
 	"\x10CheckEmailExists\x12\x15.core.v1.EmailRequest\x1a).user_service.user.v1.CheckExistsResponseB\xda\x01\n" +
 	"\x18com.user_service.user.v1B\fServiceProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/user/v1;userv1\xa2\x02\x03UUX\xaa\x02\x13UserService.User.V1\xca\x02\x13UserService\\User\\V1\xe2\x02\x1fUserService\\User\\V1\\GPBMetadata\xea\x02\x15UserService::User::V1b\x06proto3"
 
@@ -45,7 +45,7 @@ var file_user_service_user_v1_service_proto_goTypes = []any{
 	(*UpdateProfileNameRequest)(nil),      // 2: user_service.user.v1.UpdateProfileNameRequest
 	(*ChangePasswordRequest)(nil),         // 3: user_service.user.v1.ChangePasswordRequest
 	(*v1.EmptyRequest)(nil),               // 4: core.v1.EmptyRequest
-	(*CheckExistsRequest)(nil),            // 5: user_service.user.v1.CheckExistsRequest
+	(*v1.IDRequest)(nil),                  // 5: core.v1.IDRequest
 	(*v1.EmailRequest)(nil),               // 6: core.v1.EmailRequest
 	(*GenerateScopedTokenResponse)(nil),   // 7: user_service.user.v1.GenerateScopedTokenResponse
 	(*v11.Profile)(nil),                   // 8: user_service.models.v1.Profile
@@ -60,7 +60,7 @@ var file_user_service_user_v1_service_proto_depIdxs = []int32{
 	3,  // 3: user_service.user.v1.UserService.ChangePassword:input_type -> user_service.user.v1.ChangePasswordRequest
 	4,  // 4: user_service.user.v1.UserService.GetProfile:input_type -> core.v1.EmptyRequest
 	4,  // 5: user_service.user.v1.UserService.GetUser:input_type -> core.v1.EmptyRequest
-	5,  // 6: user_service.user.v1.UserService.CheckExists:input_type -> user_service.user.v1.CheckExistsRequest
+	5,  // 6: user_service.user.v1.UserService.CheckExists:input_type -> core.v1.IDRequest
 	6,  // 7: user_service.user.v1.UserService.CheckEmailExists:input_type -> core.v1.EmailRequest
 	7,  // 8: user_service.user.v1.UserService.GenerateScopedToken:output_type -> user_service.user.v1.GenerateScopedTokenResponse
 	8,  // 9: user_service.user.v1.UserService.UpdateProfileAvatarUrl:output_type -> user_service.models.v1.Profile

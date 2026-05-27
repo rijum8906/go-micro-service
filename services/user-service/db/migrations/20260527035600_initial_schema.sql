@@ -1,7 +1,15 @@
+-- Create "set_updated_at" function
+CREATE FUNCTION "set_updated_at" () RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$;
 -- Create "users" table
 CREATE TABLE "users" (
   "id" uuid NOT NULL DEFAULT gen_random_uuid(),
   "email" character varying(255) NOT NULL,
+  "status" character varying(30) NOT NULL DEFAULT 'active',
   "password_hash" character varying(255) NULL,
   "is_email_verified" boolean NOT NULL DEFAULT false,
   "two_factor_enabled" boolean NOT NULL DEFAULT false,
@@ -9,9 +17,21 @@ CREATE TABLE "users" (
   "email_verified_at" timestamptz NULL,
   "created_at" timestamptz NULL DEFAULT now(),
   "updated_at" timestamptz NULL DEFAULT now(),
+  "deleted_at" timestamptz NULL,
   PRIMARY KEY ("id"),
-  CONSTRAINT "users_email_key" UNIQUE ("email")
+  CONSTRAINT "users_email_key" UNIQUE ("email"),
+  CONSTRAINT "users_status_check" CHECK ((status)::text = ANY ((ARRAY['active'::character varying, 'inactive'::character varying, 'deleted'::character varying])::text[]))
 );
+-- Create index "idx_users_email" to table: "users"
+CREATE INDEX "idx_users_email" ON "users" ("email");
+-- Create index "idx_users_is_email_verified" to table: "users"
+CREATE INDEX "idx_users_is_email_verified" ON "users" ("is_email_verified");
+-- Create index "idx_users_status" to table: "users"
+CREATE INDEX "idx_users_status" ON "users" ("status");
+-- Create index "idx_users_two_factor_enabled" to table: "users"
+CREATE INDEX "idx_users_two_factor_enabled" ON "users" ("two_factor_enabled");
+-- Set comment to column: "status" on table: "users"
+COMMENT ON COLUMN "users"."status" IS 'The status of the user (active, inactive, deleted)';
 -- Create "oauths" table
 CREATE TABLE "oauths" (
   "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -23,6 +43,12 @@ CREATE TABLE "oauths" (
   PRIMARY KEY ("id"),
   CONSTRAINT "oauths_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
+-- Create index "idx_oauths_provider_provider_id" to table: "oauths"
+CREATE INDEX "idx_oauths_provider_provider_id" ON "oauths" ("provider", "provider_id");
+-- Create index "idx_oauths_user_id" to table: "oauths"
+CREATE INDEX "idx_oauths_user_id" ON "oauths" ("user_id");
+-- Create trigger "set_updated_at_oauths"
+CREATE TRIGGER "set_updated_at_oauths" BEFORE UPDATE ON "oauths" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();
 -- Create "profiles" table
 CREATE TABLE "profiles" (
   "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -36,6 +62,10 @@ CREATE TABLE "profiles" (
   CONSTRAINT "profiles_user_id_key" UNIQUE ("user_id"),
   CONSTRAINT "profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
+-- Create index "idx_profiles_user_id" to table: "profiles"
+CREATE INDEX "idx_profiles_user_id" ON "profiles" ("user_id");
+-- Create trigger "set_updated_at_profiles"
+CREATE TRIGGER "set_updated_at_profiles" BEFORE UPDATE ON "profiles" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();
 -- Create "sessions" table
 CREATE TABLE "sessions" (
   "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -52,13 +82,17 @@ CREATE TABLE "sessions" (
   PRIMARY KEY ("id"),
   CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE CASCADE
 );
--- Create index "idx_sessions_active" to table: "sessions"
-CREATE INDEX "idx_sessions_active" ON "sessions" ("user_id") WHERE (is_revoked = false);
 -- Create index "idx_sessions_expires" to table: "sessions"
 CREATE INDEX "idx_sessions_expires" ON "sessions" ("expires_at");
+-- Create index "idx_sessions_is_revoked" to table: "sessions"
+CREATE INDEX "idx_sessions_is_revoked" ON "sessions" ("is_revoked");
 -- Create index "idx_sessions_last_login" to table: "sessions"
 CREATE INDEX "idx_sessions_last_login" ON "sessions" ("last_login_at" DESC);
 -- Create index "idx_sessions_refresh_token" to table: "sessions"
-CREATE UNIQUE INDEX "idx_sessions_refresh_token" ON "sessions" ("refresh_token_hash");
+CREATE INDEX "idx_sessions_refresh_token" ON "sessions" ("refresh_token_hash");
 -- Create index "idx_sessions_user_id" to table: "sessions"
 CREATE INDEX "idx_sessions_user_id" ON "sessions" ("user_id");
+-- Create trigger "set_updated_at_sessions"
+CREATE TRIGGER "set_updated_at_sessions" BEFORE UPDATE ON "sessions" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();
+-- Create trigger "set_updated_at_users"
+CREATE TRIGGER "set_updated_at_users" BEFORE UPDATE ON "users" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();

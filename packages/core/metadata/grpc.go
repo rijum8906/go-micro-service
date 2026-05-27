@@ -20,7 +20,8 @@ func Receive(ctx context.Context) (dto.ClientInfo, bool) {
 
 // SendClientInfo adds client info to outgoing gRPC metadata.
 func SendClientInfo(ctx context.Context, info dto.ClientInfo) context.Context {
-	return appendOutgoing(ctx,
+	return appendOutgoing(
+		ctx,
 		dto.MetaDeviceIDKey, info.DeviceID,
 		dto.MetaUserAgentKey, info.UserAgent,
 		dto.MetaClientIPKey, info.IPAddress,
@@ -57,11 +58,11 @@ func ReceiveClientInfo(ctx context.Context) (dto.ClientInfo, bool) {
 
 // SendUserInfo adds user identity metadata to the outgoing context.
 func SendUserInfo(ctx context.Context, info dto.UserInfo) context.Context {
-	return appendOutgoing(ctx,
+	return appendOutgoing(
+		ctx,
 		dto.MetaUserIDKey, info.UserID,
-		dto.MetaAccessTokenKey, info.AccessToken,
+		dto.MetaTokenIDKey, info.TokenID,
 		dto.MetaSessionIDKey, info.SessionID,
-		dto.MetaRoleKey, info.Role,
 	)
 }
 
@@ -73,10 +74,25 @@ func ReceiveUserInfo(ctx context.Context) (dto.UserInfo, bool) {
 	}
 
 	return dto.UserInfo{
-		UserID:      first(md, dto.MetaUserIDKey),
-		AccessToken: first(md, dto.MetaAccessTokenKey),
-		SessionID:   first(md, dto.MetaSessionIDKey),
-		Role:        first(md, dto.MetaRoleKey),
+		UserID:    first(md, dto.MetaUserIDKey),
+		TokenID:   first(md, dto.MetaTokenIDKey),
+		SessionID: first(md, dto.MetaSessionIDKey),
+	}, true
+}
+
+func SendTokensInfo(ctx context.Context, tokens dto.AuthTokens) context.Context {
+	return appendOutgoing(ctx, dto.MetaAccessTokenKey, tokens.AccessToken, dto.MetaRefreshTokenKey, tokens.RefreshToken)
+}
+
+func ReceiveTokensInfo(ctx context.Context) (dto.AuthTokens, bool) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return dto.AuthTokens{}, false
+	}
+
+	return dto.AuthTokens{
+		AccessToken:  first(md, dto.MetaAccessTokenKey),
+		RefreshToken: first(md, dto.MetaRefreshTokenKey),
 	}, true
 }
 

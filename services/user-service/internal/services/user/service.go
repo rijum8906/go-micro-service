@@ -2,76 +2,95 @@ package user
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	coreconstants "github.com/rijum8906/relay/packages/core/constants"
 	"github.com/rijum8906/relay/packages/core/coreutils"
-	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/protoutils"
-	"github.com/rijum8906/relay/packages/core/token"
+	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/user/app/constants"
+	"github.com/rijum8906/relay/services/user/internal/db"
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
-func (s *userService) GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *dto.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError) {
+func (s *UserService) GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest) (*userv1.GenerateScopedTokenResponse, error) {
 	if req == nil {
-		return nil, apperror.ErrValidation.WithMessage("generate scoped token request is required")
+		return nil, apperror.ErrValidation.WithMessage("revoke other sessions request is required")
 	}
 
-	if user == nil || user.UserID == "" {
-		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
+	// Extract user information from authenticated context
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
 
-	if req.AuthMethod != corev1.AuthMethod_AUTH_METHOD_PASSWORD {
+	if req.AuthMethod.String() != string(coreconstants.AuthMethodPassword) {
 		return nil, apperror.ErrValidation.WithMessage("invalid auth method")
 	}
-
-	scope, appErr := token.TokenScopeFromProto(req.GetScope())
-	if appErr != nil {
-		return nil, appErr
-	}
-	scopedToken, appErr := s.utils.TokenManager.IssueScopedToken(ctx, user.UserID, scope)
-	if appErr != nil {
-		return nil, appErr
+	if !constants.IsValidaTokenScope(req.Scope.String()) {
+		return nil, apperror.ErrValidation.WithMessage("invalid token scope")
 	}
 
-	userID, _ := uuid.Parse(user.UserID)
+	userID, _ := uuid.Parse(userInfo.UserID)
 
-	userInfo, appErr := s.repos.User.GetUser(ctx, userID)
-	if appErr != nil {
-		return nil, appErr
+	user, err := s.DBQ.GetUser(ctx, userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperror.ErrNotFound.WithMessage("user not found")
+		}
+		return nil, apperror.ErrInternal.
+			WithDetail("internal_message", "failed to get user by id").
+			WithDetail("db_error", err.Error())
 	}
 
-	if appErr = s.utils.HashService.Verify(userInfo.PasswordHash.String, req.AuthValue); appErr != nil {
+	if !s.HashService.Verify(user.PasswordHash.String, req.AuthValue) {
+		return nil, apperror.ErrValidation.WithMessage("invalid password")
+	}
+
+	tokenRes, appErr := s.TokenManager.GenerateToken(
+		userInfo.UserID,
+		uuid.NewString(),
+		constants.TokenScopeChangePassword,
+		s.Config.ScopedTokenTTL,
+	)
+	if appErr != nil {
 		return nil, appErr
 	}
 
 	return &userv1.GenerateScopedTokenResponse{
 		Token: &modelsv1.Token{
-			Value:     scopedToken,
-			ExpiresAt: coreutils.ParseToProtoTimestamp(s.env.ScopedTokenTTL),
+			Value:     tokenRes.TokenString,
+			ExpiresAt: coreutils.ParseToProtoTimestamp(s.Config.ScopedTokenTTL),
 		},
 	}, nil
 }
 
-func (s *userService) ChangePassword(ctx context.Context, req *userv1.ChangePasswordRequest) (*corev1.SuccessResponse, *apperror.AppError) {
+func (s *UserService) ChangePassword(ctx context.Context, req *userv1.ChangePasswordRequest) (*corev1.SuccessResponse, error) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("change password request is required")
 	}
 
-	scopedToken := req.GetScopedToken()
-	if scopedToken == nil || scopedToken.GetValue() == "" {
-		return nil, apperror.ErrValidation.WithMessage("change password scoped token is required")
+	// Extract user information from authenticated context
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
 
-	claims, appErr := s.utils.TokenManager.ValidateScopedToken(ctx, scopedToken.GetValue())
+	claims, appErr := s.TokenManager.ValidateScopedToken(ctx, req.TokenScope)
 	if appErr != nil {
 		return nil, appErr
 	}
+	if claims.Subject != userInfo.UserID {
+		return nil, apperror.ErrValidation.WithMessage("invalid user id in token")
+	}
 
-	if claims.Scope != token.TokenScopeChangePassword {
+	if claims.Scope != constants.TokenScopeChangePassword {
 		return nil, apperror.ErrValidation.WithMessage("invalid scoped token scope for change password")
 	}
 
@@ -80,18 +99,19 @@ func (s *userService) ChangePassword(ctx context.Context, req *userv1.ChangePass
 		return nil, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
 	}
 
-	newPasswordHash, appErr := s.utils.HashService.Hash(req.GetNewPassword())
+	newPasswordHash, appErr := s.HashService.Hash(req.NewPassword)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	appErr = s.repos.User.UpdateUserPassword(ctx, userID, newPasswordHash)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = s.utils.TokenManager.RevokeScopedToken(ctx, scopedToken.GetValue()); appErr != nil {
-		return nil, appErr
+	if err = s.DBQ.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+		ID: userID,
+		PasswordHash: pgtype.Text{
+			String: newPasswordHash,
+			Valid:  true,
+		},
+	}); err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to update user").WithDetail("error", err.Error())
 	}
 
 	return &corev1.SuccessResponse{
@@ -99,7 +119,7 @@ func (s *userService) ChangePassword(ctx context.Context, req *userv1.ChangePass
 	}, nil
 }
 
-func (s *userService) UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest, userInfo *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
+func (s *UserService) UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest) (*modelsv1.Profile, error) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update profile name request is required")
 	}
@@ -109,19 +129,21 @@ func (s *userService) UpdateProfileName(ctx context.Context, req *userv1.UpdateP
 		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
 	}
 
-	if appErr := s.validateProfileAccess(ctx, profileID, userInfo); appErr != nil {
-		return nil, appErr
+	profile, err := s.DBQ.UpdateProfileName(ctx, db.UpdateProfileNameParams{
+		ID:        profileID,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.
+			WithMessage("Failed to update profile").
+			WithDetail("db_error", err.Error())
 	}
 
-	profile, appErr := s.repos.Profile.UpdateProfileNames(ctx, profileID, req.GetFirstName(), req.GetLastName())
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return utils.MapProfile(profile), nil
+	return utils.MapProfile(&profile), nil
 }
 
-func (s *userService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest, userInfo *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
+func (s *UserService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest) (*modelsv1.Profile, error) {
 	if req == nil {
 		return nil, apperror.ErrValidation.WithMessage("update profile avatar request is required")
 	}
@@ -131,98 +153,89 @@ func (s *userService) UpdateProfileAvatarUrl(ctx context.Context, req *userv1.Up
 		return nil, apperror.ErrValidation.WithMessage("invalid profile id").WithDetail("error", err.Error())
 	}
 
-	if appErr := s.validateProfileAccess(ctx, profileID, userInfo); appErr != nil {
-		return nil, appErr
-	}
-
-	profile, appErr := s.repos.Profile.UpdateProfileAvatar(ctx, profileID, req.GetAvatarUrl())
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return utils.MapProfile(profile), nil
-}
-
-func (s *userService) GetProfile(ctx context.Context, userInfo *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError) {
-	if userInfo == nil || userInfo.UserID == "" {
-		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
-	}
-
-	userID, appErr := utils.NewUUID(userInfo.UserID)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	profile, appErr := s.repos.Profile.GetProfileByUserID(ctx, userID)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return utils.MapProfile(profile), nil
-}
-
-func (s *userService) GetUser(ctx context.Context, userInfo *dto.UserInfo) (*modelsv1.User, *apperror.AppError) {
-	if userInfo == nil || userInfo.UserID == "" {
-		return nil, apperror.ErrValidation.WithMessage("user metadata is required")
-	}
-
-	userID, appErr := utils.NewUUID(userInfo.UserID)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	user, appErr := s.repos.User.GetUser(ctx, userID)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return utils.MapUser(user), nil
-}
-
-func (s *userService) validateProfileAccess(ctx context.Context, profileID uuid.UUID, userInfo *dto.UserInfo) *apperror.AppError {
-	if userInfo == nil || userInfo.UserID == "" {
-		return apperror.ErrValidation.WithMessage("user metadata is required")
-	}
-
-	userID, appErr := utils.NewUUID(userInfo.UserID)
-	if appErr != nil {
-		return appErr
-	}
-
-	profile, appErr := s.repos.Profile.GetProfileByUserID(ctx, userID)
-	if appErr != nil {
-		return appErr
-	}
-
-	if profile.ID != profileID {
-		return apperror.ErrForbidden.WithMessage("profile does not belong to user")
-	}
-
-	return nil
-}
-
-func (s *userService) CheckExists(ctx context.Context, id string) (bool, *apperror.AppError) {
-	useID, err := uuid.Parse(id)
+	profile, err := s.DBQ.UpdateProfileAvatarURL(ctx, db.UpdateProfileAvatarURLParams{
+		ID:        profileID,
+		AvatarUrl: req.AvatarUrl,
+	})
 	if err != nil {
-		return false, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
-	}
-	exists, appErr := s.repos.User.CheckExists(ctx, useID)
-	if appErr != nil {
-		return false, appErr
+		return nil, apperror.ErrInternal.
+			WithMessage("Failed to update profile").
+			WithDetail("db_error", err.Error())
 	}
 
-	return exists, nil
+	return utils.MapProfile(&profile), nil
 }
 
-func (s *userService) CheckEmailExists(ctx context.Context, email string) (bool, *apperror.AppError) {
-	if appErr := protoutils.ValidateEmailReq(&corev1.EmailRequest{Email: email}); appErr != nil {
-		return false, appErr
+func (s *UserService) GetProfile(ctx context.Context, req *corev1.EmptyRequest) (*modelsv1.Profile, error) {
+	// Extract user information from authenticated context
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
 
-	exists, err := s.repos.User.CheckEmailExists(ctx, email)
+	userID, err := uuid.Parse(userInfo.UserID)
 	if err != nil {
-		return false, apperror.ErrInternal.WithMessage("Failed to check user exists").WithDetail("error", err.Error())
+		return nil, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
 	}
 
-	return exists, nil
+	profile, appErr := s.DBQ.GetProfileByUserID(ctx, userID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return utils.MapProfile(&profile), nil
+}
+
+func (s *UserService) GetUser(ctx context.Context, req *corev1.EmptyRequest) (*modelsv1.User, error) {
+	// Extract user information from authenticated context
+	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
+	}
+
+	userID, err := uuid.Parse(userInfo.UserID)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
+	}
+
+	user, appErr := s.DBQ.GetUser(ctx, userID)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return utils.MapUser(&user), nil
+}
+
+func (s *UserService) CheckEmailExists(ctx context.Context, req *corev1.EmailRequest) (*userv1.CheckExistsResponse, error) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("check email exists request is required")
+	}
+
+	exists, err := s.DBQ.CheckUserEmailExists(ctx, req.Email)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to check user exists").WithDetail("error", err.Error())
+	}
+
+	return &userv1.CheckExistsResponse{
+		Exists: exists,
+	}, nil
+}
+
+func (s *UserService) CheckExists(ctx context.Context, req *corev1.IDRequest) (*userv1.CheckExistsResponse, error) {
+	if req == nil {
+		return nil, apperror.ErrValidation.WithMessage("check email exists request is required")
+	}
+	userID, err := uuid.Parse(req.Id)
+	if err != nil {
+		return nil, apperror.ErrValidation.WithMessage("invalid user id").WithDetail("error", err.Error())
+	}
+
+	exists, err := s.DBQ.CheckUserExists(ctx, userID)
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to check user exists").WithDetail("error", err.Error())
+	}
+
+	return &userv1.CheckExistsResponse{
+		Exists: exists,
+	}, nil
 }

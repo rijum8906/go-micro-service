@@ -2,53 +2,75 @@
 package auth
 
 import (
-	"context"
-
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
-	"github.com/rijum8906/relay/packages/core/dto"
-	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
+	"github.com/rijum8906/relay/packages/core/hash"
+	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
+	"github.com/rijum8906/relay/packages/core/token"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/user/app"
 	"github.com/rijum8906/relay/services/user/app/config"
-	"github.com/rijum8906/relay/services/user/internal/utils"
+	"github.com/rijum8906/relay/services/user/internal/db"
+	"github.com/rijum8906/relay/services/user/internal/services/helper"
+	"go.uber.org/zap"
 )
 
-type AuthService interface {
-	Login(ctx context.Context, data *authv1.LoginRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
-	Register(ctx context.Context, data *authv1.RegisterRequest, client *dto.ClientInfo) (*authv1.AuthResponse, *apperror.AppError)
-	Logout(ctx context.Context, client *dto.UserInfo) (bool, *apperror.AppError)
-	RefreshToken(ctx context.Context, user *dto.UserInfo) (*authv1.RefreshTokenResponse, *apperror.AppError)
-	RequestEmailVerification(ctx context.Context, req *authv1.RequestEmailVerificationRequest) (*corev1.SuccessResponse, *apperror.AppError)
-	RequestPasswordReset(ctx context.Context, req *authv1.RequestPasswordResetRequest) (*corev1.SuccessResponse, *apperror.AppError)
-	VerifyEmail(ctx context.Context, req *authv1.VerifyEmailRequest) (*corev1.SuccessResponse, *apperror.AppError)
-	ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*corev1.SuccessResponse, *apperror.AppError)
+type AuthService struct {
+	// Core
+	DBPool              *pgxpool.Pool
+	DBQ                 *db.Queries
+	UserClient          userv1.UserServiceClient
+	OrgOpenFGAPublisher broker.Publisher
+	Helper              *helper.ServiceHelper
+
+	// Utils
+	TuppleManager coreopenfga.TuppleManager
+	TokenManager  *token.TokenManager
+	Permission    *permissions.PermissionManager
+	HashService   *hash.HashService
+	Logger        *zap.Logger
+
+	// Config
+	Config *config.Env
 }
 
-type authService struct {
-	env       *config.Env
-	repos     *utils.Repos
-	utils     *utils.ServiceUtils
-	publisher broker.Publisher
-}
-
-func NewAuthService(repo *utils.Repos, utils *utils.ServiceUtils, env *config.Env, publisher broker.Publisher) (AuthService, *apperror.AppError) {
-	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("repos", "auth repositories are not configured")
-	}
-	if utils == nil || utils.TokenManager == nil || utils.HashService == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("utils", "auth utilities are not configured")
-	}
-	if env == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("env", "auth environment config is not configured")
-	}
-	if publisher == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize auth service").WithDetail("publisher", "job publisher is not configured")
+func New() (authv1.AuthServiceServer, *apperror.AppError) {
+	application, appErr := app.GetInstance()
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	return &authService{
-		env:       env,
-		repos:     repo,
-		utils:     utils,
-		publisher: publisher,
+	q := db.New(application.DB())
+
+	fgaClient, appErr := coreopenfga.NewClient(application.Config().FGAAPIURL)
+	if appErr != nil {
+		return nil, appErr
+	}
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+	permissionManager := permissions.NewPermissionManager(fgaClient)
+
+	publisher := broker.NewPublisher(application.BrokerCLient().GetClient())
+
+	helper, appErr := helper.GetHelper()
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return &AuthService{
+		DBPool:              application.DB(),
+		DBQ:                 q,
+		TuppleManager:       tuppleManager,
+		TokenManager:        application.TokenManager(),
+		Permission:          permissionManager,
+		OrgOpenFGAPublisher: publisher,
+		HashService: hash.NewHashService(hash.Config{
+			BcryptCost: 10,
+		}),
+		Logger: application.Logger(),
+		Config: application.Config(),
+		Helper: helper,
 	}, nil
 }

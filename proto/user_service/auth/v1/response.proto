@@ -12,4 +12,5 @@ message AuthResponse {
 
 message RefreshTokenResponse {
   user_service.models.v1.Token access_token = 1;
+  string refresh_token = 2;
 }

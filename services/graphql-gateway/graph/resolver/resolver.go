@@ -22,15 +22,15 @@ type GrpcClients struct {
 }
 
 type Resolver struct {
-	Clients  *GrpcClients
-	Validate *validator.Validate
-	Token    *token.TokenManager
+	Clients      *GrpcClients
+	Validate     *validator.Validate
+	TokenManager *token.TokenManager
 }
 
 func NewResolver(clients *GrpcClients, token *token.TokenManager) *Resolver {
 	return &Resolver{
-		Validate: validator.New(),
-		Clients:  clients,
-		Token:    token,
+		Validate:     validator.New(),
+		Clients:      clients,
+		TokenManager: token,
 	}
 }

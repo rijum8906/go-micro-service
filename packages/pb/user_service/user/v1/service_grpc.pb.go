@@ -41,7 +41,7 @@ type UserServiceClient interface {
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
 	GetProfile(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.Profile, error)
 	GetUser(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.User, error)
-	CheckExists(ctx context.Context, in *CheckExistsRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
+	CheckExists(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
 	CheckEmailExists(ctx context.Context, in *v11.EmailRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
 }
 
@@ -113,7 +113,7 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *v11.EmptyRequest, o
 	return out, nil
 }
 
-func (c *userServiceClient) CheckExists(ctx context.Context, in *CheckExistsRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error) {
+func (c *userServiceClient) CheckExists(ctx context.Context, in *v11.IDRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CheckExistsResponse)
 	err := c.cc.Invoke(ctx, UserService_CheckExists_FullMethodName, in, out, cOpts...)
@@ -143,7 +143,7 @@ type UserServiceServer interface {
 	ChangePassword(context.Context, *ChangePasswordRequest) (*v11.SuccessResponse, error)
 	GetProfile(context.Context, *v11.EmptyRequest) (*v1.Profile, error)
 	GetUser(context.Context, *v11.EmptyRequest) (*v1.User, error)
-	CheckExists(context.Context, *CheckExistsRequest) (*CheckExistsResponse, error)
+	CheckExists(context.Context, *v11.IDRequest) (*CheckExistsResponse, error)
 	CheckEmailExists(context.Context, *v11.EmailRequest) (*CheckExistsResponse, error)
 }
 
@@ -172,7 +172,7 @@ func (UnimplementedUserServiceServer) GetProfile(context.Context, *v11.EmptyRequ
 func (UnimplementedUserServiceServer) GetUser(context.Context, *v11.EmptyRequest) (*v1.User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedUserServiceServer) CheckExists(context.Context, *CheckExistsRequest) (*CheckExistsResponse, error) {
+func (UnimplementedUserServiceServer) CheckExists(context.Context, *v11.IDRequest) (*CheckExistsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CheckExists not implemented")
 }
 func (UnimplementedUserServiceServer) CheckEmailExists(context.Context, *v11.EmailRequest) (*CheckExistsResponse, error) {
@@ -307,7 +307,7 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _UserService_CheckExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckExistsRequest)
+	in := new(v11.IDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -319,7 +319,7 @@ func _UserService_CheckExists_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: UserService_CheckExists_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).CheckExists(ctx, req.(*CheckExistsRequest))
+		return srv.(UserServiceServer).CheckExists(ctx, req.(*v11.IDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

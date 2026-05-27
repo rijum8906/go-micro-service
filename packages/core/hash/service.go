@@ -9,28 +9,24 @@ import (
 )
 
 // Hash generates a bcrypt hash from a password
-func (s *hashService) Hash(password string) (string, *apperror.AppError) {
+func (s *HashService) Hash(password string) (string, *apperror.AppError) {
 	// Generate bcrypt hash
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), s.cost)
 	if err != nil {
-		return "", apperror.ErrInternal.WithMessage("failed to hash password").WithDetail("err", err.Error())
+		return "", apperror.ErrInternal.WithMessage("failed to hash password").WithDetail("hash_error", err.Error())
 	}
 
 	return string(hashedBytes), nil
 }
 
 // Verify checks if a password matches its hash
-func (s *hashService) Verify(hash string, password string) *apperror.AppError {
+func (s *HashService) Verify(hash string, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	if err != nil {
-		return apperror.ErrUnAuthenticated.WithMessage("invalid credentials")
-	}
-
-	return nil
+	return err == nil
 }
 
 // Generate generates a cryptographically secure random string of given size
-func (s *hashService) Generate(size int) (string, *apperror.AppError) {
+func (s *HashService) Generate(size int) (string, *apperror.AppError) {
 	// Calculate bytes needed for base64 encoding
 	// Base64 uses 4 characters per 3 bytes, so we need (size * 3 + 3) / 4 bytes
 	byteSize := (size * 3) / 4

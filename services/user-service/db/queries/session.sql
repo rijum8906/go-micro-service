@@ -1,51 +1,6 @@
--- name: GetSession :one
-SELECT *
-FROM sessions
-WHERE id = $1 LIMIT 1;
-
--- name: GetSessionsByUserID :many
-SELECT *
-FROM sessions
-WHERE user_id = $1 ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
-
--- name: GetActiveSessionsByUserID :many
-SELECT *
-FROM sessions
-WHERE user_id = $1 AND is_revoked = false ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
-
--- name: GetSessionByRefreshTokenHash :one
-SELECT *
-FROM sessions
-WHERE refresh_token_hash = $1 LIMIT 1;
-
--- name: UpdateSession :one
-UPDATE sessions
-SET user_id = $2,
-refresh_token_hash = $3,
-user_agent = $4,
-ip_addr = $5,
-device_id = $6,
-last_login_at = $7,
-expires_at = $8,
-is_revoked = $9
-WHERE id = $1
-RETURNING *;
-
--- name: RevokeSession :exec
-UPDATE sessions
-SET is_revoked = true
-WHERE id = $1;
-
--- name: RevokeActiveSessions :exec
-UPDATE sessions
-SET is_revoked = true
-WHERE user_id = $1 AND is_revoked = false;
-
--- name: RevokeOtherSessions :exec
-UPDATE sessions
-SET is_revoked = true
-WHERE user_id = $1 AND id <> $2 AND is_revoked = false;
-
+-- =====================================================
+-- CREATE METHODS
+-- =====================================================
 -- name: CreateSession :one
 INSERT INTO sessions (
     user_id,
@@ -59,14 +14,87 @@ INSERT INTO sessions (
 )
 RETURNING *;
 
--- name: DeleteSession :exec
+-- =====================================================
+-- GET METHODS
+-- =====================================================
+-- name: GetSession :one
+SELECT *
+    FROM sessions
+    WHERE id = $1 AND is_revoked = false LIMIT 1;
+
+-- name: GetSessionsByUserID :many
+SELECT *
+FROM sessions
+WHERE user_id = $1 AND is_revoked = false ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
+
+-- name: GetActiveSessionsByUserID :many
+SELECT *
+FROM sessions
+WHERE user_id = $1 AND is_revoked = false ORDER BY last_login_at DESC LIMIT $2 OFFSET $3;
+
+-- name: GetSessionByRefreshTokenHash :one
+SELECT *
+FROM sessions
+WHERE refresh_token_hash = $1 AND is_revoked = false LIMIT 1;
+
+-- =====================================================
+-- CHECK METHODS
+-- =====================================================
+-- name: CheckSessionExists :one
+SELECT EXISTS(
+    SELECT 1
+    FROM sessions
+    WHERE id = $1 AND is_revoked = false
+);
+
+-- name: CheckSessionExistsByTokenHash :one
+SELECT EXISTS(
+    SELECT 1
+    FROM sessions
+    WHERE refresh_token_hash = $1 AND is_revoked = false
+);
+
+-- =====================================================
+-- UPDATE METHODS
+-- =====================================================
+-- name: UpdateSessionRefreshTokenHash :one
+UPDATE sessions
+SET refresh_token_hash = $2,
+last_login_at = NOW()
+WHERE id = $1 AND is_revoked = false
+RETURNING *;
+
+-- name: RevokeSession :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE id = $1 AND is_revoked = false;
+
+-- name: RevokeSessionByRefreshTokenHash :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE refresh_token_hash = $1 AND is_revoked = false;
+
+-- name: RevokeActiveSessions :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE user_id = $1 AND is_revoked = false;
+
+-- name: RevokeOtherSessions :exec
+UPDATE sessions
+SET is_revoked = true
+WHERE user_id = $1 AND id = $2 AND is_revoked = false;
+
+-- =====================================================
+-- DELETE METHODS
+-- =====================================================
+-- name: DeleteSessionHard :exec
 DELETE FROM sessions
-WHERE id = $1;
+WHERE id = $1 AND is_revoked = false;
 
 -- name: DeleteExpiredSessions :exec
 DELETE FROM sessions
-WHERE expires_at <= now();
+WHERE expires_at <= now() AND is_revoked = false;
 
 -- name: DeleteSessionsByUserID :exec
 DELETE FROM sessions
-WHERE user_id = $1;
+WHERE user_id = $1 AND is_revoked = false;

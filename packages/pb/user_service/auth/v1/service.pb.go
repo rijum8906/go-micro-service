@@ -25,12 +25,12 @@ var File_user_service_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/auth/v1/service.proto\x12\x14user_service.auth.v1\x1a\x14core/v1/common.proto\x1a\"user_service/auth/v1/request.proto\x1a#user_service/auth/v1/response.proto2\xd3\x05\n" +
+	"\"user_service/auth/v1/service.proto\x12\x14user_service.auth.v1\x1a\x14core/v1/common.proto\x1a\"user_service/auth/v1/request.proto\x1a#user_service/auth/v1/response.proto2\xe7\x05\n" +
 	"\vAuthService\x12O\n" +
 	"\x05Login\x12\".user_service.auth.v1.LoginRequest\x1a\".user_service.auth.v1.AuthResponse\x12U\n" +
-	"\bRegister\x12%.user_service.auth.v1.RegisterRequest\x1a\".user_service.auth.v1.AuthResponse\x129\n" +
-	"\x06Logout\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponse\x12e\n" +
-	"\fRefreshToken\x12).user_service.auth.v1.RefreshTokenRequest\x1a*.user_service.auth.v1.RefreshTokenResponse\x12k\n" +
+	"\bRegister\x12%.user_service.auth.v1.RegisterRequest\x1a\".user_service.auth.v1.AuthResponse\x12G\n" +
+	"\x06Logout\x12#.user_service.auth.v1.LogoutRequest\x1a\x18.core.v1.SuccessResponse\x12k\n" +
+	"\fRefreshToken\x12/.user_service.auth.v1.RefreshAccessTokenRequest\x1a*.user_service.auth.v1.RefreshTokenResponse\x12k\n" +
 	"\x18RequestEmailVerification\x125.user_service.auth.v1.RequestEmailVerificationRequest\x1a\x18.core.v1.SuccessResponse\x12c\n" +
 	"\x14RequestPasswordReset\x121.user_service.auth.v1.RequestPasswordResetRequest\x1a\x18.core.v1.SuccessResponse\x12Q\n" +
 	"\vVerifyEmail\x12(.user_service.auth.v1.VerifyEmailRequest\x1a\x18.core.v1.SuccessResponse\x12U\n" +
@@ -40,8 +40,8 @@ const file_user_service_auth_v1_service_proto_rawDesc = "" +
 var file_user_service_auth_v1_service_proto_goTypes = []any{
 	(*LoginRequest)(nil),                    // 0: user_service.auth.v1.LoginRequest
 	(*RegisterRequest)(nil),                 // 1: user_service.auth.v1.RegisterRequest
-	(*v1.EmptyRequest)(nil),                 // 2: core.v1.EmptyRequest
-	(*RefreshTokenRequest)(nil),             // 3: user_service.auth.v1.RefreshTokenRequest
+	(*LogoutRequest)(nil),                   // 2: user_service.auth.v1.LogoutRequest
+	(*RefreshAccessTokenRequest)(nil),       // 3: user_service.auth.v1.RefreshAccessTokenRequest
 	(*RequestEmailVerificationRequest)(nil), // 4: user_service.auth.v1.RequestEmailVerificationRequest
 	(*RequestPasswordResetRequest)(nil),     // 5: user_service.auth.v1.RequestPasswordResetRequest
 	(*VerifyEmailRequest)(nil),              // 6: user_service.auth.v1.VerifyEmailRequest
@@ -53,8 +53,8 @@ var file_user_service_auth_v1_service_proto_goTypes = []any{
 var file_user_service_auth_v1_service_proto_depIdxs = []int32{
 	0,  // 0: user_service.auth.v1.AuthService.Login:input_type -> user_service.auth.v1.LoginRequest
 	1,  // 1: user_service.auth.v1.AuthService.Register:input_type -> user_service.auth.v1.RegisterRequest
-	2,  // 2: user_service.auth.v1.AuthService.Logout:input_type -> core.v1.EmptyRequest
-	3,  // 3: user_service.auth.v1.AuthService.RefreshToken:input_type -> user_service.auth.v1.RefreshTokenRequest
+	2,  // 2: user_service.auth.v1.AuthService.Logout:input_type -> user_service.auth.v1.LogoutRequest
+	3,  // 3: user_service.auth.v1.AuthService.RefreshToken:input_type -> user_service.auth.v1.RefreshAccessTokenRequest
 	4,  // 4: user_service.auth.v1.AuthService.RequestEmailVerification:input_type -> user_service.auth.v1.RequestEmailVerificationRequest
 	5,  // 5: user_service.auth.v1.AuthService.RequestPasswordReset:input_type -> user_service.auth.v1.RequestPasswordResetRequest
 	6,  // 6: user_service.auth.v1.AuthService.VerifyEmail:input_type -> user_service.auth.v1.VerifyEmailRequest

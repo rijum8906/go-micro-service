@@ -9,8 +9,8 @@ import "user_service/auth/v1/response.proto";
 service AuthService {
   rpc Login(LoginRequest) returns (AuthResponse);
   rpc Register(RegisterRequest) returns (AuthResponse);
-  rpc Logout(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
-  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc Logout(LogoutRequest) returns (core.v1.SuccessResponse);
+  rpc RefreshToken(RefreshAccessTokenRequest) returns (RefreshTokenResponse);
   rpc RequestEmailVerification(RequestEmailVerificationRequest) returns (core.v1.SuccessResponse);
   rpc RequestPasswordReset(RequestPasswordResetRequest) returns (core.v1.SuccessResponse);
   rpc VerifyEmail(VerifyEmailRequest) returns (core.v1.SuccessResponse);

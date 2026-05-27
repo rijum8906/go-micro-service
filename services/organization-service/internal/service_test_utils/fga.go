@@ -11,14 +11,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/testutils"
+	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
-	"github.com/rijum8906/relay/packages/pb/user_service/mocks"
+	userv1_mock "github.com/rijum8906/relay/packages/pb/user_service/mocks"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 )
 
-var MockUserServiceClient = &mocks.MockUserServiceClient{}
+var MockUserServiceClient = &userv1_mock.MockUserServiceClient{}
 
 func MustCreateService() (db.Querier, *pgxpool.Pool, *coreopenfga.Client) {
 	apiURL := GetEnv("OPENFGA_TEST_API_URL", "FGA_TEST_API_URL")
@@ -100,7 +101,7 @@ func MustCreateOrg(ctx context.Context, q db.Querier, req *organizationv1.Create
 	if err != nil {
 		panic(err)
 	}
-	MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: req.CreatedBy,
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,

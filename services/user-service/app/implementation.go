@@ -6,26 +6,12 @@ import (
 	"net"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/broker"
 	"github.com/rijum8906/relay/packages/core/corelogger"
 	"github.com/rijum8906/relay/packages/core/hash"
 	"github.com/rijum8906/relay/packages/core/token"
-	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
-	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
-	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/user/app/config"
-	userdb "github.com/rijum8906/relay/services/user/internal/db"
-	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
-	profilerepo "github.com/rijum8906/relay/services/user/internal/repository/profile"
-	sessionrepo "github.com/rijum8906/relay/services/user/internal/repository/session"
-	userrepo "github.com/rijum8906/relay/services/user/internal/repository/user"
-	"github.com/rijum8906/relay/services/user/internal/services/auth"
-	"github.com/rijum8906/relay/services/user/internal/services/session"
-	"github.com/rijum8906/relay/services/user/internal/services/user"
-	"github.com/rijum8906/relay/services/user/internal/utils"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
@@ -54,6 +40,10 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 }
 
 func (a *Application) initUtils() *apperror.AppError {
+	if a.infra.cache == nil {
+		return apperror.ErrInternal.WithMessage("failed to initialize token manager").WithDetail("error", "redis client is nil")
+	}
+
 	// Token
 	tokenManager := token.NewTokenManager(token.Config{
 		JwtSecret:      []byte(a.config.JWTSecret),
@@ -86,42 +76,6 @@ func (a *Application) initUtils() *apperror.AppError {
 	return nil
 }
 
-func (a *Application) initHandler() *apperror.AppError {
-	queries := userdb.New(a.infra.database)
-	repos := &utils.Repos{
-		User:    userrepo.NewAuthRepository(queries),
-		Profile: profilerepo.NewProfileRepository(queries),
-		Session: sessionrepo.NewSessionRepository(queries),
-	}
-
-	brokerPublisher := broker.NewPublisher(a.infra.brokerClient.GetClient())
-
-	authService, appErr := auth.NewAuthService(repos, utils.NewUtils(a.utils.token, a.utils.hash), a.config, brokerPublisher)
-	if appErr != nil {
-		return appErr
-	}
-
-	userService, appErr := user.NewUserService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv)
-	if appErr != nil {
-		return appErr
-	}
-
-	sessionService, appErr := session.NewSessionService(repos, utils.NewUtils(a.utils.token, a.utils.hash), &a.config.CoreEnv)
-	if appErr != nil {
-		return appErr
-	}
-
-	authHandler := handler.NewAuthHandler(authService)
-	userHandler := handler.NewUserHandler(userService)
-	sessionHandler := handler.NewSessionHandler(sessionService)
-
-	a.services.auth = authHandler
-	a.services.session = sessionHandler
-	a.services.user = userHandler
-
-	return nil
-}
-
 func (a *Application) initGRPCServer() *apperror.AppError {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", a.config.Port))
 	if err != nil {
@@ -132,13 +86,6 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 	// Create and Register grpc server
 	server := grpc.NewServer()
 	a.server = server
-	authv1.RegisterAuthServiceServer(server, a.services.auth)
-	userv1.RegisterUserServiceServer(server, a.services.user)
-	sessionv1.RegisterSessionServiceServer(server, a.services.session)
-
-	if a.config.AppEnv == "development" {
-		reflection.Register(server)
-	}
 
 	return nil
 }

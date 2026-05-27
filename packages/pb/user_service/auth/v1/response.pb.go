@@ -85,6 +85,7 @@ func (x *AuthResponse) GetTokens() *v1.AuthToken {
 type RefreshTokenResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   *v1.Token              `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -126,6 +127,13 @@ func (x *RefreshTokenResponse) GetAccessToken() *v1.Token {
 	return nil
 }
 
+func (x *RefreshTokenResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
 var File_user_service_auth_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_response_proto_rawDesc = "" +
@@ -134,9 +142,10 @@ const file_user_service_auth_v1_response_proto_rawDesc = "" +
 	"\fAuthResponse\x120\n" +
 	"\x04user\x18\x01 \x01(\v2\x1c.user_service.models.v1.UserR\x04user\x129\n" +
 	"\aprofile\x18\x02 \x01(\v2\x1f.user_service.models.v1.ProfileR\aprofile\x129\n" +
-	"\x06tokens\x18\x03 \x01(\v2!.user_service.models.v1.AuthTokenR\x06tokens\"X\n" +
+	"\x06tokens\x18\x03 \x01(\v2!.user_service.models.v1.AuthTokenR\x06tokens\"}\n" +
 	"\x14RefreshTokenResponse\x12@\n" +
-	"\faccess_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vaccessTokenB\xdb\x01\n" +
+	"\faccess_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x02 \x01(\tR\frefreshTokenB\xdb\x01\n" +
 	"\x18com.user_service.auth.v1B\rResponseProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\x13UserService.Auth.V1\xca\x02\x13UserService\\Auth\\V1\xe2\x02\x1fUserService\\Auth\\V1\\GPBMetadata\xea\x02\x15UserService::Auth::V1b\x06proto3"
 
 var (

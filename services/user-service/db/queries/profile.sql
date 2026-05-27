@@ -1,3 +1,20 @@
+-- =====================================================
+-- CREATE METHODS
+-- =====================================================
+-- name: CreateProfile :one
+INSERT INTO profiles (
+    user_id,
+    first_name,
+    last_name,
+    avatar_url
+) VALUES (
+    $1, $2, $3, $4
+)
+RETURNING *;
+
+-- =====================================================
+-- GET METHODS
+-- ====================================================
 -- name: GetProfile :one
 SELECT *
 FROM profiles
@@ -8,6 +25,10 @@ SELECT *
 FROM profiles
 WHERE user_id = $1 LIMIT 1;
 
+
+-- =====================================================
+-- UPDATE METHODS
+-- =====================================================
 -- name: UpdateProfileName :one
 UPDATE profiles
 SET first_name = $2,
@@ -21,17 +42,10 @@ SET avatar_url = $2
 WHERE id = $1
 RETURNING *;
 
--- name: CreateProfile :one
-INSERT INTO profiles (
-    user_id,
-    first_name,
-    last_name,
-    avatar_url
-) VALUES (
-    $1, $2, $3, $4
-)
-RETURNING *;
 
--- name: DeleteProfile :exec
+-- =====================================================
+-- DELETE METHODS
+-- =====================================================
+-- name: DeleteProfileHard :exec
 DELETE FROM profiles
 WHERE id = $1;

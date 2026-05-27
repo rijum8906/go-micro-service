@@ -9,10 +9,10 @@ import (
 	"context"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
-	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
@@ -67,12 +67,19 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	res, err := r.Clients.AuthClient.Logout(ctx, &corev1.EmptyRequest{})
+	tokens, ok := metadata.ReceiveTokensInfo(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithMessage("failed to logout")
+	}
+
+	res, err := r.Clients.AuthClient.Logout(ctx, &authv1.LogoutRequest{
+		RefreshToken: tokens.RefreshToken,
+	})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
@@ -172,7 +179,7 @@ func (r *mutationResolver) RevokeSession(ctx context.Context, input *model.Revok
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -199,7 +206,7 @@ func (r *mutationResolver) RevokeAllSessions(ctx context.Context, input model.Sc
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -218,12 +225,12 @@ func (r *mutationResolver) RevokeAllSessions(ctx context.Context, input model.Sc
 }
 
 // RevokeOthersSession is the resolver for the RevokeOthersSession field.
-func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.AuthResponse, error) {
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -235,11 +242,22 @@ func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
-	if !res.Success {
-		return nil, apperror.ErrInternal.WithMessage("failed to revoke other sessions")
-	}
+	// if !res.Success {
+	// 	return nil, apperror.ErrInternal.WithMessage("failed to revoke other sessions")
+	// }
 
-	return &model.MutationResponse{Success: res.Success, Message: "sessions revoked"}, nil
+	return &model.AuthResponse{
+		Tokens: &model.AuthTokens{
+			AccessToken: &model.Token{
+				Value:     res.AccessToken.Value,
+				ExpiresAt: res.AccessToken.ExpiresAt.String(),
+			},
+			RefreshToken: &model.Token{
+				Value:     res.RefreshToken.Value,
+				ExpiresAt: res.RefreshToken.ExpiresAt.String(),
+			},
+		},
+	}, nil
 }
 
 // GenerateScopedToken is the resolver for the GenerateScopedToken field.
@@ -248,7 +266,7 @@ func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdt
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -281,7 +299,7 @@ func (r *mutationResolver) UpdateProfileAvatarURL(ctx context.Context, input use
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -303,7 +321,7 @@ func (r *mutationResolver) UpdateProfileName(ctx context.Context, input userdto.
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -326,15 +344,18 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.Cha
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	claims, appErr := r.TokenManager.ValidateScopedToken(ctx, input.Token)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	res, err := r.Clients.UserClient.ChangePassword(ctx, &userv1.ChangePasswordRequest{
-		ScopedToken: &modelsv1.Token{
-			Value: input.Token,
-		},
+		TokenScope:  string(claims.Scope),
 		NewPassword: input.NewPassword,
 	})
 	if err != nil {
@@ -353,7 +374,7 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input taskdto.CreateT
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}

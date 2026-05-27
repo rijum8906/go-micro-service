@@ -31,7 +31,10 @@ message ResetPasswordRequest {
   string new_password = 2;
 }
 
-// Refrsh the Access Token
-message RefreshTokenRequest {
-  string access_token = 1;
+message RefreshAccessTokenRequest {
+  string refresh_token = 2;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
 }

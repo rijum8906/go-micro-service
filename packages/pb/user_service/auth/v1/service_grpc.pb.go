@@ -36,8 +36,8 @@ const (
 type AuthServiceClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	RefreshToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	RequestEmailVerification(ctx context.Context, in *RequestEmailVerificationRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	RequestPasswordReset(ctx context.Context, in *RequestPasswordResetRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
@@ -72,7 +72,7 @@ func (c *authServiceClient) Register(ctx context.Context, in *RegisterRequest, o
 	return out, nil
 }
 
-func (c *authServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *authServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
 	err := c.cc.Invoke(ctx, AuthService_Logout_FullMethodName, in, out, cOpts...)
@@ -82,7 +82,7 @@ func (c *authServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, opt
 	return out, nil
 }
 
-func (c *authServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
+func (c *authServiceClient) RefreshToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RefreshTokenResponse)
 	err := c.cc.Invoke(ctx, AuthService_RefreshToken_FullMethodName, in, out, cOpts...)
@@ -138,8 +138,8 @@ func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPassword
 type AuthServiceServer interface {
 	Login(context.Context, *LoginRequest) (*AuthResponse, error)
 	Register(context.Context, *RegisterRequest) (*AuthResponse, error)
-	Logout(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
-	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
+	Logout(context.Context, *LogoutRequest) (*v1.SuccessResponse, error)
+	RefreshToken(context.Context, *RefreshAccessTokenRequest) (*RefreshTokenResponse, error)
 	RequestEmailVerification(context.Context, *RequestEmailVerificationRequest) (*v1.SuccessResponse, error)
 	RequestPasswordReset(context.Context, *RequestPasswordResetRequest) (*v1.SuccessResponse, error)
 	VerifyEmail(context.Context, *VerifyEmailRequest) (*v1.SuccessResponse, error)
@@ -159,10 +159,10 @@ func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*Au
 func (UnimplementedAuthServiceServer) Register(context.Context, *RegisterRequest) (*AuthResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedAuthServiceServer) Logout(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
 }
-func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshAccessTokenRequest) (*RefreshTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedAuthServiceServer) RequestEmailVerification(context.Context, *RequestEmailVerificationRequest) (*v1.SuccessResponse, error) {
@@ -234,7 +234,7 @@ func _AuthService_Register_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _AuthService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmptyRequest)
+	in := new(LogoutRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -246,13 +246,13 @@ func _AuthService_Logout_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: AuthService_Logout_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).Logout(ctx, req.(*v1.EmptyRequest))
+		return srv.(AuthServiceServer).Logout(ctx, req.(*LogoutRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AuthService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RefreshTokenRequest)
+	in := new(RefreshAccessTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -264,7 +264,7 @@ func _AuthService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: AuthService_RefreshToken_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+		return srv.(AuthServiceServer).RefreshToken(ctx, req.(*RefreshAccessTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

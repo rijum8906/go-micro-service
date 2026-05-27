@@ -325,28 +325,27 @@ func (x *ResetPasswordRequest) GetNewPassword() string {
 	return ""
 }
 
-// Refrsh the Access Token
-type RefreshTokenRequest struct {
+type RefreshAccessTokenRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *RefreshTokenRequest) Reset() {
-	*x = RefreshTokenRequest{}
+func (x *RefreshAccessTokenRequest) Reset() {
+	*x = RefreshAccessTokenRequest{}
 	mi := &file_user_service_auth_v1_request_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RefreshTokenRequest) String() string {
+func (x *RefreshAccessTokenRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RefreshTokenRequest) ProtoMessage() {}
+func (*RefreshAccessTokenRequest) ProtoMessage() {}
 
-func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
+func (x *RefreshAccessTokenRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_service_auth_v1_request_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -358,14 +357,58 @@ func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RefreshTokenRequest.ProtoReflect.Descriptor instead.
-func (*RefreshTokenRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use RefreshAccessTokenRequest.ProtoReflect.Descriptor instead.
+func (*RefreshAccessTokenRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *RefreshTokenRequest) GetAccessToken() string {
+func (x *RefreshAccessTokenRequest) GetRefreshToken() string {
 	if x != nil {
-		return x.AccessToken
+		return x.RefreshToken
+	}
+	return ""
+}
+
+type LogoutRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RefreshToken  string                 `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LogoutRequest) Reset() {
+	*x = LogoutRequest{}
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LogoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutRequest) ProtoMessage() {}
+
+func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutRequest.ProtoReflect.Descriptor instead.
+func (*LogoutRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *LogoutRequest) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
 	}
 	return ""
 }
@@ -392,9 +435,11 @@ const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\"\\\n" +
 	"\x14ResetPasswordRequest\x12!\n" +
 	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"8\n" +
-	"\x13RefreshTokenRequest\x12!\n" +
-	"\faccess_token\x18\x01 \x01(\tR\vaccessTokenB\xda\x01\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"@\n" +
+	"\x19RefreshAccessTokenRequest\x12#\n" +
+	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"4\n" +
+	"\rLogoutRequest\x12#\n" +
+	"\rrefresh_token\x18\x01 \x01(\tR\frefreshTokenB\xda\x01\n" +
 	"\x18com.user_service.auth.v1B\fRequestProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\x13UserService.Auth.V1\xca\x02\x13UserService\\Auth\\V1\xe2\x02\x1fUserService\\Auth\\V1\\GPBMetadata\xea\x02\x15UserService::Auth::V1b\x06proto3"
 
 var (
@@ -409,7 +454,7 @@ func file_user_service_auth_v1_request_proto_rawDescGZIP() []byte {
 	return file_user_service_auth_v1_request_proto_rawDescData
 }
 
-var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*LoginRequest)(nil),                    // 0: user_service.auth.v1.LoginRequest
 	(*RegisterRequest)(nil),                 // 1: user_service.auth.v1.RegisterRequest
@@ -417,7 +462,8 @@ var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*RequestPasswordResetRequest)(nil),     // 3: user_service.auth.v1.RequestPasswordResetRequest
 	(*VerifyEmailRequest)(nil),              // 4: user_service.auth.v1.VerifyEmailRequest
 	(*ResetPasswordRequest)(nil),            // 5: user_service.auth.v1.ResetPasswordRequest
-	(*RefreshTokenRequest)(nil),             // 6: user_service.auth.v1.RefreshTokenRequest
+	(*RefreshAccessTokenRequest)(nil),       // 6: user_service.auth.v1.RefreshAccessTokenRequest
+	(*LogoutRequest)(nil),                   // 7: user_service.auth.v1.LogoutRequest
 }
 var file_user_service_auth_v1_request_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -438,7 +484,7 @@ func file_user_service_auth_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_auth_v1_request_proto_rawDesc), len(file_user_service_auth_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
