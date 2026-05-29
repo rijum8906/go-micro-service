@@ -189,6 +189,50 @@ func (x *EmailRequest) GetEmail() string {
 	return ""
 }
 
+type TokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TokenRequest) Reset() {
+	*x = TokenRequest{}
+	mi := &file_core_v1_common_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TokenRequest) ProtoMessage() {}
+
+func (x *TokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_core_v1_common_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TokenRequest.ProtoReflect.Descriptor instead.
+func (*TokenRequest) Descriptor() ([]byte, []int) {
+	return file_core_v1_common_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TokenRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
 type IDRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -198,7 +242,7 @@ type IDRequest struct {
 
 func (x *IDRequest) Reset() {
 	*x = IDRequest{}
-	mi := &file_core_v1_common_proto_msgTypes[4]
+	mi := &file_core_v1_common_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -210,7 +254,7 @@ func (x *IDRequest) String() string {
 func (*IDRequest) ProtoMessage() {}
 
 func (x *IDRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[4]
+	mi := &file_core_v1_common_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -223,7 +267,7 @@ func (x *IDRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IDRequest.ProtoReflect.Descriptor instead.
 func (*IDRequest) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{4}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *IDRequest) GetId() string {
@@ -242,7 +286,7 @@ type TokenHashRequest struct {
 
 func (x *TokenHashRequest) Reset() {
 	*x = TokenHashRequest{}
-	mi := &file_core_v1_common_proto_msgTypes[5]
+	mi := &file_core_v1_common_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -254,7 +298,7 @@ func (x *TokenHashRequest) String() string {
 func (*TokenHashRequest) ProtoMessage() {}
 
 func (x *TokenHashRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[5]
+	mi := &file_core_v1_common_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -267,7 +311,7 @@ func (x *TokenHashRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TokenHashRequest.ProtoReflect.Descriptor instead.
 func (*TokenHashRequest) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{5}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *TokenHashRequest) GetTokenHash() string {
@@ -287,7 +331,7 @@ type IDAndScopedTokenRequest struct {
 
 func (x *IDAndScopedTokenRequest) Reset() {
 	*x = IDAndScopedTokenRequest{}
-	mi := &file_core_v1_common_proto_msgTypes[6]
+	mi := &file_core_v1_common_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -299,7 +343,7 @@ func (x *IDAndScopedTokenRequest) String() string {
 func (*IDAndScopedTokenRequest) ProtoMessage() {}
 
 func (x *IDAndScopedTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[6]
+	mi := &file_core_v1_common_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -312,7 +356,7 @@ func (x *IDAndScopedTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IDAndScopedTokenRequest.ProtoReflect.Descriptor instead.
 func (*IDAndScopedTokenRequest) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{6}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *IDAndScopedTokenRequest) GetTokenScope() string {
@@ -339,7 +383,7 @@ type PaginationRequest struct {
 
 func (x *PaginationRequest) Reset() {
 	*x = PaginationRequest{}
-	mi := &file_core_v1_common_proto_msgTypes[7]
+	mi := &file_core_v1_common_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -351,7 +395,7 @@ func (x *PaginationRequest) String() string {
 func (*PaginationRequest) ProtoMessage() {}
 
 func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[7]
+	mi := &file_core_v1_common_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -364,7 +408,7 @@ func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PaginationRequest.ProtoReflect.Descriptor instead.
 func (*PaginationRequest) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{7}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *PaginationRequest) GetPage() int32 {
@@ -391,7 +435,7 @@ type IDWithPaginationReq struct {
 
 func (x *IDWithPaginationReq) Reset() {
 	*x = IDWithPaginationReq{}
-	mi := &file_core_v1_common_proto_msgTypes[8]
+	mi := &file_core_v1_common_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -403,7 +447,7 @@ func (x *IDWithPaginationReq) String() string {
 func (*IDWithPaginationReq) ProtoMessage() {}
 
 func (x *IDWithPaginationReq) ProtoReflect() protoreflect.Message {
-	mi := &file_core_v1_common_proto_msgTypes[8]
+	mi := &file_core_v1_common_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -416,7 +460,7 @@ func (x *IDWithPaginationReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IDWithPaginationReq.ProtoReflect.Descriptor instead.
 func (*IDWithPaginationReq) Descriptor() ([]byte, []int) {
-	return file_core_v1_common_proto_rawDescGZIP(), []int{8}
+	return file_core_v1_common_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *IDWithPaginationReq) GetId() string {
@@ -444,7 +488,9 @@ const file_core_v1_common_proto_rawDesc = "" +
 	"\x0fSuccessResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"$\n" +
 	"\fEmailRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\"\x1b\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"$\n" +
+	"\fTokenRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"\x1b\n" +
 	"\tIDRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"1\n" +
 	"\x10TokenHashRequest\x12\x1d\n" +
@@ -476,20 +522,21 @@ func file_core_v1_common_proto_rawDescGZIP() []byte {
 	return file_core_v1_common_proto_rawDescData
 }
 
-var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_core_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_core_v1_common_proto_goTypes = []any{
 	(*RequestMetadata)(nil),         // 0: core.v1.RequestMetadata
 	(*EmptyRequest)(nil),            // 1: core.v1.EmptyRequest
 	(*SuccessResponse)(nil),         // 2: core.v1.SuccessResponse
 	(*EmailRequest)(nil),            // 3: core.v1.EmailRequest
-	(*IDRequest)(nil),               // 4: core.v1.IDRequest
-	(*TokenHashRequest)(nil),        // 5: core.v1.TokenHashRequest
-	(*IDAndScopedTokenRequest)(nil), // 6: core.v1.IDAndScopedTokenRequest
-	(*PaginationRequest)(nil),       // 7: core.v1.PaginationRequest
-	(*IDWithPaginationReq)(nil),     // 8: core.v1.IDWithPaginationReq
+	(*TokenRequest)(nil),            // 4: core.v1.TokenRequest
+	(*IDRequest)(nil),               // 5: core.v1.IDRequest
+	(*TokenHashRequest)(nil),        // 6: core.v1.TokenHashRequest
+	(*IDAndScopedTokenRequest)(nil), // 7: core.v1.IDAndScopedTokenRequest
+	(*PaginationRequest)(nil),       // 8: core.v1.PaginationRequest
+	(*IDWithPaginationReq)(nil),     // 9: core.v1.IDWithPaginationReq
 }
 var file_core_v1_common_proto_depIdxs = []int32{
-	7, // 0: core.v1.IDWithPaginationReq.pagination:type_name -> core.v1.PaginationRequest
+	8, // 0: core.v1.IDWithPaginationReq.pagination:type_name -> core.v1.PaginationRequest
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -508,7 +555,7 @@ func file_core_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_core_v1_common_proto_rawDesc), len(file_core_v1_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

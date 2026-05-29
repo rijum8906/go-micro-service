@@ -2,44 +2,15 @@
 package utils
 
 import (
+	"fmt"
 	"net/url"
 	pathPkg "path"
+	"strconv"
+	"strings"
+	"time"
 
-	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/hash"
-	"github.com/rijum8906/relay/packages/core/token"
-	"github.com/rijum8906/relay/services/user/internal/repository/profile"
-	"github.com/rijum8906/relay/services/user/internal/repository/session"
-	"github.com/rijum8906/relay/services/user/internal/repository/user"
 )
-
-type ServiceUtils struct {
-	TokenManager *token.TokenManager
-	HashService  hash.HashService
-}
-
-type Repos struct {
-	User    user.UserRepository
-	Profile profile.ProfileRepository
-	Session session.SessionRepository
-}
-
-func NewUtils(tokenManager *token.TokenManager, hashService hash.HashService) *ServiceUtils {
-	return &ServiceUtils{
-		TokenManager: tokenManager,
-		HashService:  hashService,
-	}
-}
-
-func NewUUID(id string) (uuid.UUID, *apperror.AppError) {
-	u, err := uuid.Parse(id)
-	if err != nil {
-		return uuid.UUID{}, apperror.ErrValidation.WithMessage("invalid uuid").WithDetail("error", err.Error())
-	}
-
-	return u, nil
-}
 
 func NewTokenURL(token, baseURL, path string) (string, *apperror.AppError) {
 	// Basic presence checks
@@ -67,4 +38,75 @@ func NewTokenURL(token, baseURL, path string) (string, *apperror.AppError) {
 	base.RawQuery = q.Encode()
 
 	return base.String(), nil
+}
+
+type TOTPProtocol string
+
+const (
+	TOTPProtocolGoogle TOTPProtocol = "otpauth"
+)
+
+type TOTPType string
+
+const (
+	TOTPTypeTOTP TOTPType = "totp"
+)
+
+type TOTPAuthURIConfig struct {
+	Protocol     TOTPProtocol  // e.g., "otpauth"
+	Type         TOTPType      // e.g., "totp"
+	Issuer       string        // e.g., "YourCompany"
+	Email        string        // e.g., "user@example.com"
+	Secret       string        // The Base32 encoded secret key
+	Algorithm    string        // e.g., "SHA1", "SHA256"
+	CodeLength   int           // e.g., 6 or 8
+	CodeValidity time.Duration // e.g., 30 * time.Second
+}
+
+// GenerateTOTPAuthURI builds a fully valid provisioning URI for authenticator QR codes
+func GenerateTOTPAuthURI(config TOTPAuthURIConfig) string {
+	// 1. Build the path: Issuer:Email (e.g., "YourCompany:user@example.com")
+	// Both the issuer and the email should be clearly identified in the path
+	label := fmt.Sprintf("%s:%s", config.Issuer, config.Email)
+
+	// 2. Set up the base URL structure
+	u := &url.URL{
+		Scheme: "otpauth",
+		Host:   string(config.Type), // typically "totp"
+		Path:   label,
+	}
+
+	// 3. Construct the query parameters safely
+	query := url.Values{}
+	query.Set("secret", config.Secret)
+	query.Set("issuer", config.Issuer)
+
+	// Default to SHA1 if not specified, as many apps only support SHA1
+	algo := strings.ToUpper(config.Algorithm)
+	if algo == "" {
+		algo = "SHA1"
+	}
+	query.Set("algorithm", algo)
+
+	// Default to 6 digits if not specified
+	digits := config.CodeLength
+	if digits == 0 {
+		digits = 6
+	}
+	query.Set("digits", strconv.Itoa(digits))
+
+	// Convert duration (seconds) to integer string (default to 30s)
+	period := int(config.CodeValidity.Seconds())
+	if period == 0 {
+		period = 30
+	}
+	query.Set("period", strconv.Itoa(period))
+
+	// 4. Assign the query parameters back to the URL
+	u.RawQuery = query.Encode()
+
+	// 5. Return the string representation
+	// Note: Go's net/url package keeps path slashes safe, but some old apps
+	// expect raw escaping. u.String() works perfectly across modern standards.
+	return u.String()
 }

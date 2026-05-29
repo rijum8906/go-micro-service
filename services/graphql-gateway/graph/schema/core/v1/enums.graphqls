@@ -14,6 +14,10 @@ enum TokenScope {
   RECOVERY          # Account recovery
   UPDATE_ORG_NAME
   CHANGE_ORG_OWNER
+  DELETE_ORG
+  ARCHIVE_ORG
+  LEAVE_ORG
+  UPDATE_ORG_MEMBERSHIP
 }
 
 # AuthMethod defines how the user authenticated

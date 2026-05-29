@@ -15,14 +15,15 @@ import (
 	"github.com/rijum8906/relay/packages/core/dto"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/testutils"
-	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/organization"
+	"go.uber.org/zap"
 	grpcmetadata "google.golang.org/grpc/metadata"
 )
 
@@ -34,6 +35,14 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	// AppError logs internal and third-party errors from Error(). Tests need a
+	// logger before setup or assertion errors can be formatted safely.
+	apperror.SetConfig(&apperror.Config{
+		Logger: zap.NewNop(),
+		AppEnv: "test",
+		Debug:  true,
+	})
+
 	f, err := coreopenfga.NewClient("http://localhost:9000")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "failed to create OpenFGA client:", err)
@@ -59,8 +68,8 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 
-	// Best-effort cleanup — ignore errors so a failed store delete
-	// doesn't mask a real test failure.
+	// Ignore cleanup errors so a failed store delete does not mask a real test
+	// failure.
 	_ = storeManager.Delete(ctx)
 	os.Exit(code)
 }
@@ -81,7 +90,7 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 		CreatedBy:   createdBy.String(),
 	}
 
-	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: createdBy.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
@@ -228,7 +237,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 		dto.MetaUserIDKey, createdBy.String(),
 	))
 
-	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: newOwner.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
@@ -249,7 +258,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	_, err = service.ChangeOrganizationOwnership(ctx, &organizationv1.ChangeOrganizationOwnershipRequest{
 		OrganizationId: org.Id,
 		NewOwnerId:     newOwner.String(),
-		TokenScope:     string(token.TokenScopeChangeOrganizationOwner),
+		TokenScope:     constants.TokenScopeChangeOrganizationOwner,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -268,7 +277,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
 		dto.MetaUserIDKey, createdBy.String(),
 	))
-	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: newOwner.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
@@ -277,7 +286,7 @@ func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
 	_, err = service.ChangeOrganizationOwnership(ctx, &organizationv1.ChangeOrganizationOwnershipRequest{
 		OrganizationId: org.Id,
 		NewOwnerId:     newOwner.String(),
-		TokenScope:     string(token.TokenScopeChangeOrganizationOwner),
+		TokenScope:     constants.TokenScopeChangeOrganizationOwner,
 	})
 	if err == nil {
 		t.Fatal("expected error, got nil")
@@ -311,7 +320,7 @@ func Test_DeleteOrganization_Success_Integration(t *testing.T) {
 	// Delete organization
 	res, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 		Id:         org.Id,
-		TokenScope: string(token.TokenScopeDeleteOrganization),
+		TokenScope: constants.TokenScopeDeleteOrganization,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -360,7 +369,7 @@ func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
 	t.Run("Without proper context", func(t *testing.T) {
 		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 			Id:         org.Id,
-			TokenScope: string(token.TokenScopeDeleteOrganization),
+			TokenScope: constants.TokenScopeDeleteOrganization,
 		})
 		if err == nil {
 			t.Fatal("expected error, got nil")
@@ -377,7 +386,7 @@ func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
 
 		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 			Id:         uuid.NewString(),
-			TokenScope: string(token.TokenScopeDeleteOrganization),
+			TokenScope: constants.TokenScopeDeleteOrganization,
 		})
 		if err == nil {
 			t.Fatal("expected error, got nil")
@@ -394,7 +403,7 @@ func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
 
 		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 			Id:         org.Id,
-			TokenScope: string(token.TokenScopeChangeOrganizationOwner),
+			TokenScope: constants.TokenScopeChangeOrganizationOwner,
 		})
 		if err == nil {
 			t.Fatal("expected error, got nil")
@@ -427,7 +436,7 @@ func Test_ArchiveOrganization_Success_integration(t *testing.T) {
 	// Archive
 	res, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 		Id:         org.Id,
-		TokenScope: string(token.TokenScopeArchiveOrganization),
+		TokenScope: constants.TokenScopeDeleteOrganization,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -479,7 +488,7 @@ func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
 	t.Run("Without proper context", func(t *testing.T) {
 		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 			Id:         org.Id,
-			TokenScope: string(token.TokenScopeArchiveOrganization),
+			TokenScope: constants.TokenScopeDeleteOrganization,
 		})
 		if err == nil {
 			t.Fatal("expected error, got nil")
@@ -496,7 +505,7 @@ func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
 
 		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 			Id:         uuid.NewString(),
-			TokenScope: string(token.TokenScopeArchiveOrganization),
+			TokenScope: constants.TokenScopeDeleteOrganization,
 		})
 		if err == nil {
 			t.Fatal("expected error, got nil")
@@ -513,7 +522,7 @@ func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
 
 		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
 			Id:         org.Id,
-			TokenScope: string(token.TokenScopeChangeOrganizationOwner),
+			TokenScope: constants.TokenScopeChangeOrganizationOwner,
 		})
 		if err == nil {
 			t.Fatal("expected error, got nil")
@@ -533,7 +542,7 @@ func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServi
 	normalizedReq := servicetestutils.NormalizeCreateRequest(req)
 
 	// Setup user existence mock
-	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: normalizedReq.CreatedBy,
 	}).Return(&userv1.CheckExistsResponse{Exists: true}, nil)
 

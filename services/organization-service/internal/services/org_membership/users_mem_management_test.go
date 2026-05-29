@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
 	"github.com/rijum8906/relay/services/organization-service/app/constants"
@@ -36,7 +35,7 @@ func Test_LeaveOrganization_Validation(t *testing.T) {
 				return suite.Ctx
 			},
 			orgMemID:      "invalid_id",
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
@@ -86,7 +85,7 @@ func Test_LeaveOrganization_Integration_Failure(t *testing.T) {
 				return suite.Ctx
 			},
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeLeaveOrganization),
+			tokenScope:    string(constants.TokenScopeLeaveOrganization),
 			expectedError: string(apperror.CodeInternal),
 		},
 		{
@@ -97,7 +96,7 @@ func Test_LeaveOrganization_Integration_Failure(t *testing.T) {
 				))
 			},
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
@@ -108,7 +107,7 @@ func Test_LeaveOrganization_Integration_Failure(t *testing.T) {
 				))
 			},
 			orgMemID:      uuid.NewString(),
-			tokenScope:    string(token.TokenScopeLeaveOrganization),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeNotFound),
 		},
 		{
@@ -119,7 +118,7 @@ func Test_LeaveOrganization_Integration_Failure(t *testing.T) {
 				))
 			},
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeLeaveOrganization),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
@@ -130,7 +129,7 @@ func Test_LeaveOrganization_Integration_Failure(t *testing.T) {
 				))
 			},
 			orgMemID:      orgSuite.OwnerMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeLeaveOrganization),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeValidation),
 		},
 	}
@@ -164,7 +163,7 @@ func Test_LeaveOrganization_Integration_Success(t *testing.T) {
 		))
 
 		_, err := service.LeaveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeLeaveOrganization),
+			TokenScope: constants.TokenScopeLeaveOrganization,
 			Id:         orgSuite.AdminMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -182,7 +181,7 @@ func Test_LeaveOrganization_Integration_Success(t *testing.T) {
 		))
 
 		_, err := service.LeaveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeLeaveOrganization),
+			TokenScope: constants.TokenScopeLeaveOrganization,
 			Id:         orgSuite.OwnerMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -228,56 +227,56 @@ func Test_BanOrganizationMembership_ValidationAndFailure(t *testing.T) {
 			name:          "invalid_membership_id_returns_validation_error",
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      "invalid_id",
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "missing_user_metadata_returns_internal_error",
 			ctx:           suite.Ctx,
 			orgMemID:      memberMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeInternal),
 		},
 		{
 			name:          "unknown_membership_returns_not_found",
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      uuid.NewString(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeNotFound),
 		},
 		{
 			name:          "admin_cannot_ban_self",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "cannot_ban_owner",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.OwnerMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "member_cannot_ban_admin",
 			ctx:           orgMembershipUserCtx(memberID),
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "cannot_ban_suspended_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      suspendedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "cannot_ban_removed_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      removedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeValidation),
 		},
 	}
@@ -313,7 +312,7 @@ func Test_BanOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("admin_bans_member", func(t *testing.T) {
 		_, err := service.BanOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeLeaveOrganization,
 			Id:         memberMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -322,7 +321,7 @@ func Test_BanOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("already_banned_membership_is_idempotent", func(t *testing.T) {
 		_, err := service.BanOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeLeaveOrganization,
 			Id:         memberMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -371,42 +370,42 @@ func Test_UnbanOrganizationMembership_ValidationAndFailure(t *testing.T) {
 			name:          "invalid_membership_id_returns_validation_error",
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      "invalid_id",
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "missing_user_metadata_returns_internal_error",
 			ctx:           suite.Ctx,
 			orgMemID:      memberMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeLeaveOrganization,
 			expectedError: string(apperror.CodeInternal),
 		},
 		{
 			name:          "cannot_unban_owner",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.OwnerMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "cannot_unban_suspended_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      suspendedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "cannot_unban_left_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      leftMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "cannot_unban_removed_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      removedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 	}
@@ -447,7 +446,7 @@ func Test_UnbanOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("admin_unbans_banned_member", func(t *testing.T) {
 		_, err := service.UnbanOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeUpdateOrganizationMembership,
 			Id:         bannedMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -456,7 +455,7 @@ func Test_UnbanOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("already_active_membership_is_idempotent", func(t *testing.T) {
 		_, err := service.UnbanOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeUpdateOrganizationMembership,
 			Id:         activeMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -509,56 +508,56 @@ func Test_SuspendOrganizationMembership_ValidationAndFailure(t *testing.T) {
 			name:          "invalid_membership_id_returns_validation_error",
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      "invalid_id",
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "missing_user_metadata_returns_internal_error",
 			ctx:           suite.Ctx,
 			orgMemID:      memberMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeInternal),
 		},
 		{
 			name:          "admin_cannot_suspend_self",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "cannot_suspend_owner",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.OwnerMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "member_cannot_suspend_peer_member",
 			ctx:           orgMembershipUserCtx(memberID),
 			orgMemID:      peerMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "cannot_suspend_banned_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      bannedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "cannot_suspend_left_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      leftMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "cannot_suspend_removed_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      removedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 	}
@@ -594,7 +593,7 @@ func Test_SuspendOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("admin_suspends_member", func(t *testing.T) {
 		_, err := service.SuspendOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeUpdateOrganizationMembership,
 			Id:         memberMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -603,7 +602,7 @@ func Test_SuspendOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("already_suspended_membership_is_idempotent", func(t *testing.T) {
 		_, err := service.SuspendOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeUpdateOrganizationMembership,
 			Id:         memberMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -652,42 +651,42 @@ func Test_ActivateOrganizationMembership_ValidationAndFailure(t *testing.T) {
 			name:          "invalid_membership_id_returns_validation_error",
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      "invalid_id",
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "missing_user_metadata_returns_internal_error",
 			ctx:           suite.Ctx,
 			orgMemID:      memberMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeInternal),
 		},
 		{
 			name:          "admin_cannot_activate_peer_admin",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
 			name:          "cannot_activate_banned_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      bannedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "cannot_activate_left_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      leftMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
 			name:          "cannot_activate_removed_membership",
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      removedMembership.ID.String(),
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 	}
@@ -728,7 +727,7 @@ func Test_ActivateOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("admin_activates_suspended_member", func(t *testing.T) {
 		_, err := service.ActivateOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeUpdateOrganizationMembership,
 			Id:         suspendedMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -737,7 +736,7 @@ func Test_ActivateOrganizationMembership_Integration_Success(t *testing.T) {
 
 	t.Run("already_active_membership_is_idempotent", func(t *testing.T) {
 		_, err := service.ActivateOrganizationMembership(ctx, &corev1.IDAndScopedTokenRequest{
-			TokenScope: string(token.TokenScopeAdmin),
+			TokenScope: constants.TokenScopeUpdateOrganizationMembership,
 			Id:         activeMembership.ID.String(),
 		})
 		require.NoError(t, err)
@@ -792,7 +791,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      "invalid_id",
 			newRole:       constants.OrgRoleAdmin,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
@@ -808,7 +807,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      memberMembership.ID.String(),
 			newRole:       constants.OrgRoleAdmin,
-			tokenScope:    string(token.TokenScopeAdmin),
+			tokenScope:    constants.TokenScopeTest,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
@@ -816,7 +815,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      memberMembership.ID.String(),
 			newRole:       "invalid_role",
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
@@ -824,7 +823,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      memberMembership.ID.String(),
 			newRole:       constants.OrgRoleOwner,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
@@ -832,7 +831,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           suite.Ctx,
 			orgMemID:      memberMembership.ID.String(),
 			newRole:       constants.OrgRoleAdmin,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeInternal),
 		},
 		{
@@ -840,7 +839,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.AdminMembership.ID.String(),
 			newRole:       constants.OrgRoleMember,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
@@ -848,7 +847,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(adminID),
 			orgMemID:      orgSuite.OwnerMembership.ID.String(),
 			newRole:       constants.OrgRoleMember,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
@@ -856,7 +855,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(memberID),
 			orgMemID:      peerMembership.ID.String(),
 			newRole:       constants.OrgRoleAdmin,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodePermissionDenied),
 		},
 		{
@@ -864,7 +863,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      suspendedMembership.ID.String(),
 			newRole:       constants.OrgRoleAdmin,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
@@ -872,7 +871,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      leftMembership.ID.String(),
 			newRole:       constants.OrgRoleAdmin,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 		{
@@ -880,7 +879,7 @@ func Test_ChangeOrganizationMembershipRole_ValidationAndFailure(t *testing.T) {
 			ctx:           orgMembershipUserCtx(ownerID),
 			orgMemID:      removedMembership.ID.String(),
 			newRole:       constants.OrgRoleAdmin,
-			tokenScope:    string(token.TokenScopeUpdateOrganizationMembership),
+			tokenScope:    constants.TokenScopeUpdateOrganizationMembership,
 			expectedError: string(apperror.CodeValidation),
 		},
 	}
@@ -920,7 +919,7 @@ func Test_ChangeOrganizationMembershipRole_Integration_Success(t *testing.T) {
 		_, err := service.ChangeOrganizationMembershipRole(ctx, &org_membershipv1.ChangeOrgMembershipRoleReq{
 			OrganizationMembershipId: memberMembership.ID.String(),
 			NewRole:                  constants.OrgRoleAdmin,
-			TokenScope:               string(token.TokenScopeUpdateOrganizationMembership),
+			TokenScope:               constants.TokenScopeUpdateOrganizationMembership,
 		})
 		require.NoError(t, err)
 		requireOrgMembershipRole(t, suite, memberMembership.ID, constants.OrgRoleAdmin)
@@ -930,7 +929,7 @@ func Test_ChangeOrganizationMembershipRole_Integration_Success(t *testing.T) {
 		_, err := service.ChangeOrganizationMembershipRole(ctx, &org_membershipv1.ChangeOrgMembershipRoleReq{
 			OrganizationMembershipId: alreadyMemberMembership.ID.String(),
 			NewRole:                  constants.OrgRoleMember,
-			TokenScope:               string(token.TokenScopeUpdateOrganizationMembership),
+			TokenScope:               constants.TokenScopeUpdateOrganizationMembership,
 		})
 		require.NoError(t, err)
 		requireOrgMembershipRole(t, suite, alreadyMemberMembership.ID, constants.OrgRoleMember)

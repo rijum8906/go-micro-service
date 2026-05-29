@@ -11,11 +11,10 @@ import (
 	"github.com/rijum8906/relay/packages/core/metadata"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/protoutils"
-	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
-	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/utils"
 )
@@ -31,7 +30,7 @@ func (s *organizationService) CreateOrganization(ctx context.Context, req *organ
 	}
 
 	// Step 1. Check user existstence and slug availability
-	res, err := s.userClient.CheckExists(ctx, &userv1.CheckExistsRequest{
+	res, err := s.userClient.CheckExists(ctx, &corev1.IDRequest{
 		Id: req.CreatedBy,
 	})
 	if err != nil {
@@ -169,7 +168,7 @@ func (s *organizationService) UpdateOrganizationName(ctx context.Context, req *o
 	orgID, _ := uuid.Parse(req.OrganizationId)
 
 	// Step 1. Check Token Scope
-	if req.TokenScope != string(token.TokenScopeUpdateOrganizationName) {
+	if req.TokenScope != constants.TokenScopeUpdateOrganizationName {
 		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
 	}
 
@@ -227,7 +226,7 @@ func (s *organizationService) ChangeOrganizationOwnership(ctx context.Context, r
 	}
 
 	// Step 2. Check if user exists
-	res, err := s.userClient.CheckExists(ctx, &userv1.CheckExistsRequest{
+	res, err := s.userClient.CheckExists(ctx, &corev1.IDRequest{
 		Id: req.NewOwnerId,
 	})
 	if err != nil {
@@ -260,7 +259,7 @@ func (s *organizationService) ChangeOrganizationOwnership(ctx context.Context, r
 	}
 
 	// Step 5. Check Token Scope
-	if req.TokenScope != string(token.TokenScopeChangeOrganizationOwner) {
+	if req.TokenScope != constants.TokenScopeChangeOrganizationOwner {
 		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
 	}
 
@@ -329,7 +328,7 @@ func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev
 	}
 
 	// Step 3. Check Token Scope
-	if req.TokenScope != string(token.TokenScopeDeleteOrganization) {
+	if req.TokenScope != constants.TokenScopeDeleteOrganization {
 		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
 	}
 
@@ -394,7 +393,7 @@ func (s *organizationService) ArchiveOrganization(ctx context.Context, req *core
 	}
 
 	// Step 3. Check Token Scope
-	if req.TokenScope != string(token.TokenScopeArchiveOrganization) {
+	if req.TokenScope != constants.TokenScopeDeleteOrganization {
 		return nil, apperror.New(apperror.CodeValidation, "invalid token scope")
 	}
 

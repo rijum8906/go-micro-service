@@ -50,7 +50,7 @@ func ParseIDAndScopedTokenReq(req *corev1.IDAndScopedTokenRequest) (uuid.UUID, *
 	}
 
 	// Validate Token Scope
-	if !token.ValidateTokenScope(req.TokenScope) {
+	if !token.IsValidTokenScope(req.TokenScope) {
 		return uuid.UUID{}, apperror.ErrValidation.WithMessage("token scope must be provided")
 	}
 

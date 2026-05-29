@@ -1,6 +1,8 @@
 package app
 
 import (
+	"os"
+
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/corelogger"
 	"github.com/rijum8906/relay/packages/core/dto"
@@ -21,7 +23,12 @@ func initLogger(config *config.Env) (*zap.Logger, *apperror.AppError) {
 }
 
 func initTemplateManager() (template.TemplateManager, *apperror.AppError) {
-	tm, err := template.NewTemplateManagerWithCompanyInfo("packages/templates", &dto.CompanyInfo{
+	templatesDir := "packages/templates"
+	if _, err := os.Stat(templatesDir); err != nil {
+		templatesDir = "../../packages/templates"
+	}
+
+	tm, err := template.NewTemplateManagerWithCompanyInfo(templatesDir, &dto.CompanyInfo{
 		Name:       "Relay",
 		Emails:     []string{"UfNwO@example.com"},
 		Addresses:  []string{"123 Main St, Anytown, USA"},

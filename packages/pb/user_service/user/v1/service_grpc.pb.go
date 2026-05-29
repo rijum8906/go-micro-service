@@ -8,8 +8,8 @@ package userv1
 
 import (
 	context "context"
-	v11 "github.com/rijum8906/relay/packages/pb/core/v1"
-	v1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
+	v11 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -21,11 +21,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_GenerateScopedToken_FullMethodName    = "/user_service.user.v1.UserService/GenerateScopedToken"
-	UserService_UpdateProfileAvatarUrl_FullMethodName = "/user_service.user.v1.UserService/UpdateProfileAvatarUrl"
-	UserService_UpdateProfileName_FullMethodName      = "/user_service.user.v1.UserService/UpdateProfileName"
-	UserService_ChangePassword_FullMethodName         = "/user_service.user.v1.UserService/ChangePassword"
 	UserService_GetProfile_FullMethodName             = "/user_service.user.v1.UserService/GetProfile"
+	UserService_UpdateProfileAvatarURL_FullMethodName = "/user_service.user.v1.UserService/UpdateProfileAvatarURL"
+	UserService_UpdateProfileName_FullMethodName      = "/user_service.user.v1.UserService/UpdateProfileName"
 	UserService_GetUser_FullMethodName                = "/user_service.user.v1.UserService/GetUser"
 	UserService_CheckExists_FullMethodName            = "/user_service.user.v1.UserService/CheckExists"
 	UserService_CheckEmailExists_FullMethodName       = "/user_service.user.v1.UserService/CheckEmailExists"
@@ -35,14 +33,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenRequest, opts ...grpc.CallOption) (*GenerateScopedTokenResponse, error)
-	UpdateProfileAvatarUrl(ctx context.Context, in *UpdateProfileAvatarUrlRequest, opts ...grpc.CallOption) (*v1.Profile, error)
-	UpdateProfileName(ctx context.Context, in *UpdateProfileNameRequest, opts ...grpc.CallOption) (*v1.Profile, error)
-	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
-	GetProfile(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.Profile, error)
-	GetUser(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.User, error)
-	CheckExists(ctx context.Context, in *CheckExistsRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
-	CheckEmailExists(ctx context.Context, in *v11.EmailRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
+	// Profile management
+	GetProfile(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Profile, error)
+	UpdateProfileAvatarURL(ctx context.Context, in *UpdateProfileAvatarURLRequest, opts ...grpc.CallOption) (*v11.Profile, error)
+	UpdateProfileName(ctx context.Context, in *UpdateProfileNameRequest, opts ...grpc.CallOption) (*v11.Profile, error)
+	// User management
+	GetUser(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.User, error)
+	// User existence checks
+	CheckExists(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
+	CheckEmailExists(ctx context.Context, in *v1.EmailRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
 }
 
 type userServiceClient struct {
@@ -53,49 +52,9 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenRequest, opts ...grpc.CallOption) (*GenerateScopedTokenResponse, error) {
+func (c *userServiceClient) GetProfile(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Profile, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GenerateScopedTokenResponse)
-	err := c.cc.Invoke(ctx, UserService_GenerateScopedToken_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) UpdateProfileAvatarUrl(ctx context.Context, in *UpdateProfileAvatarUrlRequest, opts ...grpc.CallOption) (*v1.Profile, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.Profile)
-	err := c.cc.Invoke(ctx, UserService_UpdateProfileAvatarUrl_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) UpdateProfileName(ctx context.Context, in *UpdateProfileNameRequest, opts ...grpc.CallOption) (*v1.Profile, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.Profile)
-	err := c.cc.Invoke(ctx, UserService_UpdateProfileName_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v11.SuccessResponse)
-	err := c.cc.Invoke(ctx, UserService_ChangePassword_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) GetProfile(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.Profile, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.Profile)
+	out := new(v11.Profile)
 	err := c.cc.Invoke(ctx, UserService_GetProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -103,9 +62,29 @@ func (c *userServiceClient) GetProfile(ctx context.Context, in *v11.EmptyRequest
 	return out, nil
 }
 
-func (c *userServiceClient) GetUser(ctx context.Context, in *v11.EmptyRequest, opts ...grpc.CallOption) (*v1.User, error) {
+func (c *userServiceClient) UpdateProfileAvatarURL(ctx context.Context, in *UpdateProfileAvatarURLRequest, opts ...grpc.CallOption) (*v11.Profile, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.User)
+	out := new(v11.Profile)
+	err := c.cc.Invoke(ctx, UserService_UpdateProfileAvatarURL_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateProfileName(ctx context.Context, in *UpdateProfileNameRequest, opts ...grpc.CallOption) (*v11.Profile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.Profile)
+	err := c.cc.Invoke(ctx, UserService_UpdateProfileName_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUser(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.User)
 	err := c.cc.Invoke(ctx, UserService_GetUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -113,7 +92,7 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *v11.EmptyRequest, o
 	return out, nil
 }
 
-func (c *userServiceClient) CheckExists(ctx context.Context, in *CheckExistsRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error) {
+func (c *userServiceClient) CheckExists(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CheckExistsResponse)
 	err := c.cc.Invoke(ctx, UserService_CheckExists_FullMethodName, in, out, cOpts...)
@@ -123,7 +102,7 @@ func (c *userServiceClient) CheckExists(ctx context.Context, in *CheckExistsRequ
 	return out, nil
 }
 
-func (c *userServiceClient) CheckEmailExists(ctx context.Context, in *v11.EmailRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error) {
+func (c *userServiceClient) CheckEmailExists(ctx context.Context, in *v1.EmailRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CheckExistsResponse)
 	err := c.cc.Invoke(ctx, UserService_CheckEmailExists_FullMethodName, in, out, cOpts...)
@@ -137,14 +116,15 @@ func (c *userServiceClient) CheckEmailExists(ctx context.Context, in *v11.EmailR
 // All implementations should embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
-	GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error)
-	UpdateProfileAvatarUrl(context.Context, *UpdateProfileAvatarUrlRequest) (*v1.Profile, error)
-	UpdateProfileName(context.Context, *UpdateProfileNameRequest) (*v1.Profile, error)
-	ChangePassword(context.Context, *ChangePasswordRequest) (*v11.SuccessResponse, error)
-	GetProfile(context.Context, *v11.EmptyRequest) (*v1.Profile, error)
-	GetUser(context.Context, *v11.EmptyRequest) (*v1.User, error)
-	CheckExists(context.Context, *CheckExistsRequest) (*CheckExistsResponse, error)
-	CheckEmailExists(context.Context, *v11.EmailRequest) (*CheckExistsResponse, error)
+	// Profile management
+	GetProfile(context.Context, *v1.EmptyRequest) (*v11.Profile, error)
+	UpdateProfileAvatarURL(context.Context, *UpdateProfileAvatarURLRequest) (*v11.Profile, error)
+	UpdateProfileName(context.Context, *UpdateProfileNameRequest) (*v11.Profile, error)
+	// User management
+	GetUser(context.Context, *v1.EmptyRequest) (*v11.User, error)
+	// User existence checks
+	CheckExists(context.Context, *v1.IDRequest) (*CheckExistsResponse, error)
+	CheckEmailExists(context.Context, *v1.EmailRequest) (*CheckExistsResponse, error)
 }
 
 // UnimplementedUserServiceServer should be embedded to have
@@ -154,28 +134,22 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GenerateScopedToken not implemented")
-}
-func (UnimplementedUserServiceServer) UpdateProfileAvatarUrl(context.Context, *UpdateProfileAvatarUrlRequest) (*v1.Profile, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateProfileAvatarUrl not implemented")
-}
-func (UnimplementedUserServiceServer) UpdateProfileName(context.Context, *UpdateProfileNameRequest) (*v1.Profile, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateProfileName not implemented")
-}
-func (UnimplementedUserServiceServer) ChangePassword(context.Context, *ChangePasswordRequest) (*v11.SuccessResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ChangePassword not implemented")
-}
-func (UnimplementedUserServiceServer) GetProfile(context.Context, *v11.EmptyRequest) (*v1.Profile, error) {
+func (UnimplementedUserServiceServer) GetProfile(context.Context, *v1.EmptyRequest) (*v11.Profile, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetProfile not implemented")
 }
-func (UnimplementedUserServiceServer) GetUser(context.Context, *v11.EmptyRequest) (*v1.User, error) {
+func (UnimplementedUserServiceServer) UpdateProfileAvatarURL(context.Context, *UpdateProfileAvatarURLRequest) (*v11.Profile, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateProfileAvatarURL not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateProfileName(context.Context, *UpdateProfileNameRequest) (*v11.Profile, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateProfileName not implemented")
+}
+func (UnimplementedUserServiceServer) GetUser(context.Context, *v1.EmptyRequest) (*v11.User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedUserServiceServer) CheckExists(context.Context, *CheckExistsRequest) (*CheckExistsResponse, error) {
+func (UnimplementedUserServiceServer) CheckExists(context.Context, *v1.IDRequest) (*CheckExistsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CheckExists not implemented")
 }
-func (UnimplementedUserServiceServer) CheckEmailExists(context.Context, *v11.EmailRequest) (*CheckExistsResponse, error) {
+func (UnimplementedUserServiceServer) CheckEmailExists(context.Context, *v1.EmailRequest) (*CheckExistsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CheckEmailExists not implemented")
 }
 func (UnimplementedUserServiceServer) testEmbeddedByValue() {}
@@ -198,38 +172,38 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_GenerateScopedToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateScopedTokenRequest)
+func _UserService_GetProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).GenerateScopedToken(ctx, in)
+		return srv.(UserServiceServer).GetProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_GenerateScopedToken_FullMethodName,
+		FullMethod: UserService_GetProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GenerateScopedToken(ctx, req.(*GenerateScopedTokenRequest))
+		return srv.(UserServiceServer).GetProfile(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_UpdateProfileAvatarUrl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateProfileAvatarUrlRequest)
+func _UserService_UpdateProfileAvatarURL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProfileAvatarURLRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).UpdateProfileAvatarUrl(ctx, in)
+		return srv.(UserServiceServer).UpdateProfileAvatarURL(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_UpdateProfileAvatarUrl_FullMethodName,
+		FullMethod: UserService_UpdateProfileAvatarURL_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).UpdateProfileAvatarUrl(ctx, req.(*UpdateProfileAvatarUrlRequest))
+		return srv.(UserServiceServer).UpdateProfileAvatarURL(ctx, req.(*UpdateProfileAvatarURLRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -252,44 +226,8 @@ func _UserService_UpdateProfileName_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangePasswordRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).ChangePassword(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_ChangePassword_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ChangePassword(ctx, req.(*ChangePasswordRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserService_GetProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.EmptyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetProfile(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_GetProfile_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetProfile(ctx, req.(*v11.EmptyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.EmptyRequest)
+	in := new(v1.EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -301,13 +239,13 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: UserService_GetUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUser(ctx, req.(*v11.EmptyRequest))
+		return srv.(UserServiceServer).GetUser(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_CheckExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckExistsRequest)
+	in := new(v1.IDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -319,13 +257,13 @@ func _UserService_CheckExists_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: UserService_CheckExists_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).CheckExists(ctx, req.(*CheckExistsRequest))
+		return srv.(UserServiceServer).CheckExists(ctx, req.(*v1.IDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_CheckEmailExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v11.EmailRequest)
+	in := new(v1.EmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -337,7 +275,7 @@ func _UserService_CheckEmailExists_Handler(srv interface{}, ctx context.Context,
 		FullMethod: UserService_CheckEmailExists_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).CheckEmailExists(ctx, req.(*v11.EmailRequest))
+		return srv.(UserServiceServer).CheckEmailExists(ctx, req.(*v1.EmailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -350,24 +288,16 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GenerateScopedToken",
-			Handler:    _UserService_GenerateScopedToken_Handler,
+			MethodName: "GetProfile",
+			Handler:    _UserService_GetProfile_Handler,
 		},
 		{
-			MethodName: "UpdateProfileAvatarUrl",
-			Handler:    _UserService_UpdateProfileAvatarUrl_Handler,
+			MethodName: "UpdateProfileAvatarURL",
+			Handler:    _UserService_UpdateProfileAvatarURL_Handler,
 		},
 		{
 			MethodName: "UpdateProfileName",
 			Handler:    _UserService_UpdateProfileName_Handler,
-		},
-		{
-			MethodName: "ChangePassword",
-			Handler:    _UserService_ChangePassword_Handler,
-		},
-		{
-			MethodName: "GetProfile",
-			Handler:    _UserService_GetProfile_Handler,
 		},
 		{
 			MethodName: "GetUser",

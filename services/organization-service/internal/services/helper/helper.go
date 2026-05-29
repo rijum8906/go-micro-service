@@ -59,12 +59,18 @@ func initHelper() (*ServiceHelper, *apperror.AppError) {
 }
 
 func GetHelper() (*ServiceHelper, *apperror.AppError) {
+	if instance != nil {
+		return instance, nil
+	}
 	once.Do(func() {
 		instance, helperErr = initHelper()
 	})
 
 	if helperErr != nil {
 		return nil, helperErr
+	}
+	if instance == nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to initialize service helper")
 	}
 
 	return instance, nil
@@ -80,21 +86,23 @@ func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *appe
 
 	defer func() {
 		if p := recover(); p != nil {
-			// Log the panic with stack trace
-			s.Logger.Error("panic in transaction",
-				zap.Any("panic", p),
-				zap.String("stack", string(debug.Stack())))
+			err = apperror.ErrInternal.WithMessage("panic in transaction")
+			if s.Logger != nil {
+				s.Logger.Error("panic in transaction",
+					zap.Any("panic", p),
+					zap.String("stack", string(debug.Stack())))
+			}
 
-			// Rollback
 			if rbErr := tx.Rollback(ctx); rbErr != nil {
-				s.Logger.Error("rollback failed after panic",
-					zap.Error(rbErr))
+				if s.Logger != nil {
+					s.Logger.Error("rollback failed after panic", zap.Error(rbErr))
+				}
 			}
 		} else if err != nil {
-			// Normal error rollback
 			if rbErr := tx.Rollback(ctx); rbErr != nil {
-				s.Logger.Warn("rollback failed",
-					zap.Error(rbErr))
+				if s.Logger != nil {
+					s.Logger.Warn("rollback failed", zap.Error(rbErr))
+				}
 			}
 		}
 	}()

@@ -16,6 +16,10 @@ message EmailRequest {
   string email = 1;
 }
 
+message TokenRequest {
+  string token = 1;
+}
+
 message IDRequest {
   string id = 1;
 }

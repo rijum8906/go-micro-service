@@ -112,7 +112,7 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 	}
 
 	// Validate token scope matches operation type
-	if req.TokenScope != string(token.TokenScopeLeaveOrganization) {
+	if req.TokenScope != constants.TokenScopeLeaveOrganization {
 		return nil, apperror.ErrPermissionDenied.WithMessage("invalid token scope for leave organization operation")
 	}
 
@@ -1093,10 +1093,10 @@ func (s *OrgMembershipService) ChangeOrganizationMembershipRole(
 	}
 
 	// Validate token scope
-	if !token.ValidateTokenScope(req.TokenScope) {
+	if !token.IsValidTokenScope(req.TokenScope) {
 		return nil, apperror.ErrValidation.WithMessage("token scope must be provided")
 	}
-	if req.TokenScope != string(token.TokenScopeUpdateOrganizationMembership) {
+	if req.TokenScope != constants.TokenScopeUpdateOrganizationMembership {
 		return nil, apperror.ErrPermissionDenied.
 			WithMessage("invalid token scope for membership role update")
 	}

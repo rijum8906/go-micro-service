@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/corelogger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -47,7 +48,14 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 }
 
 func (a *Application) initUtils() *apperror.AppError {
-	logger, appErr := initLogger(a.config)
+	logger, appErr := corelogger.InitLogger(corelogger.LoggerConfig{
+		AppEnv:       a.config.AppEnv,
+		LogLevel:     a.config.LogLevel,
+		LogFile:      a.config.LogFile,
+		EnableJSON:   a.config.EnableJSON,
+		EnableCaller: a.config.EnableCaller,
+		EnableStack:  a.config.EnableStack,
+	})
 	if appErr != nil {
 		return appErr
 	}

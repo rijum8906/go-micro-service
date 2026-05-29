@@ -10,13 +10,13 @@ import "user_service/session/v1/response.proto";
 service SessionService {
   // Retrieval
   rpc GetCurrentSession(core.v1.EmptyRequest) returns (user_service.models.v1.Session);
-  rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
-  rpc GetActiveSessions(core.v1.EmptyRequest) returns (GetActiveSessionsResponse);
+  rpc GetSessions(core.v1.PaginationRequest) returns (GetSessionsResponse);
+  rpc GetActiveSessions(core.v1.PaginationRequest) returns (GetActiveSessionsResponse);
 
   // Revocation
   rpc RevokeSession(RevokeSessionRequest) returns (core.v1.SuccessResponse);
   rpc RevokeAllSessions(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
-  rpc RevokeOtherSessions(RevokeOtherSessionsRequest) returns (core.v1.SuccessResponse);
+  rpc RevokeOtherSessions(RevokeOtherSessionsRequest) returns (user_service.models.v1.AuthToken);
 
   // Termination
   rpc TerminateExpiredSessions(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);

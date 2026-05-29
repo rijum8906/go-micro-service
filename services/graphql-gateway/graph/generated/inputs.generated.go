@@ -13,6 +13,10 @@ import (
 
 // region    ************************** generated!.gotpl **************************
 
+type GenerateScopedTokenInputResolver interface {
+	Scope(ctx context.Context, obj *userdto.GenerateScopedTokenInput, data model.TokenScope) error
+}
+
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
@@ -165,14 +169,16 @@ func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.C
 		switch k {
 		case "scope":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
-			data, err := ec.unmarshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐTokenScope(ctx, v)
+			data, err := ec.unmarshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTokenScope(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Scope = data
+			if err = ec.Resolvers.GenerateScopedTokenInput().Scope(ctx, &it, data); err != nil {
+				return it, err
+			}
 		case "authMethod":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authMethod"))
-			data, err := ec.unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐAuthMethod(ctx, v)
+			data, err := ec.unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋconstantsᚐAuthMethod(ctx, v)
 			if err != nil {
 				return it, err
 			}

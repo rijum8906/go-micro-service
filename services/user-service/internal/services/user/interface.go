@@ -2,48 +2,74 @@
 package user
 
 import (
-	"context"
-
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	"github.com/rijum8906/relay/packages/core/coreenv"
-	"github.com/rijum8906/relay/packages/core/dto"
-	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
-	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
+	"github.com/rijum8906/relay/packages/core/broker"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
+	"github.com/rijum8906/relay/packages/core/hash"
+	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
+	"github.com/rijum8906/relay/packages/core/token"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
-	"github.com/rijum8906/relay/services/user/internal/utils"
+	"github.com/rijum8906/relay/services/user/app"
+	"github.com/rijum8906/relay/services/user/app/config"
+	"github.com/rijum8906/relay/services/user/internal/db"
+	"github.com/rijum8906/relay/services/user/internal/services/helper"
+	"go.uber.org/zap"
 )
 
-type UserService interface {
-	GenerateScopedToken(ctx context.Context, req *userv1.GenerateScopedTokenRequest, user *dto.UserInfo) (*userv1.GenerateScopedTokenResponse, *apperror.AppError)
-	ChangePassword(ctx context.Context, req *userv1.ChangePasswordRequest) (*corev1.SuccessResponse, *apperror.AppError)
-	UpdateProfileName(ctx context.Context, req *userv1.UpdateProfileNameRequest, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
-	UpdateProfileAvatarUrl(ctx context.Context, req *userv1.UpdateProfileAvatarUrlRequest, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
-	GetProfile(ctx context.Context, user *dto.UserInfo) (*modelsv1.Profile, *apperror.AppError)
-	GetUser(ctx context.Context, user *dto.UserInfo) (*modelsv1.User, *apperror.AppError)
-	CheckExists(ctx context.Context, id string) (bool, *apperror.AppError)
-	CheckEmailExists(ctx context.Context, email string) (bool, *apperror.AppError)
+type UserService struct {
+	// Core
+	DBPool              *pgxpool.Pool
+	DBQ                 *db.Queries
+	UserClient          userv1.UserServiceClient
+	OrgOpenFGAPublisher broker.Publisher
+	Helper              *helper.ServiceHelper
+
+	// Utils
+	TuppleManager coreopenfga.TuppleManager
+	TokenManager  token.TokenManager
+	Permission    *permissions.PermissionManager
+	HashService   *hash.HashService
+	Logger        *zap.Logger
+
+	// Config
+	Config *config.Env
 }
 
-type userService struct {
-	env   *coreenv.CoreEnv
-	repos *utils.Repos
-	utils *utils.ServiceUtils
-}
-
-func NewUserService(repo *utils.Repos, utils *utils.ServiceUtils, env *coreenv.CoreEnv) (UserService, *apperror.AppError) {
-	if repo == nil || repo.User == nil || repo.Profile == nil || repo.Session == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize user service").WithDetail("repos", "user repositories are not configured")
-	}
-	if utils == nil || utils.TokenManager == nil || utils.HashService == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize user service").WithDetail("utils", "user utilities are not configured")
-	}
-	if env == nil {
-		return nil, apperror.ErrInternal.WithMessage("failed to initialize user service").WithDetail("env", "user environment config is not configured")
+func New() (userv1.UserServiceServer, *apperror.AppError) {
+	application, appErr := app.GetInstance()
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	return &userService{
-		env:   env,
-		repos: repo,
-		utils: utils,
+	q := db.New(application.DB())
+
+	fgaClient, appErr := coreopenfga.NewClient(application.Config().FGAAPIURL)
+	if appErr != nil {
+		return nil, appErr
+	}
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+	permissionManager := permissions.NewPermissionManager(fgaClient)
+
+	publisher := broker.NewPublisher(application.BrokerCLient().GetClient())
+
+	helper, appErr := helper.GetHelper()
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return &UserService{
+		DBPool:              application.DB(),
+		DBQ:                 q,
+		TuppleManager:       tuppleManager,
+		TokenManager:        application.TokenManager(),
+		Permission:          permissionManager,
+		OrgOpenFGAPublisher: publisher,
+		HashService: hash.NewHashService(hash.Config{
+			BcryptCost: 10,
+		}),
+		Logger: application.Logger(),
+		Config: application.Config(),
+		Helper: helper,
 	}, nil
 }

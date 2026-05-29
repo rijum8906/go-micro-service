@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/testutils"
-	"github.com/rijum8906/relay/packages/core/token"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 )
 
 // NOTE: do not test slug too much validateSlug() is already being tested
@@ -78,7 +78,7 @@ func Test_validateChangeOwnershipRequst(t *testing.T) {
 			req: &organizationv1.ChangeOrganizationOwnershipRequest{
 				OrganizationId: uuid.NewString(),
 				NewOwnerId:     uuid.NewString(),
-				TokenScope:     string(token.TokenScopeChangeOrganizationOwner),
+				TokenScope:     constants.TokenScopeChangeOrganizationOwner,
 			},
 			wantErr: false,
 		},
@@ -96,7 +96,7 @@ func Test_validateChangeOwnershipRequst(t *testing.T) {
 			req: &organizationv1.ChangeOrganizationOwnershipRequest{
 				OrganizationId: "invalid",
 				NewOwnerId:     uuid.NewString(),
-				TokenScope:     string(token.TokenScopeChangeOrganizationOwner),
+				TokenScope:     constants.TokenScopeChangeOrganizationOwner,
 			},
 			wantErr: true,
 		},
@@ -105,7 +105,7 @@ func Test_validateChangeOwnershipRequst(t *testing.T) {
 			req: &organizationv1.ChangeOrganizationOwnershipRequest{
 				OrganizationId: uuid.NewString(),
 				NewOwnerId:     "invalid",
-				TokenScope:     string(token.TokenScopeChangeOrganizationOwner),
+				TokenScope:     constants.TokenScopeChangeOrganizationOwner,
 			},
 			wantErr: true,
 		},
@@ -146,7 +146,7 @@ func Test_validateUpdateOrganizationName(t *testing.T) {
 			name: "valid request",
 			req: &organizationv1.UpdateOrganizationNameRequest{
 				OrganizationId: uuid.NewString(),
-				TokenScope:     string(token.TokenScopeUpdateOrganizationName),
+				TokenScope:     constants.TokenScopeUpdateOrganizationName,
 				Name:           testutils.GenerateRandomString(5),
 				Description:    testutils.GenerateRandomString(20),
 			},
@@ -166,7 +166,7 @@ func Test_validateUpdateOrganizationName(t *testing.T) {
 			name: "invalid organization id",
 			req: &organizationv1.UpdateOrganizationNameRequest{
 				OrganizationId: "invalid",
-				TokenScope:     string(token.TokenScopeUpdateOrganizationName),
+				TokenScope:     constants.TokenScopeUpdateOrganizationName,
 				Name:           testutils.GenerateRandomString(5),
 				Description:    testutils.GenerateRandomString(20),
 			},

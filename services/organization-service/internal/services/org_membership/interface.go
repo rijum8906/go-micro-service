@@ -34,7 +34,7 @@ type OrgMembershipService struct {
 	// Utils
 	TuppleManager coreopenfga.TuppleManager
 	Permission    *permissions.PermissionManager
-	HashService   hash.HashService
+	HashService   *hash.HashService
 	Logger        *zap.Logger
 
 	// Config

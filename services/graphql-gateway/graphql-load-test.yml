@@ -1,0 +1,69 @@
+config:
+  target: "http://localhost:8080"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 100
+      name: "Ramp up"
+    - duration: 120
+      arrivalRate: 100
+      name: "Sustained load"
+    - duration: 30
+      arrivalRate: 0
+      name: "Cooldown"
+
+  plugins:
+    metrics-by-endpoint: {}
+
+  processor: "./graphql-processor.js"
+
+  variables:
+    emails:
+      - "user1@example.com"
+      - "user2@example.com"
+      - "user3@example.com"
+
+scenarios:
+  - name: "GraphQL Login Flow"
+    weight: 3
+    flow:
+      - post:
+          url: "/graphql"
+          headers:
+            Content-Type: "application/json"
+          json:
+            query: |
+              mutation Login($email: String!, $password: String!) {
+                login(email: $email, password: $password) {
+                  user {
+                    id
+                    email
+                  }
+                }
+              }
+            variables:
+              email: "{{ $randomEmail() }}"
+              password: "test123"
+          capture:
+            - json: "$.data.login.token"
+              as: "authToken"
+
+      - think: 1
+
+      - post:
+          url: "/graphql"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+            Content-Type: "application/json"
+          json:
+            query: |
+              query GetProfile {
+                me {
+                  id
+                  email
+                  profile {
+                    name
+                    avatar
+                  }
+                }
+              }

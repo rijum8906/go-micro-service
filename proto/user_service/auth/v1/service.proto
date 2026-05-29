@@ -7,12 +7,29 @@ import "user_service/auth/v1/request.proto";
 import "user_service/auth/v1/response.proto";
 
 service AuthService {
+  // Authentication
   rpc Login(LoginRequest) returns (AuthResponse);
+  rpc LoginWithTwoFactorCode(TwoFactorCodeRequest) returns (AuthResponse);
   rpc Register(RegisterRequest) returns (AuthResponse);
-  rpc Logout(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
-  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+
+  // Authorization
+  rpc Logout(LogoutRequest) returns (core.v1.SuccessResponse);
+  rpc LogoutAllDevices(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
+
+  // Password management
+  rpc ChangePassword(ChangePasswordRequest) returns (core.v1.SuccessResponse);
+  rpc ResetPassword(ResetPasswordRequest) returns (core.v1.SuccessResponse);
+
+  // Security
+  rpc VerifyTwoFactor(TwoFactorRequest) returns (core.v1.SuccessResponse);
+  rpc DisableTwoFactor(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
+
+  // Token management
+  rpc RefreshToken(RefreshAccessTokenRequest) returns (RefreshTokenResponse);
+  rpc GenerateScopedToken(GenerateScopedTokenRequest) returns (GenerateScopedTokenResponse);
+
+  // Email verification
   rpc RequestEmailVerification(RequestEmailVerificationRequest) returns (core.v1.SuccessResponse);
   rpc RequestPasswordReset(RequestPasswordResetRequest) returns (core.v1.SuccessResponse);
   rpc VerifyEmail(VerifyEmailRequest) returns (core.v1.SuccessResponse);
-  rpc ResetPassword(ResetPasswordRequest) returns (core.v1.SuccessResponse);
 }

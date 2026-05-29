@@ -13,15 +13,15 @@ func (s *UserAuthEmailService) processEmailVerification(msg *nats.Msg) *apperror
 	var data dto.EmailVerificationDTO
 
 	if err := json.Unmarshal(msg.Data, &data); err != nil {
-		return apperror.ErrInternal.WithMessage("error unmarshalling password reset").WithDetail("error", err.Error())
+		return apperror.ErrInternal.WithMessage("error unmarshalling email verification").WithDetail("error", err.Error())
 	}
 
-	emailTemplate, err := s.TemplateManager.RenderToString(template.TemplateTypeEmailPasswordReset, data)
+	emailTemplate, err := s.TemplateManager.RenderToString(template.TemplateTypeEmailVerification, data)
 	if err != nil {
-		return apperror.ErrThirdParty.WithMessage("error rendering password reset template").WithDetail("error", err.Error())
+		return apperror.ErrThirdParty.WithMessage("error rendering email verification template").WithDetail("error", err.Error())
 	}
 
-	if appErr := s.sendEmail(msg, emailTemplate, "Password Reset", data.BaseEmailDTO); appErr != nil {
+	if appErr := s.sendEmail(msg, emailTemplate, "Email Verification", data.BaseEmailDTO); appErr != nil {
 		return appErr
 	}
 

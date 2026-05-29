@@ -2,16 +2,7 @@ syntax = "proto3";
 
 package user_service.user.v1;
 
-import "core/v1/enums.proto";
-import "user_service/models/v1/model.proto";
-
-message GenerateScopedTokenRequest {
-  core.v1.TokenScope scope = 1;
-  core.v1.AuthMethod auth_method = 2;
-  string auth_value = 3;
-}
-
-message UpdateProfileAvatarUrlRequest {
+message UpdateProfileAvatarURLRequest {
   string profile_id = 1;
   string avatar_url = 2;
 }
@@ -20,13 +11,4 @@ message UpdateProfileNameRequest {
   string profile_id = 1;
   string first_name = 2;
   string last_name = 3;
-}
-
-message ChangePasswordRequest {
-  user_service.models.v1.Token scoped_token = 1;
-  string new_password = 2;
-}
-
-message CheckExistsRequest {
-  string id = 1;
 }

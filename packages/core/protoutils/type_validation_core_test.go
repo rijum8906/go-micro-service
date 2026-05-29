@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/protoutils"
-	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 )
 
@@ -103,7 +102,7 @@ func TestValidateIDAndScopedTokenReq(t *testing.T) {
 			name: "valid request",
 			req: &corev1.IDAndScopedTokenRequest{
 				Id:         uuid.NewString(),
-				TokenScope: string(token.TokenScopeAdmin),
+				TokenScope: "UPDATE_USER_PASSWORD",
 			},
 		},
 		{
@@ -116,7 +115,7 @@ func TestValidateIDAndScopedTokenReq(t *testing.T) {
 			name: "invalid uuid",
 			req: &corev1.IDAndScopedTokenRequest{
 				Id:         "not-a-uuid",
-				TokenScope: string(token.TokenScopeAdmin),
+				TokenScope: "UPDATE_USER_PASSWORD",
 			},
 			wantCode:    apperror.CodeValidation,
 			wantMessage: "provided id is not a valid uuid",

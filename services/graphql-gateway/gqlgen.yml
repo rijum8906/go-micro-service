@@ -25,7 +25,8 @@ autobind:
   - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
   - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
   - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/taskdto/task"
-  - "github.com/rijum8906/relay/packages/core/token"
+  - "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
+  - "github.com/rijum8906/relay/packages/core/constants"
 
 models:
   RequestMetaInput:
