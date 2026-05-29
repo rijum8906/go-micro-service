@@ -8,7 +8,7 @@ import (
 )
 
 // RevokeAllUserTokens revokes all tokens for a user using the set
-func (tm *TokenManager) RevokeAllUserTokens(ctx context.Context, userID string) *apperror.AppError {
+func (tm *tokenManager) RevokeAllUserTokens(ctx context.Context, userID string) *apperror.AppError {
 	userTokenKey := fmt.Sprintf("user_tokens:%s", userID)
 
 	// Get all token IDs for this user
@@ -34,7 +34,7 @@ func (tm *TokenManager) RevokeAllUserTokens(ctx context.Context, userID string) 
 }
 
 // RevokeAuthToken revokes a single auth token
-func (tm *TokenManager) RevokeAuthToken(ctx context.Context, tokenID, userID string) *apperror.AppError {
+func (tm *tokenManager) RevokeAuthToken(ctx context.Context, tokenID, userID string) *apperror.AppError {
 	// Delete the token
 	if err := tm.redisClient.Del(ctx, tokenID).Err(); err != nil {
 		return apperror.ErrInternal.

@@ -7,6 +7,7 @@
 package authv1
 
 import (
+	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -413,11 +414,211 @@ func (x *LogoutRequest) GetRefreshToken() string {
 	return ""
 }
 
+type TwoFactorRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TwoFactorRequest) Reset() {
+	*x = TwoFactorRequest{}
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TwoFactorRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TwoFactorRequest) ProtoMessage() {}
+
+func (x *TwoFactorRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TwoFactorRequest.ProtoReflect.Descriptor instead.
+func (*TwoFactorRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *TwoFactorRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+type ChangePasswordRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TokenScope    string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
+	NewPassword   string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangePasswordRequest) Reset() {
+	*x = ChangePasswordRequest{}
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangePasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangePasswordRequest) ProtoMessage() {}
+
+func (x *ChangePasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangePasswordRequest.ProtoReflect.Descriptor instead.
+func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ChangePasswordRequest) GetTokenScope() string {
+	if x != nil {
+		return x.TokenScope
+	}
+	return ""
+}
+
+func (x *ChangePasswordRequest) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
+type GenerateScopedTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Scope         v1.TokenScope          `protobuf:"varint,1,opt,name=scope,proto3,enum=core.v1.TokenScope" json:"scope,omitempty"`
+	AuthMethod    v1.AuthMethod          `protobuf:"varint,2,opt,name=auth_method,json=authMethod,proto3,enum=core.v1.AuthMethod" json:"auth_method,omitempty"`
+	AuthValue     string                 `protobuf:"bytes,3,opt,name=auth_value,json=authValue,proto3" json:"auth_value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateScopedTokenRequest) Reset() {
+	*x = GenerateScopedTokenRequest{}
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateScopedTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateScopedTokenRequest) ProtoMessage() {}
+
+func (x *GenerateScopedTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateScopedTokenRequest.ProtoReflect.Descriptor instead.
+func (*GenerateScopedTokenRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GenerateScopedTokenRequest) GetScope() v1.TokenScope {
+	if x != nil {
+		return x.Scope
+	}
+	return v1.TokenScope(0)
+}
+
+func (x *GenerateScopedTokenRequest) GetAuthMethod() v1.AuthMethod {
+	if x != nil {
+		return x.AuthMethod
+	}
+	return v1.AuthMethod(0)
+}
+
+func (x *GenerateScopedTokenRequest) GetAuthValue() string {
+	if x != nil {
+		return x.AuthValue
+	}
+	return ""
+}
+
+type TwoFactorCodeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TwoFactorCode string                 `protobuf:"bytes,1,opt,name=two_factor_code,json=twoFactorCode,proto3" json:"two_factor_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TwoFactorCodeRequest) Reset() {
+	*x = TwoFactorCodeRequest{}
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TwoFactorCodeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TwoFactorCodeRequest) ProtoMessage() {}
+
+func (x *TwoFactorCodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TwoFactorCodeRequest.ProtoReflect.Descriptor instead.
+func (*TwoFactorCodeRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *TwoFactorCodeRequest) GetTwoFactorCode() string {
+	if x != nil {
+		return x.TwoFactorCode
+	}
+	return ""
+}
+
 var File_user_service_auth_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/auth/v1/request.proto\x12\x14user_service.auth.v1\"@\n" +
+	"\"user_service/auth/v1/request.proto\x12\x14user_service.auth.v1\x1a\x13core/v1/enums.proto\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x7f\n" +
@@ -439,7 +640,21 @@ const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\x19RefreshAccessTokenRequest\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"4\n" +
 	"\rLogoutRequest\x12#\n" +
-	"\rrefresh_token\x18\x01 \x01(\tR\frefreshTokenB\xda\x01\n" +
+	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"&\n" +
+	"\x10TwoFactorRequest\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\"[\n" +
+	"\x15ChangePasswordRequest\x12\x1f\n" +
+	"\vtoken_scope\x18\x01 \x01(\tR\n" +
+	"tokenScope\x12!\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"\x9c\x01\n" +
+	"\x1aGenerateScopedTokenRequest\x12)\n" +
+	"\x05scope\x18\x01 \x01(\x0e2\x13.core.v1.TokenScopeR\x05scope\x124\n" +
+	"\vauth_method\x18\x02 \x01(\x0e2\x13.core.v1.AuthMethodR\n" +
+	"authMethod\x12\x1d\n" +
+	"\n" +
+	"auth_value\x18\x03 \x01(\tR\tauthValue\">\n" +
+	"\x14TwoFactorCodeRequest\x12&\n" +
+	"\x0ftwo_factor_code\x18\x01 \x01(\tR\rtwoFactorCodeB\xda\x01\n" +
 	"\x18com.user_service.auth.v1B\fRequestProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\x13UserService.Auth.V1\xca\x02\x13UserService\\Auth\\V1\xe2\x02\x1fUserService\\Auth\\V1\\GPBMetadata\xea\x02\x15UserService::Auth::V1b\x06proto3"
 
 var (
@@ -454,7 +669,7 @@ func file_user_service_auth_v1_request_proto_rawDescGZIP() []byte {
 	return file_user_service_auth_v1_request_proto_rawDescData
 }
 
-var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*LoginRequest)(nil),                    // 0: user_service.auth.v1.LoginRequest
 	(*RegisterRequest)(nil),                 // 1: user_service.auth.v1.RegisterRequest
@@ -464,13 +679,21 @@ var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*ResetPasswordRequest)(nil),            // 5: user_service.auth.v1.ResetPasswordRequest
 	(*RefreshAccessTokenRequest)(nil),       // 6: user_service.auth.v1.RefreshAccessTokenRequest
 	(*LogoutRequest)(nil),                   // 7: user_service.auth.v1.LogoutRequest
+	(*TwoFactorRequest)(nil),                // 8: user_service.auth.v1.TwoFactorRequest
+	(*ChangePasswordRequest)(nil),           // 9: user_service.auth.v1.ChangePasswordRequest
+	(*GenerateScopedTokenRequest)(nil),      // 10: user_service.auth.v1.GenerateScopedTokenRequest
+	(*TwoFactorCodeRequest)(nil),            // 11: user_service.auth.v1.TwoFactorCodeRequest
+	(v1.TokenScope)(0),                      // 12: core.v1.TokenScope
+	(v1.AuthMethod)(0),                      // 13: core.v1.AuthMethod
 }
 var file_user_service_auth_v1_request_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	12, // 0: user_service.auth.v1.GenerateScopedTokenRequest.scope:type_name -> core.v1.TokenScope
+	13, // 1: user_service.auth.v1.GenerateScopedTokenRequest.auth_method:type_name -> core.v1.AuthMethod
+	2,  // [2:2] is the sub-list for method output_type
+	2,  // [2:2] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_service_auth_v1_request_proto_init() }
@@ -484,7 +707,7 @@ func file_user_service_auth_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_auth_v1_request_proto_rawDesc), len(file_user_service_auth_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

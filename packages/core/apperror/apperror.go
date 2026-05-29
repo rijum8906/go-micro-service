@@ -96,7 +96,7 @@ func (e *AppError) Log() {
 		if config.Logger == nil {
 			fmt.Printf("[%s] %s Details : %v Frames : %v \n", e.Code, e.Message, e.Details, e.Frames)
 		} else {
-			config.Logger.Error(e.Message, zap.Any("details", e.Details), zap.Any("frames", e.Frames), zap.String("requestID", e.RequestID))
+			config.Logger.Error(e.Message, ParseAppErrorIntoZapFields(e)...)
 		}
 
 		e.isLogged = true

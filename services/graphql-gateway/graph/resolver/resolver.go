@@ -24,10 +24,10 @@ type GrpcClients struct {
 type Resolver struct {
 	Clients      *GrpcClients
 	Validate     *validator.Validate
-	TokenManager *token.TokenManager
+	TokenManager token.TokenManager
 }
 
-func NewResolver(clients *GrpcClients, token *token.TokenManager) *Resolver {
+func NewResolver(clients *GrpcClients, token token.TokenManager) *Resolver {
 	return &Resolver{
 		Validate:     validator.New(),
 		Clients:      clients,

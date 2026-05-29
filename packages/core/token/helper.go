@@ -87,7 +87,7 @@ func generateTokenClaims(subject, id, scope, sessionID string, ttl time.Duration
 }
 
 // GenerateToken generates a JWT token with the specified subject, id, scope, and ttl
-func (tm *TokenManager) GenerateToken(subject, id, scope string, ttl time.Duration) (*TokenResponse, *apperror.AppError) {
+func (tm *tokenManager) GenerateToken(subject, id, scope string, ttl time.Duration) (*TokenResponse, *apperror.AppError) {
 	token := generateTokenClaims(subject, id, scope, "", ttl)
 
 	tokenStr, err := token.SignedString(tm.config.JwtSecret)

@@ -1,3 +1,5 @@
+//go:generate ifacemaker -s tokenManager -i TokenManager -p token -o generated.go -f token.go -f issue.go -f validate.go -f revoke.go -f helper.go -d false
+
 // Package token contains test utils for token
 package token
 
@@ -23,7 +25,7 @@ type Claims struct {
 }
 
 // TokenManager is a struct that holds the configuration and methods for issuing, validating and revoking tokens
-type TokenManager struct {
+type tokenManager struct {
 	// Core
 	redisClient *redis.Client
 
@@ -32,8 +34,8 @@ type TokenManager struct {
 }
 
 // NewTokenManager returns a new instance of TokenManager
-func NewTokenManager(config Config, redisClient *redis.Client) *TokenManager {
-	return &TokenManager{
+func NewTokenManager(config Config, redisClient *redis.Client) TokenManager {
+	return &tokenManager{
 		config:      config,
 		redisClient: redisClient,
 	}

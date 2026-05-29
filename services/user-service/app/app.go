@@ -30,7 +30,7 @@ type ApplicationInfra struct {
 }
 
 type ApplicationUtils struct {
-	token  *token.TokenManager
+	token  token.TokenManager
 	hash   *hash.HashService
 	logger *zap.Logger
 }

@@ -13,6 +13,9 @@ const (
 	// Password
 	TokenScopeChangePassword = "CHANGE_USER_PASSWORD"
 	TokenScopeResetPassword  = "RESET_USER_PASSWORD"
+
+	// 2FA
+	TokenScope2FA = "TWO_FACTOR_AUTHENTICATION"
 )
 
 var TokenScopes = []string{
@@ -20,6 +23,7 @@ var TokenScopes = []string{
 	TokenScopeVerifyEmail,
 	TokenScopeChangePassword,
 	TokenScopeResetPassword,
+	TokenScope2FA,
 }
 
 func IsValidaTokenScope(tokenScope string) bool {

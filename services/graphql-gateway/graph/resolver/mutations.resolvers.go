@@ -72,7 +72,7 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 		return nil, appErr
 	}
 
-	tokens, ok := metadata.ReceiveTokensInfo(ctx)
+	tokens, ok := metadata.ReceiveAuthTokensInfo(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithMessage("failed to logout")
 	}
@@ -276,7 +276,7 @@ func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdt
 		return nil, appErr
 	}
 
-	res, err := r.Clients.UserClient.GenerateScopedToken(ctx, &userv1.GenerateScopedTokenRequest{
+	res, err := r.Clients.AuthClient.GenerateScopedToken(ctx, &authv1.GenerateScopedTokenRequest{
 		AuthMethod: authMethod,
 		Scope:      tokenScope,
 		AuthValue:  input.AuthValue,
@@ -286,10 +286,7 @@ func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdt
 	}
 
 	return &model.ScopedTokenResponse{
-		Token: &model.Token{
-			Value:     res.Token.Value,
-			ExpiresAt: res.Token.ExpiresAt.String(),
-		},
+		ScopedToken: res.ScopedToken,
 	}, nil
 }
 
@@ -304,7 +301,7 @@ func (r *mutationResolver) UpdateProfileAvatarURL(ctx context.Context, input use
 		return nil, appErr
 	}
 
-	res, err := r.Clients.UserClient.UpdateProfileAvatarUrl(ctx, &userv1.UpdateProfileAvatarUrlRequest{
+	res, err := r.Clients.UserClient.UpdateProfileAvatarURL(ctx, &userv1.UpdateProfileAvatarURLRequest{
 		ProfileId: input.ProfileID,
 		AvatarUrl: input.AvatarURL,
 	})
@@ -354,7 +351,7 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.Cha
 		return nil, appErr
 	}
 
-	res, err := r.Clients.UserClient.ChangePassword(ctx, &userv1.ChangePasswordRequest{
+	res, err := r.Clients.AuthClient.ChangePassword(ctx, &authv1.ChangePasswordRequest{
 		TokenScope:  string(claims.Scope),
 		NewPassword: input.NewPassword,
 	})

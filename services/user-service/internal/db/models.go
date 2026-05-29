@@ -50,6 +50,7 @@ type User struct {
 	PasswordHash       pgtype.Text
 	IsEmailVerified    bool
 	TwoFactorEnabled   bool
+	TwoFactorSecret    pgtype.Text
 	TwoFactorEnabledAt pgtype.Timestamptz
 	EmailVerifiedAt    pgtype.Timestamptz
 	CreatedAt          pgtype.Timestamptz

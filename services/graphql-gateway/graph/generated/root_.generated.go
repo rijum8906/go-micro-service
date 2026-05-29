@@ -89,7 +89,7 @@ type ComplexityRoot struct {
 	}
 
 	ScopedTokenResponse struct {
-		Token func(childComplexity int) int
+		ScopedToken func(childComplexity int) int
 	}
 
 	Session struct {
@@ -516,12 +516,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.MyProfile(childComplexity), true
 
-	case "ScopedTokenResponse.token":
-		if e.ComplexityRoot.ScopedTokenResponse.Token == nil {
+	case "ScopedTokenResponse.scopedToken":
+		if e.ComplexityRoot.ScopedTokenResponse.ScopedToken == nil {
 			break
 		}
 
-		return e.ComplexityRoot.ScopedTokenResponse.Token(childComplexity), true
+		return e.ComplexityRoot.ScopedTokenResponse.ScopedToken(childComplexity), true
 
 	case "Session.createdAt":
 		if e.ComplexityRoot.Session.CreatedAt == nil {
@@ -1027,29 +1027,29 @@ input  VerifyEmailInput {
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/queries.graphqls", Input: ``, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/types.graphqls", Input: `type Token {
-  value: String!
-  expiresAt: DateTime!
+    value: String!
+    expiresAt: DateTime!
 }
 
 type AuthTokens {
-  accessToken: Token!
-  refreshToken: Token!
+    accessToken: Token!
+    refreshToken: Token!
 }
 
 type AuthResponse {
-  tokens: AuthTokens!
-  user: User!
-  profile: Profile!
+    tokens: AuthTokens!
+    user: User!
+    profile: Profile!
 }
 
 type MutationResponse {
-   success: Boolean!
-   message: String!
- }
+    success: Boolean!
+    message: String!
+}
 
- type ScopedTokenResponse {
-   token: Token!
- }
+type ScopedTokenResponse {
+    scopedToken: String!
+}
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/inputs.graphqls", Input: `input GetSessionsInput {
   paginationRequest: PaginationInput!

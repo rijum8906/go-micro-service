@@ -809,8 +809,8 @@ func (ec *executionContext) fieldContext_Mutation_GenerateScopedToken(ctx contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "token":
-				return ec.fieldContext_ScopedTokenResponse_token(ctx, field)
+			case "scopedToken":
+				return ec.fieldContext_ScopedTokenResponse_scopedToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ScopedTokenResponse", field.Name)
 		},

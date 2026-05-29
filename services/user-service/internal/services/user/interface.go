@@ -27,7 +27,7 @@ type UserService struct {
 
 	// Utils
 	TuppleManager coreopenfga.TuppleManager
-	TokenManager  *token.TokenManager
+	TokenManager  token.TokenManager
 	Permission    *permissions.PermissionManager
 	HashService   *hash.HashService
 	Logger        *zap.Logger

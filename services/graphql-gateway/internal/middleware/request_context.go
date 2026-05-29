@@ -27,8 +27,14 @@ func ExtractAuthTokens(r *http.Request) dto.AuthTokens {
 	accessToken := r.Header.Get(dto.AuthorizationReqHeaderKey)
 	if accessToken != "" {
 		tokenParts := strings.Split(accessToken, " ")
-		if len(tokenParts) == 2 && tokenParts[0] == "Bearer" {
+		if len(tokenParts) == 2 {
 			accessToken = tokenParts[1]
+			// switch tokenParts[0] {
+			// case string(coreconstants.TokenTypeBearer):
+			// 	accessTokenType = coreconstants.TokenTypeBearer
+			// case string(coreconstants.TokenType2FA):
+			// 	accessTokenType = coreconstants.TokenType2FA
+			// }
 		}
 	} else {
 		// Fallback to cookie
@@ -60,7 +66,7 @@ func WithRequestHeaders(next http.Handler) http.Handler {
 
 		ctx := r.Context()
 		ctx = metadata.SendClientInfo(ctx, clientInfo)
-		ctx = metadata.SendTokensInfo(ctx, tokens)
+		ctx = metadata.SendAuthTokensInfo(ctx, tokens)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

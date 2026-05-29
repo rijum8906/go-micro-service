@@ -26,7 +26,7 @@ const TokenScopeAuth = "USER_AUTH"
 // Example:
 //   - Scope: USER_EMAIL_VERIFY, Subject: user's email
 //   - Scope: USER_PASSWORD_CHANGE, Subject: user ID (must be issued via authentication)
-func (tm *TokenManager) IssueScopedToken(ctx context.Context, subject, scope string) (*TokenResponse, *apperror.AppError) {
+func (tm *tokenManager) IssueScopedToken(ctx context.Context, subject, scope string) (*TokenResponse, *apperror.AppError) {
 	tokenID := uuid.NewString()
 	return tm.issueToken(ctx, tokenID, subject, scope, "", tm.config.ScopedSecret, tm.config.ScopedTokenTTL)
 }
@@ -40,7 +40,7 @@ func (tm *TokenManager) IssueScopedToken(ctx context.Context, subject, scope str
 //
 // Use Case:
 //   - User sign-in
-func (tm *TokenManager) IssueAuthToken(ctx context.Context, userID, sessionID string) (*TokenResponse, *apperror.AppError) {
+func (tm *tokenManager) IssueAuthToken(ctx context.Context, userID, sessionID string) (*TokenResponse, *apperror.AppError) {
 	tokenID := uuid.NewString()
 	userTokenKey := fmt.Sprintf("user_tokens:%s", userID)
 
@@ -72,7 +72,7 @@ func (tm *TokenManager) IssueAuthToken(ctx context.Context, userID, sessionID st
 }
 
 // issueToken is the internal helper for token issuance
-func (tm *TokenManager) issueToken(ctx context.Context, tokenID, subject, scope, sessionID string, secret []byte, ttl time.Duration) (*TokenResponse, *apperror.AppError) {
+func (tm *tokenManager) issueToken(ctx context.Context, tokenID, subject, scope, sessionID string, secret []byte, ttl time.Duration) (*TokenResponse, *apperror.AppError) {
 	token := generateTokenClaims(subject, tokenID, scope, sessionID, ttl)
 
 	tokenStr, err := token.SignedString(secret)

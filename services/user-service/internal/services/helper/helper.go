@@ -3,7 +3,6 @@ package helper
 
 import (
 	"context"
-	"runtime/debug"
 	"sync"
 
 	"github.com/jackc/pgx/v5"
@@ -62,6 +61,14 @@ func GetHelper() (*ServiceHelper, *apperror.AppError) {
 	return instance, nil
 }
 
+func GetHelperForTest(pool *pgxpool.Pool, q *db.Queries, logger *zap.Logger) *ServiceHelper {
+	return &ServiceHelper{
+		DBPool: pool,
+		DBQ:    q,
+		Logger: logger,
+	}
+}
+
 func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) *apperror.AppError {
 	tx, err := s.DBPool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.Serializable,
@@ -72,11 +79,6 @@ func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *appe
 
 	defer func() {
 		if p := recover(); p != nil {
-			// Log the panic with stack trace
-			s.Logger.Error("panic in transaction",
-				zap.Any("panic", p),
-				zap.String("stack", string(debug.Stack())))
-
 			// Rollback
 			if rbErr := tx.Rollback(ctx); rbErr != nil {
 				s.Logger.Error("rollback failed after panic",
@@ -102,4 +104,24 @@ func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *appe
 	}
 
 	return nil
+}
+
+func (s *ServiceHelper) RunInTxWithManualRollback(ctx context.Context, f func(q *db.Queries) *apperror.AppError) (pgx.Tx, *apperror.AppError) {
+	tx, err := s.DBPool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.Serializable,
+	})
+	if err != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to begin transaction").WithDetail("error", err.Error())
+	}
+
+	q := s.DBQ.WithTx(tx)
+	if appErr := f(q); appErr != nil {
+		return nil, appErr
+	}
+
+	if err = tx.Commit(ctx); err != nil {
+		return nil, apperror.ErrInternal.WithMessage("failed to commit transaction").WithDetail("error", err.Error())
+	}
+
+	return tx, nil
 }

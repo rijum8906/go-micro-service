@@ -68,7 +68,7 @@ INSERT INTO users (
 ) VALUES (
     $1, $2, $3
 )
-RETURNING id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+RETURNING id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
@@ -90,6 +90,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.PasswordHash,
 		&i.IsEmailVerified,
 		&i.TwoFactorEnabled,
+		&i.TwoFactorSecret,
 		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
@@ -123,8 +124,39 @@ func (q *Queries) DeleteUserSoft(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const DisableUserTwoFactor = `-- name: DisableUserTwoFactor :exec
+UPDATE users
+SET two_factor_enabled = false,
+    two_factor_secret = NULL,
+    two_factor_enabled_at = NULL
+WHERE id = $1
+`
+
+func (q *Queries) DisableUserTwoFactor(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, DisableUserTwoFactor, id)
+	return err
+}
+
+const EnableUserTwoFactor = `-- name: EnableUserTwoFactor :exec
+UPDATE users
+SET two_factor_enabled = true,
+    two_factor_secret = $2,
+    two_factor_enabled_at = NOW()
+WHERE id = $1
+`
+
+type EnableUserTwoFactorParams struct {
+	ID              uuid.UUID
+	TwoFactorSecret pgtype.Text
+}
+
+func (q *Queries) EnableUserTwoFactor(ctx context.Context, arg EnableUserTwoFactorParams) error {
+	_, err := q.db.Exec(ctx, EnableUserTwoFactor, arg.ID, arg.TwoFactorSecret)
+	return err
+}
+
 const GetUser = `-- name: GetUser :one
-SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
 FROM users
 WHERE id = $1 AND status != 'deleted' LIMIT 1
 `
@@ -142,6 +174,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.PasswordHash,
 		&i.IsEmailVerified,
 		&i.TwoFactorEnabled,
+		&i.TwoFactorSecret,
 		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
@@ -152,7 +185,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const GetUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
 FROM users
 WHERE email = $1 AND status != 'deleted' LIMIT 1
 `
@@ -167,6 +200,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.PasswordHash,
 		&i.IsEmailVerified,
 		&i.TwoFactorEnabled,
+		&i.TwoFactorSecret,
 		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
@@ -177,7 +211,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const GetUserWithAllStatuses = `-- name: GetUserWithAllStatuses :one
-SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
 FROM users
 WHERE id = $1
 `
@@ -192,6 +226,7 @@ func (q *Queries) GetUserWithAllStatuses(ctx context.Context, id uuid.UUID) (Use
 		&i.PasswordHash,
 		&i.IsEmailVerified,
 		&i.TwoFactorEnabled,
+		&i.TwoFactorSecret,
 		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
@@ -251,23 +286,5 @@ type UpdateUserPasswordParams struct {
 // =====================================================
 func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
 	_, err := q.db.Exec(ctx, UpdateUserPassword, arg.ID, arg.PasswordHash)
-	return err
-}
-
-const UpdateUserTwoFactor = `-- name: UpdateUserTwoFactor :exec
-UPDATE users
-SET two_factor_enabled = $2,
-    two_factor_enabled_at = $3
-WHERE id = $1
-`
-
-type UpdateUserTwoFactorParams struct {
-	ID                 uuid.UUID
-	TwoFactorEnabled   bool
-	TwoFactorEnabledAt pgtype.Timestamptz
-}
-
-func (q *Queries) UpdateUserTwoFactor(ctx context.Context, arg UpdateUserTwoFactorParams) error {
-	_, err := q.db.Exec(ctx, UpdateUserTwoFactor, arg.ID, arg.TwoFactorEnabled, arg.TwoFactorEnabledAt)
 	return err
 }

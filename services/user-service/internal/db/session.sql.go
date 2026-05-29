@@ -271,6 +271,59 @@ func (q *Queries) GetSessionsByUserID(ctx context.Context, arg GetSessionsByUser
 	return items, nil
 }
 
+const LockAndGetSessionByRefreshTokenHash = `-- name: LockAndGetSessionByRefreshTokenHash :one
+SELECT id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
+FROM sessions
+WHERE refresh_token_hash = $1 AND is_revoked = false
+FOR UPDATE SKIP LOCKED
+`
+
+func (q *Queries) LockAndGetSessionByRefreshTokenHash(ctx context.Context, refreshTokenHash string) (Session, error) {
+	row := q.db.QueryRow(ctx, LockAndGetSessionByRefreshTokenHash, refreshTokenHash)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.RefreshTokenHash,
+		&i.UserAgent,
+		&i.IpAddr,
+		&i.DeviceID,
+		&i.LastLoginAt,
+		&i.ExpiresAt,
+		&i.IsRevoked,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const LockSession = `-- name: LockSession :exec
+SELECT id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
+FROM sessions
+WHERE id = $1 AND is_revoked = false
+FOR UPDATE SKIP LOCKED
+`
+
+// =====================================================
+// LOCK METHODS
+// =====================================================
+func (q *Queries) LockSession(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, LockSession, id)
+	return err
+}
+
+const LockSessionsByUserID = `-- name: LockSessionsByUserID :exec
+SELECT id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
+FROM sessions
+WHERE user_id = $1 AND is_revoked = false
+FOR UPDATE SKIP LOCKED
+`
+
+func (q *Queries) LockSessionsByUserID(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, LockSessionsByUserID, userID)
+	return err
+}
+
 const RevokeActiveSessions = `-- name: RevokeActiveSessions :exec
 UPDATE sessions
 SET is_revoked = true

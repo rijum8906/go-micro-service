@@ -32,7 +32,7 @@ func attachClientInfo(ctx context.Context, meta coredto.RequestMeta) context.Con
 }
 
 // validateAndAttachUserInfo validate the bearer token and on validation success attach user info to context
-func validateAndAttachUserInfo(ctx context.Context, tokenManager *token.TokenManager) (context.Context, *apperror.AppError) {
+func validateAndAttachUserInfo(ctx context.Context, tokenManager token.TokenManager) (context.Context, *apperror.AppError) {
 	accessToken, appErr := utils.GetAccessTokenFromHeader(ctx)
 	if appErr != nil {
 		return nil, appErr

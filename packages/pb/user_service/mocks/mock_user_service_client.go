@@ -41,89 +41,6 @@ func (_m *MockUserServiceClient) EXPECT() *MockUserServiceClient_Expecter {
 	return &MockUserServiceClient_Expecter{mock: &_m.Mock}
 }
 
-// ChangePassword provides a mock function for the type MockUserServiceClient
-func (_mock *MockUserServiceClient) ChangePassword(ctx context.Context, in *userv1.ChangePasswordRequest, opts ...grpc.CallOption) (*corev1.SuccessResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
-
-	if len(ret) == 0 {
-		panic("no return value specified for ChangePassword")
-	}
-
-	var r0 *corev1.SuccessResponse
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.ChangePasswordRequest, ...grpc.CallOption) (*corev1.SuccessResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.ChangePasswordRequest, ...grpc.CallOption) *corev1.SuccessResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*corev1.SuccessResponse)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *userv1.ChangePasswordRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockUserServiceClient_ChangePassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ChangePassword'
-type MockUserServiceClient_ChangePassword_Call struct {
-	*mock.Call
-}
-
-// ChangePassword is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *userv1.ChangePasswordRequest
-//   - opts ...grpc.CallOption
-func (_e *MockUserServiceClient_Expecter) ChangePassword(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_ChangePassword_Call {
-	return &MockUserServiceClient_ChangePassword_Call{Call: _e.mock.On("ChangePassword",
-		append([]interface{}{ctx, in}, opts...)...)}
-}
-
-func (_c *MockUserServiceClient_ChangePassword_Call) Run(run func(ctx context.Context, in *userv1.ChangePasswordRequest, opts ...grpc.CallOption)) *MockUserServiceClient_ChangePassword_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 *userv1.ChangePasswordRequest
-		if args[1] != nil {
-			arg1 = args[1].(*userv1.ChangePasswordRequest)
-		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
-		run(
-			arg0,
-			arg1,
-			arg2...,
-		)
-	})
-	return _c
-}
-
-func (_c *MockUserServiceClient_ChangePassword_Call) Return(successResponse *corev1.SuccessResponse, err error) *MockUserServiceClient_ChangePassword_Call {
-	_c.Call.Return(successResponse, err)
-	return _c
-}
-
-func (_c *MockUserServiceClient_ChangePassword_Call) RunAndReturn(run func(ctx context.Context, in *userv1.ChangePasswordRequest, opts ...grpc.CallOption) (*corev1.SuccessResponse, error)) *MockUserServiceClient_ChangePassword_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // CheckEmailExists provides a mock function for the type MockUserServiceClient
 func (_mock *MockUserServiceClient) CheckEmailExists(ctx context.Context, in *corev1.EmailRequest, opts ...grpc.CallOption) (*userv1.CheckExistsResponse, error) {
 	var tmpRet mock.Arguments
@@ -286,89 +203,6 @@ func (_c *MockUserServiceClient_CheckExists_Call) Return(checkExistsResponse *us
 }
 
 func (_c *MockUserServiceClient_CheckExists_Call) RunAndReturn(run func(ctx context.Context, in *corev1.IDRequest, opts ...grpc.CallOption) (*userv1.CheckExistsResponse, error)) *MockUserServiceClient_CheckExists_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GenerateScopedToken provides a mock function for the type MockUserServiceClient
-func (_mock *MockUserServiceClient) GenerateScopedToken(ctx context.Context, in *userv1.GenerateScopedTokenRequest, opts ...grpc.CallOption) (*userv1.GenerateScopedTokenResponse, error) {
-	var tmpRet mock.Arguments
-	if len(opts) > 0 {
-		tmpRet = _mock.Called(ctx, in, opts)
-	} else {
-		tmpRet = _mock.Called(ctx, in)
-	}
-	ret := tmpRet
-
-	if len(ret) == 0 {
-		panic("no return value specified for GenerateScopedToken")
-	}
-
-	var r0 *userv1.GenerateScopedTokenResponse
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.GenerateScopedTokenRequest, ...grpc.CallOption) (*userv1.GenerateScopedTokenResponse, error)); ok {
-		return returnFunc(ctx, in, opts...)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.GenerateScopedTokenRequest, ...grpc.CallOption) *userv1.GenerateScopedTokenResponse); ok {
-		r0 = returnFunc(ctx, in, opts...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*userv1.GenerateScopedTokenResponse)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *userv1.GenerateScopedTokenRequest, ...grpc.CallOption) error); ok {
-		r1 = returnFunc(ctx, in, opts...)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockUserServiceClient_GenerateScopedToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GenerateScopedToken'
-type MockUserServiceClient_GenerateScopedToken_Call struct {
-	*mock.Call
-}
-
-// GenerateScopedToken is a helper method to define mock.On call
-//   - ctx context.Context
-//   - in *userv1.GenerateScopedTokenRequest
-//   - opts ...grpc.CallOption
-func (_e *MockUserServiceClient_Expecter) GenerateScopedToken(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_GenerateScopedToken_Call {
-	return &MockUserServiceClient_GenerateScopedToken_Call{Call: _e.mock.On("GenerateScopedToken",
-		append([]interface{}{ctx, in}, opts...)...)}
-}
-
-func (_c *MockUserServiceClient_GenerateScopedToken_Call) Run(run func(ctx context.Context, in *userv1.GenerateScopedTokenRequest, opts ...grpc.CallOption)) *MockUserServiceClient_GenerateScopedToken_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 *userv1.GenerateScopedTokenRequest
-		if args[1] != nil {
-			arg1 = args[1].(*userv1.GenerateScopedTokenRequest)
-		}
-		var arg2 []grpc.CallOption
-		var variadicArgs []grpc.CallOption
-		if len(args) > 2 {
-			variadicArgs = args[2].([]grpc.CallOption)
-		}
-		arg2 = variadicArgs
-		run(
-			arg0,
-			arg1,
-			arg2...,
-		)
-	})
-	return _c
-}
-
-func (_c *MockUserServiceClient_GenerateScopedToken_Call) Return(generateScopedTokenResponse *userv1.GenerateScopedTokenResponse, err error) *MockUserServiceClient_GenerateScopedToken_Call {
-	_c.Call.Return(generateScopedTokenResponse, err)
-	return _c
-}
-
-func (_c *MockUserServiceClient_GenerateScopedToken_Call) RunAndReturn(run func(ctx context.Context, in *userv1.GenerateScopedTokenRequest, opts ...grpc.CallOption) (*userv1.GenerateScopedTokenResponse, error)) *MockUserServiceClient_GenerateScopedToken_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -539,8 +373,8 @@ func (_c *MockUserServiceClient_GetUser_Call) RunAndReturn(run func(ctx context.
 	return _c
 }
 
-// UpdateProfileAvatarUrl provides a mock function for the type MockUserServiceClient
-func (_mock *MockUserServiceClient) UpdateProfileAvatarUrl(ctx context.Context, in *userv1.UpdateProfileAvatarUrlRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error) {
+// UpdateProfileAvatarURL provides a mock function for the type MockUserServiceClient
+func (_mock *MockUserServiceClient) UpdateProfileAvatarURL(ctx context.Context, in *userv1.UpdateProfileAvatarURLRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error) {
 	var tmpRet mock.Arguments
 	if len(opts) > 0 {
 		tmpRet = _mock.Called(ctx, in, opts)
@@ -550,22 +384,22 @@ func (_mock *MockUserServiceClient) UpdateProfileAvatarUrl(ctx context.Context, 
 	ret := tmpRet
 
 	if len(ret) == 0 {
-		panic("no return value specified for UpdateProfileAvatarUrl")
+		panic("no return value specified for UpdateProfileAvatarURL")
 	}
 
 	var r0 *modelsv1.Profile
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.UpdateProfileAvatarUrlRequest, ...grpc.CallOption) (*modelsv1.Profile, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.UpdateProfileAvatarURLRequest, ...grpc.CallOption) (*modelsv1.Profile, error)); ok {
 		return returnFunc(ctx, in, opts...)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.UpdateProfileAvatarUrlRequest, ...grpc.CallOption) *modelsv1.Profile); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *userv1.UpdateProfileAvatarURLRequest, ...grpc.CallOption) *modelsv1.Profile); ok {
 		r0 = returnFunc(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*modelsv1.Profile)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *userv1.UpdateProfileAvatarUrlRequest, ...grpc.CallOption) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *userv1.UpdateProfileAvatarURLRequest, ...grpc.CallOption) error); ok {
 		r1 = returnFunc(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -573,29 +407,29 @@ func (_mock *MockUserServiceClient) UpdateProfileAvatarUrl(ctx context.Context, 
 	return r0, r1
 }
 
-// MockUserServiceClient_UpdateProfileAvatarUrl_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateProfileAvatarUrl'
-type MockUserServiceClient_UpdateProfileAvatarUrl_Call struct {
+// MockUserServiceClient_UpdateProfileAvatarURL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateProfileAvatarURL'
+type MockUserServiceClient_UpdateProfileAvatarURL_Call struct {
 	*mock.Call
 }
 
-// UpdateProfileAvatarUrl is a helper method to define mock.On call
+// UpdateProfileAvatarURL is a helper method to define mock.On call
 //   - ctx context.Context
-//   - in *userv1.UpdateProfileAvatarUrlRequest
+//   - in *userv1.UpdateProfileAvatarURLRequest
 //   - opts ...grpc.CallOption
-func (_e *MockUserServiceClient_Expecter) UpdateProfileAvatarUrl(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_UpdateProfileAvatarUrl_Call {
-	return &MockUserServiceClient_UpdateProfileAvatarUrl_Call{Call: _e.mock.On("UpdateProfileAvatarUrl",
+func (_e *MockUserServiceClient_Expecter) UpdateProfileAvatarURL(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_UpdateProfileAvatarURL_Call {
+	return &MockUserServiceClient_UpdateProfileAvatarURL_Call{Call: _e.mock.On("UpdateProfileAvatarURL",
 		append([]interface{}{ctx, in}, opts...)...)}
 }
 
-func (_c *MockUserServiceClient_UpdateProfileAvatarUrl_Call) Run(run func(ctx context.Context, in *userv1.UpdateProfileAvatarUrlRequest, opts ...grpc.CallOption)) *MockUserServiceClient_UpdateProfileAvatarUrl_Call {
+func (_c *MockUserServiceClient_UpdateProfileAvatarURL_Call) Run(run func(ctx context.Context, in *userv1.UpdateProfileAvatarURLRequest, opts ...grpc.CallOption)) *MockUserServiceClient_UpdateProfileAvatarURL_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 *userv1.UpdateProfileAvatarUrlRequest
+		var arg1 *userv1.UpdateProfileAvatarURLRequest
 		if args[1] != nil {
-			arg1 = args[1].(*userv1.UpdateProfileAvatarUrlRequest)
+			arg1 = args[1].(*userv1.UpdateProfileAvatarURLRequest)
 		}
 		var arg2 []grpc.CallOption
 		var variadicArgs []grpc.CallOption
@@ -612,12 +446,12 @@ func (_c *MockUserServiceClient_UpdateProfileAvatarUrl_Call) Run(run func(ctx co
 	return _c
 }
 
-func (_c *MockUserServiceClient_UpdateProfileAvatarUrl_Call) Return(profile *modelsv1.Profile, err error) *MockUserServiceClient_UpdateProfileAvatarUrl_Call {
+func (_c *MockUserServiceClient_UpdateProfileAvatarURL_Call) Return(profile *modelsv1.Profile, err error) *MockUserServiceClient_UpdateProfileAvatarURL_Call {
 	_c.Call.Return(profile, err)
 	return _c
 }
 
-func (_c *MockUserServiceClient_UpdateProfileAvatarUrl_Call) RunAndReturn(run func(ctx context.Context, in *userv1.UpdateProfileAvatarUrlRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error)) *MockUserServiceClient_UpdateProfileAvatarUrl_Call {
+func (_c *MockUserServiceClient_UpdateProfileAvatarURL_Call) RunAndReturn(run func(ctx context.Context, in *userv1.UpdateProfileAvatarURLRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error)) *MockUserServiceClient_UpdateProfileAvatarURL_Call {
 	_c.Call.Return(run)
 	return _c
 }

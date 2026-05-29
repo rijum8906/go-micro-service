@@ -4,13 +4,29 @@ package user_service.auth.v1;
 
 import "user_service/models/v1/model.proto";
 
+enum AuthStatus {
+  AUTH_STATUS_UNSPECIFIED = 0;
+  AUTH_STATUS_SUCCESS = 1;
+  AUTH_STATUS_FAILED = 2;
+  AUTH_STATUS_2FA_REQUIRED = 3;
+}
+
 message AuthResponse {
   user_service.models.v1.User user = 1;
   user_service.models.v1.Profile profile = 2;
   user_service.models.v1.AuthToken tokens = 3;
+  AuthStatus status = 4;
 }
 
 message RefreshTokenResponse {
   user_service.models.v1.Token access_token = 1;
   string refresh_token = 2;
+}
+
+message EnableTwoFactorResponse {
+  string totp_uri = 1;
+}
+
+message GenerateScopedTokenResponse {
+  string scoped_token = 1;
 }

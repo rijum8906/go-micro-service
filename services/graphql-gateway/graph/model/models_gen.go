@@ -73,7 +73,7 @@ type ScopedTokenInput struct {
 }
 
 type ScopedTokenResponse struct {
-	Token *Token `json:"token"`
+	ScopedToken string `json:"scopedToken"`
 }
 
 type Session struct {

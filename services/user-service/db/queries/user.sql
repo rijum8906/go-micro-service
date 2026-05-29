@@ -66,10 +66,18 @@ UPDATE users
 SET email = $2
 WHERE id = $1;
 
--- name: UpdateUserTwoFactor :exec
+-- name: EnableUserTwoFactor :exec
 UPDATE users
-SET two_factor_enabled = $2,
-    two_factor_enabled_at = $3
+SET two_factor_enabled = true,
+    two_factor_secret = $2,
+    two_factor_enabled_at = NOW()
+WHERE id = $1;
+
+-- name: DisableUserTwoFactor :exec
+UPDATE users
+SET two_factor_enabled = false,
+    two_factor_secret = NULL,
+    two_factor_enabled_at = NULL
 WHERE id = $1;
 
 -- name: UpdateUserIsEmailVerified :exec

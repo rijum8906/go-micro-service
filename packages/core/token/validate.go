@@ -24,7 +24,7 @@ import (
 //
 // Returns the token claims if valid, otherwise returns an AppError.
 // NOTE: we need to match the subject with userID to validate the token
-func (tm *TokenManager) ValidateAuthToken(ctx context.Context, tokenStr string) (*Claims, *apperror.AppError) {
+func (tm *tokenManager) ValidateAuthToken(ctx context.Context, tokenStr string) (*Claims, *apperror.AppError) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		return tm.config.JwtSecret, nil
 	})
@@ -70,7 +70,7 @@ func (tm *TokenManager) ValidateAuthToken(ctx context.Context, tokenStr string) 
 // subsequent requests with the same token will fail as the token is already consumed.
 //
 // Returns the token claims if valid, otherwise returns an AppError.
-func (tm *TokenManager) ValidateScopedToken(ctx context.Context, tokenStr string) (*Claims, *apperror.AppError) {
+func (tm *tokenManager) ValidateScopedToken(ctx context.Context, tokenStr string) (*Claims, *apperror.AppError) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 		return tm.config.ScopedSecret, nil
 	})

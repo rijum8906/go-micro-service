@@ -24,6 +24,7 @@ CREATE TABLE users (
     password_hash varchar(255),
     is_email_verified bool NOT NULL DEFAULT false,
     two_factor_enabled bool NOT NULL DEFAULT false,
+    two_factor_secret varchar(255),
     two_factor_enabled_at timestamptz,
     email_verified_at timestamptz,
     created_at timestamptz DEFAULT now(),

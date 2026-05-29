@@ -13,6 +13,7 @@ CREATE TABLE "users" (
   "password_hash" character varying(255) NULL,
   "is_email_verified" boolean NOT NULL DEFAULT false,
   "two_factor_enabled" boolean NOT NULL DEFAULT false,
+  "two_factor_secret" character varying(255) NULL,
   "two_factor_enabled_at" timestamptz NULL,
   "email_verified_at" timestamptz NULL,
   "created_at" timestamptz NULL DEFAULT now(),

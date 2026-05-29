@@ -2,6 +2,7 @@ package hash
 
 import (
 	"crypto/rand"
+	"encoding/base32"
 	"encoding/base64"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
@@ -43,6 +44,33 @@ func (s *HashService) Generate(size int) (string, *apperror.AppError) {
 
 	// Encode to base64 and truncate to desired length
 	encoded := base64.URLEncoding.EncodeToString(randomBytes)
+	if len(encoded) > size {
+		encoded = encoded[:size]
+	}
+
+	return encoded, nil
+}
+
+// GenerateBase32 generates a cryptographically secure random string of given size encoded in Base32 (no padding)
+func (s *HashService) GenerateBase32(size int) (string, *apperror.AppError) {
+	// Base32 uses 8 characters per 5 bytes, so we need (size * 5) / 8 bytes
+	byteSize := (size * 5) / 8
+	if (size*5)%8 != 0 {
+		byteSize++
+	}
+
+	// Generate random bytes
+	randomBytes := make([]byte, byteSize)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return "", apperror.ErrInternal.WithMessage("failed to generate random string").WithDetail("err", err.Error())
+	}
+
+	// Use StdEncoding with NoPadding so it doesn't append "========" to the end
+	encoder := base32.StdEncoding.WithPadding(base32.NoPadding)
+	encoded := encoder.EncodeToString(randomBytes)
+
+	// Truncate to desired length safely
 	if len(encoded) > size {
 		encoded = encoded[:size]
 	}

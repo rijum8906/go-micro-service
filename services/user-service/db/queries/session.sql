@@ -85,6 +85,27 @@ SET is_revoked = true
 WHERE user_id = $1 AND id = $2 AND is_revoked = false;
 
 -- =====================================================
+-- LOCK METHODS
+-- =====================================================
+-- name: LockSession :exec
+SELECT *
+FROM sessions
+WHERE id = $1 AND is_revoked = false
+FOR UPDATE SKIP LOCKED;
+
+-- name: LockAndGetSessionByRefreshTokenHash :one
+SELECT *
+FROM sessions
+WHERE refresh_token_hash = $1 AND is_revoked = false
+FOR UPDATE SKIP LOCKED;
+
+-- name: LockSessionsByUserID :exec
+SELECT *
+FROM sessions
+WHERE user_id = $1 AND is_revoked = false
+FOR UPDATE SKIP LOCKED;
+
+-- =====================================================
 -- DELETE METHODS
 -- =====================================================
 -- name: DeleteSessionHard :exec

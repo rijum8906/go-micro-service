@@ -284,36 +284,30 @@ func (ec *executionContext) fieldContext_MutationResponse_message(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _ScopedTokenResponse_token(ctx context.Context, field graphql.CollectedField, obj *model.ScopedTokenResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _ScopedTokenResponse_scopedToken(ctx context.Context, field graphql.CollectedField, obj *model.ScopedTokenResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ScopedTokenResponse_token,
+		ec.fieldContext_ScopedTokenResponse_scopedToken,
 		func(ctx context.Context) (any, error) {
-			return obj.Token, nil
+			return obj.ScopedToken, nil
 		},
 		nil,
-		ec.marshalNToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐToken,
+		ec.marshalNString2string,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_ScopedTokenResponse_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScopedTokenResponse_scopedToken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ScopedTokenResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "value":
-				return ec.fieldContext_Token_value(ctx, field)
-			case "expiresAt":
-				return ec.fieldContext_Token_expiresAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1229,8 +1223,8 @@ func (ec *executionContext) _ScopedTokenResponse(ctx context.Context, sel ast.Se
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ScopedTokenResponse")
-		case "token":
-			out.Values[i] = ec._ScopedTokenResponse_token(ctx, field, obj)
+		case "scopedToken":
+			out.Values[i] = ec._ScopedTokenResponse_scopedToken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
