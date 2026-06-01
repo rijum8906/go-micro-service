@@ -1,7 +1,20 @@
+# Root mutation type extended by feature modules.
 type Mutation {
-  _empty: String
+    _empty: String
 }
 
+# Root query type extended by feature modules.
 type Query {
-  _empty: String
+    _empty: String
 }
+
+# Requires specific headers to be present on the operation or field.
+directive @headers(
+    required: [String!]
+    optional: [String!]
+) on QUERY | MUTATION | SUBSCRIPTION | FIELD_DEFINITION
+
+# Marks an operation or field as requiring auth-related headers.
+directive @auth(
+    requiredHeaders: [String!]
+) on QUERY | MUTATION | FIELD_DEFINITION

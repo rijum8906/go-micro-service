@@ -1,9 +1,11 @@
+# Login credentials for the password login flow.
 input LoginInput {
   email: String!
   password: String!
   meta: RequestMetaInput!
 }
 
+# Registration payload for creating a new account.
 input RegisterInput {
   email: String!
   password: String!
@@ -12,26 +14,41 @@ input RegisterInput {
   meta: RequestMetaInput!
 }
 
+# Two-factor code submitted after a 2FA challenge is issued.
+input TwoFactorCode {
+    twoFactorCode: String!
+}
+
+# Request metadata used during logout validation.
 input LogoutInput {
   meta: RequestMetaInput!
 }
 
+# Payload used to start a password-reset flow.
 input RequestPasswordResetInput {
   email: String!
   meta: RequestMetaInput!
 }
 
+# Legacy auth-only scoped-token request payload.
+input GenereateScopedTokenInput {
+    authMethod: AuthMethod!
+}
+
+# New password submitted after validating a reset token.
 input ResetPasswordInput {
   token: String!
   newPassword: String!
 }
 
+# Payload used to request an email verification link.
 input RequestEmailVerificationInput {
   email: String!
   meta: RequestMetaInput!
 }
 
-input  VerifyEmailInput {
+# Payload used to verify an email address with a token.
+input VerifyEmailInput {
   token: String!
   meta: RequestMetaInput!
 }

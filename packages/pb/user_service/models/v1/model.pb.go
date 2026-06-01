@@ -7,7 +7,6 @@
 package modelsv1
 
 import (
-	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -77,7 +76,7 @@ func (x *Token) GetExpiresAt() *timestamppb.Timestamp {
 
 type ScopedToken struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Scope         v1.TokenScope          `protobuf:"varint,1,opt,name=scope,proto3,enum=core.v1.TokenScope" json:"scope,omitempty"`
+	Scope         string                 `protobuf:"bytes,1,opt,name=scope,proto3" json:"scope,omitempty"`
 	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -113,11 +112,11 @@ func (*ScopedToken) Descriptor() ([]byte, []int) {
 	return file_user_service_models_v1_model_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ScopedToken) GetScope() v1.TokenScope {
+func (x *ScopedToken) GetScope() string {
 	if x != nil {
 		return x.Scope
 	}
-	return v1.TokenScope(0)
+	return ""
 }
 
 func (x *ScopedToken) GetExpiresAt() *timestamppb.Timestamp {
@@ -475,13 +474,13 @@ var File_user_service_models_v1_model_proto protoreflect.FileDescriptor
 
 const file_user_service_models_v1_model_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/models/v1/model.proto\x12\x16user_service.models.v1\x1a\x13core/v1/enums.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"X\n" +
+	"\"user_service/models/v1/model.proto\x12\x16user_service.models.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"X\n" +
 	"\x05Token\x12\x14\n" +
 	"\x05value\x18\x01 \x01(\tR\x05value\x129\n" +
 	"\n" +
-	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"s\n" +
-	"\vScopedToken\x12)\n" +
-	"\x05scope\x18\x01 \x01(\x0e2\x13.core.v1.TokenScopeR\x05scope\x129\n" +
+	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"^\n" +
+	"\vScopedToken\x12\x14\n" +
+	"\x05scope\x18\x01 \x01(\tR\x05scope\x129\n" +
 	"\n" +
 	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\x91\x01\n" +
 	"\tAuthToken\x12@\n" +
@@ -547,28 +546,26 @@ var file_user_service_models_v1_model_proto_goTypes = []any{
 	(*Profile)(nil),               // 4: user_service.models.v1.Profile
 	(*Session)(nil),               // 5: user_service.models.v1.Session
 	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
-	(v1.TokenScope)(0),            // 7: core.v1.TokenScope
 }
 var file_user_service_models_v1_model_proto_depIdxs = []int32{
 	6,  // 0: user_service.models.v1.Token.expires_at:type_name -> google.protobuf.Timestamp
-	7,  // 1: user_service.models.v1.ScopedToken.scope:type_name -> core.v1.TokenScope
-	6,  // 2: user_service.models.v1.ScopedToken.expires_at:type_name -> google.protobuf.Timestamp
-	0,  // 3: user_service.models.v1.AuthToken.access_token:type_name -> user_service.models.v1.Token
-	0,  // 4: user_service.models.v1.AuthToken.refresh_token:type_name -> user_service.models.v1.Token
-	6,  // 5: user_service.models.v1.User.email_verified_at:type_name -> google.protobuf.Timestamp
-	6,  // 6: user_service.models.v1.User.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
-	6,  // 7: user_service.models.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 8: user_service.models.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	6,  // 9: user_service.models.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 10: user_service.models.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
-	6,  // 11: user_service.models.v1.Session.last_login_at:type_name -> google.protobuf.Timestamp
-	6,  // 12: user_service.models.v1.Session.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 13: user_service.models.v1.Session.updated_at:type_name -> google.protobuf.Timestamp
-	14, // [14:14] is the sub-list for method output_type
-	14, // [14:14] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	6,  // 1: user_service.models.v1.ScopedToken.expires_at:type_name -> google.protobuf.Timestamp
+	0,  // 2: user_service.models.v1.AuthToken.access_token:type_name -> user_service.models.v1.Token
+	0,  // 3: user_service.models.v1.AuthToken.refresh_token:type_name -> user_service.models.v1.Token
+	6,  // 4: user_service.models.v1.User.email_verified_at:type_name -> google.protobuf.Timestamp
+	6,  // 5: user_service.models.v1.User.two_factor_enabled_at:type_name -> google.protobuf.Timestamp
+	6,  // 6: user_service.models.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 7: user_service.models.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	6,  // 8: user_service.models.v1.Profile.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 9: user_service.models.v1.Profile.updated_at:type_name -> google.protobuf.Timestamp
+	6,  // 10: user_service.models.v1.Session.last_login_at:type_name -> google.protobuf.Timestamp
+	6,  // 11: user_service.models.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 12: user_service.models.v1.Session.updated_at:type_name -> google.protobuf.Timestamp
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_user_service_models_v1_model_proto_init() }

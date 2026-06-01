@@ -7,6 +7,7 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
@@ -61,12 +62,13 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 	return utils.MapAuthResponse(res.User, res.Profile, res.Tokens), nil
 }
 
-// Logout is the resolver for the Logout field.
-func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error) {
-	if err := r.Validate.Struct(input); err != nil {
-		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
+// LoginWithTwoFactorCode is the resolver for the LoginWithTwoFactorCode field.
+func (r *mutationResolver) LoginWithTwoFactorCode(ctx context.Context, input model.TwoFactorCode) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: LoginWithTwoFactorCode - LoginWithTwoFactorCode"))
+}
 
+// Logout is the resolver for the Logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (*model.MutationResponse, error) {
 	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
@@ -90,6 +92,11 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 	return &model.MutationResponse{
 		Success: res.Success,
 	}, nil
+}
+
+// LogoutALlDevices is the resolver for the LogoutALlDevices field.
+func (r *mutationResolver) LogoutALlDevices(ctx context.Context) (*model.MutationResponse, error) {
+	panic(fmt.Errorf("not implemented: LogoutALlDevices - LogoutALlDevices"))
 }
 
 // RequestPasswordReset is the resolver for the RequestPasswordReset field.
@@ -171,6 +178,41 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 	return &model.MutationResponse{
 		Success: resp.Success,
 	}, nil
+}
+
+// GenerateScopedToken is the resolver for the GenerateScopedToken field.
+func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.GenerateScopedTokenResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	authMethod, tokenScope, appErr := parseScopedToken(input.AuthMethod, input.Scope)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.AuthClient.GenerateScopedToken(ctx, &authv1.GenerateScopedTokenRequest{
+		AuthMethod: authMethod.String(),
+		Scope:      tokenScope.String(),
+		AuthValue:  input.AuthValue,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return &model.GenerateScopedTokenResponse{
+		ScopedToken: res.GetScopedToken(),
+	}, nil
+}
+
+// RefershToken is the resolver for the RefershToken field.
+func (r *mutationResolver) RefershToken(ctx context.Context) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: RefershToken - RefershToken"))
 }
 
 // RevokeSession is the resolver for the RevokeSession field.
@@ -257,36 +299,6 @@ func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.
 				ExpiresAt: res.RefreshToken.ExpiresAt.String(),
 			},
 		},
-	}, nil
-}
-
-// GenerateScopedToken is the resolver for the GenerateScopedToken field.
-func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error) {
-	if err := r.Validate.Struct(input); err != nil {
-		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
-
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	authMethod, tokenScope, appErr := parseScopedToken(input.AuthMethod, input.Scope)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	res, err := r.Clients.AuthClient.GenerateScopedToken(ctx, &authv1.GenerateScopedTokenRequest{
-		AuthMethod: authMethod,
-		Scope:      tokenScope,
-		AuthValue:  input.AuthValue,
-	})
-	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
-
-	return &model.ScopedTokenResponse{
-		ScopedToken: res.ScopedToken,
 	}, nil
 }
 

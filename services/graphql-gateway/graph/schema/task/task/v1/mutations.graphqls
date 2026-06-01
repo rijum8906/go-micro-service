@@ -1,3 +1,4 @@
 extend type Mutation {
+    # Creates a new task.
     CreateTask(input: CreateTaskInput!): Task!
 }

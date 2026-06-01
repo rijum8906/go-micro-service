@@ -1,11 +1,52 @@
 extend type Mutation {
-    Login(input: LoginInput!): AuthResponse!
+    # Handles both a normal login and a 2FA challenge response.
+    # - When status is AUTH_STATUS_2FA_REQUIRED, return the pre-auth token and
+    #   send it back as Authorization: "2FA-Challenge" for the follow-up request.
+    # - When status is AUTH_STATUS_SUCCESS, return access and refresh tokens plus user/profile data.
+    Login(input: LoginInput!): AuthResponse! @headers(required: ["X-Device-Id"])
+
+    # Same response contract as Login.
     Register(input: RegisterInput!): AuthResponse!
-    Logout(input: LogoutInput!): MutationResponse!
+        @headers(required: ["X-Device-Id"])
+
+    # Completes the login flow after a 2FA challenge.
+    # NOTE: do not use Bearer; use Authorization: "2FA-Challenge".
+    LoginWithTwoFactorCode(input: TwoFactorCode!): AuthResponse!
+        @headers(required: ["Authorization", "X-Device-Id"])
+
+    # Logs out the current session for the matching device.
+    # TIP: persist the device id in LocalStorage or IndexedDB.
+    Logout: MutationResponse! @auth(requiredHeaders: ["X-Device-Id"])
+
+    # Logs out every session for the user.
+    LogoutALlDevices: MutationResponse! @auth(requiredHeaders: ["X-Device-Id"])
+
+    # Sends a password-reset email with a tokenized reset link.
+    # NOTE: use a path such as tokens/reset-password?token={token} in the link.
     RequestPasswordReset(input: RequestPasswordResetInput!): MutationResponse!
+
+    # Resets the password after the token has been verified.
     ResetPassword(input: ResetPasswordInput!): MutationResponse!
+        @headers(required: ["X-Device-Id"])
+
+    # Sends an email verification link to the user.
     RequestEmailVerification(
         input: RequestEmailVerificationInput!
     ): MutationResponse!
+
+    # Verifies an email address using the provided token.
     VerifyEmail(input: VerifyEmailInput!): MutationResponse!
+        @headers(required: ["X-Device-Id"])
+
+    # Generates a scoped token for security-sensitive follow-up operations.
+    # Example: create a CHANGE_USER_PASSWORD token and attach it to ChangePassword.
+    # TODO: additional auth methods can be supported later.
+    GenerateScopedToken(
+        input: GenerateScopedTokenInput!
+    ): GenerateScopedTokenResponse! @auth(requiredHeaders: ["X-Device-Id"])
+
+    # Refreshes the current access token using the refresh token.
+    RefershToken: AuthResponse!
+        @headers(required: ["X-Device-Id"])
+        @auth(requiredHeaders: ["Authorization"])
 }

@@ -8,13 +8,15 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
+	coreconstants "github.com/rijum8906/relay/packages/core/constants"
 )
 
 type AuthResponse struct {
-	Tokens  *AuthTokens `json:"tokens"`
-	User    *User       `json:"user"`
-	Profile *Profile    `json:"profile"`
+	Status        AuthStatus  `json:"status"`
+	Tokens        *AuthTokens `json:"tokens,omitempty"`
+	User          *User       `json:"user,omitempty"`
+	Profile       *Profile    `json:"profile,omitempty"`
+	PreAuthTOoken *string     `json:"preAuthTOoken,omitempty"`
 }
 
 type AuthTokens struct {
@@ -23,8 +25,15 @@ type AuthTokens struct {
 }
 
 type EmailInput struct {
-	Email string               `json:"email"`
-	Meta  *coredto.RequestMeta `json:"meta"`
+	Email string `json:"email"`
+}
+
+type GenerateScopedTokenResponse struct {
+	ScopedToken string `json:"scopedToken"`
+}
+
+type GenereateScopedTokenInput struct {
+	AuthMethod coreconstants.AuthMethod `json:"authMethod"`
 }
 
 type GetSessionsInput struct {
@@ -68,8 +77,7 @@ type RevokeSessionInput struct {
 }
 
 type ScopedTokenInput struct {
-	ScopedToken string               `json:"scopedToken"`
-	Meta        *coredto.RequestMeta `json:"meta"`
+	ScopedToken string `json:"scopedToken"`
 }
 
 type ScopedTokenResponse struct {
@@ -113,6 +121,10 @@ type Token struct {
 	ExpiresAt string `json:"expiresAt"`
 }
 
+type TwoFactorCode struct {
+	TwoFactorCode string `json:"twoFactorCode"`
+}
+
 type User struct {
 	ID                 string  `json:"id"`
 	Email              string  `json:"email"`
@@ -124,53 +136,135 @@ type User struct {
 	UpdatedAt          string  `json:"updatedAt"`
 }
 
+type AuthStatus string
+
+const (
+	AuthStatusAuthStatusUnspecified AuthStatus = "AUTH_STATUS_UNSPECIFIED"
+	AuthStatusAuthStatusSuccess     AuthStatus = "AUTH_STATUS_SUCCESS"
+	AuthStatusAuthStatusFailed      AuthStatus = "AUTH_STATUS_FAILED"
+	AuthStatusAuthStatus2faRequired AuthStatus = "AUTH_STATUS_2FA_REQUIRED"
+)
+
+var AllAuthStatus = []AuthStatus{
+	AuthStatusAuthStatusUnspecified,
+	AuthStatusAuthStatusSuccess,
+	AuthStatusAuthStatusFailed,
+	AuthStatusAuthStatus2faRequired,
+}
+
+func (e AuthStatus) IsValid() bool {
+	switch e {
+	case AuthStatusAuthStatusUnspecified, AuthStatusAuthStatusSuccess, AuthStatusAuthStatusFailed, AuthStatusAuthStatus2faRequired:
+		return true
+	}
+	return false
+}
+
+func (e AuthStatus) String() string {
+	return string(e)
+}
+
+func (e *AuthStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AuthStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AuthStatus", str)
+	}
+	return nil
+}
+
+func (e AuthStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AuthStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AuthStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type AuthorizationTokenType string
+
+const (
+	AuthorizationTokenTypeBearer    AuthorizationTokenType = "Bearer"
+	AuthorizationTokenTypeTwoFactor AuthorizationTokenType = "TwoFactor"
+)
+
+var AllAuthorizationTokenType = []AuthorizationTokenType{
+	AuthorizationTokenTypeBearer,
+	AuthorizationTokenTypeTwoFactor,
+}
+
+func (e AuthorizationTokenType) IsValid() bool {
+	switch e {
+	case AuthorizationTokenTypeBearer, AuthorizationTokenTypeTwoFactor:
+		return true
+	}
+	return false
+}
+
+func (e AuthorizationTokenType) String() string {
+	return string(e)
+}
+
+func (e *AuthorizationTokenType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AuthorizationTokenType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AuthorizationTokenType", str)
+	}
+	return nil
+}
+
+func (e AuthorizationTokenType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AuthorizationTokenType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AuthorizationTokenType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type TokenScope string
 
 const (
-	TokenScopeAuth                TokenScope = "AUTH"
-	TokenScopeRefresh             TokenScope = "REFRESH"
-	TokenScopeChangeEmail         TokenScope = "CHANGE_EMAIL"
-	TokenScopeChangePassword      TokenScope = "CHANGE_PASSWORD"
-	TokenScopeDeleteAccount       TokenScope = "DELETE_ACCOUNT"
-	TokenScopeResetPassword       TokenScope = "RESET_PASSWORD"
-	TokenScopeVerifyEmail         TokenScope = "VERIFY_EMAIL"
-	TokenScopeEnable2fa           TokenScope = "ENABLE_2FA"
-	TokenScopeDisable2fa          TokenScope = "DISABLE_2FA"
-	TokenScopeAdmin               TokenScope = "ADMIN"
-	TokenScopeImpersonate         TokenScope = "IMPERSONATE"
-	TokenScopeRecovery            TokenScope = "RECOVERY"
-	TokenScopeUpdateOrgName       TokenScope = "UPDATE_ORG_NAME"
-	TokenScopeChangeOrgOwner      TokenScope = "CHANGE_ORG_OWNER"
-	TokenScopeDeleteOrg           TokenScope = "DELETE_ORG"
-	TokenScopeArchiveOrg          TokenScope = "ARCHIVE_ORG"
-	TokenScopeLeaveOrg            TokenScope = "LEAVE_ORG"
-	TokenScopeUpdateOrgMembership TokenScope = "UPDATE_ORG_MEMBERSHIP"
+	TokenScopeVerifyUserEmail    TokenScope = "VERIFY_USER_EMAIL"
+	TokenScopeChangeUserPassword TokenScope = "CHANGE_USER_PASSWORD"
 )
 
 var AllTokenScope = []TokenScope{
-	TokenScopeAuth,
-	TokenScopeRefresh,
-	TokenScopeChangeEmail,
-	TokenScopeChangePassword,
-	TokenScopeDeleteAccount,
-	TokenScopeResetPassword,
-	TokenScopeVerifyEmail,
-	TokenScopeEnable2fa,
-	TokenScopeDisable2fa,
-	TokenScopeAdmin,
-	TokenScopeImpersonate,
-	TokenScopeRecovery,
-	TokenScopeUpdateOrgName,
-	TokenScopeChangeOrgOwner,
-	TokenScopeDeleteOrg,
-	TokenScopeArchiveOrg,
-	TokenScopeLeaveOrg,
-	TokenScopeUpdateOrgMembership,
+	TokenScopeVerifyUserEmail,
+	TokenScopeChangeUserPassword,
 }
 
 func (e TokenScope) IsValid() bool {
 	switch e {
-	case TokenScopeAuth, TokenScopeRefresh, TokenScopeChangeEmail, TokenScopeChangePassword, TokenScopeDeleteAccount, TokenScopeResetPassword, TokenScopeVerifyEmail, TokenScopeEnable2fa, TokenScopeDisable2fa, TokenScopeAdmin, TokenScopeImpersonate, TokenScopeRecovery, TokenScopeUpdateOrgName, TokenScopeChangeOrgOwner, TokenScopeDeleteOrg, TokenScopeArchiveOrg, TokenScopeLeaveOrg, TokenScopeUpdateOrgMembership:
+	case TokenScopeVerifyUserEmail, TokenScopeChangeUserPassword:
 		return true
 	}
 	return false

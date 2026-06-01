@@ -80,6 +80,7 @@ type AuthResponse struct {
 	Profile       *v1.Profile            `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`
 	Tokens        *v1.AuthToken          `protobuf:"bytes,3,opt,name=tokens,proto3" json:"tokens,omitempty"`
 	Status        AuthStatus             `protobuf:"varint,4,opt,name=status,proto3,enum=user_service.auth.v1.AuthStatus" json:"status,omitempty"`
+	PreAuthToken  string                 `protobuf:"bytes,5,opt,name=pre_auth_token,json=preAuthToken,proto3" json:"pre_auth_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -140,6 +141,13 @@ func (x *AuthResponse) GetStatus() AuthStatus {
 		return x.Status
 	}
 	return AuthStatus_AUTH_STATUS_UNSPECIFIED
+}
+
+func (x *AuthResponse) GetPreAuthToken() string {
+	if x != nil {
+		return x.PreAuthToken
+	}
+	return ""
 }
 
 type RefreshTokenResponse struct {
@@ -286,12 +294,13 @@ var File_user_service_auth_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_response_proto_rawDesc = "" +
 	"\n" +
-	"#user_service/auth/v1/response.proto\x12\x14user_service.auth.v1\x1a\"user_service/models/v1/model.proto\"\xf0\x01\n" +
+	"#user_service/auth/v1/response.proto\x12\x14user_service.auth.v1\x1a\"user_service/models/v1/model.proto\"\x96\x02\n" +
 	"\fAuthResponse\x120\n" +
 	"\x04user\x18\x01 \x01(\v2\x1c.user_service.models.v1.UserR\x04user\x129\n" +
 	"\aprofile\x18\x02 \x01(\v2\x1f.user_service.models.v1.ProfileR\aprofile\x129\n" +
 	"\x06tokens\x18\x03 \x01(\v2!.user_service.models.v1.AuthTokenR\x06tokens\x128\n" +
-	"\x06status\x18\x04 \x01(\x0e2 .user_service.auth.v1.AuthStatusR\x06status\"}\n" +
+	"\x06status\x18\x04 \x01(\x0e2 .user_service.auth.v1.AuthStatusR\x06status\x12$\n" +
+	"\x0epre_auth_token\x18\x05 \x01(\tR\fpreAuthToken\"}\n" +
 	"\x14RefreshTokenResponse\x12@\n" +
 	"\faccess_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"4\n" +

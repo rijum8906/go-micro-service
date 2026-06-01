@@ -4,28 +4,23 @@ package constants
 import "slices"
 
 const (
-	// Core
-	TokenScopeRefreshToken = "USER_REFRESH_TOKEN"
-
-	// Email
-	TokenScopeVerifyEmail = "VERIFY_USER_EMAIL"
-
 	// Password
 	TokenScopeChangePassword = "CHANGE_USER_PASSWORD"
-	TokenScopeResetPassword  = "RESET_USER_PASSWORD"
 
-	// 2FA
-	TokenScope2FA = "TWO_FACTOR_AUTHENTICATION"
+	// Internal (Can't be issued by user)
+	TokenScopeResetPassword = "RESET_USER_PASSWORD"
+	TokenScopeVerifyEmail   = "VERIFY_USER_EMAIL"
+	TokenScopeRefreshToken  = "USER_REFRESH_TOKEN"
+	TokenScope2FA           = "TWO_FACTOR_AUTHENTICATION"
 )
 
-var TokenScopes = []string{
-	TokenScopeRefreshToken,
-	TokenScopeVerifyEmail,
-	TokenScopeChangePassword,
+var TokenScopesInternal = []string{
 	TokenScopeResetPassword,
+	TokenScopeVerifyEmail,
+	TokenScopeRefreshToken,
 	TokenScope2FA,
 }
 
-func IsValidaTokenScope(tokenScope string) bool {
-	return slices.Contains(TokenScopes, tokenScope)
+func IsInternalTokenScope(tokenScope string) bool {
+	return slices.Contains(TokenScopesInternal, tokenScope)
 }

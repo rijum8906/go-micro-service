@@ -1,4 +1,7 @@
 extend type Query {
+    # Returns a single task by id.
     GetTask(input: GetTaskInput!): Task!
+
+    # Lists tasks for a project.
     ListTasksByProject(input: ListTasksByProjectInput!): [Task!]!
 }

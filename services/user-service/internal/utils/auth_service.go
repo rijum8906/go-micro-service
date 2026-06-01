@@ -59,6 +59,7 @@ func MapSession(session *db.Session) *modelsv1.Session {
 
 func MapAuthResponse(user *db.User, profile *db.Profile, accessToken, refreshToken string) *authv1.AuthResponse {
 	return &authv1.AuthResponse{
+		Status:  authv1.AuthStatus_AUTH_STATUS_SUCCESS,
 		Tokens:  ParseTokens(accessToken, refreshToken),
 		User:    MapUser(user),
 		Profile: MapProfile(profile),

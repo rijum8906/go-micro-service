@@ -7,7 +7,6 @@
 package authv1
 
 import (
-	v1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -512,8 +511,8 @@ func (x *ChangePasswordRequest) GetNewPassword() string {
 
 type GenerateScopedTokenRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Scope         v1.TokenScope          `protobuf:"varint,1,opt,name=scope,proto3,enum=core.v1.TokenScope" json:"scope,omitempty"`
-	AuthMethod    v1.AuthMethod          `protobuf:"varint,2,opt,name=auth_method,json=authMethod,proto3,enum=core.v1.AuthMethod" json:"auth_method,omitempty"`
+	Scope         string                 `protobuf:"bytes,1,opt,name=scope,proto3" json:"scope,omitempty"`
+	AuthMethod    string                 `protobuf:"bytes,2,opt,name=auth_method,json=authMethod,proto3" json:"auth_method,omitempty"`
 	AuthValue     string                 `protobuf:"bytes,3,opt,name=auth_value,json=authValue,proto3" json:"auth_value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -549,18 +548,18 @@ func (*GenerateScopedTokenRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *GenerateScopedTokenRequest) GetScope() v1.TokenScope {
+func (x *GenerateScopedTokenRequest) GetScope() string {
 	if x != nil {
 		return x.Scope
 	}
-	return v1.TokenScope(0)
+	return ""
 }
 
-func (x *GenerateScopedTokenRequest) GetAuthMethod() v1.AuthMethod {
+func (x *GenerateScopedTokenRequest) GetAuthMethod() string {
 	if x != nil {
 		return x.AuthMethod
 	}
-	return v1.AuthMethod(0)
+	return ""
 }
 
 func (x *GenerateScopedTokenRequest) GetAuthValue() string {
@@ -618,7 +617,7 @@ var File_user_service_auth_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/auth/v1/request.proto\x12\x14user_service.auth.v1\x1a\x13core/v1/enums.proto\"@\n" +
+	"\"user_service/auth/v1/request.proto\x12\x14user_service.auth.v1\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x7f\n" +
@@ -646,10 +645,10 @@ const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\x15ChangePasswordRequest\x12\x1f\n" +
 	"\vtoken_scope\x18\x01 \x01(\tR\n" +
 	"tokenScope\x12!\n" +
-	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"\x9c\x01\n" +
-	"\x1aGenerateScopedTokenRequest\x12)\n" +
-	"\x05scope\x18\x01 \x01(\x0e2\x13.core.v1.TokenScopeR\x05scope\x124\n" +
-	"\vauth_method\x18\x02 \x01(\x0e2\x13.core.v1.AuthMethodR\n" +
+	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"r\n" +
+	"\x1aGenerateScopedTokenRequest\x12\x14\n" +
+	"\x05scope\x18\x01 \x01(\tR\x05scope\x12\x1f\n" +
+	"\vauth_method\x18\x02 \x01(\tR\n" +
 	"authMethod\x12\x1d\n" +
 	"\n" +
 	"auth_value\x18\x03 \x01(\tR\tauthValue\">\n" +
@@ -683,17 +682,13 @@ var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*ChangePasswordRequest)(nil),           // 9: user_service.auth.v1.ChangePasswordRequest
 	(*GenerateScopedTokenRequest)(nil),      // 10: user_service.auth.v1.GenerateScopedTokenRequest
 	(*TwoFactorCodeRequest)(nil),            // 11: user_service.auth.v1.TwoFactorCodeRequest
-	(v1.TokenScope)(0),                      // 12: core.v1.TokenScope
-	(v1.AuthMethod)(0),                      // 13: core.v1.AuthMethod
 }
 var file_user_service_auth_v1_request_proto_depIdxs = []int32{
-	12, // 0: user_service.auth.v1.GenerateScopedTokenRequest.scope:type_name -> core.v1.TokenScope
-	13, // 1: user_service.auth.v1.GenerateScopedTokenRequest.auth_method:type_name -> core.v1.AuthMethod
-	2,  // [2:2] is the sub-list for method output_type
-	2,  // [2:2] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_user_service_auth_v1_request_proto_init() }

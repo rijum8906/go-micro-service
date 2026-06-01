@@ -1,4 +1,9 @@
 extend type Query {
+  # Returns the authenticated user's profile.
   MyProfile: Profile!
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Returns the authenticated user's account record.
   Me: User!
+        @auth(requiredHeaders: ["Authorization"])
 }

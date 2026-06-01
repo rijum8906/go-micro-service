@@ -1,6 +1,13 @@
 extend type Mutation {
-  GenerateScopedToken(input: GenerateScopedTokenInput!): ScopedTokenResponse!
+  # Updates the avatar URL for a profile.
   UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Updates the display name (firstName and lastName) fields for a profile.
   UpdateProfileName(input: UpdateProfileNameInput!): Profile!
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Changes the account password using a scoped token.
   ChangePassword(input: ChangePasswordInput!): MutationResponse!
+        @auth(requiredHeaders: ["Authorization"])
 }

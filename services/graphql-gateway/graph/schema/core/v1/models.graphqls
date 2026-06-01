@@ -1,3 +1,4 @@
+# User account details returned by auth and profile queries.
 type User {
   id: ID!
   email: String!
@@ -9,6 +10,7 @@ type User {
   updatedAt: DateTime!
 }
 
+# Public profile data associated with a user.
 type Profile {
   id: ID!
   userId: ID!
@@ -19,6 +21,7 @@ type Profile {
   avatarUrl: String
 }
 
+# Session details used for active-session views and revocation flows.
 type Session {
   id: ID!
   userId: ID!

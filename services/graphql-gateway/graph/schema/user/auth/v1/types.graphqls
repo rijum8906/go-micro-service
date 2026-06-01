@@ -1,24 +1,44 @@
+# Generic token value plus expiry timestamp.
 type Token {
     value: String!
     expiresAt: DateTime!
 }
 
+# Access and refresh tokens returned by auth flows.
 type AuthTokens {
     accessToken: Token!
     refreshToken: Token!
 }
 
-type AuthResponse {
-    tokens: AuthTokens!
-    user: User!
-    profile: Profile!
+# High-level auth state returned by login and refresh flows.
+enum AuthStatus {
+    AUTH_STATUS_UNSPECIFIED,
+    AUTH_STATUS_SUCCESS,
+    AUTH_STATUS_FAILED,
+    AUTH_STATUS_2FA_REQUIRED,
 }
 
+# Auth response that can carry tokens, user data, or a 2FA challenge token.
+type AuthResponse {
+    status: AuthStatus!
+    tokens: AuthTokens
+    user: User
+    profile: Profile
+    preAuthTOoken: String
+}
+
+# Generic mutation result for acknowledgement-only operations.
 type MutationResponse {
     success: Boolean!
     message: String!
 }
 
+# Backward-compatible scoped token response.
 type ScopedTokenResponse {
+    scopedToken: String!
+}
+
+# Response for GenerateScopedToken.
+type GenerateScopedTokenResponse {
     scopedToken: String!
 }

@@ -29,18 +29,26 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Auth    func(ctx context.Context, obj any, next graphql.Resolver, requiredHeaders []string) (res any, err error)
+	Headers func(ctx context.Context, obj any, next graphql.Resolver, required []string, optional []string) (res any, err error)
 }
 
 type ComplexityRoot struct {
 	AuthResponse struct {
-		Profile func(childComplexity int) int
-		Tokens  func(childComplexity int) int
-		User    func(childComplexity int) int
+		PreAuthTOoken func(childComplexity int) int
+		Profile       func(childComplexity int) int
+		Status        func(childComplexity int) int
+		Tokens        func(childComplexity int) int
+		User          func(childComplexity int) int
 	}
 
 	AuthTokens struct {
 		AccessToken  func(childComplexity int) int
 		RefreshToken func(childComplexity int) int
+	}
+
+	GenerateScopedTokenResponse struct {
+		ScopedToken func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -49,7 +57,10 @@ type ComplexityRoot struct {
 		Empty                    func(childComplexity int) int
 		GenerateScopedToken      func(childComplexity int, input userdto.GenerateScopedTokenInput) int
 		Login                    func(childComplexity int, input userdto.LoginInput) int
-		Logout                   func(childComplexity int, input userdto.LogoutInput) int
+		LoginWithTwoFactorCode   func(childComplexity int, input model.TwoFactorCode) int
+		Logout                   func(childComplexity int) int
+		LogoutALlDevices         func(childComplexity int) int
+		RefershToken             func(childComplexity int) int
 		Register                 func(childComplexity int, input userdto.RegisterInput) int
 		RequestEmailVerification func(childComplexity int, input userdto.RequestEmailVerificationInput) int
 		RequestPasswordReset     func(childComplexity int, input userdto.RequestPasswordResetInput) int
@@ -155,12 +166,26 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "AuthResponse.preAuthTOoken":
+		if e.ComplexityRoot.AuthResponse.PreAuthTOoken == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthResponse.PreAuthTOoken(childComplexity), true
+
 	case "AuthResponse.profile":
 		if e.ComplexityRoot.AuthResponse.Profile == nil {
 			break
 		}
 
 		return e.ComplexityRoot.AuthResponse.Profile(childComplexity), true
+
+	case "AuthResponse.status":
+		if e.ComplexityRoot.AuthResponse.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AuthResponse.Status(childComplexity), true
 
 	case "AuthResponse.tokens":
 		if e.ComplexityRoot.AuthResponse.Tokens == nil {
@@ -189,6 +214,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.AuthTokens.RefreshToken(childComplexity), true
+
+	case "GenerateScopedTokenResponse.scopedToken":
+		if e.ComplexityRoot.GenerateScopedTokenResponse.ScopedToken == nil {
+			break
+		}
+
+		return e.ComplexityRoot.GenerateScopedTokenResponse.ScopedToken(childComplexity), true
 
 	case "Mutation.ChangePassword":
 		if e.ComplexityRoot.Mutation.ChangePassword == nil {
@@ -245,17 +277,38 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Mutation.Login(childComplexity, args["input"].(userdto.LoginInput)), true
 
+	case "Mutation.LoginWithTwoFactorCode":
+		if e.ComplexityRoot.Mutation.LoginWithTwoFactorCode == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_LoginWithTwoFactorCode_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.LoginWithTwoFactorCode(childComplexity, args["input"].(model.TwoFactorCode)), true
+
 	case "Mutation.Logout":
 		if e.ComplexityRoot.Mutation.Logout == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_Logout_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
+		return e.ComplexityRoot.Mutation.Logout(childComplexity), true
+
+	case "Mutation.LogoutALlDevices":
+		if e.ComplexityRoot.Mutation.LogoutALlDevices == nil {
+			break
 		}
 
-		return e.ComplexityRoot.Mutation.Logout(childComplexity, args["input"].(userdto.LogoutInput)), true
+		return e.ComplexityRoot.Mutation.LogoutALlDevices(childComplexity), true
+
+	case "Mutation.RefershToken":
+		if e.ComplexityRoot.Mutation.RefershToken == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Mutation.RefershToken(childComplexity), true
 
 	case "Mutation.Register":
 		if e.ComplexityRoot.Mutation.Register == nil {
@@ -787,6 +840,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateTaskInput,
 		ec.unmarshalInputEmailInput,
 		ec.unmarshalInputGenerateScopedTokenInput,
+		ec.unmarshalInputGenereateScopedTokenInput,
 		ec.unmarshalInputGetSessionsInput,
 		ec.unmarshalInputGetTaskInput,
 		ec.unmarshalInputListTasksByProjectInput,
@@ -801,6 +855,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRevokeOthersSessionInput,
 		ec.unmarshalInputRevokeSessionInput,
 		ec.unmarshalInputScopedTokenInput,
+		ec.unmarshalInputTwoFactorCode,
 		ec.unmarshalInputUpdateProfileAvatarUrlInput,
 		ec.unmarshalInputUpdateProfileNameInput,
 		ec.unmarshalInputVerifyEmailInput,
@@ -815,7 +870,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
+				data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
+					return ec._Query(ctx, opCtx.Operation.SelectionSet), nil
+				})
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
 					result := <-ec.DeferredResults
@@ -845,7 +902,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
+			data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
+				return ec._Mutation(ctx, opCtx.Operation.SelectionSet), nil
+			})
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -879,43 +938,35 @@ func newExecutionContext(
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/core/v1/enums.graphqls", Input: `# TokenScope defines what actions a token can perform
+	{Name: "../schema/core/v1/enums.graphqls", Input: `# TokenScope defines what actions a scoped token can perform.
 enum TokenScope {
-  AUTH              # Standard authentication
-  REFRESH           # Token refresh
-  CHANGE_EMAIL      # Change email address
-  CHANGE_PASSWORD   # Change password
-  DELETE_ACCOUNT    # Delete account
-  RESET_PASSWORD    # Password reset flow
-  VERIFY_EMAIL      # Email verification
-  ENABLE_2FA        # Enable two-factor authentication
-  DISABLE_2FA       # Disable two-factor authentication
-  ADMIN             # Administrative actions
-  IMPERSONATE       # Impersonate another user
-  RECOVERY          # Account recovery
-  UPDATE_ORG_NAME
-  CHANGE_ORG_OWNER
-  DELETE_ORG
-  ARCHIVE_ORG
-  LEAVE_ORG
-  UPDATE_ORG_MEMBERSHIP
+    # User Service
+    VERIFY_USER_EMAIL
+    CHANGE_USER_PASSWORD
 }
 
-# AuthMethod defines how the user authenticated
+# AuthMethod defines how the user authenticated.
 enum AuthMethod {
-  PASSWORD          # Password authentication
-  BIOMETRIC         # Biometric (fingerprint, face ID)
-  OTP               # One-time password (SMS/email)
-  TOTP              # Time-based one-time password (authenticator app)
-  RECOVERY          # Recovery code
-  MAGIC_LINK        # Magic link email
-  SOCIAL_GOOGLE     # Google OAuth
-  SOCIAL_GITHUB     # GitHub OAuth
-  API_KEY           # API key authentication
-  SERVICE_ACCOUNT   # Service-to-service authentication
+  PASSWORD          # Password authentication.
+  BIOMETRIC         # Biometric authentication such as fingerprint or face ID.
+  OTP               # One-time password delivered by SMS or email.
+  TOTP              # Time-based one-time password from an authenticator app.
+  RECOVERY          # Recovery code authentication.
+  MAGIC_LINK        # Magic-link email authentication.
+  SOCIAL_GOOGLE     # Google OAuth.
+  SOCIAL_GITHUB     # GitHub OAuth.
+  API_KEY           # API key authentication.
+  SERVICE_ACCOUNT   # Service-to-service authentication.
+}
+
+# Token type used when returning authorization tokens to clients.
+enum AuthorizationTokenType {
+    Bearer
+    TwoFactor # NOTE: If generating to frontend, must change the value to 2FA-Challenge.
 }
 `, BuiltIn: false},
-	{Name: "../schema/core/v1/models.graphqls", Input: `type User {
+	{Name: "../schema/core/v1/models.graphqls", Input: `# User account details returned by auth and profile queries.
+type User {
   id: ID!
   email: String!
   isEmailVerified: Boolean!
@@ -926,6 +977,7 @@ enum AuthMethod {
   updatedAt: DateTime!
 }
 
+# Public profile data associated with a user.
 type Profile {
   id: ID!
   userId: ID!
@@ -936,6 +988,7 @@ type Profile {
   avatarUrl: String
 }
 
+# Session details used for active-session views and revocation flows.
 type Session {
   id: ID!
   userId: ID!
@@ -948,39 +1001,56 @@ type Session {
 `, BuiltIn: false},
 	{Name: "../schema/core/v1/scalars.graphqls", Input: `scalar DateTime
 `, BuiltIn: false},
-	{Name: "../schema/core/v1/schema.graphqls", Input: `type Mutation {
-  _empty: String
+	{Name: "../schema/core/v1/schema.graphqls", Input: `# Root mutation type extended by feature modules.
+type Mutation {
+    _empty: String
 }
 
+# Root query type extended by feature modules.
 type Query {
-  _empty: String
+    _empty: String
 }
+
+# Requires specific headers to be present on the operation or field.
+directive @headers(
+    required: [String!]
+    optional: [String!]
+) on QUERY | MUTATION | SUBSCRIPTION | FIELD_DEFINITION
+
+# Marks an operation or field as requiring auth-related headers.
+directive @auth(
+    requiredHeaders: [String!]
+) on QUERY | MUTATION | FIELD_DEFINITION
 `, BuiltIn: false},
-	{Name: "../schema/core/v1/types.graphqls", Input: `input RequestMetaInput {
+	{Name: "../schema/core/v1/types.graphqls", Input: `# Metadata attached to requests that need device-aware behavior.
+input RequestMetaInput {
   deviceId: String!
 }
 
+# Standard pagination payload used by list queries.
 input PaginationInput {
   page: Int!
   limit: Int!
 }
 
+# Scoped token used for security-sensitive operations.
 input ScopedTokenInput {
   scopedToken: String!
-  meta: RequestMetaInput!
 }
 
+# Simple email wrapper used by identity flows.
 input EmailInput {
   email: String!
-  meta: RequestMetaInput!
 }
 `, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `input LoginInput {
+	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `# Login credentials for the password login flow.
+input LoginInput {
   email: String!
   password: String!
   meta: RequestMetaInput!
 }
 
+# Registration payload for creating a new account.
 input RegisterInput {
   email: String!
   password: String!
@@ -989,113 +1059,212 @@ input RegisterInput {
   meta: RequestMetaInput!
 }
 
+# Two-factor code submitted after a 2FA challenge is issued.
+input TwoFactorCode {
+    twoFactorCode: String!
+}
+
+# Request metadata used during logout validation.
 input LogoutInput {
   meta: RequestMetaInput!
 }
 
+# Payload used to start a password-reset flow.
 input RequestPasswordResetInput {
   email: String!
   meta: RequestMetaInput!
 }
 
+# Legacy auth-only scoped-token request payload.
+input GenereateScopedTokenInput {
+    authMethod: AuthMethod!
+}
+
+# New password submitted after validating a reset token.
 input ResetPasswordInput {
   token: String!
   newPassword: String!
 }
 
+# Payload used to request an email verification link.
 input RequestEmailVerificationInput {
   email: String!
   meta: RequestMetaInput!
 }
 
-input  VerifyEmailInput {
+# Payload used to verify an email address with a token.
+input VerifyEmailInput {
   token: String!
   meta: RequestMetaInput!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/mutations.graphqls", Input: `extend type Mutation {
-    Login(input: LoginInput!): AuthResponse!
+    # Handles both a normal login and a 2FA challenge response.
+    # - When status is AUTH_STATUS_2FA_REQUIRED, return the pre-auth token and
+    #   send it back as Authorization: "2FA-Challenge" for the follow-up request.
+    # - When status is AUTH_STATUS_SUCCESS, return access and refresh tokens plus user/profile data.
+    Login(input: LoginInput!): AuthResponse! @headers(required: ["X-Device-Id"])
+
+    # Same response contract as Login.
     Register(input: RegisterInput!): AuthResponse!
-    Logout(input: LogoutInput!): MutationResponse!
+        @headers(required: ["X-Device-Id"])
+
+    # Completes the login flow after a 2FA challenge.
+    # NOTE: do not use Bearer; use Authorization: "2FA-Challenge".
+    LoginWithTwoFactorCode(input: TwoFactorCode!): AuthResponse!
+        @headers(required: ["Authorization", "X-Device-Id"])
+
+    # Logs out the current session for the matching device.
+    # TIP: persist the device id in LocalStorage or IndexedDB.
+    Logout: MutationResponse! @auth(requiredHeaders: ["X-Device-Id"])
+
+    # Logs out every session for the user.
+    LogoutALlDevices: MutationResponse! @auth(requiredHeaders: ["X-Device-Id"])
+
+    # Sends a password-reset email with a tokenized reset link.
+    # NOTE: use a path such as tokens/reset-password?token={token} in the link.
     RequestPasswordReset(input: RequestPasswordResetInput!): MutationResponse!
+
+    # Resets the password after the token has been verified.
     ResetPassword(input: ResetPasswordInput!): MutationResponse!
+        @headers(required: ["X-Device-Id"])
+
+    # Sends an email verification link to the user.
     RequestEmailVerification(
         input: RequestEmailVerificationInput!
     ): MutationResponse!
+
+    # Verifies an email address using the provided token.
     VerifyEmail(input: VerifyEmailInput!): MutationResponse!
+        @headers(required: ["X-Device-Id"])
+
+    # Generates a scoped token for security-sensitive follow-up operations.
+    # Example: create a CHANGE_USER_PASSWORD token and attach it to ChangePassword.
+    # TODO: additional auth methods can be supported later.
+    GenerateScopedToken(
+        input: GenerateScopedTokenInput!
+    ): GenerateScopedTokenResponse! @auth(requiredHeaders: ["X-Device-Id"])
+
+    # Refreshes the current access token using the refresh token.
+    RefershToken: AuthResponse!
+        @headers(required: ["X-Device-Id"])
+        @auth(requiredHeaders: ["Authorization"])
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/queries.graphqls", Input: ``, BuiltIn: false},
-	{Name: "../schema/user/auth/v1/types.graphqls", Input: `type Token {
+	{Name: "../schema/user/auth/v1/types.graphqls", Input: `# Generic token value plus expiry timestamp.
+type Token {
     value: String!
     expiresAt: DateTime!
 }
 
+# Access and refresh tokens returned by auth flows.
 type AuthTokens {
     accessToken: Token!
     refreshToken: Token!
 }
 
-type AuthResponse {
-    tokens: AuthTokens!
-    user: User!
-    profile: Profile!
+# High-level auth state returned by login and refresh flows.
+enum AuthStatus {
+    AUTH_STATUS_UNSPECIFIED,
+    AUTH_STATUS_SUCCESS,
+    AUTH_STATUS_FAILED,
+    AUTH_STATUS_2FA_REQUIRED,
 }
 
+# Auth response that can carry tokens, user data, or a 2FA challenge token.
+type AuthResponse {
+    status: AuthStatus!
+    tokens: AuthTokens
+    user: User
+    profile: Profile
+    preAuthTOoken: String
+}
+
+# Generic mutation result for acknowledgement-only operations.
 type MutationResponse {
     success: Boolean!
     message: String!
 }
 
+# Backward-compatible scoped token response.
 type ScopedTokenResponse {
     scopedToken: String!
 }
+
+# Response for GenerateScopedToken.
+type GenerateScopedTokenResponse {
+    scopedToken: String!
+}
 `, BuiltIn: false},
-	{Name: "../schema/user/session/v1/inputs.graphqls", Input: `input GetSessionsInput {
+	{Name: "../schema/user/session/v1/inputs.graphqls", Input: `# Pagination wrapper for session listing.
+input GetSessionsInput {
   paginationRequest: PaginationInput!
 }
 
+# Revokes all other sessions while keeping the current one active.
 input RevokeOthersSessionInput {
- scopedToken: String!
+  scopedToken: String!
   token: String!
 }
 
+# Revokes a single session identified by token.
 input RevokeSessionInput {
   scopedToken: String!
   tokenToRevoke: String!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/mutations.graphqls", Input: `extend type Mutation {
+    # Revokes a single session.
     RevokeSession(input: RevokeSessionInput): MutationResponse!
+        @auth(requiredHeaders: ["Authorization"])
+
+    # Revokes every session associated with the current user.
     RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
+        @auth(requiredHeaders: ["Authorization"])
+
+    # Revokes all other sessions and returns a refreshed auth response.
     RevokeOthersSession(input: RevokeOthersSessionInput!): AuthResponse!
+        @auth(requiredHeaders: ["Authorization"])
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/queries.graphqls", Input: `extend type Query {
+  # Returns paginated sessions for the current user.
   GetSessions(input: GetSessionsInput): [Session!]
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Returns active sessions using a scoped token.
   GetActiveSessions(input: ScopedTokenInput!): [Session!]
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Returns the current session.
   GetCurrentSession: Session!
+        @auth(requiredHeaders: ["Authorization"])
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/types.graphqls", Input: ``, BuiltIn: false},
-	{Name: "../schema/user/user/v1/inputs.graphqls", Input: `input GenerateScopedTokenInput {
+	{Name: "../schema/user/user/v1/inputs.graphqls", Input: `# Scoped-token payload used by auth and security-sensitive flows.
+input GenerateScopedTokenInput {
   scope: TokenScope!
   authMethod: AuthMethod!
   authValue: String!
   meta: RequestMetaInput!
 }
 
+# Updates a profile avatar URL.
 input UpdateProfileAvatarUrlInput {
   profileId: ID!
   avatarUrl: String!
 }
 
+# Updates the first and last name for a profile.
 input UpdateProfileNameInput {
   profileId: ID!
   firstName: String!
   lastName: String!
 }
 
+# Changes a password after validating a scoped token.
 input ChangePasswordInput {
   token: String!
   newPassword: String!
@@ -1103,19 +1272,32 @@ input ChangePasswordInput {
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/user/v1/mutations.graphqls", Input: `extend type Mutation {
-  GenerateScopedToken(input: GenerateScopedTokenInput!): ScopedTokenResponse!
+  # Updates the avatar URL for a profile.
   UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Updates the display name (firstName and lastName) fields for a profile.
   UpdateProfileName(input: UpdateProfileNameInput!): Profile!
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Changes the account password using a scoped token.
   ChangePassword(input: ChangePasswordInput!): MutationResponse!
+        @auth(requiredHeaders: ["Authorization"])
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/user/v1/queries.graphqls", Input: `extend type Query {
+  # Returns the authenticated user's profile.
   MyProfile: Profile!
+        @auth(requiredHeaders: ["Authorization"])
+
+  # Returns the authenticated user's account record.
   Me: User!
+        @auth(requiredHeaders: ["Authorization"])
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/user/v1/types.graphqls", Input: ``, BuiltIn: false},
-	{Name: "../schema/task/task/v1/inputs.graphqls", Input: `input CreateTaskInput {
+	{Name: "../schema/task/task/v1/inputs.graphqls", Input: `# Task creation payload.
+input CreateTaskInput {
     title: String!
     organizationId: ID
     projectId: ID
@@ -1125,24 +1307,31 @@ input ChangePasswordInput {
     dueAt: DateTime
 }
 
+# Looks up a single task by id.
 input GetTaskInput {
     id: ID!
 }
 
+# Lists tasks for a specific project.
 input ListTasksByProjectInput {
     projectId: ID!
 }
 `, BuiltIn: false},
 	{Name: "../schema/task/task/v1/mutations.graphqls", Input: `extend type Mutation {
+    # Creates a new task.
     CreateTask(input: CreateTaskInput!): Task!
 }
 `, BuiltIn: false},
 	{Name: "../schema/task/task/v1/queries.graphqls", Input: `extend type Query {
+    # Returns a single task by id.
     GetTask(input: GetTaskInput!): Task!
+
+    # Lists tasks for a project.
     ListTasksByProject(input: ListTasksByProjectInput!): [Task!]!
 }
 `, BuiltIn: false},
-	{Name: "../schema/task/task/v1/types.graphqls", Input: `type Task {
+	{Name: "../schema/task/task/v1/types.graphqls", Input: `# Task record returned by task queries and mutations.
+type Task {
     id: ID!
     organizationId: ID
     projectId: ID
