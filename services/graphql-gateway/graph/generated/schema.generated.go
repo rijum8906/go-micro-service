@@ -54,33 +54,6 @@ type QueryResolver interface {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_auth_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "requiredHeaders", ec.unmarshalOString2ᚕstringᚄ)
-	if err != nil {
-		return nil, err
-	}
-	args["requiredHeaders"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) dir_headers_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "required", ec.unmarshalOString2ᚕstringᚄ)
-	if err != nil {
-		return nil, err
-	}
-	args["required"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "optional", ec.unmarshalOString2ᚕstringᚄ)
-	if err != nil {
-		return nil, err
-	}
-	args["optional"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_ChangePassword_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -305,137 +278,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 
 // region    ************************** directives.gotpl **************************
 
-func (ec *executionContext) _queryMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
-
-	for _, d := range obj.Directives {
-		switch d.Name {
-		case "auth":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_auth_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return graphql.Null
-			}
-			n := next
-			next = func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					return nil, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, obj, n, args["requiredHeaders"].([]string))
-			}
-		case "headers":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_headers_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return graphql.Null
-			}
-			n := next
-			next = func(ctx context.Context) (any, error) {
-				if ec.Directives.Headers == nil {
-					return nil, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, obj, n, args["required"].([]string), args["optional"].([]string))
-			}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if data, ok := tmp.(graphql.Marshaler); ok {
-		return data
-	}
-	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return graphql.Null
-
-}
-
-func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
-
-	for _, d := range obj.Directives {
-		switch d.Name {
-		case "auth":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_auth_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return graphql.Null
-			}
-			n := next
-			next = func(ctx context.Context) (any, error) {
-				if ec.Directives.Auth == nil {
-					return nil, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, obj, n, args["requiredHeaders"].([]string))
-			}
-		case "headers":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_headers_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return graphql.Null
-			}
-			n := next
-			next = func(ctx context.Context) (any, error) {
-				if ec.Directives.Headers == nil {
-					return nil, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, obj, n, args["required"].([]string), args["optional"].([]string))
-			}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if data, ok := tmp.(graphql.Marshaler); ok {
-		return data
-	}
-	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return graphql.Null
-
-}
-
-func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) graphql.Marshaler {
-	for _, d := range obj.Directives {
-		switch d.Name {
-		case "headers":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_headers_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return func(ctx context.Context) graphql.Marshaler {
-					return graphql.Null
-				}
-			}
-			n := next
-			next = func(ctx context.Context) (any, error) {
-				if ec.Directives.Headers == nil {
-					return nil, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, obj, n, args["required"].([]string), args["optional"].([]string))
-			}
-		}
-	}
-	tmp, err := next(ctx)
-	if err != nil {
-		ec.Error(ctx, err)
-		return func(ctx context.Context) graphql.Marshaler {
-			return graphql.Null
-		}
-	}
-	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
-		return data
-	}
-	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func(ctx context.Context) graphql.Marshaler {
-		return graphql.Null
-	}
-}
-
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
@@ -479,25 +321,7 @@ func (ec *executionContext) _Mutation_Login(ctx context.Context, field graphql.C
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().Login(ctx, fc.Args["input"].(userdto.LoginInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				required, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Headers == nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, nil, directive0, required, nil)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
 		true,
 		true,
@@ -550,25 +374,7 @@ func (ec *executionContext) _Mutation_Register(ctx context.Context, field graphq
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().Register(ctx, fc.Args["input"].(userdto.RegisterInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				required, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Headers == nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, nil, directive0, required, nil)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
 		true,
 		true,
@@ -621,25 +427,7 @@ func (ec *executionContext) _Mutation_LoginWithTwoFactorCode(ctx context.Context
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().LoginWithTwoFactorCode(ctx, fc.Args["input"].(model.TwoFactorCode))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				required, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization", "X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Headers == nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, nil, directive0, required, nil)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
 		true,
 		true,
@@ -691,25 +479,7 @@ func (ec *executionContext) _Mutation_Logout(ctx context.Context, field graphql.
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Mutation().Logout(ctx)
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
 		true,
 		true,
@@ -744,25 +514,7 @@ func (ec *executionContext) _Mutation_LogoutALlDevices(ctx context.Context, fiel
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Mutation().LogoutALlDevices(ctx)
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
 		true,
 		true,
@@ -845,25 +597,7 @@ func (ec *executionContext) _Mutation_ResetPassword(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().ResetPassword(ctx, fc.Args["input"].(userdto.ResetPasswordInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				required, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Headers == nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, nil, directive0, required, nil)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
 		true,
 		true,
@@ -957,25 +691,7 @@ func (ec *executionContext) _Mutation_VerifyEmail(ctx context.Context, field gra
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().VerifyEmail(ctx, fc.Args["input"].(userdto.VerifyEmailInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				required, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Headers == nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, nil, directive0, required, nil)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
 		true,
 		true,
@@ -1022,25 +738,7 @@ func (ec *executionContext) _Mutation_GenerateScopedToken(ctx context.Context, f
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().GenerateScopedToken(ctx, fc.Args["input"].(userdto.GenerateScopedTokenInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.GenerateScopedTokenResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.GenerateScopedTokenResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNGenerateScopedTokenResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGenerateScopedTokenResponse,
 		true,
 		true,
@@ -1084,37 +782,7 @@ func (ec *executionContext) _Mutation_RefershToken(ctx context.Context, field gr
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Mutation().RefershToken(ctx)
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				required, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"X-Device-Id"})
-				if err != nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Headers == nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, errors.New("directive headers is not implemented")
-				}
-				return ec.Directives.Headers(ctx, nil, directive0, required, nil)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive1, requiredHeaders)
-			}
-
-			next = directive2
-			return next
-		},
+		nil,
 		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
 		true,
 		true,
@@ -1156,25 +824,7 @@ func (ec *executionContext) _Mutation_RevokeSession(ctx context.Context, field g
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().RevokeSession(ctx, fc.Args["input"].(*model.RevokeSessionInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
 		true,
 		true,
@@ -1221,25 +871,7 @@ func (ec *executionContext) _Mutation_RevokeAllSessions(ctx context.Context, fie
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().RevokeAllSessions(ctx, fc.Args["input"].(model.ScopedTokenInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
 		true,
 		true,
@@ -1286,25 +918,7 @@ func (ec *executionContext) _Mutation_RevokeOthersSession(ctx context.Context, f
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().RevokeOthersSession(ctx, fc.Args["input"].(model.RevokeOthersSessionInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.AuthResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
 		true,
 		true,
@@ -1357,25 +971,7 @@ func (ec *executionContext) _Mutation_UpdateProfileAvatarUrl(ctx context.Context
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateProfileAvatarURL(ctx, fc.Args["input"].(userdto.UpdateProfileAvatarUrlInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.Profile
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Profile
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
@@ -1432,25 +1028,7 @@ func (ec *executionContext) _Mutation_UpdateProfileName(ctx context.Context, fie
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateProfileName(ctx, fc.Args["input"].(userdto.UpdateProfileNameInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.Profile
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Profile
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
@@ -1507,25 +1085,7 @@ func (ec *executionContext) _Mutation_ChangePassword(ctx context.Context, field 
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().ChangePassword(ctx, fc.Args["input"].(userdto.ChangePasswordInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.MutationResponse
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
 		true,
 		true,
@@ -1682,25 +1242,7 @@ func (ec *executionContext) _Query_GetSessions(ctx context.Context, field graphq
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetSessions(ctx, fc.Args["input"].(*model.GetSessionsInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal []*model.Session
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Session
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalOSession2ᚕᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSessionᚄ,
 		true,
 		false,
@@ -1757,25 +1299,7 @@ func (ec *executionContext) _Query_GetActiveSessions(ctx context.Context, field 
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().GetActiveSessions(ctx, fc.Args["input"].(model.ScopedTokenInput))
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal []*model.Session
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal []*model.Session
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalOSession2ᚕᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSessionᚄ,
 		true,
 		false,
@@ -1831,25 +1355,7 @@ func (ec *executionContext) _Query_GetCurrentSession(ctx context.Context, field 
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().GetCurrentSession(ctx)
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.Session
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Session
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNSession2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐSession,
 		true,
 		true,
@@ -1894,25 +1400,7 @@ func (ec *executionContext) _Query_MyProfile(ctx context.Context, field graphql.
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().MyProfile(ctx)
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.Profile
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.Profile
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
 		true,
 		true,
@@ -1957,25 +1445,7 @@ func (ec *executionContext) _Query_Me(ctx context.Context, field graphql.Collect
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Me(ctx)
 		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				requiredHeaders, err := ec.unmarshalOString2ᚕstringᚄ(ctx, []any{"Authorization"})
-				if err != nil {
-					var zeroVal *model.User
-					return zeroVal, err
-				}
-				if ec.Directives.Auth == nil {
-					var zeroVal *model.User
-					return zeroVal, errors.New("directive auth is not implemented")
-				}
-				return ec.Directives.Auth(ctx, nil, directive0, requiredHeaders)
-			}
-
-			next = directive1
-			return next
-		},
+		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUser,
 		true,
 		true,

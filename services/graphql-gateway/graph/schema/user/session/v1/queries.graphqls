@@ -1,13 +1,19 @@
 extend type Query {
-  # Returns paginated sessions for the current user.
-  GetSessions(input: GetSessionsInput): [Session!]
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns paginated sessions for the current user.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    GetSessions(input: GetSessionsInput): [Session!]
 
-  # Returns active sessions using a scoped token.
-  GetActiveSessions(input: ScopedTokenInput!): [Session!]
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns active sessions using a scoped token.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    GetActiveSessions(input: ScopedTokenInput!): [Session!]
 
-  # Returns the current session.
-  GetCurrentSession: Session!
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns the current session.
+    #
+    # Required Auth: True
+    # Required Request Headers: X-Device-Id
+    GetCurrentSession: Session!
 }

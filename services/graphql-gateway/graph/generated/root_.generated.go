@@ -29,8 +29,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Auth    func(ctx context.Context, obj any, next graphql.Resolver, requiredHeaders []string) (res any, err error)
-	Headers func(ctx context.Context, obj any, next graphql.Resolver, required []string, optional []string) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -870,9 +868,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
-					return ec._Query(ctx, opCtx.Operation.SelectionSet), nil
-				})
+				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
 					result := <-ec.DeferredResults
@@ -902,9 +898,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
-				return ec._Mutation(ctx, opCtx.Operation.SelectionSet), nil
-			})
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -947,16 +941,16 @@ enum TokenScope {
 
 # AuthMethod defines how the user authenticated.
 enum AuthMethod {
-  PASSWORD          # Password authentication.
-  BIOMETRIC         # Biometric authentication such as fingerprint or face ID.
-  OTP               # One-time password delivered by SMS or email.
-  TOTP              # Time-based one-time password from an authenticator app.
-  RECOVERY          # Recovery code authentication.
-  MAGIC_LINK        # Magic-link email authentication.
-  SOCIAL_GOOGLE     # Google OAuth.
-  SOCIAL_GITHUB     # GitHub OAuth.
-  API_KEY           # API key authentication.
-  SERVICE_ACCOUNT   # Service-to-service authentication.
+    PASSWORD # Password authentication.
+    BIOMETRIC # Biometric authentication such as fingerprint or face ID.
+    OTP # One-time password delivered by SMS or email.
+    TOTP # Time-based one-time password from an authenticator app.
+    RECOVERY # Recovery code authentication.
+    MAGIC_LINK # Magic-link email authentication.
+    SOCIAL_GOOGLE # Google OAuth.
+    SOCIAL_GITHUB # GitHub OAuth.
+    API_KEY # API key authentication.
+    SERVICE_ACCOUNT # Service-to-service authentication.
 }
 
 # Token type used when returning authorization tokens to clients.
@@ -967,36 +961,36 @@ enum AuthorizationTokenType {
 `, BuiltIn: false},
 	{Name: "../schema/core/v1/models.graphqls", Input: `# User account details returned by auth and profile queries.
 type User {
-  id: ID!
-  email: String!
-  isEmailVerified: Boolean!
-  emailVerifiedAt: DateTime
-  twoFactorEnabled: Boolean!
-  twoFactorEnabledAt: DateTime
-  createdAt: DateTime!
-  updatedAt: DateTime!
+    id: ID!
+    email: String!
+    isEmailVerified: Boolean!
+    emailVerifiedAt: DateTime
+    twoFactorEnabled: Boolean!
+    twoFactorEnabledAt: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
 }
 
 # Public profile data associated with a user.
 type Profile {
-  id: ID!
-  userId: ID!
-  firstName: String!
-  lastName: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  avatarUrl: String
+    id: ID!
+    userId: ID!
+    firstName: String!
+    lastName: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    avatarUrl: String
 }
 
 # Session details used for active-session views and revocation flows.
 type Session {
-  id: ID!
-  userId: ID!
-  refreshToken: String!
-  deviceId: String!
-  ipAddr: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+    id: ID!
+    userId: ID!
+    refreshToken: String!
+    deviceId: String!
+    ipAddr: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
 }
 `, BuiltIn: false},
 	{Name: "../schema/core/v1/scalars.graphqls", Input: `scalar DateTime
@@ -1010,53 +1004,42 @@ type Mutation {
 type Query {
     _empty: String
 }
-
-# Requires specific headers to be present on the operation or field.
-directive @headers(
-    required: [String!]
-    optional: [String!]
-) on QUERY | MUTATION | SUBSCRIPTION | FIELD_DEFINITION
-
-# Marks an operation or field as requiring auth-related headers.
-directive @auth(
-    requiredHeaders: [String!]
-) on QUERY | MUTATION | FIELD_DEFINITION
 `, BuiltIn: false},
 	{Name: "../schema/core/v1/types.graphqls", Input: `# Metadata attached to requests that need device-aware behavior.
 input RequestMetaInput {
-  deviceId: String!
+    deviceId: String!
 }
 
 # Standard pagination payload used by list queries.
 input PaginationInput {
-  page: Int!
-  limit: Int!
+    page: Int!
+    limit: Int!
 }
 
 # Scoped token used for security-sensitive operations.
 input ScopedTokenInput {
-  scopedToken: String!
+    scopedToken: String!
 }
 
 # Simple email wrapper used by identity flows.
 input EmailInput {
-  email: String!
+    email: String!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/inputs.graphqls", Input: `# Login credentials for the password login flow.
 input LoginInput {
-  email: String!
-  password: String!
-  meta: RequestMetaInput!
+    email: String!
+    password: String!
+    meta: RequestMetaInput!
 }
 
 # Registration payload for creating a new account.
 input RegisterInput {
-  email: String!
-  password: String!
-  firstName: String!
-  lastName: String!
-  meta: RequestMetaInput!
+    email: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+    meta: RequestMetaInput!
 }
 
 # Two-factor code submitted after a 2FA challenge is issued.
@@ -1066,13 +1049,13 @@ input TwoFactorCode {
 
 # Request metadata used during logout validation.
 input LogoutInput {
-  meta: RequestMetaInput!
+    meta: RequestMetaInput!
 }
 
 # Payload used to start a password-reset flow.
 input RequestPasswordResetInput {
-  email: String!
-  meta: RequestMetaInput!
+    email: String!
+    meta: RequestMetaInput!
 }
 
 # Legacy auth-only scoped-token request payload.
@@ -1082,52 +1065,69 @@ input GenereateScopedTokenInput {
 
 # New password submitted after validating a reset token.
 input ResetPasswordInput {
-  token: String!
-  newPassword: String!
+    token: String!
+    newPassword: String!
 }
 
 # Payload used to request an email verification link.
 input RequestEmailVerificationInput {
-  email: String!
-  meta: RequestMetaInput!
+    email: String!
+    meta: RequestMetaInput!
 }
 
 # Payload used to verify an email address with a token.
 input VerifyEmailInput {
-  token: String!
-  meta: RequestMetaInput!
+    token: String!
+    meta: RequestMetaInput!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/mutations.graphqls", Input: `extend type Mutation {
     # Handles both a normal login and a 2FA challenge response.
+    #
+    # Required Auth: False
+    # Required Request Headers: X-Device-Id
+    #
     # - When status is AUTH_STATUS_2FA_REQUIRED, return the pre-auth token and
     #   send it back as Authorization: "2FA-Challenge" for the follow-up request.
     # - When status is AUTH_STATUS_SUCCESS, return access and refresh tokens plus user/profile data.
-    Login(input: LoginInput!): AuthResponse! @headers(required: ["X-Device-Id"])
+    Login(input: LoginInput!): AuthResponse!
 
     # Same response contract as Login.
+    #
+    # Required Auth: False
+    # Required Request Headers: X-Device-Id
     Register(input: RegisterInput!): AuthResponse!
-        @headers(required: ["X-Device-Id"])
 
     # Completes the login flow after a 2FA challenge.
+    #
+    # Required Auth: True [Authorization: "2FA-Challenge eYJcml....."]
+    # Required Request Headers: X-Device-Id
+    #
     # NOTE: do not use Bearer; use Authorization: "2FA-Challenge".
     LoginWithTwoFactorCode(input: TwoFactorCode!): AuthResponse!
-        @headers(required: ["Authorization", "X-Device-Id"])
 
     # Logs out the current session for the matching device.
+    #
+    # Required Auth: True
+    # Required Headers: X-Device-Id
+    #
     # TIP: persist the device id in LocalStorage or IndexedDB.
-    Logout: MutationResponse! @auth(requiredHeaders: ["X-Device-Id"])
+    Logout: MutationResponse!
 
     # Logs out every session for the user.
-    LogoutALlDevices: MutationResponse! @auth(requiredHeaders: ["X-Device-Id"])
+    #
+    # Required Auth: True
+    # Required Headers: X-Device-Id
+    #
+    LogoutALlDevices: MutationResponse!
 
     # Sends a password-reset email with a tokenized reset link.
+    #
     # NOTE: use a path such as tokens/reset-password?token={token} in the link.
     RequestPasswordReset(input: RequestPasswordResetInput!): MutationResponse!
 
     # Resets the password after the token has been verified.
     ResetPassword(input: ResetPasswordInput!): MutationResponse!
-        @headers(required: ["X-Device-Id"])
 
     # Sends an email verification link to the user.
     RequestEmailVerification(
@@ -1136,19 +1136,16 @@ input VerifyEmailInput {
 
     # Verifies an email address using the provided token.
     VerifyEmail(input: VerifyEmailInput!): MutationResponse!
-        @headers(required: ["X-Device-Id"])
 
     # Generates a scoped token for security-sensitive follow-up operations.
     # Example: create a CHANGE_USER_PASSWORD token and attach it to ChangePassword.
     # TODO: additional auth methods can be supported later.
     GenerateScopedToken(
         input: GenerateScopedTokenInput!
-    ): GenerateScopedTokenResponse! @auth(requiredHeaders: ["X-Device-Id"])
+    ): GenerateScopedTokenResponse!
 
     # Refreshes the current access token using the refresh token.
     RefershToken: AuthResponse!
-        @headers(required: ["X-Device-Id"])
-        @auth(requiredHeaders: ["Authorization"])
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/auth/v1/queries.graphqls", Input: ``, BuiltIn: false},
@@ -1166,10 +1163,10 @@ type AuthTokens {
 
 # High-level auth state returned by login and refresh flows.
 enum AuthStatus {
-    AUTH_STATUS_UNSPECIFIED,
-    AUTH_STATUS_SUCCESS,
-    AUTH_STATUS_FAILED,
-    AUTH_STATUS_2FA_REQUIRED,
+    AUTH_STATUS_UNSPECIFIED
+    AUTH_STATUS_SUCCESS
+    AUTH_STATUS_FAILED
+    AUTH_STATUS_2FA_REQUIRED
 }
 
 # Auth response that can carry tokens, user data, or a 2FA challenge token.
@@ -1199,100 +1196,122 @@ type GenerateScopedTokenResponse {
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/inputs.graphqls", Input: `# Pagination wrapper for session listing.
 input GetSessionsInput {
-  paginationRequest: PaginationInput!
+    paginationRequest: PaginationInput!
 }
 
 # Revokes all other sessions while keeping the current one active.
 input RevokeOthersSessionInput {
-  scopedToken: String!
-  token: String!
+    scopedToken: String!
+    token: String!
 }
 
 # Revokes a single session identified by token.
 input RevokeSessionInput {
-  scopedToken: String!
-  tokenToRevoke: String!
+    scopedToken: String!
+    tokenToRevoke: String!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/mutations.graphqls", Input: `extend type Mutation {
     # Revokes a single session.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
     RevokeSession(input: RevokeSessionInput): MutationResponse!
-        @auth(requiredHeaders: ["Authorization"])
 
     # Revokes every session associated with the current user.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
     RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
-        @auth(requiredHeaders: ["Authorization"])
 
     # Revokes all other sessions and returns a refreshed auth response.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
     RevokeOthersSession(input: RevokeOthersSessionInput!): AuthResponse!
-        @auth(requiredHeaders: ["Authorization"])
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/queries.graphqls", Input: `extend type Query {
-  # Returns paginated sessions for the current user.
-  GetSessions(input: GetSessionsInput): [Session!]
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns paginated sessions for the current user.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    GetSessions(input: GetSessionsInput): [Session!]
 
-  # Returns active sessions using a scoped token.
-  GetActiveSessions(input: ScopedTokenInput!): [Session!]
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns active sessions using a scoped token.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    GetActiveSessions(input: ScopedTokenInput!): [Session!]
 
-  # Returns the current session.
-  GetCurrentSession: Session!
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns the current session.
+    #
+    # Required Auth: True
+    # Required Request Headers: X-Device-Id
+    GetCurrentSession: Session!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/session/v1/types.graphqls", Input: ``, BuiltIn: false},
 	{Name: "../schema/user/user/v1/inputs.graphqls", Input: `# Scoped-token payload used by auth and security-sensitive flows.
 input GenerateScopedTokenInput {
-  scope: TokenScope!
-  authMethod: AuthMethod!
-  authValue: String!
-  meta: RequestMetaInput!
+    scope: TokenScope!
+    authMethod: AuthMethod!
+    authValue: String!
+    meta: RequestMetaInput!
 }
 
 # Updates a profile avatar URL.
 input UpdateProfileAvatarUrlInput {
-  profileId: ID!
-  avatarUrl: String!
+    profileId: ID!
+    avatarUrl: String!
 }
 
 # Updates the first and last name for a profile.
 input UpdateProfileNameInput {
-  profileId: ID!
-  firstName: String!
-  lastName: String!
+    profileId: ID!
+    firstName: String!
+    lastName: String!
 }
 
 # Changes a password after validating a scoped token.
 input ChangePasswordInput {
-  token: String!
-  newPassword: String!
-  meta: RequestMetaInput!
+    token: String!
+    newPassword: String!
+    meta: RequestMetaInput!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/user/v1/mutations.graphqls", Input: `extend type Mutation {
-  # Updates the avatar URL for a profile.
-  UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
-        @auth(requiredHeaders: ["Authorization"])
+    # Updates the avatar URL for a profile.
+    #
+    # Required Auth: True
+    # Required Request Headers: X-Device-Id
+    UpdateProfileAvatarUrl(input: UpdateProfileAvatarUrlInput!): Profile!
 
-  # Updates the display name (firstName and lastName) fields for a profile.
-  UpdateProfileName(input: UpdateProfileNameInput!): Profile!
-        @auth(requiredHeaders: ["Authorization"])
+    # Updates the display name (firstName and lastName) fields for a profile.
+    #
+    # Required Auth: True
+    # Required Request Headers: X-Device-Id
+    UpdateProfileName(input: UpdateProfileNameInput!): Profile!
 
-  # Changes the account password using a scoped token.
-  ChangePassword(input: ChangePasswordInput!): MutationResponse!
-        @auth(requiredHeaders: ["Authorization"])
+    # Changes the account password using a scoped token.
+    #
+    # Required Auth: True
+    # Required Request Headers: X-Device-Id
+    ChangePassword(input: ChangePasswordInput!): MutationResponse!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/user/v1/queries.graphqls", Input: `extend type Query {
-  # Returns the authenticated user's profile.
-  MyProfile: Profile!
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns the authenticated user's profile.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    MyProfile: Profile!
 
-  # Returns the authenticated user's account record.
-  Me: User!
-        @auth(requiredHeaders: ["Authorization"])
+    # Returns the authenticated user's account record.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    Me: User!
 }
 `, BuiltIn: false},
 	{Name: "../schema/user/user/v1/types.graphqls", Input: ``, BuiltIn: false},

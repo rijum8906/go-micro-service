@@ -12,10 +12,10 @@ type AuthTokens {
 
 # High-level auth state returned by login and refresh flows.
 enum AuthStatus {
-    AUTH_STATUS_UNSPECIFIED,
-    AUTH_STATUS_SUCCESS,
-    AUTH_STATUS_FAILED,
-    AUTH_STATUS_2FA_REQUIRED,
+    AUTH_STATUS_UNSPECIFIED
+    AUTH_STATUS_SUCCESS
+    AUTH_STATUS_FAILED
+    AUTH_STATUS_2FA_REQUIRED
 }
 
 # Auth response that can carry tokens, user data, or a 2FA challenge token.

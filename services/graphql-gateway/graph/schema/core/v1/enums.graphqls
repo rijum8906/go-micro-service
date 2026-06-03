@@ -7,16 +7,16 @@ enum TokenScope {
 
 # AuthMethod defines how the user authenticated.
 enum AuthMethod {
-  PASSWORD          # Password authentication.
-  BIOMETRIC         # Biometric authentication such as fingerprint or face ID.
-  OTP               # One-time password delivered by SMS or email.
-  TOTP              # Time-based one-time password from an authenticator app.
-  RECOVERY          # Recovery code authentication.
-  MAGIC_LINK        # Magic-link email authentication.
-  SOCIAL_GOOGLE     # Google OAuth.
-  SOCIAL_GITHUB     # GitHub OAuth.
-  API_KEY           # API key authentication.
-  SERVICE_ACCOUNT   # Service-to-service authentication.
+    PASSWORD # Password authentication.
+    BIOMETRIC # Biometric authentication such as fingerprint or face ID.
+    OTP # One-time password delivered by SMS or email.
+    TOTP # Time-based one-time password from an authenticator app.
+    RECOVERY # Recovery code authentication.
+    MAGIC_LINK # Magic-link email authentication.
+    SOCIAL_GOOGLE # Google OAuth.
+    SOCIAL_GITHUB # GitHub OAuth.
+    API_KEY # API key authentication.
+    SERVICE_ACCOUNT # Service-to-service authentication.
 }
 
 # Token type used when returning authorization tokens to clients.
