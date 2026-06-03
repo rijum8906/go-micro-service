@@ -32,7 +32,10 @@ input RequestPasswordResetInput {
 
 # Legacy auth-only scoped-token request payload.
 input GenereateScopedTokenInput {
+    scope: String!
     authMethod: AuthMethod!
+    authValue: String!
+    meta: RequestMetaInput!
 }
 
 # New password submitted after validating a reset token.

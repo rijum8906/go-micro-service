@@ -26,8 +26,6 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
 	GenerateScopedTokenInput() GenerateScopedTokenInputResolver
-	RequestEmailVerificationInput() RequestEmailVerificationInputResolver
-	VerifyEmailInput() VerifyEmailInputResolver
 }
 
 type DirectiveRoot struct {
@@ -1062,7 +1060,10 @@ input RequestPasswordResetInput {
 
 # Legacy auth-only scoped-token request payload.
 input GenereateScopedTokenInput {
+    scope: String!
     authMethod: AuthMethod!
+    authValue: String!
+    meta: RequestMetaInput!
 }
 
 # New password submitted after validating a reset token.

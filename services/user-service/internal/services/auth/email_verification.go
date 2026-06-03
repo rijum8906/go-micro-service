@@ -125,7 +125,7 @@ func (s *AuthService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 			return appErr
 		}
 
-		url, appErr := utils.NewTokenURL(scopedToken.TokenString, s.Config.FrontendURL, s.Config.EmailVerificationPath)
+		url, appErr := utils.NewTokenURL(scopedToken.TokenString, s.Config.FrontendURL, s.Config.ResetPasswordPath)
 		if appErr != nil {
 			return appErr
 		}

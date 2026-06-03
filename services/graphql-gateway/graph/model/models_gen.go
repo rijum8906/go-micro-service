@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	coreconstants "github.com/rijum8906/relay/packages/core/constants"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 )
 
 type AuthResponse struct {
@@ -33,7 +34,10 @@ type GenerateScopedTokenResponse struct {
 }
 
 type GenereateScopedTokenInput struct {
+	Scope      string                   `json:"scope"`
 	AuthMethod coreconstants.AuthMethod `json:"authMethod"`
+	AuthValue  string                   `json:"authValue"`
+	Meta       *coredto.RequestMeta     `json:"meta"`
 }
 
 type GetSessionsInput struct {

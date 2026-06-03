@@ -54,14 +54,17 @@ type RequestPasswordResetInput struct {
 }
 
 type ResetPasswordInput struct {
-	Token       string `json:"token" validate:"required"`
-	NewPassword string `json:"newPassword" validate:"required,min=8,max=50"`
+	Token       string              `json:"token" validate:"required"`
+	NewPassword string              `json:"newPassword" validate:"required,min=8,max=50"`
+	Meta        coredto.RequestMeta `json:"meta" validate:"required"`
 }
 
 type RequestEmailVerificationInput struct {
-	Email string `json:"email" validate:"required,email"`
+	Email string              `json:"email" validate:"required,email"`
+	Meta  coredto.RequestMeta `json:"meta" validate:"required"`
 }
 
 type VerifyEmailInput struct {
-	Token string `json:"token" validate:"required"`
+	Token string              `json:"token" validate:"required"`
+	Meta  coredto.RequestMeta `json:"meta" validate:"required"`
 }
