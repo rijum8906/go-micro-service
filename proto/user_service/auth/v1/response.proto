@@ -31,3 +31,8 @@ message EnableTwoFactorResponse {
 message GenerateScopedTokenResponse {
   string scoped_token = 1;
 }
+
+message InitTwoFactorTOTPResponse {
+  string two_factor_secret = 1;
+  string qr_code_uri = 2;
+}

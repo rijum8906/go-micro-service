@@ -12,9 +12,6 @@ CREATE TABLE "users" (
   "status" character varying(30) NOT NULL DEFAULT 'active',
   "password_hash" character varying(255) NULL,
   "is_email_verified" boolean NOT NULL DEFAULT false,
-  "two_factor_enabled" boolean NOT NULL DEFAULT false,
-  "two_factor_secret" character varying(255) NULL,
-  "two_factor_enabled_at" timestamptz NULL,
   "email_verified_at" timestamptz NULL,
   "created_at" timestamptz NULL DEFAULT now(),
   "updated_at" timestamptz NULL DEFAULT now(),
@@ -29,8 +26,6 @@ CREATE INDEX "idx_users_email" ON "users" ("email");
 CREATE INDEX "idx_users_is_email_verified" ON "users" ("is_email_verified");
 -- Create index "idx_users_status" to table: "users"
 CREATE INDEX "idx_users_status" ON "users" ("status");
--- Create index "idx_users_two_factor_enabled" to table: "users"
-CREATE INDEX "idx_users_two_factor_enabled" ON "users" ("two_factor_enabled");
 -- Set comment to column: "status" on table: "users"
 COMMENT ON COLUMN "users"."status" IS 'The status of the user (active, inactive, deleted)';
 -- Create "oauths" table
@@ -95,5 +90,27 @@ CREATE INDEX "idx_sessions_refresh_token" ON "sessions" ("refresh_token_hash");
 CREATE INDEX "idx_sessions_user_id" ON "sessions" ("user_id");
 -- Create trigger "set_updated_at_sessions"
 CREATE TRIGGER "set_updated_at_sessions" BEFORE UPDATE ON "sessions" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();
+-- Create "two_factors" table
+CREATE TABLE "two_factors" (
+  "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+  "user_id" uuid NOT NULL,
+  "method" character varying(255) NOT NULL,
+  "secret" character varying(255) NOT NULL,
+  "is_enabled" boolean NULL DEFAULT true,
+  "is_primary" boolean NULL DEFAULT true,
+  "last_used_at" timestamptz NULL,
+  "created_at" timestamptz NULL DEFAULT now(),
+  "updated_at" timestamptz NULL DEFAULT now(),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "unique_method_per_user" UNIQUE ("user_id", "method"),
+  CONSTRAINT "two_factors_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT "two_factors_method_check" CHECK ((method)::text = ANY ((ARRAY['totp'::character varying, 'email'::character varying, 'webauthn'::character varying])::text[]))
+);
+-- Create index "idx_one_primary_per_user" to table: "two_factors"
+CREATE UNIQUE INDEX "idx_one_primary_per_user" ON "two_factors" ("user_id") WHERE (is_primary = true);
+-- Create index "idx_two_factors_user_id" to table: "two_factors"
+CREATE INDEX "idx_two_factors_user_id" ON "two_factors" ("user_id");
+-- Create trigger "set_updated_at_two_factors"
+CREATE TRIGGER "set_updated_at_two_factors" BEFORE UPDATE ON "two_factors" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();
 -- Create trigger "set_updated_at_users"
 CREATE TRIGGER "set_updated_at_users" BEFORE UPDATE ON "users" FOR EACH ROW EXECUTE FUNCTION "set_updated_at"();

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/corelogger"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	"github.com/rijum8906/relay/packages/core/token"
@@ -32,7 +33,7 @@ var (
 
 func TestMain(m *testing.M) {
 	apperror.SetConfig(&apperror.Config{
-		Logger: zap.NewNop(),
+		Logger: corelogger.NewDevLogger(),
 		AppEnv: "test",
 		Debug:  true,
 	})
@@ -107,7 +108,7 @@ func Test_Login_Validation(t *testing.T) {
 		{
 			name: "email does not exists",
 			setupCtx: func(ctx context.Context) context.Context {
-				return getClientInfoBasedCtx(ctx)
+				return setClientInfoInCtx(ctx)
 			},
 			req: &authv1.LoginRequest{
 				Email:    testutils.GenerateRandomEmail(),
@@ -120,7 +121,7 @@ func Test_Login_Validation(t *testing.T) {
 		{
 			name: "Invalida password",
 			setupCtx: func(ctx context.Context) context.Context {
-				return getClientInfoBasedCtx(ctx)
+				return setClientInfoInCtx(ctx)
 			},
 			req: &authv1.LoginRequest{
 				Email:    user.Email,
@@ -156,7 +157,7 @@ func Test_Login_Validation(t *testing.T) {
 }
 
 func Test_Login_Edge_Cases(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+	ctx := setClientInfoInCtx(context.Background())
 
 	email1 := testutils.GenerateRandomEmail()
 	password1 := testutils.GenerateRandomString(32)
@@ -229,7 +230,7 @@ func Test_Login_Edge_Cases(t *testing.T) {
 }
 
 func Test_Login_Success(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+	ctx := setClientInfoInCtx(context.Background())
 
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(32)
@@ -300,7 +301,7 @@ func Test_Register_Validation(t *testing.T) {
 		{
 			name: "email already exists",
 			setupCtx: func(ctx context.Context) context.Context {
-				return getClientInfoBasedCtx(ctx)
+				return setClientInfoInCtx(ctx)
 			},
 			req: &authv1.RegisterRequest{
 				Email:     user.Email,
@@ -338,7 +339,7 @@ func Test_Register_Validation(t *testing.T) {
 }
 
 func Test_Register_Edge_Cases(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+	ctx := setClientInfoInCtx(context.Background())
 
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(32)
@@ -368,7 +369,7 @@ func Test_Register_Edge_Cases(t *testing.T) {
 }
 
 func Test_Register_Success(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+	ctx := setClientInfoInCtx(context.Background())
 
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(32)
@@ -429,7 +430,7 @@ func createUser(ctx context.Context, email, password string) (*db.User, *db.Prof
 	return &user, &profile, nil
 }
 
-func getClientInfoBasedCtx(ctx context.Context) context.Context {
+func setClientInfoInCtx(ctx context.Context) context.Context {
 	clientInfo := dto.ClientInfo{
 		DeviceID:   testutils.GenerateRandomString(32),
 		IPAddress:  "127.0.0.1",
@@ -452,5 +453,18 @@ func getClientInfoBasedCtx(ctx context.Context) context.Context {
 		dto.MetaSDKVersionKey, clientInfo.SDKVersion,
 		dto.MetaRequestIDKey, clientInfo.RequestID,
 		dto.MetaTraceIDKey, clientInfo.TraceID,
+	))
+}
+
+func setUserInfoInCtx(ctx context.Context, user *db.User, profile *db.Profile) context.Context {
+	userInfo := dto.UserInfo{
+		UserID:    user.ID.String(),
+		TokenID:   uuid.NewString(),
+		SessionID: uuid.NewString(),
+	}
+	return metadata.NewIncomingContext(ctx, metadata.Pairs(
+		dto.MetaUserIDKey, userInfo.UserID,
+		dto.MetaTokenIDKey, userInfo.TokenID,
+		dto.MetaSessionIDKey, userInfo.SessionID,
 	))
 }

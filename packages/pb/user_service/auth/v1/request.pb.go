@@ -613,6 +613,58 @@ func (x *TwoFactorCodeRequest) GetTwoFactorCode() string {
 	return ""
 }
 
+type TwoFactorTOTPRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Totp            string                 `protobuf:"bytes,1,opt,name=totp,proto3" json:"totp,omitempty"`
+	TwoFactorSecret string                 `protobuf:"bytes,2,opt,name=two_factor_secret,json=twoFactorSecret,proto3" json:"two_factor_secret,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *TwoFactorTOTPRequest) Reset() {
+	*x = TwoFactorTOTPRequest{}
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TwoFactorTOTPRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TwoFactorTOTPRequest) ProtoMessage() {}
+
+func (x *TwoFactorTOTPRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_request_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TwoFactorTOTPRequest.ProtoReflect.Descriptor instead.
+func (*TwoFactorTOTPRequest) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *TwoFactorTOTPRequest) GetTotp() string {
+	if x != nil {
+		return x.Totp
+	}
+	return ""
+}
+
+func (x *TwoFactorTOTPRequest) GetTwoFactorSecret() string {
+	if x != nil {
+		return x.TwoFactorSecret
+	}
+	return ""
+}
+
 var File_user_service_auth_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_request_proto_rawDesc = "" +
@@ -653,7 +705,10 @@ const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"auth_value\x18\x03 \x01(\tR\tauthValue\">\n" +
 	"\x14TwoFactorCodeRequest\x12&\n" +
-	"\x0ftwo_factor_code\x18\x01 \x01(\tR\rtwoFactorCodeB\xda\x01\n" +
+	"\x0ftwo_factor_code\x18\x01 \x01(\tR\rtwoFactorCode\"V\n" +
+	"\x14TwoFactorTOTPRequest\x12\x12\n" +
+	"\x04totp\x18\x01 \x01(\tR\x04totp\x12*\n" +
+	"\x11two_factor_secret\x18\x02 \x01(\tR\x0ftwoFactorSecretB\xda\x01\n" +
 	"\x18com.user_service.auth.v1B\fRequestProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\x13UserService.Auth.V1\xca\x02\x13UserService\\Auth\\V1\xe2\x02\x1fUserService\\Auth\\V1\\GPBMetadata\xea\x02\x15UserService::Auth::V1b\x06proto3"
 
 var (
@@ -668,7 +723,7 @@ func file_user_service_auth_v1_request_proto_rawDescGZIP() []byte {
 	return file_user_service_auth_v1_request_proto_rawDescData
 }
 
-var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_user_service_auth_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*LoginRequest)(nil),                    // 0: user_service.auth.v1.LoginRequest
 	(*RegisterRequest)(nil),                 // 1: user_service.auth.v1.RegisterRequest
@@ -682,6 +737,7 @@ var file_user_service_auth_v1_request_proto_goTypes = []any{
 	(*ChangePasswordRequest)(nil),           // 9: user_service.auth.v1.ChangePasswordRequest
 	(*GenerateScopedTokenRequest)(nil),      // 10: user_service.auth.v1.GenerateScopedTokenRequest
 	(*TwoFactorCodeRequest)(nil),            // 11: user_service.auth.v1.TwoFactorCodeRequest
+	(*TwoFactorTOTPRequest)(nil),            // 12: user_service.auth.v1.TwoFactorTOTPRequest
 }
 var file_user_service_auth_v1_request_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -702,7 +758,7 @@ func file_user_service_auth_v1_request_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_auth_v1_request_proto_rawDesc), len(file_user_service_auth_v1_request_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

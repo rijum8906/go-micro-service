@@ -23,9 +23,6 @@ CREATE TABLE users (
         CHECK (status IN ('active', 'inactive', 'deleted')),
     password_hash varchar(255),
     is_email_verified bool NOT NULL DEFAULT false,
-    two_factor_enabled bool NOT NULL DEFAULT false,
-    two_factor_secret varchar(255),
-    two_factor_enabled_at timestamptz,
     email_verified_at timestamptz,
     created_at timestamptz DEFAULT now(),
     updated_at timestamptz DEFAULT now(),
@@ -45,8 +42,6 @@ CREATE INDEX idx_users_status ON users(status);
 CREATE INDEX idx_users_email ON users(email);
 -- Use Case: Find users by is_email_verified
 CREATE INDEX idx_users_is_email_verified ON users(is_email_verified);
--- Use Case: Find users by two_factor_enabled
-CREATE INDEX idx_users_two_factor_enabled ON users(two_factor_enabled);
 
 -- ============================================
 -- Profiles
@@ -68,6 +63,39 @@ CREATE TRIGGER set_updated_at_profiles
 
 -- Use Case: Find profiles by user_id
 CREATE INDEX idx_profiles_user_id ON profiles(user_id);
+
+-- ===========================================
+-- Two Factor Authentication
+-- ===========================================
+CREATE TABLE two_factors (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    method varchar(255) NOT NULL
+        CHECK (method IN ('totp', 'email', 'webauthn')),
+    secret varchar(255) NOT NULL,
+
+    is_enabled boolean DEFAULT true,
+    is_primary boolean DEFAULT true,
+    last_used_at timestamptz,
+
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now(),
+
+    CONSTRAINT unique_method_per_user UNIQUE (user_id, method)
+);
+
+CREATE TRIGGER set_updated_at_two_factors
+    BEFORE UPDATE ON two_factors
+    FOR EACH ROW
+    EXECUTE FUNCTION set_updated_at();
+
+-- Use Case: Find two factors by user_id
+CREATE INDEX idx_two_factors_user_id ON two_factors(user_id);
+
+-- Use Case: Find one primary two factor by user_id
+-- There must be only one primary two factor per user
+CREATE UNIQUE INDEX idx_one_primary_per_user ON two_factors (user_id) WHERE is_primary = true;
 
 -- ============================================
 -- OAuths

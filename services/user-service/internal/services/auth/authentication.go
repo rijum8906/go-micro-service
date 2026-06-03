@@ -70,13 +70,18 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		return nil, apperror.ErrPermissionDenied.WithMessage("invalid credentials")
 	}
 
-	// If user has 2FA enabled
-	if user.TwoFactorEnabled {
+	exists, err := s.DBQ.CheckTwoFactorAuthEnabledByUserID(ctx, user.ID)
+	if err != nil {
+		return nil, apperror.ErrInternal.
+			WithDetail("internal_message", "failed to get primary two-factor auth by user id").
+			WithDetail("db_error", err.Error())
+	}
+	if exists {
+		// If 2FA is enabled, issue a pre-auth token and return 2FA required status
 		preAuthToken, appErr := s.issuePreAuthToken(ctx, user.ID.String())
 		if appErr != nil {
 			return nil, appErr
 		}
-
 		return &authv1.AuthResponse{
 			Status:       authv1.AuthStatus_AUTH_STATUS_2FA_REQUIRED,
 			PreAuthToken: preAuthToken,
@@ -89,7 +94,7 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		return nil, appErr
 	}
 
-	_, authTokens, appErr := s.crateSessionAndIssueTokens(ctx, &user, &clientInfo)
+	_, authTokens, appErr := s.crateSessionAndIssueTokens(ctx, user.ID, &clientInfo)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -237,12 +242,12 @@ func (s *AuthService) LoginWithTwoFactorCode(ctx context.Context, req *authv1.Tw
 	if err != nil {
 		return nil, constants.ErrInvalidUserIDInUserInfo
 	}
-	user, err := s.DBQ.GetUser(ctx, userID)
+	user2FA, err := s.DBQ.GetTwoFactorAuthByUserID(ctx, userID)
 	if err != nil {
-		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user from database")
+		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user 2FA from database")
 	}
 	// Generate and Match two factor code against generated code
-	generatedTwoFactorCode, appErr := generate2FATokenCode(user.TwoFactorSecret.String)
+	generatedTwoFactorCode, appErr := generate2FATokenCode(user2FA.Secret)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -250,14 +255,20 @@ func (s *AuthService) LoginWithTwoFactorCode(ctx context.Context, req *authv1.Tw
 		return nil, apperror.ErrValidation.WithMessage("invalid two factor code")
 	}
 
+	// Fetch user from database
+	user, err := s.DBQ.GetUser(ctx, userID)
+	if appErr := utils.AssertRowExists(err, "user", userID.String()); appErr != nil {
+		return nil, appErr
+	}
+
 	// Fetch profile from database
 	profile, err := s.DBQ.GetProfile(ctx, userID)
-	if appErr := utils.AssertRowExists(err, "profile", user.ID.String()); appErr != nil {
+	if appErr := utils.AssertRowExists(err, "profile", scopedTokenInfo.Subject); appErr != nil {
 		return nil, appErr
 	}
 
 	// Create session and issue access and refresh tokens
-	_, authTokens, appErr := s.crateSessionAndIssueTokens(ctx, &user, &clientInfo)
+	_, authTokens, appErr := s.crateSessionAndIssueTokens(ctx, userID, &clientInfo)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -270,14 +281,14 @@ func (s *AuthService) LoginWithTwoFactorCode(ctx context.Context, req *authv1.Tw
 // CORE HELPER FUNCTIONS
 // ===============================================================
 
-func (s *AuthService) crateSessionAndIssueTokens(ctx context.Context, user *db.User, clientInfo *dto.ClientInfo) (*db.Session, *dto.AuthTokens, *apperror.AppError) {
+func (s *AuthService) crateSessionAndIssueTokens(ctx context.Context, userID uuid.UUID, clientInfo *dto.ClientInfo) (*db.Session, *dto.AuthTokens, *apperror.AppError) {
 	var session *db.Session
 	var refreshTokenHash string
 
 	// Execute authentication in transaction
 	if err := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Create session along with refresh token
-		s, appErr := s.createSession(ctx, q, user.ID, clientInfo)
+		s, appErr := s.createSession(ctx, q, userID, clientInfo)
 		if appErr != nil {
 			return appErr
 		}
@@ -290,7 +301,7 @@ func (s *AuthService) crateSessionAndIssueTokens(ctx context.Context, user *db.U
 	}
 
 	// Issue access token
-	token, appErr := s.issueAccessToken(ctx, user.ID.String(), session.ID.String())
+	token, appErr := s.issueAccessToken(ctx, userID.String(), session.ID.String())
 	if appErr != nil {
 		return nil, nil, appErr
 	}

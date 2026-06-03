@@ -57,3 +57,8 @@ message GenerateScopedTokenRequest {
 message TwoFactorCodeRequest {
   string two_factor_code = 1;
 }
+
+message TwoFactorTOTPRequest {
+  string totp = 1;
+  string two_factor_secret = 2;
+}

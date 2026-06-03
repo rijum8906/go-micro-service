@@ -4,10 +4,9 @@
 -- name: CreateUser :one
 INSERT INTO users (
     email,
-    password_hash,
-    two_factor_enabled_at
+    password_hash
 ) VALUES (
-    $1, $2, $3
+    $1, $2
 )
 RETURNING *;
 
@@ -64,20 +63,6 @@ WHERE id = $1;
 -- name: UpdateUserEmail :exec
 UPDATE users
 SET email = $2
-WHERE id = $1;
-
--- name: EnableUserTwoFactor :exec
-UPDATE users
-SET two_factor_enabled = true,
-    two_factor_secret = $2,
-    two_factor_enabled_at = NOW()
-WHERE id = $1;
-
--- name: DisableUserTwoFactor :exec
-UPDATE users
-SET two_factor_enabled = false,
-    two_factor_secret = NULL,
-    two_factor_enabled_at = NULL
 WHERE id = $1;
 
 -- name: UpdateUserIsEmailVerified :exec

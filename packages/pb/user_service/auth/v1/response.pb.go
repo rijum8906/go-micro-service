@@ -290,6 +290,58 @@ func (x *GenerateScopedTokenResponse) GetScopedToken() string {
 	return ""
 }
 
+type InitTwoFactorTOTPResponse struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	TwoFactorSecret string                 `protobuf:"bytes,1,opt,name=two_factor_secret,json=twoFactorSecret,proto3" json:"two_factor_secret,omitempty"`
+	QrCodeUri       string                 `protobuf:"bytes,2,opt,name=qr_code_uri,json=qrCodeUri,proto3" json:"qr_code_uri,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *InitTwoFactorTOTPResponse) Reset() {
+	*x = InitTwoFactorTOTPResponse{}
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InitTwoFactorTOTPResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InitTwoFactorTOTPResponse) ProtoMessage() {}
+
+func (x *InitTwoFactorTOTPResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InitTwoFactorTOTPResponse.ProtoReflect.Descriptor instead.
+func (*InitTwoFactorTOTPResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_response_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *InitTwoFactorTOTPResponse) GetTwoFactorSecret() string {
+	if x != nil {
+		return x.TwoFactorSecret
+	}
+	return ""
+}
+
+func (x *InitTwoFactorTOTPResponse) GetQrCodeUri() string {
+	if x != nil {
+		return x.QrCodeUri
+	}
+	return ""
+}
+
 var File_user_service_auth_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_response_proto_rawDesc = "" +
@@ -307,7 +359,10 @@ const file_user_service_auth_v1_response_proto_rawDesc = "" +
 	"\x17EnableTwoFactorResponse\x12\x19\n" +
 	"\btotp_uri\x18\x01 \x01(\tR\atotpUri\"@\n" +
 	"\x1bGenerateScopedTokenResponse\x12!\n" +
-	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken*x\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\"g\n" +
+	"\x19InitTwoFactorTOTPResponse\x12*\n" +
+	"\x11two_factor_secret\x18\x01 \x01(\tR\x0ftwoFactorSecret\x12\x1e\n" +
+	"\vqr_code_uri\x18\x02 \x01(\tR\tqrCodeUri*x\n" +
 	"\n" +
 	"AuthStatus\x12\x1b\n" +
 	"\x17AUTH_STATUS_UNSPECIFIED\x10\x00\x12\x17\n" +
@@ -329,24 +384,25 @@ func file_user_service_auth_v1_response_proto_rawDescGZIP() []byte {
 }
 
 var file_user_service_auth_v1_response_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_user_service_auth_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_user_service_auth_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_user_service_auth_v1_response_proto_goTypes = []any{
 	(AuthStatus)(0),                     // 0: user_service.auth.v1.AuthStatus
 	(*AuthResponse)(nil),                // 1: user_service.auth.v1.AuthResponse
 	(*RefreshTokenResponse)(nil),        // 2: user_service.auth.v1.RefreshTokenResponse
 	(*EnableTwoFactorResponse)(nil),     // 3: user_service.auth.v1.EnableTwoFactorResponse
 	(*GenerateScopedTokenResponse)(nil), // 4: user_service.auth.v1.GenerateScopedTokenResponse
-	(*v1.User)(nil),                     // 5: user_service.models.v1.User
-	(*v1.Profile)(nil),                  // 6: user_service.models.v1.Profile
-	(*v1.AuthToken)(nil),                // 7: user_service.models.v1.AuthToken
-	(*v1.Token)(nil),                    // 8: user_service.models.v1.Token
+	(*InitTwoFactorTOTPResponse)(nil),   // 5: user_service.auth.v1.InitTwoFactorTOTPResponse
+	(*v1.User)(nil),                     // 6: user_service.models.v1.User
+	(*v1.Profile)(nil),                  // 7: user_service.models.v1.Profile
+	(*v1.AuthToken)(nil),                // 8: user_service.models.v1.AuthToken
+	(*v1.Token)(nil),                    // 9: user_service.models.v1.Token
 }
 var file_user_service_auth_v1_response_proto_depIdxs = []int32{
-	5, // 0: user_service.auth.v1.AuthResponse.user:type_name -> user_service.models.v1.User
-	6, // 1: user_service.auth.v1.AuthResponse.profile:type_name -> user_service.models.v1.Profile
-	7, // 2: user_service.auth.v1.AuthResponse.tokens:type_name -> user_service.models.v1.AuthToken
+	6, // 0: user_service.auth.v1.AuthResponse.user:type_name -> user_service.models.v1.User
+	7, // 1: user_service.auth.v1.AuthResponse.profile:type_name -> user_service.models.v1.Profile
+	8, // 2: user_service.auth.v1.AuthResponse.tokens:type_name -> user_service.models.v1.AuthToken
 	0, // 3: user_service.auth.v1.AuthResponse.status:type_name -> user_service.auth.v1.AuthStatus
-	8, // 4: user_service.auth.v1.RefreshTokenResponse.access_token:type_name -> user_service.models.v1.Token
+	9, // 4: user_service.auth.v1.RefreshTokenResponse.access_token:type_name -> user_service.models.v1.Token
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -365,7 +421,7 @@ func file_user_service_auth_v1_response_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_auth_v1_response_proto_rawDesc), len(file_user_service_auth_v1_response_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
