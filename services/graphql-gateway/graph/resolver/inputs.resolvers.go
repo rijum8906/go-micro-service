@@ -7,9 +7,11 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/generated"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
+	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 	userdto "github.com/rijum8906/relay/services/graphql-gateway/internal/dto/userdto/auth"
 )
 
@@ -18,9 +20,31 @@ func (r *generateScopedTokenInputResolver) Scope(ctx context.Context, obj *userd
 	return nil
 }
 
+// Meta is the resolver for the meta field.
+func (r *requestEmailVerificationInputResolver) Meta(ctx context.Context, obj *userdto.RequestEmailVerificationInput, data *coredto.RequestMeta) error {
+	panic(fmt.Errorf("not implemented: Meta - meta"))
+}
+
+// Meta is the resolver for the meta field.
+func (r *verifyEmailInputResolver) Meta(ctx context.Context, obj *userdto.VerifyEmailInput, data *coredto.RequestMeta) error {
+	panic(fmt.Errorf("not implemented: Meta - meta"))
+}
+
 // GenerateScopedTokenInput returns generated.GenerateScopedTokenInputResolver implementation.
 func (r *Resolver) GenerateScopedTokenInput() generated.GenerateScopedTokenInputResolver {
 	return &generateScopedTokenInputResolver{r}
 }
 
+// RequestEmailVerificationInput returns generated.RequestEmailVerificationInputResolver implementation.
+func (r *Resolver) RequestEmailVerificationInput() generated.RequestEmailVerificationInputResolver {
+	return &requestEmailVerificationInputResolver{r}
+}
+
+// VerifyEmailInput returns generated.VerifyEmailInputResolver implementation.
+func (r *Resolver) VerifyEmailInput() generated.VerifyEmailInputResolver {
+	return &verifyEmailInputResolver{r}
+}
+
 type generateScopedTokenInputResolver struct{ *Resolver }
+type requestEmailVerificationInputResolver struct{ *Resolver }
+type verifyEmailInputResolver struct{ *Resolver }

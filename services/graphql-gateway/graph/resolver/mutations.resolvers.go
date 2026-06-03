@@ -125,8 +125,6 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input userdto.Rese
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
-
 	resp, err := r.Clients.AuthClient.ResetPassword(ctx, &authv1.ResetPasswordRequest{
 		ScopedToken: input.Token,
 		NewPassword: input.NewPassword,
@@ -146,8 +144,6 @@ func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input u
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
-
 	resp, err := r.Clients.AuthClient.RequestEmailVerification(ctx, &authv1.RequestEmailVerificationRequest{
 		Email: input.Email,
 	})
@@ -165,8 +161,6 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
-
-	ctx = attachClientInfo(ctx, input.Meta)
 
 	resp, err := r.Clients.AuthClient.VerifyEmail(ctx, &authv1.VerifyEmailRequest{
 		ScopedToken: input.Token,

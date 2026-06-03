@@ -1570,6 +1570,11 @@ func (ec *executionContext) unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx context.Context, v any) (*coredto.RequestMeta, error) {
+	res, err := ec.unmarshalInputRequestMetaInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenInput(ctx context.Context, v any) (model.ScopedTokenInput, error) {
 	res, err := ec.unmarshalInputScopedTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)

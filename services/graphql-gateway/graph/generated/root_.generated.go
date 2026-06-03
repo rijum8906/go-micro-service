@@ -26,6 +26,8 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
 	GenerateScopedTokenInput() GenerateScopedTokenInputResolver
+	RequestEmailVerificationInput() RequestEmailVerificationInputResolver
+	VerifyEmailInput() VerifyEmailInputResolver
 }
 
 type DirectiveRoot struct {
