@@ -28,6 +28,12 @@ export const updateProfileSchema = z.object({
 });
 export type UpdateProfileSchemaType = z.infer<typeof updateProfileSchema>;
 
+export const updateProfileNameSchema = z.object({
+  firstName: z.string().min(2, 'First name is required'),
+  lastName: z.string().min(2, 'Last name is required'),
+});
+export type UpdateProfileNameSchemaType = z.infer<typeof updateProfileNameSchema>;
+
 export const createProfileSchema = z.object({
   firstName: z.string().min(2, 'First name is required'),
   lastName: z.string().min(2, 'Last name is required'),

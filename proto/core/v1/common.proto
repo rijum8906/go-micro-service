@@ -12,12 +12,20 @@ message SuccessResponse {
   bool success = 1;
 }
 
-message EmailInput {
+message EmailRequest {
   string email = 1;
+}
+
+message TokenRequest {
+  string token = 1;
 }
 
 message IDRequest {
   string id = 1;
+}
+
+message TokenHashRequest {
+  string token_hash = 1;
 }
 
 message IDAndScopedTokenRequest {
@@ -28,4 +36,9 @@ message IDAndScopedTokenRequest {
 message PaginationRequest {
   int32 page = 1;
   int32 limit = 2;
+}
+
+message IDWithPaginationReq {
+  string id = 1;
+  core.v1.PaginationRequest pagination = 2;
 }

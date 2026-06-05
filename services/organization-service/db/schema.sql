@@ -19,32 +19,37 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE organizations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name varchar(255) NOT NULL,
-    status varchar(30) NOT NULL DEFAULT 'active'
-        CHECK (status IN ('active', 'archived', 'deleted')),
     slug varchar(80) UNIQUE NOT NULL,
     description text,
     logo_url text,
-    created_by uuid NOT NULL,
+    status varchar(30) NOT NULL DEFAULT 'active'
+        CHECK (status IN ('active', 'archived', 'deleted')),
+    created_by_user_id uuid NOT NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
-    deleted_at timestamptz,
-    deleted_by uuid,
     archived_at timestamptz,
+    deleted_at timestamptz,
 
-    -- Ensures slugs are consistently lowercase to prevent case-sensitive duplicates
+    -- Constraints
     CONSTRAINT chk_organizations_slug_lowercase CHECK (slug = lower(slug)),
-
-    -- Slugs should only contain lowercase letters, numbers, and hyphens
     CONSTRAINT chk_organizations_slug_format CHECK (slug ~ '^[a-z0-9-]+$')
 );
 
 COMMENT ON TABLE organizations IS 'Core tenant/workspace entity that contains teams and members';
 COMMENT ON COLUMN organizations.slug IS 'URL-friendly identifier, unique across all organizations';
-COMMENT ON COLUMN organizations.created_by IS 'User ID who created this organization';
+COMMENT ON COLUMN organizations.created_by_user_id IS 'User ID who created this organization (references external users table)';
+COMMENT ON COLUMN organizations.status IS 'active=normal operation, archived=read-only/hidden, deleted=soft-deleted';
 
 CREATE TRIGGER trg_organizations_updated_at
     BEFORE UPDATE ON organizations
     FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- Use case: Resolve an organization quickly by its URL slug during routing and lookup.
+CREATE INDEX idx_organizations_slug ON organizations (slug);
+-- Use case: Filter organizations by lifecycle state for admin lists and cleanup jobs.
+CREATE INDEX idx_organizations_status ON organizations (status);
+-- Use case: Show recently created organizations without a full table sort.
+CREATE INDEX idx_organizations_created_at ON organizations (created_at DESC);
 
 -- =====================================================
 -- Organization Memberships (users belonging to orgs)
@@ -54,31 +59,28 @@ CREATE TABLE organization_memberships (
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     user_id uuid NOT NULL,
     role varchar(30) NOT NULL DEFAULT 'member',
-    status varchar(30) NOT NULL DEFAULT 'active'
-        CHECK (status IN ('active', 'suspended', 'left')),
-    invited_by uuid REFERENCES organization_memberships(id),
+    status varchar(30) not null default 'active'
+        check (status in ('active', 'suspended', 'banned', 'left', 'removed')),
     joined_at timestamptz NOT NULL DEFAULT now(),
-    left_at timestamptz,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
-    deleted_at timestamptz,
-    deleted_by uuid REFERENCES organization_memberships(id),
 
-    -- Prevents duplicate memberships for the same user in an organization
+    -- Constraints
     CONSTRAINT uq_organization_memberships_org_user UNIQUE (organization_id, user_id)
 );
 
 COMMENT ON TABLE organization_memberships IS 'Junction table linking users to organizations with role and status';
 COMMENT ON COLUMN organization_memberships.role IS 'owner=full org control, admin=manage members/teams, member=standard access';
-COMMENT ON COLUMN organization_memberships.status IS 'active=current member, suspended=temporarily blocked, left=voluntarily departed';
+COMMENT ON COLUMN organization_memberships.status IS 'active=current member, suspended=temporarily blocked, banned=permanently blocked, left=voluntary departure, removed=admin removal';
 
--- For finding all orgs a user belongs to
-CREATE INDEX idx_organization_memberships_user_id
-    ON organization_memberships (user_id);
-
--- For finding all members of an org (most common query)
-CREATE INDEX idx_organization_memberships_organization_id
-    ON organization_memberships (organization_id);
+-- Use case: List all organizations for a user and check a user's membership history.
+CREATE INDEX idx_memberships_user_id ON organization_memberships (user_id);
+-- Use case: List and paginate all members in an organization.
+CREATE INDEX idx_memberships_organization_id ON organization_memberships (organization_id);
+-- Use case: Filter memberships by status for moderation and cleanup views.
+CREATE INDEX idx_memberships_status ON organization_memberships (status);
+-- Use case: Filter memberships by role for owner/admin/member management views.
+CREATE INDEX idx_memberships_role ON organization_memberships (role);
 
 CREATE TRIGGER trg_organization_memberships_updated_at
     BEFORE UPDATE ON organization_memberships
@@ -92,23 +94,30 @@ CREATE TABLE organization_teams (
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     name varchar(255) NOT NULL,
     description text,
-    created_by uuid NOT NULL,
+    status varchar(30) NOT NULL DEFAULT 'active'
+        CHECK (status IN ('active', 'archived', 'deleted')),
+    created_by_mem_id uuid NOT NULL REFERENCES organization_memberships(id),
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
-    deleted_at timestamptz,
-    deleted_by uuid REFERENCES organization_memberships(id),
-
-    -- Team names must be unique within an organization (can't have two "Engineering" teams)
-    CONSTRAINT uq_organization_teams_org_name UNIQUE (organization_id, name)
+    archived_at timestamptz,
+    deleted_at timestamptz
 );
 
+-- Use case: Enforce one active or archived team name per organization while allowing deleted-name reuse.
+CREATE UNIQUE INDEX uq_organization_teams_org_name_active
+    ON organization_teams (organization_id, name)
+    WHERE (status IN ('active', 'archived'));
+
 COMMENT ON TABLE organization_teams IS 'Teams are sub-groups within an organization for fine-grained access control';
-COMMENT ON COLUMN organization_teams.name IS 'Team name, must be unique per organization (e.g., "Engineering", "Sales")';
+COMMENT ON COLUMN organization_teams.name IS 'Team name, must be unique per organization (excluding deleted teams)';
+COMMENT ON COLUMN organization_teams.status IS 'active=normal, archived=hidden/read-only, deleted=soft-deleted';
 
-
--- Essential for "show all teams in this organization" queries
-CREATE INDEX idx_organization_teams_organization_id
-    ON organization_teams (organization_id);
+-- Use case: List all teams that belong to an organization.
+CREATE INDEX idx_teams_organization_id ON organization_teams (organization_id);
+-- Use case: Filter teams by lifecycle state for active, archived, and deleted views.
+CREATE INDEX idx_teams_status ON organization_teams (status);
+-- Use case: Find teams created by a specific organization member for audit/admin screens.
+CREATE INDEX idx_teams_created_by ON organization_teams (created_by_mem_id);
 
 CREATE TRIGGER trg_organization_teams_updated_at
     BEFORE UPDATE ON organization_teams
@@ -120,48 +129,35 @@ CREATE TRIGGER trg_organization_teams_updated_at
 CREATE TABLE organization_team_memberships (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    team_id uuid NOT NULL REFERENCES organization_teams(id),
-    membership_id uuid NOT NULL REFERENCES organization_memberships(id),  -- References organization_memberships, not users directly
+    team_id uuid NOT NULL REFERENCES organization_teams(id) ON DELETE CASCADE,
+    membership_id uuid NOT NULL REFERENCES organization_memberships(id) ON DELETE CASCADE,
     role varchar(30) NOT NULL DEFAULT 'member',
+    status varchar(30) not null default 'active'
+        check (status in ('active', 'suspended', 'banned', 'left', 'removed')),
+    joined_at timestamptz NOT NULL DEFAULT now(),
     created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now(),
-    deleted_at timestamptz,  -- Soft delete: when a member leaves a team
-    deleted_by uuid REFERENCES organization_team_memberships(id),
-
-    CONSTRAINT fk_organization_team_memberships_team
-        FOREIGN KEY (team_id)
-        REFERENCES organization_teams(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_organization_team_memberships_membership
-        FOREIGN KEY (membership_id)
-        REFERENCES organization_memberships(id)
-        ON DELETE CASCADE
+    updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Use case: Prevent duplicate active or suspended team memberships for the same org member.
+CREATE UNIQUE INDEX uq_team_memberships_active
+    ON organization_team_memberships (team_id, membership_id)
+    WHERE (status IN ('active', 'suspended'));
 
 COMMENT ON TABLE organization_team_memberships IS 'Links organization members to teams. Uses membership_id (not user_id) to respect org-level roles.';
 COMMENT ON COLUMN organization_team_memberships.membership_id IS 'References organization_memberships.id - a user must be an org member before joining a team';
-COMMENT ON COLUMN organization_team_memberships.deleted_at IS 'Soft delete timestamp. When non-NULL, the member is no longer in the team.';
 
--- Prevents duplicate active team memberships (a user can't be in the same team twice)
--- The WHERE clause makes this a partial unique index - only enforces for active records
-CREATE UNIQUE INDEX uq_organization_team_memberships_active
-    ON organization_team_memberships (organization_id, team_id, membership_id)
-    WHERE deleted_at IS NULL;
-
--- Fast lookup: "Find all teams that a user belongs to in an organization"
--- INCLUDE stores team_id and role directly in the index, avoiding a table lookup
-CREATE INDEX idx_organization_team_memberships_user_lookup
+-- Use case: Find all active/suspended teams that an organization member belongs to.
+CREATE INDEX idx_team_memberships_user_lookup
     ON organization_team_memberships (organization_id, membership_id)
     INCLUDE (team_id, role)
-    WHERE deleted_at IS NULL;
+    WHERE status IN ('active', 'suspended');
 
--- Fast lookup: "Find all members of a specific team"
--- INCLUDE stores membership_id and role, making the query fully index-covered
-CREATE INDEX idx_organization_team_memberships_team_lookup
-    ON organization_team_memberships (organization_id, team_id)
+-- Use case: Find all active/suspended members of a specific team.
+CREATE INDEX idx_team_memberships_team_lookup
+    ON organization_team_memberships (team_id)
     INCLUDE (membership_id, role)
-    WHERE deleted_at IS NULL;
+    WHERE status IN ('active', 'suspended');
 
 CREATE TRIGGER trg_organization_team_memberships_updated_at
     BEFORE UPDATE ON organization_team_memberships
@@ -176,26 +172,34 @@ CREATE TABLE organization_invitations (
     email varchar(320) NOT NULL,
     role varchar(30) NOT NULL DEFAULT 'member',
     status varchar(30) NOT NULL DEFAULT 'pending'
-        CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
-    invited_by uuid NOT NULL REFERENCES organization_memberships(id),
-    token_hash varchar(255) UNIQUE NOT NULL,  -- Store hash, not raw token for security
-    expires_at timestamptz NOT NULL,           -- Tokens expire after N days
-    accepted_by uuid,
-    accepted_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now()
+        CHECK (status IN ('pending', 'accepted', 'declined', 'revoked', 'expired')),
+    invited_by_mem_id uuid NOT NULL REFERENCES organization_memberships(id),
+    token_hash varchar(255) UNIQUE NOT NULL,
+    expires_at timestamptz NOT NULL,
+    responded_at timestamptz,
+    response varchar(30) CHECK (response IN ('accept', 'decline')),
+    revoked_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now(),
+
+    -- Audit fields (who performed actions - stored in audit log, but useful here for quick access)
+    responded_by_user_id uuid,  -- References external users table
+    revoked_by_mem_id uuid REFERENCES organization_memberships(id)
 );
 
 COMMENT ON TABLE organization_invitations IS 'Tracks pending invitations to join an organization';
 COMMENT ON COLUMN organization_invitations.token_hash IS 'SHA256 hash of the invitation token. Never store raw tokens.';
 COMMENT ON COLUMN organization_invitations.expires_at IS 'Invitations are invalid after this timestamp (typically 7 days)';
+COMMENT ON COLUMN organization_invitations.status IS 'pending=waiting, accepted=user joined, declined=user refused, revoked=admin cancelled, expired=auto after expires_at';
 
--- Find all pending invites for an organization (admin UI)
-CREATE INDEX idx_organization_invitations_organization_id
-    ON organization_invitations (organization_id);
-
--- Find all pending invites for a specific email (during signup/accept flow)
-CREATE INDEX idx_organization_invitations_email
-    ON organization_invitations (email);
+-- Use case: List invitations for an organization in member-management screens.
+CREATE INDEX idx_invitations_organization_id ON organization_invitations (organization_id);
+-- Use case: Find invitations sent to an email address during signup or invite acceptance.
+CREATE INDEX idx_invitations_email ON organization_invitations (email);
+-- Use case: Resolve an invitation by its token hash without scanning invitation records.
+CREATE INDEX idx_invitations_token_hash ON organization_invitations (token_hash);
+-- Use case: Find pending invitations due to expire or be marked expired.
+CREATE INDEX idx_invitations_status_expires ON organization_invitations (status, expires_at)
+    WHERE status = 'pending';
 
 -- =====================================================
 -- Organization Audit Logs (compliance & debugging)
@@ -203,41 +207,33 @@ CREATE INDEX idx_organization_invitations_email
 CREATE TABLE organization_audit_logs (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    actor_user_id uuid,  -- NULL for system actions (e.g., automated cleanup)
+    actor_mem_id uuid REFERENCES organization_memberships(id),  -- NULL for system actions
     action varchar(100) NOT NULL,
     target_type varchar(50),
     target_id uuid,
+    old_value jsonb,
+    new_value jsonb,
     metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+    ip_address inet,
+    user_agent text,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE organization_audit_logs IS 'Immutable audit trail for security, compliance, and debugging';
-COMMENT ON COLUMN organization_audit_logs.action IS 'Verb like "member_added", "role_changed", "settings_updated"';
-COMMENT ON COLUMN organization_audit_logs.target_type IS 'Entity type: "user", "team", "membership", "organization"';
-COMMENT ON COLUMN organization_audit_logs.metadata IS 'Additional context like {old_role: "member", new_role: "admin"}';
+COMMENT ON COLUMN organization_audit_logs.actor_mem_id IS 'Membership ID of who performed action. NULL = system action (cleanup, migration)';
+COMMENT ON COLUMN organization_audit_logs.action IS 'Verb like "member.added", "role.changed", "team.archived"';
+COMMENT ON COLUMN organization_audit_logs.target_type IS 'Entity type: "organization", "membership", "team", "invitation"';
+COMMENT ON COLUMN organization_audit_logs.old_value IS 'Previous state (for updates/changes)';
+COMMENT ON COLUMN organization_audit_logs.new_value IS 'New state (for updates/changes)';
+COMMENT ON COLUMN organization_audit_logs.metadata IS 'Additional context like {reason: "violation", source: "admin_api"}';
 
--- Most common query pattern: "Show recent activity for an organization"
--- This composite index covers both org filtering and time ordering
-CREATE INDEX idx_organization_audit_logs_org_time
-    ON organization_audit_logs (organization_id, created_at DESC);
-
--- We drop the individual indexes since this composite index serves both purposes
-DROP INDEX IF EXISTS idx_organization_audit_logs_organization_id;
-DROP INDEX IF EXISTS idx_organization_audit_logs_created_at;
-
--- =====================================================
--- Optional: Additional Useful Indexes
--- =====================================================
-
--- For "find all actions performed by a specific user" (investigations)
-CREATE INDEX idx_organization_audit_logs_actor
-    ON organization_audit_logs (actor_user_id, created_at DESC)
-    WHERE actor_user_id IS NOT NULL;
-
--- For "show all changes to a specific entity" (e.g., document history)
-CREATE INDEX idx_organization_audit_logs_target
-    ON organization_audit_logs (target_type, target_id, created_at DESC)
-    WHERE target_id IS NOT NULL;
-
--- For JSONB queries inside metadata (if you frequently search inside it)
--- CREATE INDEX idx_organization_audit_logs_metadata ON organization_audit_logs USING gin (metadata);
+-- Use case: Read an organization's audit timeline in reverse chronological order.
+CREATE INDEX idx_audit_org_time ON organization_audit_logs (organization_id, created_at DESC);
+-- Use case: Investigate all audit events performed by a specific organization member.
+CREATE INDEX idx_audit_actor ON organization_audit_logs (actor_mem_id, created_at DESC) WHERE actor_mem_id IS NOT NULL;
+-- Use case: Read the audit history for a specific target entity.
+CREATE INDEX idx_audit_target ON organization_audit_logs (target_type, target_id, created_at DESC) WHERE target_id IS NOT NULL;
+-- Use case: Filter an organization's audit timeline by action type.
+CREATE INDEX idx_audit_action ON organization_audit_logs (organization_id, action, created_at DESC);
+-- Use case: Query recent audit events globally for monitoring and investigations.
+CREATE INDEX idx_audit_created_at ON organization_audit_logs (created_at DESC);

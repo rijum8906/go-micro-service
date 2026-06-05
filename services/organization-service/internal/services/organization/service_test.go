@@ -2,93 +2,82 @@ package organization_test
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/dto"
+	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/testutils"
-	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/organization_service/models/v1"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
-	"github.com/rijum8906/relay/packages/pb/user_service/mocks"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
+	servicetestutils "github.com/rijum8906/relay/services/organization-service/internal/service_test_utils"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/organization"
+	"go.uber.org/zap"
 	grpcmetadata "google.golang.org/grpc/metadata"
 )
 
-var mockUserServiceClient = &mocks.MockUserServiceClient{}
+// NOTE: do not perform any validation test here, as it has already been tested in validation_test.go
 
-func Test_CreateOrganization_Failure_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
-	q := db.New(pool)
-	service := organization.New(q, mockUserServiceClient)
+var (
+	fgaClient    *coreopenfga.Client
+	storeManager coreopenfga.StoreManager
+)
+
+func TestMain(m *testing.M) {
+	// AppError logs internal and third-party errors from Error(). Tests need a
+	// logger before setup or assertion errors can be formatted safely.
+	apperror.SetConfig(&apperror.Config{
+		Logger: zap.NewNop(),
+		AppEnv: "test",
+		Debug:  true,
+	})
+
+	f, err := coreopenfga.NewClient("http://localhost:9000")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create OpenFGA client:", err)
+		os.Exit(1)
+	}
+	fgaClient = f
 
 	ctx := context.Background()
-	testCases := []struct {
-		name    string
-		req     *organizationv1.CreateOrganizationRequest
-		errCode apperror.ErrorCode
-	}{
-		{
-			name: "invalid slug with a whitespace",
-			req: &organizationv1.CreateOrganizationRequest{
-				Name:        testutils.GenerateRandomString(5),
-				Description: testutils.GenerateRandomString(20),
-				Slug:        "org v",
-			},
-			errCode: apperror.CodeValidation,
-		},
-		{
-			name: "invalid slug with a special character",
-			req: &organizationv1.CreateOrganizationRequest{
-				Name:        testutils.GenerateRandomString(5),
-				Description: testutils.GenerateRandomString(20),
-				Slug:        "org@",
-			},
-			errCode: apperror.CodeValidation,
-		},
+	sm := coreopenfga.NewStoreManager(f.Client)
+	if _, err = sm.Create(ctx, testutils.GenerateRandomString(10)); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to create store:", err)
+		os.Exit(1)
 	}
+	storeManager = sm
+	f.StoreID = sm.GetStoreID()
 
-	createdBy := uuid.New()
-
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
-		Id: createdBy.String(),
-	}).Return(&userv1.CheckExistsResponse{
-		Exists: false,
-	}, nil)
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			_, err := service.CreateOrganization(ctx, &organizationv1.CreateOrganizationRequest{
-				Name:        testCase.req.Name,
-				Description: testCase.req.Description,
-				Slug:        testCase.req.Slug,
-				CreatedBy:   createdBy.String(),
-			})
-			if err == nil {
-				t.Fatal("expected error, got nil")
-			} else {
-				if !strings.Contains(err.Error(), string(testCase.errCode)) {
-					t.Errorf("expected error code %s, got %s", testCase.errCode, err.Error())
-				}
-			}
-		})
+	mm := coreopenfga.NewModelManager(f.Client, sm)
+	if err = mm.Write(ctx, "organization"); err != nil {
+		fmt.Fprintln(os.Stderr, "failed to write model:", err)
+		os.Exit(1)
 	}
+	f.AuthorizationModelID = mm.GetAuthorizationModelID()
 
-	t.Cleanup(func() {
-		pool.Close()
-	})
+	code := m.Run()
+
+	// Ignore cleanup errors so a failed store delete does not mask a real test
+	// failure.
+	_ = storeManager.Delete(ctx)
+	os.Exit(code)
 }
 
 func Test_CreateOrganization_Success_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
-	q := db.New(pool)
-	service := organization.New(q, mockUserServiceClient)
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
 
 	ctx := context.Background()
 
@@ -101,7 +90,7 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 		CreatedBy:   createdBy.String(),
 	}
 
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: createdBy.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
@@ -132,6 +121,19 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 		t.Errorf("expected the role to be owner but got %s", orgDups[0].Status)
 	}
 
+	// Check the relation in fga client
+	check, appErr := tuppleManager.Check(ctx, client.ClientCheckRequest{
+		User:     "user:" + createdBy.String(),
+		Relation: permissions.RoleOwner,
+		Object:   "organization:" + org.Id,
+	})
+	if appErr != nil {
+		t.Fatal(appErr)
+	}
+	if !*check.Allowed {
+		t.Errorf("expected the relation to be allowed but got %t", *check.Allowed)
+	}
+
 	t.Cleanup(func() {
 		orgID, _ := uuid.Parse(org.Id)
 		q.DeleteOrganizationHard(ctx, orgID)
@@ -141,14 +143,13 @@ func Test_CreateOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Success_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
-	q := db.New(pool)
-	service := organization.New(q, mockUserServiceClient)
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-4",
+		Slug: strings.ToLower(testutils.GenerateRandomString(5)),
 	})
 
 	fetchedOrg, err := service.GetOrganization(ctx, &corev1.IDRequest{
@@ -157,7 +158,7 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !matchOrganization(fetchedOrg, org) {
+	if !servicetestutils.MatchOrganization(fetchedOrg, org) {
 		t.Errorf("expected organization to be %v but got %v", org, fetchedOrg)
 	}
 
@@ -167,12 +168,12 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !matchOrganization(fetchedOrg, org) {
+	if !servicetestutils.MatchOrganization(fetchedOrg, org) {
 		t.Errorf("expected organization to be %v but got %v", org, fetchedOrg)
 	}
 
 	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
-		dto.MetaUserIDKey, org.CreatedBy,
+		dto.MetaUserIDKey, org.CreatedByUserId,
 	))
 	fetchedOrgs, err := service.GetOrganizationsListByCreatedBy(ctx, &corev1.EmptyRequest{})
 	if err != nil {
@@ -194,14 +195,13 @@ func Test_GetOrganization_Success_Integration(t *testing.T) {
 }
 
 func Test_GetOrganization_Failure_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
-	q := db.New(pool)
-	service := organization.New(q, mockUserServiceClient)
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
 	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
-		Slug: "org-5",
+		Slug: strings.ToLower(testutils.GenerateRandomString(5)),
 	})
 	id, _ := uuid.Parse(org.Id)
 	err := q.DeleteOrganizationHard(ctx, id)
@@ -223,107 +223,326 @@ func Test_GetOrganization_Failure_Integration(t *testing.T) {
 	})
 }
 
-func Test_ChangeOrganizationOwnership_Failure_Unit(t *testing.T) {
-	service := organization.New(nil, nil)
-	ctx := context.Background()
-
-	testCases := []struct {
-		name string
-		*organizationv1.ChangeOrganizationOwnershipRequest
-	}{
-		{
-			name: "Blank ids and token scope",
-		},
-		{
-			name: "Blank ids",
-			ChangeOrganizationOwnershipRequest: &organizationv1.ChangeOrganizationOwnershipRequest{
-				TokenScope: string(token.TokenScopeChangeOrganizationOwner),
-			},
-		},
-		{
-			name: "Blank token scope",
-			ChangeOrganizationOwnershipRequest: &organizationv1.ChangeOrganizationOwnershipRequest{
-				OrganizationId: uuid.New().String(),
-				NewOwnerId:     uuid.New().String(),
-			},
-		},
-		{
-			name: "Invalid token scope",
-			ChangeOrganizationOwnershipRequest: &organizationv1.ChangeOrganizationOwnershipRequest{
-				OrganizationId: uuid.New().String(),
-				NewOwnerId:     uuid.New().String(),
-				TokenScope:     "invalid",
-			},
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			_, err := service.ChangeOrganizationOwnership(ctx, testCase.ChangeOrganizationOwnershipRequest)
-			if err == nil {
-				t.Errorf("expected error, got nil")
-			}
-			if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
-				t.Errorf("expected error code validation, got something else")
-			}
-		})
-	}
-}
-
 func Test_ChangeOrganizationOwnership_Success_Integration(t *testing.T) {
-	pool := testutils.MustConnectDB(testutils.WithDBName(testutils.GetTestDBName("organization-service")))
-	q := db.New(pool)
-	service := organization.New(q, mockUserServiceClient)
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
 
 	ctx := context.Background()
 
 	createdBy := uuid.New()
 	newOwner := uuid.New()
 
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	// Update Context With UserInfo
+	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
+		dto.MetaUserIDKey, createdBy.String(),
+	))
+
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: newOwner.String(),
 	}).Return(&userv1.CheckExistsResponse{
 		Exists: true,
 	}, nil)
 
-	org, err := q.CreateOrganization(ctx, db.CreateOrganizationParams{
+	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{
 		Name:        testutils.GenerateRandomString(5),
-		Description: pgtype.Text{String: testutils.GenerateRandomString(20), Valid: true},
-		Slug:        "org-6",
-		CreatedBy:   createdBy,
+		Description: testutils.GenerateRandomString(20),
+		Slug:        strings.ToLower(testutils.GenerateRandomString(5)),
+		CreatedBy:   createdBy.String(),
 	})
+
+	orgID, err := uuid.Parse(org.Id)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	_, err = service.ChangeOrganizationOwnership(ctx, &organizationv1.ChangeOrganizationOwnershipRequest{
-		OrganizationId: org.ID.String(),
+		OrganizationId: org.Id,
 		NewOwnerId:     newOwner.String(),
-		TokenScope:     string(token.TokenScopeChangeOrganizationOwner),
+		TokenScope:     constants.TokenScopeChangeOrganizationOwner,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	fetchedOrg, err := q.GetOrganization(ctx, org.ID)
+	fetchedOrg, err := q.GetOrganization(ctx, orgID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if fetchedOrg.CreatedBy.String() != newOwner.String() {
-		t.Errorf("expected organization owner to be %s but got %s", newOwner.String(), fetchedOrg.CreatedBy.String())
+	if fetchedOrg.CreatedByUserID.String() != newOwner.String() {
+		t.Errorf("expected organization owner to be %s but got %s", newOwner.String(), fetchedOrg.CreatedByUserID.String())
+	}
+
+	// Try to again change the ownership
+
+	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
+		dto.MetaUserIDKey, createdBy.String(),
+	))
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
+		Id: newOwner.String(),
+	}).Return(&userv1.CheckExistsResponse{
+		Exists: true,
+	}, nil)
+
+	_, err = service.ChangeOrganizationOwnership(ctx, &organizationv1.ChangeOrganizationOwnershipRequest{
+		OrganizationId: org.Id,
+		NewOwnerId:     newOwner.String(),
+		TokenScope:     constants.TokenScopeChangeOrganizationOwner,
+	})
+	if err == nil {
+		t.Fatal("expected error, got nil")
 	}
 
 	t.Cleanup(func() {
-		q.DeleteOrganizationHard(context.Background(), org.ID)
+		q.DeleteOrganizationHard(context.Background(), orgID)
+		pool.Close()
+	})
+}
+
+func Test_DeleteOrganization_Success_Integration(t *testing.T) {
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+
+	ctx := context.Background()
+
+	// Create organization
+	org := mustCreateOrg(ctx, service, &organizationv1.CreateOrganizationRequest{})
+	id, err := uuid.Parse(org.Id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Update Context With UserInfo
+	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
+		dto.MetaUserIDKey, org.CreatedByUserId,
+	))
+
+	// Delete organization
+	res, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+		Id:         org.Id,
+		TokenScope: constants.TokenScopeDeleteOrganization,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.Success {
+		t.Errorf("expected success to be true but got false")
+	}
+
+	// Fetch Deleted org
+	deletedOrg, err := q.GetDeletedOrganization(ctx, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deletedOrg.DeletedAt.Time.After(time.Now()) {
+		t.Errorf("deleted_at should be in the past (already deleted), but got future time: %v", deletedOrg.DeletedAt.Time)
+	}
+
+	check, appErr := tuppleManager.Check(ctx, client.ClientCheckRequest{
+		User:     "user:" + org.CreatedByUserId,
+		Relation: permissions.RoleOwner,
+		Object:   "organization:" + org.Id,
+	})
+	if appErr != nil {
+		t.Fatal(appErr)
+	}
+	if *check.Allowed {
+		t.Errorf("expected deleted organization owner tuple to be removed")
+	}
+
+	// Cleanup
+	t.Cleanup(func() {
+		q.DeleteOrganizationHard(context.Background(), id)
+		pool.Close()
+	})
+}
+
+func Test_DeleteOrganization_Failure_Integration(t *testing.T) {
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+
+	ctx := context.Background()
+
+	// Create Organization
+	org := mustCreateOrg(ctx, service, nil)
+
+	t.Run("Without proper context", func(t *testing.T) {
+		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+			Id:         org.Id,
+			TokenScope: constants.TokenScopeDeleteOrganization,
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
+			t.Errorf("expected error code validation, got something else")
+		}
+	})
+
+	t.Run("With invalid organization id", func(t *testing.T) {
+		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
+			dto.MetaUserIDKey, org.CreatedByUserId,
+		))
+
+		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+			Id:         uuid.NewString(),
+			TokenScope: constants.TokenScopeDeleteOrganization,
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeNotFound)) {
+			t.Errorf("expected error code not found, got something error %s", err.Error())
+		}
+	})
+
+	t.Run("Delete with wrong token scope", func(t *testing.T) {
+		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
+			dto.MetaUserIDKey, org.CreatedByUserId,
+		))
+
+		_, err := service.DeleteOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+			Id:         org.Id,
+			TokenScope: constants.TokenScopeChangeOrganizationOwner,
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
+			t.Errorf("expected error code validation, got something else")
+		}
+	})
+
+	t.Cleanup(func() {
+		pool.Close()
+	})
+}
+
+func Test_ArchiveOrganization_Success_integration(t *testing.T) {
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+	tuppleManager := coreopenfga.NewTupleManager(fgaClient)
+
+	ctx := context.Background()
+
+	// Create Organization
+	org := mustCreateOrg(ctx, service, nil)
+
+	// Update Context With UserInfo
+	ctx = grpcmetadata.NewIncomingContext(ctx, grpcmetadata.Pairs(
+		dto.MetaUserIDKey, org.CreatedByUserId,
+	))
+
+	// Archive
+	res, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+		Id:         org.Id,
+		TokenScope: constants.TokenScopeDeleteOrganization,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.Success {
+		t.Errorf("expected success to be true but got false")
+	}
+
+	// Fetch
+	id, _ := uuid.Parse(org.Id)
+	archivedOrg, err := q.GetOrganization(ctx, id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if archivedOrg.Status != "archived" {
+		t.Errorf("expected archived_at to be not nil but got nil")
+	}
+	if archivedOrg.ArchivedAt.Time.After(time.Now()) {
+		t.Errorf("archived_at should be in the past (already archived), but got future time: %v", archivedOrg.ArchivedAt.Time)
+	}
+
+	check, appErr := tuppleManager.Check(ctx, client.ClientCheckRequest{
+		User:     "user:" + org.CreatedByUserId,
+		Relation: permissions.RoleOwner,
+		Object:   "organization:" + org.Id,
+	})
+	if appErr != nil {
+		t.Fatal(appErr)
+	}
+	if !*check.Allowed {
+		t.Errorf("expected archived organization owner tuple to remain")
+	}
+
+	// Cleanup
+	t.Cleanup(func() {
+		q.DeleteOrganizationHard(context.Background(), id)
+		pool.Close()
+	})
+}
+
+func Test_ArchiveOrganization_Failure_Integration(t *testing.T) {
+	q, pool, _ := servicetestutils.MustCreateService()
+	service := organization.New(q, servicetestutils.MockUserServiceClient, fgaClient)
+
+	ctx := context.Background()
+
+	org := mustCreateOrg(ctx, service, nil)
+
+	t.Run("Without proper context", func(t *testing.T) {
+		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+			Id:         org.Id,
+			TokenScope: constants.TokenScopeDeleteOrganization,
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeInternal)) {
+			t.Errorf("expected error code internal, got something else")
+		}
+	})
+
+	t.Run("With invalid organization id", func(t *testing.T) {
+		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
+			dto.MetaUserIDKey, org.CreatedByUserId,
+		))
+
+		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+			Id:         uuid.NewString(),
+			TokenScope: constants.TokenScopeDeleteOrganization,
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeNotFound)) {
+			t.Errorf("expected error code not found, got something error %s", err.Error())
+		}
+	})
+
+	t.Run("Delete with wrong token scope", func(t *testing.T) {
+		ctx := grpcmetadata.NewIncomingContext(context.Background(), grpcmetadata.Pairs(
+			dto.MetaUserIDKey, org.CreatedByUserId,
+		))
+
+		_, err := service.ArchiveOrganization(ctx, &corev1.IDAndScopedTokenRequest{
+			Id:         org.Id,
+			TokenScope: constants.TokenScopeChangeOrganizationOwner,
+		})
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), string(apperror.CodeValidation)) {
+			t.Errorf("expected error code validation, got something else")
+		}
+	})
+
+	t.Cleanup(func() {
+		pool.Close()
 	})
 }
 
 func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServiceServer, req *organizationv1.CreateOrganizationRequest) *modelsv1.Organization {
 	// Normalize request with defaults
-	normalizedReq := normalizeCreateRequest(req)
+	normalizedReq := servicetestutils.NormalizeCreateRequest(req)
 
 	// Setup user existence mock
-	mockUserServiceClient.On("CheckExists", ctx, &userv1.CheckExistsRequest{
+	servicetestutils.MockUserServiceClient.On("CheckExists", ctx, &corev1.IDRequest{
 		Id: normalizedReq.CreatedBy,
 	}).Return(&userv1.CheckExistsResponse{Exists: true}, nil)
 
@@ -334,47 +553,4 @@ func mustCreateOrg(ctx context.Context, service organizationv1.OrganizationServi
 	}
 
 	return org
-}
-
-func normalizeCreateRequest(req *organizationv1.CreateOrganizationRequest) *organizationv1.CreateOrganizationRequest {
-	// Handle nil request
-	if req == nil {
-		return &organizationv1.CreateOrganizationRequest{
-			Name:        testutils.GenerateRandomString(5),
-			Description: testutils.GenerateRandomString(20),
-			Slug:        strings.ToLower(testutils.GenerateRandomString(5)),
-			CreatedBy:   uuid.New().String(),
-		}
-	}
-
-	// Create a copy to avoid modifying original
-	normalized := &organizationv1.CreateOrganizationRequest{
-		Name:        req.Name,
-		Description: req.Description,
-		Slug:        req.Slug,
-		CreatedBy:   req.CreatedBy,
-	}
-
-	// Apply defaults for empty fields
-	if normalized.Name == "" {
-		normalized.Name = testutils.GenerateRandomString(5)
-	}
-	if normalized.Description == "" {
-		normalized.Description = testutils.GenerateRandomString(20)
-	}
-	if normalized.Slug == "" {
-		normalized.Slug = strings.ToLower(testutils.GenerateRandomString(5))
-	}
-	if normalized.CreatedBy == "" {
-		normalized.CreatedBy = uuid.New().String()
-	}
-
-	return normalized
-}
-
-func matchOrganization(a, b *modelsv1.Organization) bool {
-	return a.Id == b.Id &&
-		a.Name == b.Name &&
-		a.Slug == b.Slug &&
-		a.Status == b.Status
 }

@@ -20,7 +20,8 @@ func Receive(ctx context.Context) (dto.ClientInfo, bool) {
 
 // SendClientInfo adds client info to outgoing gRPC metadata.
 func SendClientInfo(ctx context.Context, info dto.ClientInfo) context.Context {
-	return appendOutgoing(ctx,
+	return appendOutgoing(
+		ctx,
 		dto.MetaDeviceIDKey, info.DeviceID,
 		dto.MetaUserAgentKey, info.UserAgent,
 		dto.MetaClientIPKey, info.IPAddress,
@@ -28,7 +29,6 @@ func SendClientInfo(ctx context.Context, info dto.ClientInfo) context.Context {
 		dto.MetaAPIVersionKey, info.APIVersion,
 		dto.MetaSDKVersionKey, info.SDKVersion,
 		dto.MetaRequestIDKey, info.RequestID,
-		dto.MetaSessionIDKey, info.SessionID,
 		dto.MetaTraceIDKey, info.TraceID,
 		dto.MetaLocaleKey, info.Locale,
 	)
@@ -49,7 +49,6 @@ func ReceiveClientInfo(ctx context.Context) (dto.ClientInfo, bool) {
 		APIVersion: first(md, dto.MetaAPIVersionKey),
 		SDKVersion: first(md, dto.MetaSDKVersionKey),
 		RequestID:  first(md, dto.MetaRequestIDKey),
-		SessionID:  first(md, dto.MetaSessionIDKey),
 		TraceID:    first(md, dto.MetaTraceIDKey),
 		Locale:     first(md, dto.MetaLocaleKey),
 	}, true
@@ -57,9 +56,10 @@ func ReceiveClientInfo(ctx context.Context) (dto.ClientInfo, bool) {
 
 // SendUserInfo adds user identity metadata to the outgoing context.
 func SendUserInfo(ctx context.Context, info dto.UserInfo) context.Context {
-	return appendOutgoing(ctx,
+	return appendOutgoing(
+		ctx,
 		dto.MetaUserIDKey, info.UserID,
-		dto.MetaAccessTokenKey, info.AccessToken,
+		dto.MetaTokenIDKey, info.TokenID,
 		dto.MetaSessionIDKey, info.SessionID,
 	)
 }
@@ -72,16 +72,68 @@ func ReceiveUserInfo(ctx context.Context) (dto.UserInfo, bool) {
 	}
 
 	return dto.UserInfo{
-		UserID:      first(md, dto.MetaUserIDKey),
-		AccessToken: first(md, dto.MetaAccessTokenKey),
-		SessionID:   first(md, dto.MetaSessionIDKey),
+		UserID:    first(md, dto.MetaUserIDKey),
+		TokenID:   first(md, dto.MetaTokenIDKey),
+		SessionID: first(md, dto.MetaSessionIDKey),
+	}, true
+}
+
+func SendAuthTokensInfo(ctx context.Context, tokens dto.AuthTokens) context.Context {
+	return appendOutgoing(ctx,
+		dto.MetaAccessTokenKey, tokens.AccessToken,
+		dto.MetaRefreshTokenKey, tokens.RefreshToken,
+	)
+}
+
+func ReceiveAuthTokensInfo(ctx context.Context) (dto.AuthTokens, bool) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return dto.AuthTokens{}, false
+	}
+
+	return dto.AuthTokens{
+		AccessToken:  first(md, dto.MetaAccessTokenKey),
+		RefreshToken: first(md, dto.MetaRefreshTokenKey),
+	}, true
+}
+
+func SendScopedTokenInfo(ctx context.Context, info dto.ScopedToken) context.Context {
+	return appendOutgoing(ctx,
+		dto.MetaScopedTokenKey, info.String,
+		dto.MetaScopedTokenIDKey, info.ID,
+		dto.MetaScopedTokenScopeKey, info.Scope,
+		dto.MetaScopedTokenSubjectKey, info.Subject,
+	)
+}
+
+func ReceiveScopedTokenInfo(ctx context.Context) (dto.ScopedToken, bool) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return dto.ScopedToken{}, false
+	}
+
+	return dto.ScopedToken{
+		String:  first(md, dto.MetaScopedTokenKey),
+		ID:      first(md, dto.MetaScopedTokenIDKey),
+		Scope:   first(md, dto.MetaScopedTokenScopeKey),
+		Subject: first(md, dto.MetaScopedTokenSubjectKey),
 	}, true
 }
 
 func appendOutgoing(ctx context.Context, kv ...string) context.Context {
 	md := filterEmptyPairs(kv...)
 	if existing, ok := metadata.FromOutgoingContext(ctx); ok {
-		md = metadata.Join(existing, md)
+		merged := metadata.MD{}
+		for key, values := range existing {
+			if len(values) == 0 {
+				continue
+			}
+			merged[key] = append([]string(nil), values...)
+		}
+		for key, values := range md {
+			merged.Set(key, values...)
+		}
+		md = merged
 	}
 
 	return metadata.NewOutgoingContext(ctx, md)

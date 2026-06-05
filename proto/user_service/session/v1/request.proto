@@ -2,13 +2,6 @@ syntax = "proto3";
 
 package user_service.session.v1;
 
-import "core/v1/common.proto";
-
-message GetSessionsRequest {
-  string user_id = 1;
-  core.v1.PaginationRequest page = 2;
-}
-
 message RevokeSessionRequest {
   string scoped_token = 1;
   string token_to_revoke = 2;

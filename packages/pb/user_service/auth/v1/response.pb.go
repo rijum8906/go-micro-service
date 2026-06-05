@@ -22,11 +22,64 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type AuthStatus int32
+
+const (
+	AuthStatus_AUTH_STATUS_UNSPECIFIED  AuthStatus = 0
+	AuthStatus_AUTH_STATUS_SUCCESS      AuthStatus = 1
+	AuthStatus_AUTH_STATUS_FAILED       AuthStatus = 2
+	AuthStatus_AUTH_STATUS_2FA_REQUIRED AuthStatus = 3
+)
+
+// Enum value maps for AuthStatus.
+var (
+	AuthStatus_name = map[int32]string{
+		0: "AUTH_STATUS_UNSPECIFIED",
+		1: "AUTH_STATUS_SUCCESS",
+		2: "AUTH_STATUS_FAILED",
+		3: "AUTH_STATUS_2FA_REQUIRED",
+	}
+	AuthStatus_value = map[string]int32{
+		"AUTH_STATUS_UNSPECIFIED":  0,
+		"AUTH_STATUS_SUCCESS":      1,
+		"AUTH_STATUS_FAILED":       2,
+		"AUTH_STATUS_2FA_REQUIRED": 3,
+	}
+)
+
+func (x AuthStatus) Enum() *AuthStatus {
+	p := new(AuthStatus)
+	*p = x
+	return p
+}
+
+func (x AuthStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AuthStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_user_service_auth_v1_response_proto_enumTypes[0].Descriptor()
+}
+
+func (AuthStatus) Type() protoreflect.EnumType {
+	return &file_user_service_auth_v1_response_proto_enumTypes[0]
+}
+
+func (x AuthStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AuthStatus.Descriptor instead.
+func (AuthStatus) EnumDescriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_response_proto_rawDescGZIP(), []int{0}
+}
+
 type AuthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	User          *v1.User               `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	Profile       *v1.Profile            `protobuf:"bytes,2,opt,name=profile,proto3" json:"profile,omitempty"`
 	Tokens        *v1.AuthToken          `protobuf:"bytes,3,opt,name=tokens,proto3" json:"tokens,omitempty"`
+	Status        AuthStatus             `protobuf:"varint,4,opt,name=status,proto3,enum=user_service.auth.v1.AuthStatus" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -82,9 +135,17 @@ func (x *AuthResponse) GetTokens() *v1.AuthToken {
 	return nil
 }
 
+func (x *AuthResponse) GetStatus() AuthStatus {
+	if x != nil {
+		return x.Status
+	}
+	return AuthStatus_AUTH_STATUS_UNSPECIFIED
+}
+
 type RefreshTokenResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   *v1.Token              `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -126,17 +187,124 @@ func (x *RefreshTokenResponse) GetAccessToken() *v1.Token {
 	return nil
 }
 
+func (x *RefreshTokenResponse) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+type EnableTwoFactorResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TotpUri       string                 `protobuf:"bytes,1,opt,name=totp_uri,json=totpUri,proto3" json:"totp_uri,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnableTwoFactorResponse) Reset() {
+	*x = EnableTwoFactorResponse{}
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnableTwoFactorResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnableTwoFactorResponse) ProtoMessage() {}
+
+func (x *EnableTwoFactorResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnableTwoFactorResponse.ProtoReflect.Descriptor instead.
+func (*EnableTwoFactorResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_response_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *EnableTwoFactorResponse) GetTotpUri() string {
+	if x != nil {
+		return x.TotpUri
+	}
+	return ""
+}
+
+type GenerateScopedTokenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ScopedToken   string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateScopedTokenResponse) Reset() {
+	*x = GenerateScopedTokenResponse{}
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateScopedTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateScopedTokenResponse) ProtoMessage() {}
+
+func (x *GenerateScopedTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_service_auth_v1_response_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateScopedTokenResponse.ProtoReflect.Descriptor instead.
+func (*GenerateScopedTokenResponse) Descriptor() ([]byte, []int) {
+	return file_user_service_auth_v1_response_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GenerateScopedTokenResponse) GetScopedToken() string {
+	if x != nil {
+		return x.ScopedToken
+	}
+	return ""
+}
+
 var File_user_service_auth_v1_response_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_response_proto_rawDesc = "" +
 	"\n" +
-	"#user_service/auth/v1/response.proto\x12\x14user_service.auth.v1\x1a\"user_service/models/v1/model.proto\"\xb6\x01\n" +
+	"#user_service/auth/v1/response.proto\x12\x14user_service.auth.v1\x1a\"user_service/models/v1/model.proto\"\xf0\x01\n" +
 	"\fAuthResponse\x120\n" +
 	"\x04user\x18\x01 \x01(\v2\x1c.user_service.models.v1.UserR\x04user\x129\n" +
 	"\aprofile\x18\x02 \x01(\v2\x1f.user_service.models.v1.ProfileR\aprofile\x129\n" +
-	"\x06tokens\x18\x03 \x01(\v2!.user_service.models.v1.AuthTokenR\x06tokens\"X\n" +
+	"\x06tokens\x18\x03 \x01(\v2!.user_service.models.v1.AuthTokenR\x06tokens\x128\n" +
+	"\x06status\x18\x04 \x01(\x0e2 .user_service.auth.v1.AuthStatusR\x06status\"}\n" +
 	"\x14RefreshTokenResponse\x12@\n" +
-	"\faccess_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vaccessTokenB\xdb\x01\n" +
+	"\faccess_token\x18\x01 \x01(\v2\x1d.user_service.models.v1.TokenR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"4\n" +
+	"\x17EnableTwoFactorResponse\x12\x19\n" +
+	"\btotp_uri\x18\x01 \x01(\tR\atotpUri\"@\n" +
+	"\x1bGenerateScopedTokenResponse\x12!\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken*x\n" +
+	"\n" +
+	"AuthStatus\x12\x1b\n" +
+	"\x17AUTH_STATUS_UNSPECIFIED\x10\x00\x12\x17\n" +
+	"\x13AUTH_STATUS_SUCCESS\x10\x01\x12\x16\n" +
+	"\x12AUTH_STATUS_FAILED\x10\x02\x12\x1c\n" +
+	"\x18AUTH_STATUS_2FA_REQUIRED\x10\x03B\xdb\x01\n" +
 	"\x18com.user_service.auth.v1B\rResponseProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/auth/v1;authv1\xa2\x02\x03UAX\xaa\x02\x13UserService.Auth.V1\xca\x02\x13UserService\\Auth\\V1\xe2\x02\x1fUserService\\Auth\\V1\\GPBMetadata\xea\x02\x15UserService::Auth::V1b\x06proto3"
 
 var (
@@ -151,25 +319,30 @@ func file_user_service_auth_v1_response_proto_rawDescGZIP() []byte {
 	return file_user_service_auth_v1_response_proto_rawDescData
 }
 
-var file_user_service_auth_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_user_service_auth_v1_response_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_user_service_auth_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_user_service_auth_v1_response_proto_goTypes = []any{
-	(*AuthResponse)(nil),         // 0: user_service.auth.v1.AuthResponse
-	(*RefreshTokenResponse)(nil), // 1: user_service.auth.v1.RefreshTokenResponse
-	(*v1.User)(nil),              // 2: user_service.models.v1.User
-	(*v1.Profile)(nil),           // 3: user_service.models.v1.Profile
-	(*v1.AuthToken)(nil),         // 4: user_service.models.v1.AuthToken
-	(*v1.Token)(nil),             // 5: user_service.models.v1.Token
+	(AuthStatus)(0),                     // 0: user_service.auth.v1.AuthStatus
+	(*AuthResponse)(nil),                // 1: user_service.auth.v1.AuthResponse
+	(*RefreshTokenResponse)(nil),        // 2: user_service.auth.v1.RefreshTokenResponse
+	(*EnableTwoFactorResponse)(nil),     // 3: user_service.auth.v1.EnableTwoFactorResponse
+	(*GenerateScopedTokenResponse)(nil), // 4: user_service.auth.v1.GenerateScopedTokenResponse
+	(*v1.User)(nil),                     // 5: user_service.models.v1.User
+	(*v1.Profile)(nil),                  // 6: user_service.models.v1.Profile
+	(*v1.AuthToken)(nil),                // 7: user_service.models.v1.AuthToken
+	(*v1.Token)(nil),                    // 8: user_service.models.v1.Token
 }
 var file_user_service_auth_v1_response_proto_depIdxs = []int32{
-	2, // 0: user_service.auth.v1.AuthResponse.user:type_name -> user_service.models.v1.User
-	3, // 1: user_service.auth.v1.AuthResponse.profile:type_name -> user_service.models.v1.Profile
-	4, // 2: user_service.auth.v1.AuthResponse.tokens:type_name -> user_service.models.v1.AuthToken
-	5, // 3: user_service.auth.v1.RefreshTokenResponse.access_token:type_name -> user_service.models.v1.Token
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	5, // 0: user_service.auth.v1.AuthResponse.user:type_name -> user_service.models.v1.User
+	6, // 1: user_service.auth.v1.AuthResponse.profile:type_name -> user_service.models.v1.Profile
+	7, // 2: user_service.auth.v1.AuthResponse.tokens:type_name -> user_service.models.v1.AuthToken
+	0, // 3: user_service.auth.v1.AuthResponse.status:type_name -> user_service.auth.v1.AuthStatus
+	8, // 4: user_service.auth.v1.RefreshTokenResponse.access_token:type_name -> user_service.models.v1.Token
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_user_service_auth_v1_response_proto_init() }
@@ -182,13 +355,14 @@ func file_user_service_auth_v1_response_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_service_auth_v1_response_proto_rawDesc), len(file_user_service_auth_v1_response_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   2,
+			NumEnums:      1,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_user_service_auth_v1_response_proto_goTypes,
 		DependencyIndexes: file_user_service_auth_v1_response_proto_depIdxs,
+		EnumInfos:         file_user_service_auth_v1_response_proto_enumTypes,
 		MessageInfos:      file_user_service_auth_v1_response_proto_msgTypes,
 	}.Build()
 	File_user_service_auth_v1_response_proto = out.File

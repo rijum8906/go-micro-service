@@ -23,20 +23,20 @@ const (
 )
 
 type Organization struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
-	Slug          string                 `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
-	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
-	LogoUrl       string                 `protobuf:"bytes,6,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"`
-	CreatedBy     string                 `protobuf:"bytes,7,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	DeletedBy     string                 `protobuf:"bytes,11,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name            string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Status          string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Slug            string                 `protobuf:"bytes,4,opt,name=slug,proto3" json:"slug,omitempty"`
+	Description     string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	LogoUrl         string                 `protobuf:"bytes,6,opt,name=logo_url,json=logoUrl,proto3" json:"logo_url,omitempty"`
+	CreatedByUserId string                 `protobuf:"bytes,7,opt,name=created_by_user_id,json=createdByUserId,proto3" json:"created_by_user_id,omitempty"`
+	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt       *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	ArchivedAt      *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=archived_at,json=archivedAt,proto3" json:"archived_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Organization) Reset() {
@@ -111,9 +111,9 @@ func (x *Organization) GetLogoUrl() string {
 	return ""
 }
 
-func (x *Organization) GetCreatedBy() string {
+func (x *Organization) GetCreatedByUserId() string {
 	if x != nil {
-		return x.CreatedBy
+		return x.CreatedByUserId
 	}
 	return ""
 }
@@ -139,11 +139,11 @@ func (x *Organization) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Organization) GetDeletedBy() string {
+func (x *Organization) GetArchivedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.DeletedBy
+		return x.ArchivedAt
 	}
-	return ""
+	return nil
 }
 
 type OrganizationMembership struct {
@@ -153,13 +153,9 @@ type OrganizationMembership struct {
 	UserId         string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Role           string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
 	Status         string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	InvitedBy      string                 `protobuf:"bytes,6,opt,name=invited_by,json=invitedBy,proto3" json:"invited_by,omitempty"`
-	JoinedAt       *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
-	LeftAt         *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=left_at,json=leftAt,proto3" json:"left_at,omitempty"`
-	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt      *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	DeletedBy      string                 `protobuf:"bytes,12,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
+	JoinedAt       *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -229,23 +225,9 @@ func (x *OrganizationMembership) GetStatus() string {
 	return ""
 }
 
-func (x *OrganizationMembership) GetInvitedBy() string {
-	if x != nil {
-		return x.InvitedBy
-	}
-	return ""
-}
-
 func (x *OrganizationMembership) GetJoinedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.JoinedAt
-	}
-	return nil
-}
-
-func (x *OrganizationMembership) GetLeftAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.LeftAt
 	}
 	return nil
 }
@@ -264,31 +246,17 @@ func (x *OrganizationMembership) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *OrganizationMembership) GetDeletedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.DeletedAt
-	}
-	return nil
-}
-
-func (x *OrganizationMembership) GetDeletedBy() string {
-	if x != nil {
-		return x.DeletedBy
-	}
-	return ""
-}
-
 type OrganizationTeam struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	Name           string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedBy      string                 `protobuf:"bytes,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedByMemId string                 `protobuf:"bytes,5,opt,name=created_by_mem_id,json=createdByMemId,proto3" json:"created_by_mem_id,omitempty"`
 	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeletedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	DeletedBy      string                 `protobuf:"bytes,9,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
+	ArchivedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=archived_at,json=archivedAt,proto3" json:"archived_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -351,9 +319,9 @@ func (x *OrganizationTeam) GetDescription() string {
 	return ""
 }
 
-func (x *OrganizationTeam) GetCreatedBy() string {
+func (x *OrganizationTeam) GetCreatedByMemId() string {
 	if x != nil {
-		return x.CreatedBy
+		return x.CreatedByMemId
 	}
 	return ""
 }
@@ -379,24 +347,24 @@ func (x *OrganizationTeam) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *OrganizationTeam) GetDeletedBy() string {
+func (x *OrganizationTeam) GetArchivedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.DeletedBy
+		return x.ArchivedAt
 	}
-	return ""
+	return nil
 }
 
 type OrganizationTeamMembership struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	OrganizationTeamId string                 `protobuf:"bytes,2,opt,name=organization_team_id,json=organizationTeamId,proto3" json:"organization_team_id,omitempty"`
-	TesmId             string                 `protobuf:"bytes,3,opt,name=tesm_id,json=tesmId,proto3" json:"tesm_id,omitempty"`
+	TeamId             string                 `protobuf:"bytes,3,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
 	MembershipId       string                 `protobuf:"bytes,4,opt,name=membership_id,json=membershipId,proto3" json:"membership_id,omitempty"`
 	Role               string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
-	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt          *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	DeletedBy          string                 `protobuf:"bytes,9,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
+	Status             string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	JoinedAt           *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
+	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -445,9 +413,9 @@ func (x *OrganizationTeamMembership) GetOrganizationTeamId() string {
 	return ""
 }
 
-func (x *OrganizationTeamMembership) GetTesmId() string {
+func (x *OrganizationTeamMembership) GetTeamId() string {
 	if x != nil {
-		return x.TesmId
+		return x.TeamId
 	}
 	return ""
 }
@@ -466,6 +434,20 @@ func (x *OrganizationTeamMembership) GetRole() string {
 	return ""
 }
 
+func (x *OrganizationTeamMembership) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *OrganizationTeamMembership) GetJoinedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.JoinedAt
+	}
+	return nil
+}
+
 func (x *OrganizationTeamMembership) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -480,91 +462,65 @@ func (x *OrganizationTeamMembership) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *OrganizationTeamMembership) GetDeletedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.DeletedAt
-	}
-	return nil
-}
-
-func (x *OrganizationTeamMembership) GetDeletedBy() string {
-	if x != nil {
-		return x.DeletedBy
-	}
-	return ""
-}
-
 var File_organization_service_models_v1_model_proto protoreflect.FileDescriptor
 
 const file_organization_service_models_v1_model_proto_rawDesc = "" +
 	"\n" +
-	"*organization_service/models/v1/model.proto\x12\x1eorganization_service.models.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8a\x03\n" +
+	"*organization_service/models/v1/model.proto\x12\x1eorganization_service.models.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb6\x03\n" +
 	"\fOrganization\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
 	"\x06status\x18\x03 \x01(\tR\x06status\x12\x12\n" +
 	"\x04slug\x18\x04 \x01(\tR\x04slug\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x19\n" +
-	"\blogo_url\x18\x06 \x01(\tR\alogoUrl\x12\x1d\n" +
-	"\n" +
-	"created_by\x18\a \x01(\tR\tcreatedBy\x129\n" +
+	"\blogo_url\x18\x06 \x01(\tR\alogoUrl\x12+\n" +
+	"\x12created_by_user_id\x18\a \x01(\tR\x0fcreatedByUserId\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
 	"deleted_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12\x1d\n" +
-	"\n" +
-	"deleted_by\x18\v \x01(\tR\tdeletedBy\"\xf3\x03\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12;\n" +
+	"\varchived_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"archivedAt\"\xc5\x02\n" +
 	"\x16OrganizationMembership\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
 	"\x04role\x18\x04 \x01(\tR\x04role\x12\x16\n" +
-	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1d\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x127\n" +
+	"\tjoined_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\bjoinedAt\x129\n" +
 	"\n" +
-	"invited_by\x18\x06 \x01(\tR\tinvitedBy\x127\n" +
-	"\tjoined_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\bjoinedAt\x123\n" +
-	"\aleft_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\x06leftAt\x129\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
-	"\n" +
-	"deleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12\x1d\n" +
-	"\n" +
-	"deleted_by\x18\f \x01(\tR\tdeletedBy\"\xf0\x02\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9a\x03\n" +
 	"\x10OrganizationTeam\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1d\n" +
-	"\n" +
-	"created_by\x18\x05 \x01(\tR\tcreatedBy\x129\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12)\n" +
+	"\x11created_by_mem_id\x18\x05 \x01(\tR\x0ecreatedByMemId\x129\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12\x1d\n" +
-	"\n" +
-	"deleted_by\x18\t \x01(\tR\tdeletedBy\"\x80\x03\n" +
+	"deleted_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12;\n" +
+	"\varchived_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"archivedAt\"\xf7\x02\n" +
 	"\x1aOrganizationTeamMembership\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x120\n" +
 	"\x14organization_team_id\x18\x02 \x01(\tR\x12organizationTeamId\x12\x17\n" +
-	"\atesm_id\x18\x03 \x01(\tR\x06tesmId\x12#\n" +
+	"\ateam_id\x18\x03 \x01(\tR\x06teamId\x12#\n" +
 	"\rmembership_id\x18\x04 \x01(\tR\fmembershipId\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\x129\n" +
+	"\x04role\x18\x05 \x01(\tR\x04role\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x127\n" +
+	"\tjoined_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\bjoinedAt\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
-	"\n" +
-	"deleted_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12\x1d\n" +
-	"\n" +
-	"deleted_by\x18\t \x01(\tR\tdeletedByB\x96\x02\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\x96\x02\n" +
 	"\"com.organization_service.models.v1B\n" +
 	"ModelProtoP\x01ZNgithub.com/rijum8906/relay/packages/pb/organization_service/models/v1;modelsv1\xa2\x02\x03OMX\xaa\x02\x1dOrganizationService.Models.V1\xca\x02\x1dOrganizationService\\Models\\V1\xe2\x02)OrganizationService\\Models\\V1\\GPBMetadata\xea\x02\x1fOrganizationService::Models::V1b\x06proto3"
 
@@ -592,17 +548,17 @@ var file_organization_service_models_v1_model_proto_depIdxs = []int32{
 	4,  // 0: organization_service.models.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
 	4,  // 1: organization_service.models.v1.Organization.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: organization_service.models.v1.Organization.deleted_at:type_name -> google.protobuf.Timestamp
-	4,  // 3: organization_service.models.v1.OrganizationMembership.joined_at:type_name -> google.protobuf.Timestamp
-	4,  // 4: organization_service.models.v1.OrganizationMembership.left_at:type_name -> google.protobuf.Timestamp
+	4,  // 3: organization_service.models.v1.Organization.archived_at:type_name -> google.protobuf.Timestamp
+	4,  // 4: organization_service.models.v1.OrganizationMembership.joined_at:type_name -> google.protobuf.Timestamp
 	4,  // 5: organization_service.models.v1.OrganizationMembership.created_at:type_name -> google.protobuf.Timestamp
 	4,  // 6: organization_service.models.v1.OrganizationMembership.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 7: organization_service.models.v1.OrganizationMembership.deleted_at:type_name -> google.protobuf.Timestamp
-	4,  // 8: organization_service.models.v1.OrganizationTeam.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 9: organization_service.models.v1.OrganizationTeam.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 10: organization_service.models.v1.OrganizationTeam.deleted_at:type_name -> google.protobuf.Timestamp
-	4,  // 11: organization_service.models.v1.OrganizationTeamMembership.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 12: organization_service.models.v1.OrganizationTeamMembership.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 13: organization_service.models.v1.OrganizationTeamMembership.deleted_at:type_name -> google.protobuf.Timestamp
+	4,  // 7: organization_service.models.v1.OrganizationTeam.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 8: organization_service.models.v1.OrganizationTeam.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 9: organization_service.models.v1.OrganizationTeam.deleted_at:type_name -> google.protobuf.Timestamp
+	4,  // 10: organization_service.models.v1.OrganizationTeam.archived_at:type_name -> google.protobuf.Timestamp
+	4,  // 11: organization_service.models.v1.OrganizationTeamMembership.joined_at:type_name -> google.protobuf.Timestamp
+	4,  // 12: organization_service.models.v1.OrganizationTeamMembership.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 13: organization_service.models.v1.OrganizationTeamMembership.updated_at:type_name -> google.protobuf.Timestamp
 	14, // [14:14] is the sub-list for method output_type
 	14, // [14:14] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name

@@ -7,12 +7,11 @@ import (
 	"net"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/corelogger"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
-	"github.com/rijum8906/relay/services/organization-service/app/config"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/services/organization"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -42,11 +41,25 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 	}
 	a.infra.brokerClient = nats
 
+	// OpenFGA
+	fgaClient, appErr := initFgaClient(ctx, a.config)
+	if appErr != nil {
+		return appErr
+	}
+	a.infra.fgaClient = fgaClient
+
 	return nil
 }
 
 func (a *Application) initUtils() *apperror.AppError {
-	logger, appErr := initLogger(a.config)
+	logger, appErr := corelogger.InitLogger(corelogger.LoggerConfig{
+		AppEnv:       a.config.AppEnv,
+		LogLevel:     a.config.LogLevel,
+		LogFile:      a.config.LogFile,
+		EnableJSON:   a.config.EnableJSON,
+		EnableCaller: a.config.EnableCaller,
+		EnableStack:  a.config.EnableStack,
+	})
 	if appErr != nil {
 		return appErr
 	}
@@ -89,7 +102,8 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 
 func (a *Application) initServices() *apperror.AppError {
 	q := db.New(a.infra.database)
-	a.services.OrganizationService = organization.New(q, a.clients.UserClient)
+
+	a.services.OrganizationService = organization.New(q, a.clients.UserClient, a.infra.fgaClient)
 
 	return nil
 }
@@ -105,30 +119,4 @@ func (a *Application) Run() *apperror.AppError {
 	}
 
 	return nil
-}
-
-func (a *Application) Shutdown() {
-	if a.server != nil {
-		a.server.GracefulStop()
-	}
-
-	if a.infra != nil && a.infra.database != nil {
-		a.infra.database.Close()
-	}
-
-	if a.infra != nil && a.infra.cache != nil {
-		a.infra.cache.Close()
-	}
-
-	if a.infra != nil && a.infra.brokerClient != nil {
-		_ = a.infra.brokerClient.Drain()
-	}
-}
-
-func (a *Application) GetLogger() *zap.Logger {
-	return a.utils.logger
-}
-
-func (a *Application) GetConfig() *config.Env {
-	return a.config
 }

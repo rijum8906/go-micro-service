@@ -26,31 +26,32 @@ var File_user_service_session_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_session_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"%user_service/session/v1/service.proto\x12\x17user_service.session.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a%user_service/session/v1/request.proto\x1a&user_service/session/v1/response.proto2\xfa\x04\n" +
+	"%user_service/session/v1/service.proto\x12\x17user_service.session.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a%user_service/session/v1/request.proto\x1a&user_service/session/v1/response.proto2\xf7\x04\n" +
 	"\x0eSessionService\x12K\n" +
-	"\x11GetCurrentSession\x12\x15.core.v1.EmptyRequest\x1a\x1f.user_service.models.v1.Session\x12h\n" +
-	"\vGetSessions\x12+.user_service.session.v1.GetSessionsRequest\x1a,.user_service.session.v1.GetSessionsResponse\x12^\n" +
-	"\x11GetActiveSessions\x12\x15.core.v1.EmptyRequest\x1a2.user_service.session.v1.GetActiveSessionsResponse\x12X\n" +
+	"\x11GetCurrentSession\x12\x15.core.v1.EmptyRequest\x1a\x1f.user_service.models.v1.Session\x12W\n" +
+	"\vGetSessions\x12\x1a.core.v1.PaginationRequest\x1a,.user_service.session.v1.GetSessionsResponse\x12c\n" +
+	"\x11GetActiveSessions\x12\x1a.core.v1.PaginationRequest\x1a2.user_service.session.v1.GetActiveSessionsResponse\x12X\n" +
 	"\rRevokeSession\x12-.user_service.session.v1.RevokeSessionRequest\x1a\x18.core.v1.SuccessResponse\x12D\n" +
-	"\x11RevokeAllSessions\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponse\x12d\n" +
-	"\x13RevokeOtherSessions\x123.user_service.session.v1.RevokeOtherSessionsRequest\x1a\x18.core.v1.SuccessResponse\x12K\n" +
+	"\x11RevokeAllSessions\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponse\x12m\n" +
+	"\x13RevokeOtherSessions\x123.user_service.session.v1.RevokeOtherSessionsRequest\x1a!.user_service.models.v1.AuthToken\x12K\n" +
 	"\x18TerminateExpiredSessions\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponseB\xef\x01\n" +
 	"\x1bcom.user_service.session.v1B\fServiceProtoP\x01ZHgithub.com/rijum8906/relay/packages/pb/user_service/session/v1;sessionv1\xa2\x02\x03USX\xaa\x02\x16UserService.Session.V1\xca\x02\x16UserService\\Session\\V1\xe2\x02\"UserService\\Session\\V1\\GPBMetadata\xea\x02\x18UserService::Session::V1b\x06proto3"
 
 var file_user_service_session_v1_service_proto_goTypes = []any{
 	(*v1.EmptyRequest)(nil),            // 0: core.v1.EmptyRequest
-	(*GetSessionsRequest)(nil),         // 1: user_service.session.v1.GetSessionsRequest
+	(*v1.PaginationRequest)(nil),       // 1: core.v1.PaginationRequest
 	(*RevokeSessionRequest)(nil),       // 2: user_service.session.v1.RevokeSessionRequest
 	(*RevokeOtherSessionsRequest)(nil), // 3: user_service.session.v1.RevokeOtherSessionsRequest
 	(*v11.Session)(nil),                // 4: user_service.models.v1.Session
 	(*GetSessionsResponse)(nil),        // 5: user_service.session.v1.GetSessionsResponse
 	(*GetActiveSessionsResponse)(nil),  // 6: user_service.session.v1.GetActiveSessionsResponse
 	(*v1.SuccessResponse)(nil),         // 7: core.v1.SuccessResponse
+	(*v11.AuthToken)(nil),              // 8: user_service.models.v1.AuthToken
 }
 var file_user_service_session_v1_service_proto_depIdxs = []int32{
 	0, // 0: user_service.session.v1.SessionService.GetCurrentSession:input_type -> core.v1.EmptyRequest
-	1, // 1: user_service.session.v1.SessionService.GetSessions:input_type -> user_service.session.v1.GetSessionsRequest
-	0, // 2: user_service.session.v1.SessionService.GetActiveSessions:input_type -> core.v1.EmptyRequest
+	1, // 1: user_service.session.v1.SessionService.GetSessions:input_type -> core.v1.PaginationRequest
+	1, // 2: user_service.session.v1.SessionService.GetActiveSessions:input_type -> core.v1.PaginationRequest
 	2, // 3: user_service.session.v1.SessionService.RevokeSession:input_type -> user_service.session.v1.RevokeSessionRequest
 	0, // 4: user_service.session.v1.SessionService.RevokeAllSessions:input_type -> core.v1.EmptyRequest
 	3, // 5: user_service.session.v1.SessionService.RevokeOtherSessions:input_type -> user_service.session.v1.RevokeOtherSessionsRequest
@@ -60,7 +61,7 @@ var file_user_service_session_v1_service_proto_depIdxs = []int32{
 	6, // 9: user_service.session.v1.SessionService.GetActiveSessions:output_type -> user_service.session.v1.GetActiveSessionsResponse
 	7, // 10: user_service.session.v1.SessionService.RevokeSession:output_type -> core.v1.SuccessResponse
 	7, // 11: user_service.session.v1.SessionService.RevokeAllSessions:output_type -> core.v1.SuccessResponse
-	7, // 12: user_service.session.v1.SessionService.RevokeOtherSessions:output_type -> core.v1.SuccessResponse
+	8, // 12: user_service.session.v1.SessionService.RevokeOtherSessions:output_type -> user_service.models.v1.AuthToken
 	7, // 13: user_service.session.v1.SessionService.TerminateExpiredSessions:output_type -> core.v1.SuccessResponse
 	7, // [7:14] is the sub-list for method output_type
 	0, // [0:7] is the sub-list for method input_type

@@ -3,7 +3,7 @@ input GetSessionsInput {
 }
 
 input RevokeOthersSessionInput {
-  scopedToken: String!
+ scopedToken: String!
   token: String!
 }
 

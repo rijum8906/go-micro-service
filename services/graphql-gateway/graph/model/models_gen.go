@@ -3,6 +3,11 @@
 package model
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 )
 
@@ -68,7 +73,7 @@ type ScopedTokenInput struct {
 }
 
 type ScopedTokenResponse struct {
-	Token *Token `json:"token"`
+	ScopedToken string `json:"scopedToken"`
 }
 
 type Session struct {
@@ -117,4 +122,91 @@ type User struct {
 	TwoFactorEnabledAt *string `json:"twoFactorEnabledAt,omitempty"`
 	CreatedAt          string  `json:"createdAt"`
 	UpdatedAt          string  `json:"updatedAt"`
+}
+
+type TokenScope string
+
+const (
+	TokenScopeAuth                TokenScope = "AUTH"
+	TokenScopeRefresh             TokenScope = "REFRESH"
+	TokenScopeChangeEmail         TokenScope = "CHANGE_EMAIL"
+	TokenScopeChangePassword      TokenScope = "CHANGE_PASSWORD"
+	TokenScopeDeleteAccount       TokenScope = "DELETE_ACCOUNT"
+	TokenScopeResetPassword       TokenScope = "RESET_PASSWORD"
+	TokenScopeVerifyEmail         TokenScope = "VERIFY_EMAIL"
+	TokenScopeEnable2fa           TokenScope = "ENABLE_2FA"
+	TokenScopeDisable2fa          TokenScope = "DISABLE_2FA"
+	TokenScopeAdmin               TokenScope = "ADMIN"
+	TokenScopeImpersonate         TokenScope = "IMPERSONATE"
+	TokenScopeRecovery            TokenScope = "RECOVERY"
+	TokenScopeUpdateOrgName       TokenScope = "UPDATE_ORG_NAME"
+	TokenScopeChangeOrgOwner      TokenScope = "CHANGE_ORG_OWNER"
+	TokenScopeDeleteOrg           TokenScope = "DELETE_ORG"
+	TokenScopeArchiveOrg          TokenScope = "ARCHIVE_ORG"
+	TokenScopeLeaveOrg            TokenScope = "LEAVE_ORG"
+	TokenScopeUpdateOrgMembership TokenScope = "UPDATE_ORG_MEMBERSHIP"
+)
+
+var AllTokenScope = []TokenScope{
+	TokenScopeAuth,
+	TokenScopeRefresh,
+	TokenScopeChangeEmail,
+	TokenScopeChangePassword,
+	TokenScopeDeleteAccount,
+	TokenScopeResetPassword,
+	TokenScopeVerifyEmail,
+	TokenScopeEnable2fa,
+	TokenScopeDisable2fa,
+	TokenScopeAdmin,
+	TokenScopeImpersonate,
+	TokenScopeRecovery,
+	TokenScopeUpdateOrgName,
+	TokenScopeChangeOrgOwner,
+	TokenScopeDeleteOrg,
+	TokenScopeArchiveOrg,
+	TokenScopeLeaveOrg,
+	TokenScopeUpdateOrgMembership,
+}
+
+func (e TokenScope) IsValid() bool {
+	switch e {
+	case TokenScopeAuth, TokenScopeRefresh, TokenScopeChangeEmail, TokenScopeChangePassword, TokenScopeDeleteAccount, TokenScopeResetPassword, TokenScopeVerifyEmail, TokenScopeEnable2fa, TokenScopeDisable2fa, TokenScopeAdmin, TokenScopeImpersonate, TokenScopeRecovery, TokenScopeUpdateOrgName, TokenScopeChangeOrgOwner, TokenScopeDeleteOrg, TokenScopeArchiveOrg, TokenScopeLeaveOrg, TokenScopeUpdateOrgMembership:
+		return true
+	}
+	return false
+}
+
+func (e TokenScope) String() string {
+	return string(e)
+}
+
+func (e *TokenScope) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TokenScope(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TokenScope", str)
+	}
+	return nil
+}
+
+func (e TokenScope) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *TokenScope) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e TokenScope) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package organization_service.org_team.v1;
+
+message OrgTeamRes {
+  string id = 1;
+  string organization_id = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message OrgTeamListRes {
+  repeated OrgTeamRes teams = 1;
+}
+
+message TeamPermissionsRes {
+  repeated string permissions = 1;
+}

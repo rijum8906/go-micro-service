@@ -8,6 +8,12 @@ import (
 	"go.uber.org/zap"
 )
 
+type Frame struct {
+	File string
+	Line int
+	Func string
+}
+
 type Config struct {
 	Logger *zap.Logger
 	AppEnv string
@@ -15,18 +21,18 @@ type Config struct {
 }
 
 var (
-	config Config
+	config *Config
 	once   sync.Once
 )
 
 // SetConfig sets the configuration once (thread-safe)
-func SetConfig(cfg Config) {
+func SetConfig(cfg *Config) {
 	once.Do(func() {
 		config = cfg
 	})
 }
 
-func GetConfig() Config {
+func GetConfig() *Config {
 	return config
 }
 
@@ -35,6 +41,8 @@ type AppError struct {
 	Message   string
 	Details   []Detail
 	RequestID string
+	Frames    []Frame // Captured stack frames
+	isLogged  bool
 }
 
 type Detail struct {
@@ -46,6 +54,17 @@ func New(code ErrorCode, message string) *AppError {
 	return &AppError{
 		Code:    code,
 		Message: message,
+	}
+}
+
+// NewWithFrame captures the caller's line number
+func NewWithFrame(code ErrorCode, message string, skip int) *AppError {
+	frames := captureFrames(skip + 1)
+
+	return &AppError{
+		Code:    code,
+		Message: message,
+		Frames:  frames,
 	}
 }
 
@@ -67,18 +86,28 @@ func (e *AppError) WithRequestID(requestID string) *AppError {
 	return e
 }
 
+func (e *AppError) WithFrames(frames []Frame) *AppError {
+	e.Frames = frames
+	return e
+}
+
+func (e *AppError) Log() {
+	if !e.isLogged {
+		if config.Logger == nil {
+			fmt.Printf("[%s] %s Details : %v Frames : %v \n", e.Code, e.Message, e.Details, e.Frames)
+		} else {
+			config.Logger.Error(e.Message, ParseAppErrorIntoZapFields(e)...)
+		}
+
+		e.isLogged = true
+	}
+}
+
 func (e *AppError) Error() string {
 	if e.Code == CodeInternal || e.Code == CodeThirdParty {
-		if config.Logger != nil {
-			config.Logger.Error(e.Message, zap.Any("details", e.Details))
-		} else {
-			fmt.Printf("[%s] %s Details : %v \n", e.Code, e.Message, e.Details)
-		}
+		e.Log()
 	}
 
-	if e.RequestID == "" {
-		return fmt.Sprintf("[%s] %s", e.Code, e.Message)
-	}
+	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
 
-	return fmt.Sprintf("[%s] %s (ID: %s)", e.Code, e.Message, e.RequestID)
 }

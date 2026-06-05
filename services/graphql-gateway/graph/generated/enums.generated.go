@@ -6,7 +6,8 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/rijum8906/relay/packages/core/token"
+	coreconstants "github.com/rijum8906/relay/packages/core/constants"
+	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -40,13 +41,13 @@ import (
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐAuthMethod(ctx context.Context, v any) (token.AuthMethod, error) {
+func (ec *executionContext) unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋconstantsᚐAuthMethod(ctx context.Context, v any) (coreconstants.AuthMethod, error) {
 	tmp, err := graphql.UnmarshalString(v)
-	res := token.AuthMethod(tmp)
+	res := coreconstants.AuthMethod(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐAuthMethod(ctx context.Context, sel ast.SelectionSet, v token.AuthMethod) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋconstantsᚐAuthMethod(ctx context.Context, sel ast.SelectionSet, v coreconstants.AuthMethod) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
@@ -57,21 +58,14 @@ func (ec *executionContext) marshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelay�
 	return res
 }
 
-func (ec *executionContext) unmarshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐTokenScope(ctx context.Context, v any) (token.TokenScope, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := token.TokenScope(tmp)
+func (ec *executionContext) unmarshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTokenScope(ctx context.Context, v any) (model.TokenScope, error) {
+	var res model.TokenScope
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐTokenScope(ctx context.Context, sel ast.SelectionSet, v token.TokenScope) graphql.Marshaler {
-	_ = sel
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
+func (ec *executionContext) marshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTokenScope(ctx context.Context, sel ast.SelectionSet, v model.TokenScope) graphql.Marshaler {
+	return v
 }
 
 // endregion ***************************** type.gotpl *****************************

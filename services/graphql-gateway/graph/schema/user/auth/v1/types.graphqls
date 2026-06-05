@@ -1,24 +1,24 @@
 type Token {
-  value: String!
-  expiresAt: DateTime!
+    value: String!
+    expiresAt: DateTime!
 }
 
 type AuthTokens {
-  accessToken: Token!
-  refreshToken: Token!
+    accessToken: Token!
+    refreshToken: Token!
 }
 
 type AuthResponse {
-  tokens: AuthTokens!
-  user: User!
-  profile: Profile!
+    tokens: AuthTokens!
+    user: User!
+    profile: Profile!
 }
 
 type MutationResponse {
-   success: Boolean!
-   message: String!
- }
+    success: Boolean!
+    message: String!
+}
 
- type ScopedTokenResponse {
-   token: Token!
- }
+type ScopedTokenResponse {
+    scopedToken: String!
+}

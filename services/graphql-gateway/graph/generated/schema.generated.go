@@ -29,7 +29,7 @@ type MutationResolver interface {
 	VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error)
 	RevokeSession(ctx context.Context, input *model.RevokeSessionInput) (*model.MutationResponse, error)
 	RevokeAllSessions(ctx context.Context, input model.ScopedTokenInput) (*model.MutationResponse, error)
-	RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.MutationResponse, error)
+	RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.AuthResponse, error)
 	GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error)
 	UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error)
 	UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error)
@@ -746,7 +746,7 @@ func (ec *executionContext) _Mutation_RevokeOthersSession(ctx context.Context, f
 			return ec.Resolvers.Mutation().RevokeOthersSession(ctx, fc.Args["input"].(model.RevokeOthersSessionInput))
 		},
 		nil,
-		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
 		true,
 		true,
 	)
@@ -760,12 +760,14 @@ func (ec *executionContext) fieldContext_Mutation_RevokeOthersSession(ctx contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "success":
-				return ec.fieldContext_MutationResponse_success(ctx, field)
-			case "message":
-				return ec.fieldContext_MutationResponse_message(ctx, field)
+			case "tokens":
+				return ec.fieldContext_AuthResponse_tokens(ctx, field)
+			case "user":
+				return ec.fieldContext_AuthResponse_user(ctx, field)
+			case "profile":
+				return ec.fieldContext_AuthResponse_profile(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type AuthResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -807,8 +809,8 @@ func (ec *executionContext) fieldContext_Mutation_GenerateScopedToken(ctx contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "token":
-				return ec.fieldContext_ScopedTokenResponse_token(ctx, field)
+			case "scopedToken":
+				return ec.fieldContext_ScopedTokenResponse_scopedToken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ScopedTokenResponse", field.Name)
 		},

@@ -1,27 +1,73 @@
 package middleware
 
 import (
-	"context"
-	"net"
 	"net/http"
+	"strings"
+
+	"github.com/google/uuid"
+	"github.com/rijum8906/relay/packages/core/dto"
+	"github.com/rijum8906/relay/packages/core/metadata"
 )
+
+func ExtractClientInfo(r *http.Request) dto.ClientInfo {
+	return dto.ClientInfo{
+		DeviceID:   r.Header.Get(dto.DeviceIDReqHeaderKey),
+		UserAgent:  r.Header.Get(dto.UserAgentReqHeaderKey),
+		IPAddress:  r.Header.Get(dto.ClientIPReqHeaderKey),
+		ClientType: r.Header.Get(dto.ClientTypeReqHeaderKey),
+		APIVersion: r.Header.Get(dto.APIVersionReqHeaderKey),
+		SDKVersion: r.Header.Get(dto.SDKVersionReqHeaderKey),
+		RequestID:  uuid.NewString(),
+		TraceID:    uuid.NewString(),
+		Locale:     r.Header.Get(dto.LocaleReqHeaderKey),
+	}
+}
+
+func ExtractAuthTokens(r *http.Request) dto.AuthTokens {
+	accessToken := r.Header.Get(dto.AuthorizationReqHeaderKey)
+	if accessToken != "" {
+		tokenParts := strings.Split(accessToken, " ")
+		if len(tokenParts) == 2 {
+			accessToken = tokenParts[1]
+			// switch tokenParts[0] {
+			// case string(coreconstants.TokenTypeBearer):
+			// 	accessTokenType = coreconstants.TokenTypeBearer
+			// case string(coreconstants.TokenType2FA):
+			// 	accessTokenType = coreconstants.TokenType2FA
+			// }
+		}
+	} else {
+		// Fallback to cookie
+		res, err := r.Cookie(dto.MetaAccessTokenKey)
+		if err == nil {
+			accessToken = res.Value
+		}
+	}
+
+	refreshToken := r.Header.Get(dto.RefreshTokenReqHeaderKey)
+	if refreshToken == "" {
+		// Fallback to cookie
+		res, err := r.Cookie(dto.MetaRefreshTokenKey)
+		if err == nil {
+			refreshToken = res.Value
+		}
+	}
+
+	return dto.AuthTokens{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+}
 
 func WithRequestHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		headers := make(map[string][]string, len(r.Header)+1)
-		for key, vals := range r.Header {
-			copied := append([]string(nil), vals...)
-			headers[key] = copied
-		}
+		clientInfo := ExtractClientInfo(r)
+		tokens := ExtractAuthTokens(r)
 
-		if len(headers["X-Forwarded-For"]) == 0 && r.RemoteAddr != "" {
-			host, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err == nil && host != "" {
-				headers["X-Forwarded-For"] = []string{host}
-			}
-		}
+		ctx := r.Context()
+		ctx = metadata.SendClientInfo(ctx, clientInfo)
+		ctx = metadata.SendAuthTokensInfo(ctx, tokens)
 
-		ctx := context.WithValue(r.Context(), "headers", headers)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
