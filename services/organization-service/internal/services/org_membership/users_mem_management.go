@@ -126,7 +126,7 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 	var membership *db.OrganizationMembership
 
 	// Execute database transaction first
-	if err := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
+	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Retrieve organization membership
 		mem, err := q.GetOrganizationMembership(ctx, membershipID)
 		if err != nil {
@@ -180,9 +180,9 @@ func (s *OrgMembershipService) LeaveOrganization(ctx context.Context, req *corev
 			zap.String("previous_role", membership.Role))
 
 		return nil
-	}); err != nil {
+	}); appErr != nil {
 		// Transaction failed - return the error to the client
-		return nil, err
+		return nil, appErr
 	}
 
 	// AFTER successful transaction commit, remove OpenFGA permissions
