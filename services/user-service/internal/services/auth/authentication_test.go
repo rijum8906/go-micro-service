@@ -405,8 +405,6 @@ func Test_Register_Edge_Cases(t *testing.T) {
 
 	// Redis server error when issuing token
 	t.Run("redis server closed", func(t *testing.T) {
-		suite.SetClientInfoInContext()
-
 		mockTokenManager := mock_token.NewMockTokenManager(t)
 		mockTokenManager.On("IssueAuthToken", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, apperror.ErrInternal)
@@ -440,7 +438,7 @@ func Test_Register_Success(t *testing.T) {
 	// Mock the publisher
 	mockPublisher := mock_broker.NewMockPublisher(t)
 	mockPublisher.On("Publish", mock.Anything, mock.Anything).Return(nil)
-	suite.AuthService.OrgOpenFGAPublisher = mockPublisher
+	suite.AuthService.BrokerPublisher = mockPublisher
 
 	resp, err := suite.AuthService.Register(suite.Ctx, &authv1.RegisterRequest{
 		Email:     email,

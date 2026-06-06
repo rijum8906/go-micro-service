@@ -21,9 +21,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_GetProfile_FullMethodName             = "/user_service.user.v1.UserService/GetProfile"
+	UserService_GetMyProfile_FullMethodName           = "/user_service.user.v1.UserService/GetMyProfile"
 	UserService_UpdateProfileAvatarURL_FullMethodName = "/user_service.user.v1.UserService/UpdateProfileAvatarURL"
 	UserService_UpdateProfileName_FullMethodName      = "/user_service.user.v1.UserService/UpdateProfileName"
+	UserService_GetMySelf_FullMethodName              = "/user_service.user.v1.UserService/GetMySelf"
 	UserService_GetUser_FullMethodName                = "/user_service.user.v1.UserService/GetUser"
 	UserService_CheckExists_FullMethodName            = "/user_service.user.v1.UserService/CheckExists"
 	UserService_CheckEmailExists_FullMethodName       = "/user_service.user.v1.UserService/CheckEmailExists"
@@ -34,11 +35,12 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	// Profile management
-	GetProfile(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Profile, error)
+	GetMyProfile(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Profile, error)
 	UpdateProfileAvatarURL(ctx context.Context, in *UpdateProfileAvatarURLRequest, opts ...grpc.CallOption) (*v11.Profile, error)
 	UpdateProfileName(ctx context.Context, in *UpdateProfileNameRequest, opts ...grpc.CallOption) (*v11.Profile, error)
 	// User management
-	GetUser(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.User, error)
+	GetMySelf(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.User, error)
+	GetUser(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v11.User, error)
 	// User existence checks
 	CheckExists(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
 	CheckEmailExists(ctx context.Context, in *v1.EmailRequest, opts ...grpc.CallOption) (*CheckExistsResponse, error)
@@ -52,10 +54,10 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) GetProfile(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Profile, error) {
+func (c *userServiceClient) GetMyProfile(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.Profile, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v11.Profile)
-	err := c.cc.Invoke(ctx, UserService_GetProfile_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_GetMyProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +84,17 @@ func (c *userServiceClient) UpdateProfileName(ctx context.Context, in *UpdatePro
 	return out, nil
 }
 
-func (c *userServiceClient) GetUser(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.User, error) {
+func (c *userServiceClient) GetMySelf(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v11.User, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.User)
+	err := c.cc.Invoke(ctx, UserService_GetMySelf_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUser(ctx context.Context, in *v1.IDRequest, opts ...grpc.CallOption) (*v11.User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v11.User)
 	err := c.cc.Invoke(ctx, UserService_GetUser_FullMethodName, in, out, cOpts...)
@@ -117,11 +129,12 @@ func (c *userServiceClient) CheckEmailExists(ctx context.Context, in *v1.EmailRe
 // for forward compatibility.
 type UserServiceServer interface {
 	// Profile management
-	GetProfile(context.Context, *v1.EmptyRequest) (*v11.Profile, error)
+	GetMyProfile(context.Context, *v1.EmptyRequest) (*v11.Profile, error)
 	UpdateProfileAvatarURL(context.Context, *UpdateProfileAvatarURLRequest) (*v11.Profile, error)
 	UpdateProfileName(context.Context, *UpdateProfileNameRequest) (*v11.Profile, error)
 	// User management
-	GetUser(context.Context, *v1.EmptyRequest) (*v11.User, error)
+	GetMySelf(context.Context, *v1.EmptyRequest) (*v11.User, error)
+	GetUser(context.Context, *v1.IDRequest) (*v11.User, error)
 	// User existence checks
 	CheckExists(context.Context, *v1.IDRequest) (*CheckExistsResponse, error)
 	CheckEmailExists(context.Context, *v1.EmailRequest) (*CheckExistsResponse, error)
@@ -134,8 +147,8 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) GetProfile(context.Context, *v1.EmptyRequest) (*v11.Profile, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetProfile not implemented")
+func (UnimplementedUserServiceServer) GetMyProfile(context.Context, *v1.EmptyRequest) (*v11.Profile, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMyProfile not implemented")
 }
 func (UnimplementedUserServiceServer) UpdateProfileAvatarURL(context.Context, *UpdateProfileAvatarURLRequest) (*v11.Profile, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateProfileAvatarURL not implemented")
@@ -143,7 +156,10 @@ func (UnimplementedUserServiceServer) UpdateProfileAvatarURL(context.Context, *U
 func (UnimplementedUserServiceServer) UpdateProfileName(context.Context, *UpdateProfileNameRequest) (*v11.Profile, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateProfileName not implemented")
 }
-func (UnimplementedUserServiceServer) GetUser(context.Context, *v1.EmptyRequest) (*v11.User, error) {
+func (UnimplementedUserServiceServer) GetMySelf(context.Context, *v1.EmptyRequest) (*v11.User, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMySelf not implemented")
+}
+func (UnimplementedUserServiceServer) GetUser(context.Context, *v1.IDRequest) (*v11.User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServiceServer) CheckExists(context.Context, *v1.IDRequest) (*CheckExistsResponse, error) {
@@ -172,20 +188,20 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_GetProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_GetMyProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.EmptyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).GetProfile(ctx, in)
+		return srv.(UserServiceServer).GetMyProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_GetProfile_FullMethodName,
+		FullMethod: UserService_GetMyProfile_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetProfile(ctx, req.(*v1.EmptyRequest))
+		return srv.(UserServiceServer).GetMyProfile(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -226,8 +242,26 @@ func _UserService_UpdateProfileName_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_GetMySelf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMySelf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMySelf_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMySelf(ctx, req.(*v1.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.IDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -239,7 +273,7 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: UserService_GetUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUser(ctx, req.(*v1.EmptyRequest))
+		return srv.(UserServiceServer).GetUser(ctx, req.(*v1.IDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -288,8 +322,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetProfile",
-			Handler:    _UserService_GetProfile_Handler,
+			MethodName: "GetMyProfile",
+			Handler:    _UserService_GetMyProfile_Handler,
 		},
 		{
 			MethodName: "UpdateProfileAvatarURL",
@@ -298,6 +332,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateProfileName",
 			Handler:    _UserService_UpdateProfileName_Handler,
+		},
+		{
+			MethodName: "GetMySelf",
+			Handler:    _UserService_GetMySelf_Handler,
 		},
 		{
 			MethodName: "GetUser",

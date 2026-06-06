@@ -76,7 +76,6 @@ type RevokeOthersSessionInput struct {
 }
 
 type RevokeSessionInput struct {
-	ScopedToken   string `json:"scopedToken"`
 	TokenToRevoke string `json:"tokenToRevoke"`
 }
 

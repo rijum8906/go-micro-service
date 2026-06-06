@@ -3,7 +3,6 @@ syntax = "proto3";
 package user_service.session.v1;
 
 message RevokeSessionRequest {
-  string scoped_token = 1;
   string token_to_revoke = 2;
 }
 

@@ -25,12 +25,12 @@ import (
 
 type AuthService struct {
 	// Core
-	DBPool              *pgxpool.Pool
-	DBQ                 *db.Queries
-	RedisClient         *redis.Client
-	UserClient          userv1.UserServiceClient
-	OrgOpenFGAPublisher broker.Publisher
-	Helper              *helper.ServiceHelper
+	DBPool          *pgxpool.Pool
+	DBQ             *db.Queries
+	RedisClient     *redis.Client
+	UserClient      userv1.UserServiceClient
+	BrokerPublisher broker.Publisher
+	Helper          *helper.ServiceHelper
 
 	// Utils
 	TokenManager token.TokenManager
@@ -57,11 +57,11 @@ func New() (authv1.AuthServiceServer, *apperror.AppError) {
 	}
 
 	return &AuthService{
-		DBPool:              application.DB(),
-		DBQ:                 q,
-		RedisClient:         application.Cache(),
-		TokenManager:        application.TokenManager(),
-		OrgOpenFGAPublisher: publisher,
+		DBPool:          application.DB(),
+		DBQ:             q,
+		RedisClient:     application.Cache(),
+		TokenManager:    application.TokenManager(),
+		BrokerPublisher: publisher,
 		HashService: hash.NewHashService(hash.Config{
 			BcryptCost: 8,
 		}),
@@ -114,14 +114,14 @@ func NewForTest() *AuthService {
 	helper := helper.GetHelperForTest(dbPool, q, logger)
 
 	return &AuthService{
-		DBPool:              dbPool,
-		DBQ:                 q,
-		RedisClient:         redisClient,
-		TokenManager:        tokenManager,
-		OrgOpenFGAPublisher: publisher,
-		HashService:         hashService,
-		Logger:              logger,
-		Config:              config,
-		Helper:              helper,
+		DBPool:          dbPool,
+		DBQ:             q,
+		RedisClient:     redisClient,
+		TokenManager:    tokenManager,
+		BrokerPublisher: publisher,
+		HashService:     hashService,
+		Logger:          logger,
+		Config:          config,
+		Helper:          helper,
 	}
 }

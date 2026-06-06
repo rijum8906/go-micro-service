@@ -26,13 +26,13 @@ var File_user_service_user_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_user_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\x8d\x04\n" +
-	"\vUserService\x12D\n" +
-	"\n" +
-	"GetProfile\x12\x15.core.v1.EmptyRequest\x1a\x1f.user_service.models.v1.Profile\x12n\n" +
+	"\"user_service/user/v1/service.proto\x12\x14user_service.user.v1\x1a\x14core/v1/common.proto\x1a\"user_service/models/v1/model.proto\x1a\"user_service/user/v1/request.proto\x1a#user_service/user/v1/response.proto2\xce\x04\n" +
+	"\vUserService\x12F\n" +
+	"\fGetMyProfile\x12\x15.core.v1.EmptyRequest\x1a\x1f.user_service.models.v1.Profile\x12n\n" +
 	"\x16UpdateProfileAvatarURL\x123.user_service.user.v1.UpdateProfileAvatarURLRequest\x1a\x1f.user_service.models.v1.Profile\x12d\n" +
-	"\x11UpdateProfileName\x12..user_service.user.v1.UpdateProfileNameRequest\x1a\x1f.user_service.models.v1.Profile\x12>\n" +
-	"\aGetUser\x12\x15.core.v1.EmptyRequest\x1a\x1c.user_service.models.v1.User\x12L\n" +
+	"\x11UpdateProfileName\x12..user_service.user.v1.UpdateProfileNameRequest\x1a\x1f.user_service.models.v1.Profile\x12@\n" +
+	"\tGetMySelf\x12\x15.core.v1.EmptyRequest\x1a\x1c.user_service.models.v1.User\x12;\n" +
+	"\aGetUser\x12\x12.core.v1.IDRequest\x1a\x1c.user_service.models.v1.User\x12L\n" +
 	"\vCheckExists\x12\x12.core.v1.IDRequest\x1a).user_service.user.v1.CheckExistsResponse\x12T\n" +
 	"\x10CheckEmailExists\x12\x15.core.v1.EmailRequest\x1a).user_service.user.v1.CheckExistsResponseB\xda\x01\n" +
 	"\x18com.user_service.user.v1B\fServiceProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/user_service/user/v1;userv1\xa2\x02\x03UUX\xaa\x02\x13UserService.User.V1\xca\x02\x13UserService\\User\\V1\xe2\x02\x1fUserService\\User\\V1\\GPBMetadata\xea\x02\x15UserService::User::V1b\x06proto3"
@@ -48,20 +48,22 @@ var file_user_service_user_v1_service_proto_goTypes = []any{
 	(*CheckExistsResponse)(nil),           // 7: user_service.user.v1.CheckExistsResponse
 }
 var file_user_service_user_v1_service_proto_depIdxs = []int32{
-	0, // 0: user_service.user.v1.UserService.GetProfile:input_type -> core.v1.EmptyRequest
+	0, // 0: user_service.user.v1.UserService.GetMyProfile:input_type -> core.v1.EmptyRequest
 	1, // 1: user_service.user.v1.UserService.UpdateProfileAvatarURL:input_type -> user_service.user.v1.UpdateProfileAvatarURLRequest
 	2, // 2: user_service.user.v1.UserService.UpdateProfileName:input_type -> user_service.user.v1.UpdateProfileNameRequest
-	0, // 3: user_service.user.v1.UserService.GetUser:input_type -> core.v1.EmptyRequest
-	3, // 4: user_service.user.v1.UserService.CheckExists:input_type -> core.v1.IDRequest
-	4, // 5: user_service.user.v1.UserService.CheckEmailExists:input_type -> core.v1.EmailRequest
-	5, // 6: user_service.user.v1.UserService.GetProfile:output_type -> user_service.models.v1.Profile
-	5, // 7: user_service.user.v1.UserService.UpdateProfileAvatarURL:output_type -> user_service.models.v1.Profile
-	5, // 8: user_service.user.v1.UserService.UpdateProfileName:output_type -> user_service.models.v1.Profile
-	6, // 9: user_service.user.v1.UserService.GetUser:output_type -> user_service.models.v1.User
-	7, // 10: user_service.user.v1.UserService.CheckExists:output_type -> user_service.user.v1.CheckExistsResponse
-	7, // 11: user_service.user.v1.UserService.CheckEmailExists:output_type -> user_service.user.v1.CheckExistsResponse
-	6, // [6:12] is the sub-list for method output_type
-	0, // [0:6] is the sub-list for method input_type
+	0, // 3: user_service.user.v1.UserService.GetMySelf:input_type -> core.v1.EmptyRequest
+	3, // 4: user_service.user.v1.UserService.GetUser:input_type -> core.v1.IDRequest
+	3, // 5: user_service.user.v1.UserService.CheckExists:input_type -> core.v1.IDRequest
+	4, // 6: user_service.user.v1.UserService.CheckEmailExists:input_type -> core.v1.EmailRequest
+	5, // 7: user_service.user.v1.UserService.GetMyProfile:output_type -> user_service.models.v1.Profile
+	5, // 8: user_service.user.v1.UserService.UpdateProfileAvatarURL:output_type -> user_service.models.v1.Profile
+	5, // 9: user_service.user.v1.UserService.UpdateProfileName:output_type -> user_service.models.v1.Profile
+	6, // 10: user_service.user.v1.UserService.GetMySelf:output_type -> user_service.models.v1.User
+	6, // 11: user_service.user.v1.UserService.GetUser:output_type -> user_service.models.v1.User
+	7, // 12: user_service.user.v1.UserService.CheckExists:output_type -> user_service.user.v1.CheckExistsResponse
+	7, // 13: user_service.user.v1.UserService.CheckEmailExists:output_type -> user_service.user.v1.CheckExistsResponse
+	7, // [7:14] is the sub-list for method output_type
+	0, // [0:7] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
