@@ -18,17 +18,17 @@ import (
 )
 
 // attachClientInfo attach client info to context
-func attachClientInfo(ctx context.Context, meta coredto.RequestMeta) context.Context {
+func attachClientInfo(ctx context.Context, meta coredto.RequestMeta) (context.Context, *apperror.AppError) {
 	browserInfo := utils.GetBrowserInfo(ctx)
 
-	ctx = metadata.SendClientInfo(ctx, dto.ClientInfo{
+	ctx = metadata.SetClientInfoToOutgoingContext(ctx, dto.ClientInfo{
 		TraceID:   uuid.NewString(),
 		UserAgent: browserInfo.UserAgent,
 		IPAddress: browserInfo.IPAddr,
 		DeviceID:  meta.DeviceId,
 	})
 
-	return ctx
+	return ctx, nil
 }
 
 // validateAndAttachUserInfo validate the bearer token and on validation success attach user info to context
@@ -43,11 +43,15 @@ func validateAndAttachUserInfo(ctx context.Context, tokenManager token.TokenMana
 		return nil, appErr
 	}
 
-	ctx = metadata.SendUserInfo(ctx, dto.UserInfo{
+	ctx = metadata.SetUserInfoToOutgoingContext(ctx, dto.UserInfo{
 		UserID:    claims.Subject,
 		SessionID: claims.ID,
 		TokenID:   claims.ID,
 	})
+
+	if ctx == nil {
+		return nil, apperror.ErrInternal.WithMessage("Failed to set user info to outgoing context")
+	}
 
 	return ctx, nil
 }

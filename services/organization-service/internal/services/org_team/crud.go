@@ -84,7 +84,7 @@ func (s *OrgTeamService) CreateTeam(ctx context.Context, req *org_teamv1.CreateO
 	}
 
 	// Authenticate and extract user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}

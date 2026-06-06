@@ -31,12 +31,12 @@ func Test_InitTwoFactorTOTP(t *testing.T) {
 	password := testutils.GenerateRandomString(10)
 
 	// Create a test user
-	user, profile, err := createUser(ctx, email, password)
+	user, _, err := createUser(ctx, email, password)
 	require.NoError(t, err)
 
 	// Enable two-factor authentication
 	// Set user info in the context
-	ctx = setUserInfoInCtx(ctx, user, profile)
+	ctx = setUserInfoInCtx(ctx, user)
 	res, err := authService.InitTwoFactorTOTP(ctx, &corev1.EmptyRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, res)
@@ -54,9 +54,9 @@ func Test_EnableTwoFactorTOTP(t *testing.T) {
 	password := testutils.GenerateRandomString(10)
 
 	// Create a test user
-	user, profile, err := createUser(ctx, email, password)
+	user, _, err := createUser(ctx, email, password)
 	require.NoError(t, err)
-	ctx = setUserInfoInCtx(ctx, user, profile) // Set user info in the context
+	ctx = setUserInfoInCtx(ctx, user) // Set user info in the context
 
 	// Initialize two-factor authentication
 	res, err := authService.InitTwoFactorTOTP(ctx, &corev1.EmptyRequest{})
@@ -77,6 +77,52 @@ func Test_EnableTwoFactorTOTP(t *testing.T) {
 
 	assert.True(t, successRes.Success)
 
+}
+
+func Test_DisableTwoFactor(t *testing.T) {
+	ctx := context.Background()
+
+	// User Credentials
+	email := testutils.GenerateRandomEmail()
+	password := testutils.GenerateRandomString(10)
+
+	// Create a user for testing
+	user, _, err := createUser(ctx, email, password)
+	t.Cleanup(func() {
+		authService.DBQ.DeleteUserHard(context.Background(), user.ID)
+	})
+	require.NoError(t, err)
+	ctx = setUserInfoInCtx(ctx, user) // Set user info in the context
+
+	// Init two factor authentication
+	res, err := authService.InitTwoFactorTOTP(ctx, &corev1.EmptyRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, res)
+
+	// Generate TOTP code
+	totp, appErr := generate2FATokenCode(res.GetTwoFactorSecret())
+	require.Nil(t, appErr)
+
+	// Enable two-factor authentication
+	_, err = authService.EnableTwoFactorTOTP(ctx, &authv1.TwoFactorTOTPRequest{
+		Totp:            totp,
+		TwoFactorSecret: res.TwoFactorSecret,
+	})
+	require.NoError(t, err)
+
+	// Disable two-factor authentication
+	successRes, err := authService.DisableTwoFactor(ctx, &corev1.EmptyRequest{})
+	require.NoError(t, err)
+	require.NotNil(t, successRes)
+	require.True(t, successRes.Success)
+
+	// Try to login
+	// Should directly pass without two-factor authentication
+	_, err = authService.Login(ctx, &authv1.LoginRequest{
+		Email:    email,
+		Password: password,
+	})
+	require.NoError(t, err)
 }
 
 // =======================================================

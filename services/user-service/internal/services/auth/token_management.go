@@ -29,7 +29,7 @@ import (
 // NOTE: this method does not require authentication
 func (s *AuthService) RefreshToken(ctx context.Context, req *authv1.RefreshAccessTokenRequest) (*authv1.RefreshTokenResponse, error) {
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.ReceiveClientInfo(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithDetail("internal_message", "client info not found in context")
@@ -112,7 +112,7 @@ func (s *AuthService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}

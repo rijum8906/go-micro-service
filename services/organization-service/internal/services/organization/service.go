@@ -117,7 +117,7 @@ func (s *organizationService) GetOrganizationBySlug(ctx context.Context, req *or
 
 func (s *organizationService) GetOrganizationsListByCreatedBy(ctx context.Context, req *corev1.EmptyRequest) (*organizationv1.OrganizationsList, error) {
 	// Retrive user info from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.New(apperror.CodeInternal, "failed to extract user info from context")
 	}
@@ -157,7 +157,7 @@ func (s *organizationService) UpdateOrganizationName(ctx context.Context, req *o
 	}
 
 	// Step 1. Extract User Info
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("error", "failed to extract user info from context")
 	}
@@ -217,7 +217,7 @@ func (s *organizationService) ChangeOrganizationOwnership(ctx context.Context, r
 	newOwnerID, _ := uuid.Parse(req.NewOwnerId)
 
 	// Step 1. Extract User Info
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("error", "failed to extract user info from context")
 	}
@@ -310,7 +310,7 @@ func (s *organizationService) DeleteOrganization(ctx context.Context, req *corev
 	orgID, _ := uuid.Parse(req.Id)
 
 	// Step 1. Extract User Info
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("error", "failed to extract user info from context")
 	}
@@ -375,7 +375,7 @@ func (s *organizationService) ArchiveOrganization(ctx context.Context, req *core
 	orgID, _ := uuid.Parse(req.Id)
 
 	// Step 1. Extract User Info
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("error", "failed to extract user info from context")
 	}

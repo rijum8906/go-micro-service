@@ -28,7 +28,10 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientInfo(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	resp, err := r.Clients.AuthClient.Login(ctx, &authv1.LoginRequest{
 		Email:    input.Email,
@@ -47,7 +50,10 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientInfo(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	res, err := r.Clients.AuthClient.Register(ctx, &authv1.RegisterRequest{
 		Email:     input.Email,
@@ -74,9 +80,9 @@ func (r *mutationResolver) Logout(ctx context.Context) (*model.MutationResponse,
 		return nil, appErr
 	}
 
-	tokens, ok := metadata.ReceiveAuthTokensInfo(ctx)
+	tokens, ok := metadata.GetAuthTokensInfoFromContext(ctx)
 	if !ok {
-		return nil, apperror.ErrInternal.WithMessage("failed to logout")
+		return nil, apperror.ErrInternal.WithMessage("Failed to get auth tokens info from context")
 	}
 
 	res, err := r.Clients.AuthClient.Logout(ctx, &authv1.LogoutRequest{
@@ -105,7 +111,10 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userd
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientInfo(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	resp, err := r.Clients.AuthClient.RequestPasswordReset(ctx, &authv1.RequestPasswordResetRequest{
 		Email: input.Email,

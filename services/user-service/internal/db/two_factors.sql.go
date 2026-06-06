@@ -124,14 +124,41 @@ func (q *Queries) DisableTwoFactorAuthByUserIDAndMethod(ctx context.Context, arg
 	return err
 }
 
-const EnableTwoFactorAuthByUserID = `-- name: EnableTwoFactorAuthByUserID :exec
+const DisableTwoFactorAuthsByUserID = `-- name: DisableTwoFactorAuthsByUserID :exec
+UPDATE two_factors
+SET is_enabled = false
+WHERE user_id = $1
+`
+
+func (q *Queries) DisableTwoFactorAuthsByUserID(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, DisableTwoFactorAuthsByUserID, userID)
+	return err
+}
+
+const EnableTwoFactorAuthByUserIDAndMethod = `-- name: EnableTwoFactorAuthByUserIDAndMethod :exec
+UPDATE two_factors
+SET is_enabled = true
+WHERE user_id = $1 AND method = $2
+`
+
+type EnableTwoFactorAuthByUserIDAndMethodParams struct {
+	UserID uuid.UUID
+	Method string
+}
+
+func (q *Queries) EnableTwoFactorAuthByUserIDAndMethod(ctx context.Context, arg EnableTwoFactorAuthByUserIDAndMethodParams) error {
+	_, err := q.db.Exec(ctx, EnableTwoFactorAuthByUserIDAndMethod, arg.UserID, arg.Method)
+	return err
+}
+
+const EnableTwoFactorAuthsByUserID = `-- name: EnableTwoFactorAuthsByUserID :exec
 UPDATE two_factors
 SET is_enabled = true
 WHERE user_id = $1
 `
 
-func (q *Queries) EnableTwoFactorAuthByUserID(ctx context.Context, userID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, EnableTwoFactorAuthByUserID, userID)
+func (q *Queries) EnableTwoFactorAuthsByUserID(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, EnableTwoFactorAuthsByUserID, userID)
 	return err
 }
 
@@ -201,13 +228,13 @@ func (q *Queries) GetTwoFactorAuthByUserID(ctx context.Context, userID uuid.UUID
 	return i, err
 }
 
-const SetTwoFactorSecretByUserID = `-- name: SetTwoFactorSecretByUserID :exec
+const SetPrimaryTwoFactorSecretByUserID = `-- name: SetPrimaryTwoFactorSecretByUserID :exec
 UPDATE two_factors
-SET secret = $2, is_enabled = true
+SET secret = $2, is_primary = true
 WHERE user_id = $1
 `
 
-type SetTwoFactorSecretByUserIDParams struct {
+type SetPrimaryTwoFactorSecretByUserIDParams struct {
 	UserID uuid.UUID
 	Secret string
 }
@@ -215,7 +242,23 @@ type SetTwoFactorSecretByUserIDParams struct {
 // ============================================
 // UPDATE METHODS
 // ============================================
-func (q *Queries) SetTwoFactorSecretByUserID(ctx context.Context, arg SetTwoFactorSecretByUserIDParams) error {
-	_, err := q.db.Exec(ctx, SetTwoFactorSecretByUserID, arg.UserID, arg.Secret)
+func (q *Queries) SetPrimaryTwoFactorSecretByUserID(ctx context.Context, arg SetPrimaryTwoFactorSecretByUserIDParams) error {
+	_, err := q.db.Exec(ctx, SetPrimaryTwoFactorSecretByUserID, arg.UserID, arg.Secret)
+	return err
+}
+
+const SetSecondaryTwoFactorSecretByUserID = `-- name: SetSecondaryTwoFactorSecretByUserID :exec
+UPDATE two_factors
+SET secret = $2, is_primary = false
+WHERE user_id = $1
+`
+
+type SetSecondaryTwoFactorSecretByUserIDParams struct {
+	UserID uuid.UUID
+	Secret string
+}
+
+func (q *Queries) SetSecondaryTwoFactorSecretByUserID(ctx context.Context, arg SetSecondaryTwoFactorSecretByUserIDParams) error {
+	_, err := q.db.Exec(ctx, SetSecondaryTwoFactorSecretByUserID, arg.UserID, arg.Secret)
 	return err
 }

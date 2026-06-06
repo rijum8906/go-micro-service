@@ -75,7 +75,7 @@ CREATE TABLE two_factors (
         CHECK (method IN ('totp', 'email', 'webauthn')),
     secret varchar(255) NOT NULL,
 
-    is_enabled boolean DEFAULT true,
+    is_enabled boolean DEFAULT false,
     is_primary boolean DEFAULT true,
     last_used_at timestamptz,
 

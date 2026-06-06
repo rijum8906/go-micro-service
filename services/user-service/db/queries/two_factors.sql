@@ -40,19 +40,35 @@ SELECT EXISTS(
 -- ============================================
 -- UPDATE METHODS
 -- ============================================
--- name: SetTwoFactorSecretByUserID :exec
+-- name: SetPrimaryTwoFactorSecretByUserID :exec
 UPDATE two_factors
-SET secret = $2, is_enabled = true
+SET secret = $2, is_primary = true
 WHERE user_id = $1;
+
+-- name: SetSecondaryTwoFactorSecretByUserID :exec
+UPDATE two_factors
+SET secret = $2, is_primary = false
+WHERE user_id = $1;
+
+-- name: EnableTwoFactorAuthByUserIDAndMethod :exec
+UPDATE two_factors
+SET is_enabled = true
+WHERE user_id = $1 AND method = $2;
+
 
 -- name: DisableTwoFactorAuthByUserIDAndMethod :exec
 UPDATE two_factors
 SET is_enabled = false
 WHERE user_id = $1 AND method = $2;
 
--- name: EnableTwoFactorAuthByUserID :exec
+-- name: EnableTwoFactorAuthsByUserID :exec
 UPDATE two_factors
 SET is_enabled = true
+WHERE user_id = $1;
+
+-- name: DisableTwoFactorAuthsByUserID :exec
+UPDATE two_factors
+SET is_enabled = false
 WHERE user_id = $1;
 
 -- ============================================

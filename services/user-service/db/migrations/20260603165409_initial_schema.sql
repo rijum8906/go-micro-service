@@ -96,7 +96,7 @@ CREATE TABLE "two_factors" (
   "user_id" uuid NOT NULL,
   "method" character varying(255) NOT NULL,
   "secret" character varying(255) NOT NULL,
-  "is_enabled" boolean NULL DEFAULT true,
+  "is_enabled" boolean NULL DEFAULT false,
   "is_primary" boolean NULL DEFAULT true,
   "last_used_at" timestamptz NULL,
   "created_at" timestamptz NULL DEFAULT now(),

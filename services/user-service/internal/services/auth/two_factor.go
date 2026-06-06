@@ -31,7 +31,7 @@ import (
 //   - The TOTP URI and secret for the user
 func (s *AuthService) InitTwoFactorTOTP(ctx context.Context, req *corev1.EmptyRequest) (*authv1.InitTwoFactorTOTPResponse, error) {
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -74,8 +74,13 @@ func (s *AuthService) InitTwoFactorTOTP(ctx context.Context, req *corev1.EmptyRe
 			CodeValidity: time.Minute * 30,
 		})
 
-		if err = s.DBQ.SetTwoFactorSecretByUserID(ctx, db.SetTwoFactorSecretByUserIDParams{
+		// Create two-factor auth record with is_enabled = false and is_primary = false
+		// This is the initial setup for the user's two-factor authentication
+		// The user will need to enable it after scanning the QR code
+		// EnableTwoFactorAuth will update these fields to true
+		if _, err = s.DBQ.CreateTwoFactorAuth(ctx, db.CreateTwoFactorAuthParams{
 			UserID: userID,
+			Method: constants.TwoFactorMethodTotp,
 			Secret: secret,
 		}); err != nil {
 			return apperror.ErrInternal.
@@ -111,7 +116,7 @@ func (s *AuthService) EnableTwoFactorTOTP(ctx context.Context, req *authv1.TwoFa
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, constants.ErrUserNotFoundInCtx
 	}
@@ -151,9 +156,11 @@ func (s *AuthService) EnableTwoFactorTOTP(ctx context.Context, req *authv1.TwoFa
 	}
 
 	// Enable two factor for user
-	if err = s.DBQ.SetTwoFactorSecretByUserID(ctx, db.SetTwoFactorSecretByUserIDParams{
+	// Set is_enabled = true and is_primary = false for the TOTP method
+	//  TODO: To make it a primary method, the user will need to request to another method
+	if err = s.DBQ.EnableTwoFactorAuthByUserIDAndMethod(ctx, db.EnableTwoFactorAuthByUserIDAndMethodParams{
 		UserID: userID,
-		Secret: req.TwoFactorSecret,
+		Method: constants.TwoFactorMethodTotp,
 	}); err != nil {
 		return nil, apperror.ErrInternal.
 			WithDetail("internal_message", "failed to enable user two factor").
@@ -167,7 +174,7 @@ func (s *AuthService) EnableTwoFactorTOTP(ctx context.Context, req *authv1.TwoFa
 // DisableTwoFactor disables two-factor authentication for a user
 //
 // Business Logic:
-//   - Removes the two-factor secret from the user's record in the database
+//   - Disables all two-factor authentication methods for the user
 //
 // Idempotent: Yes
 //
@@ -175,7 +182,7 @@ func (s *AuthService) EnableTwoFactorTOTP(ctx context.Context, req *authv1.TwoFa
 //   - A success response indicating the two-factor authentication was disabled
 func (s *AuthService) DisableTwoFactor(ctx context.Context, req *corev1.EmptyRequest) (*corev1.SuccessResponse, error) {
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -196,10 +203,7 @@ func (s *AuthService) DisableTwoFactor(ctx context.Context, req *corev1.EmptyReq
 		return nil, apperror.ErrValidation.WithMessage("two factor auth not enabled").WithDetail("method", constants.TwoFactorMethodTotp)
 	}
 
-	if err = s.DBQ.DisableTwoFactorAuthByUserIDAndMethod(ctx, db.DisableTwoFactorAuthByUserIDAndMethodParams{
-		UserID: userID,
-		Method: constants.TwoFactorMethodTotp,
-	}); err != nil {
+	if err = s.DBQ.DisableTwoFactorAuthsByUserID(ctx, userID); err != nil {
 		return nil, apperror.ErrInternal.
 			WithDetail("internal_message", "failed to disable user two factor").
 			WithDetail("db_error", err.Error())
