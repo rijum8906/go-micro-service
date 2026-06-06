@@ -1,7 +1,9 @@
+# Root mutation type extended by feature modules.
 type Mutation {
-  _empty: String
+    _empty: String
 }
 
+# Root query type extended by feature modules.
 type Query {
-  _empty: String
+    _empty: String
 }

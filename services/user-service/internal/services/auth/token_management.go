@@ -29,7 +29,7 @@ import (
 // NOTE: this method does not require authentication
 func (s *AuthService) RefreshToken(ctx context.Context, req *authv1.RefreshAccessTokenRequest) (*authv1.RefreshTokenResponse, error) {
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.ReceiveClientInfo(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithDetail("internal_message", "client info not found in context")
@@ -112,7 +112,7 @@ func (s *AuthService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -122,11 +122,14 @@ func (s *AuthService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	}
 
 	// Validate auth method and token scope
-	if req.AuthMethod.String() != string(coreconstants.AuthMethodPassword) {
+	if req.AuthMethod != string(coreconstants.AuthMethodPassword) {
 		return nil, apperror.ErrValidation.WithMessage("invalid auth method")
 	}
-	if !token.IsValidTokenScope(req.GetScope().String()) {
+	if !token.IsValidTokenScope(req.GetScope()) {
 		return nil, apperror.ErrValidation.WithMessage("invalid token scope")
+	}
+	if !constants.IsInternalTokenScope(req.GetScope()) {
+		return nil, apperror.ErrValidation.WithMessage("invalid token scope for generate scoped token")
 	}
 
 	// Retrieve user from database
@@ -151,7 +154,7 @@ func (s *AuthService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	tokenRes, appErr := s.TokenManager.GenerateToken(
 		userInfo.UserID,
 		uuid.NewString(),
-		req.GetScope().String(),
+		req.GetScope(),
 		s.Config.ScopedTokenTTL,
 	)
 	if appErr != nil {

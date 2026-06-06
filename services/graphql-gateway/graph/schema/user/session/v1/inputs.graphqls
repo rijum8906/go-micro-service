@@ -1,13 +1,16 @@
+# Pagination wrapper for session listing.
 input GetSessionsInput {
-  paginationRequest: PaginationInput!
+    paginationRequest: PaginationInput!
 }
 
+# Revokes all other sessions while keeping the current one active.
 input RevokeOthersSessionInput {
- scopedToken: String!
-  token: String!
+    scopedToken: String!
+    token: String!
 }
 
+# Revokes a single session identified by token.
 input RevokeSessionInput {
-  scopedToken: String!
-  tokenToRevoke: String!
+    scopedToken: String!
+    tokenToRevoke: String!
 }

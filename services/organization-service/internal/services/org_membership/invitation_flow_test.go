@@ -304,7 +304,7 @@ func Test_AcceptInvitation_Integration_Failure(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := tc.setupContext()
-			_, ok := coremetadata.ReceiveUserInfo(ctx)
+			_, ok := coremetadata.GetUserInfoFromIncomingContext(ctx)
 			if ok {
 				servicetestutils.MockUserServiceClient.On("GetUser", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
 					Email: tc.expectedUserEmail,
@@ -527,7 +527,7 @@ func Test_DeclineInvitation_Integration_Failure(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := tc.setupContext()
-			_, ok := coremetadata.ReceiveUserInfo(ctx)
+			_, ok := coremetadata.GetUserInfoFromIncomingContext(ctx)
 			if ok {
 				servicetestutils.MockUserServiceClient.On("GetUser", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
 					Email: tc.expectedUserEmail,

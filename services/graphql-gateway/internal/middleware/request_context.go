@@ -65,8 +65,8 @@ func WithRequestHeaders(next http.Handler) http.Handler {
 		tokens := ExtractAuthTokens(r)
 
 		ctx := r.Context()
-		ctx = metadata.SendClientInfo(ctx, clientInfo)
-		ctx = metadata.SendAuthTokensInfo(ctx, tokens)
+		ctx = metadata.SetClientInfoToOutgoingContext(ctx, clientInfo)
+		ctx = metadata.SetAuthTokensInfoToOutgoingContext(ctx, tokens)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

@@ -76,7 +76,7 @@ func GetHelper() (*ServiceHelper, *apperror.AppError) {
 	return instance, nil
 }
 
-func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) (err error) {
+func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) *apperror.AppError {
 	tx, err := s.DBPool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.Serializable,
 	})

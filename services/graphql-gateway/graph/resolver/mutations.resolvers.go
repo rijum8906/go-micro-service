@@ -7,6 +7,7 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/metadata"
@@ -27,14 +28,17 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	resp, err := r.Clients.AuthClient.Login(ctx, &authv1.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	})
 	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+		return nil, err
 	}
 
 	return utils.MapAuthResponse(resp.User, resp.Profile, resp.Tokens), nil
@@ -46,7 +50,10 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	res, err := r.Clients.AuthClient.Register(ctx, &authv1.RegisterRequest{
 		Email:     input.Email,
@@ -55,26 +62,27 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		LastName:  input.LastName,
 	})
 	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+		return nil, err
 	}
 
 	return utils.MapAuthResponse(res.User, res.Profile, res.Tokens), nil
 }
 
-// Logout is the resolver for the Logout field.
-func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error) {
-	if err := r.Validate.Struct(input); err != nil {
-		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
+// LoginWithTwoFactorCode is the resolver for the LoginWithTwoFactorCode field.
+func (r *mutationResolver) LoginWithTwoFactorCode(ctx context.Context, input model.TwoFactorCode) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: LoginWithTwoFactorCode - LoginWithTwoFactorCode"))
+}
 
+// Logout is the resolver for the Logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (*model.MutationResponse, error) {
 	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	tokens, ok := metadata.ReceiveAuthTokensInfo(ctx)
+	tokens, ok := metadata.GetAuthTokensInfoFromIncomingContext(ctx)
 	if !ok {
-		return nil, apperror.ErrInternal.WithMessage("failed to logout")
+		return nil, apperror.ErrInternal.WithMessage("Failed to get auth tokens info from context")
 	}
 
 	res, err := r.Clients.AuthClient.Logout(ctx, &authv1.LogoutRequest{
@@ -92,13 +100,21 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 	}, nil
 }
 
+// LogoutALlDevices is the resolver for the LogoutALlDevices field.
+func (r *mutationResolver) LogoutALlDevices(ctx context.Context) (*model.MutationResponse, error) {
+	panic(fmt.Errorf("not implemented: LogoutALlDevices - LogoutALlDevices"))
+}
+
 // RequestPasswordReset is the resolver for the RequestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error) {
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	resp, err := r.Clients.AuthClient.RequestPasswordReset(ctx, &authv1.RequestPasswordResetRequest{
 		Email: input.Email,
@@ -117,8 +133,6 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input userdto.Rese
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
-
-	ctx = attachClientInfo(ctx, input.Meta)
 
 	resp, err := r.Clients.AuthClient.ResetPassword(ctx, &authv1.ResetPasswordRequest{
 		ScopedToken: input.Token,
@@ -139,8 +153,6 @@ func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input u
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
-
 	resp, err := r.Clients.AuthClient.RequestEmailVerification(ctx, &authv1.RequestEmailVerificationRequest{
 		Email: input.Email,
 	})
@@ -159,8 +171,6 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
-
 	resp, err := r.Clients.AuthClient.VerifyEmail(ctx, &authv1.VerifyEmailRequest{
 		ScopedToken: input.Token,
 	})
@@ -171,6 +181,41 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 	return &model.MutationResponse{
 		Success: resp.Success,
 	}, nil
+}
+
+// GenerateScopedToken is the resolver for the GenerateScopedToken field.
+func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.GenerateScopedTokenResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	authMethod, tokenScope, appErr := parseScopedToken(input.AuthMethod, input.Scope)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.AuthClient.GenerateScopedToken(ctx, &authv1.GenerateScopedTokenRequest{
+		AuthMethod: authMethod.String(),
+		Scope:      tokenScope.String(),
+		AuthValue:  input.AuthValue,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return &model.GenerateScopedTokenResponse{
+		ScopedToken: res.GetScopedToken(),
+	}, nil
+}
+
+// RefershToken is the resolver for the RefershToken field.
+func (r *mutationResolver) RefershToken(ctx context.Context) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: RefershToken - RefershToken"))
 }
 
 // RevokeSession is the resolver for the RevokeSession field.
@@ -257,36 +302,6 @@ func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.
 				ExpiresAt: res.RefreshToken.ExpiresAt.String(),
 			},
 		},
-	}, nil
-}
-
-// GenerateScopedToken is the resolver for the GenerateScopedToken field.
-func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error) {
-	if err := r.Validate.Struct(input); err != nil {
-		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
-
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	authMethod, tokenScope, appErr := parseScopedToken(input.AuthMethod, input.Scope)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	res, err := r.Clients.AuthClient.GenerateScopedToken(ctx, &authv1.GenerateScopedTokenRequest{
-		AuthMethod: authMethod,
-		Scope:      tokenScope,
-		AuthValue:  input.AuthValue,
-	})
-	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
-
-	return &model.ScopedTokenResponse{
-		ScopedToken: res.ScopedToken,
 	}, nil
 }
 

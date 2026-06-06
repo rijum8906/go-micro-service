@@ -1,4 +1,13 @@
 extend type Query {
-  MyProfile: Profile!
-  Me: User!
+    # Returns the authenticated user's profile.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    MyProfile: Profile!
+
+    # Returns the authenticated user's account record.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    Me: User!
 }

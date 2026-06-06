@@ -21,14 +21,12 @@ func ParseTokens(accessToken string, refreshToken string) *modelsv1.AuthToken {
 
 func MapUser(user *db.User) *modelsv1.User {
 	return &modelsv1.User{
-		Id:                 user.ID.String(),
-		Email:              user.Email,
-		IsEmailVerified:    user.IsEmailVerified,
-		EmailVerifiedAt:    mapTimestamp(user.EmailVerifiedAt),
-		TwoFactorEnabled:   user.TwoFactorEnabled,
-		TwoFactorEnabledAt: mapTimestamp(user.TwoFactorEnabledAt),
-		CreatedAt:          mapTimestamp(user.CreatedAt),
-		UpdatedAt:          mapTimestamp(user.UpdatedAt),
+		Id:              user.ID.String(),
+		Email:           user.Email,
+		IsEmailVerified: user.IsEmailVerified,
+		EmailVerifiedAt: mapTimestamp(user.EmailVerifiedAt),
+		CreatedAt:       mapTimestamp(user.CreatedAt),
+		UpdatedAt:       mapTimestamp(user.UpdatedAt),
 	}
 }
 
@@ -59,6 +57,7 @@ func MapSession(session *db.Session) *modelsv1.Session {
 
 func MapAuthResponse(user *db.User, profile *db.Profile, accessToken, refreshToken string) *authv1.AuthResponse {
 	return &authv1.AuthResponse{
+		Status:  authv1.AuthStatus_AUTH_STATUS_SUCCESS,
 		Tokens:  ParseTokens(accessToken, refreshToken),
 		User:    MapUser(user),
 		Profile: MapProfile(profile),

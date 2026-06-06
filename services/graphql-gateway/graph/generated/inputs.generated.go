@@ -202,6 +202,57 @@ func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.C
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGenereateScopedTokenInput(ctx context.Context, obj any) (model.GenereateScopedTokenInput, error) {
+	var it model.GenereateScopedTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scope", "authMethod", "authValue", "meta"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scope":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		case "authMethod":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authMethod"))
+			data, err := ec.unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋconstantsᚐAuthMethod(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthMethod = data
+		case "authValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authValue"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthValue = data
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Meta = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGetSessionsInput(ctx context.Context, obj any) (model.GetSessionsInput, error) {
 	var it model.GetSessionsInput
 	if obj == nil {
@@ -609,6 +660,36 @@ func (ec *executionContext) unmarshalInputRevokeSessionInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputTwoFactorCode(ctx context.Context, obj any) (model.TwoFactorCode, error) {
+	var it model.TwoFactorCode
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"twoFactorCode"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "twoFactorCode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("twoFactorCode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TwoFactorCode = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateProfileAvatarUrlInput(ctx context.Context, obj any) (userdto.UpdateProfileAvatarUrlInput, error) {
 	var it userdto.UpdateProfileAvatarUrlInput
 	if obj == nil {
@@ -769,11 +850,6 @@ func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋrijum8906ᚋrela
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNLogoutInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐLogoutInput(ctx context.Context, v any) (userdto.LogoutInput, error) {
-	res, err := ec.unmarshalInputLogoutInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐRegisterInput(ctx context.Context, v any) (userdto.RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -796,6 +872,11 @@ func (ec *executionContext) unmarshalNResetPasswordInput2githubᚗcomᚋrijum890
 
 func (ec *executionContext) unmarshalNRevokeOthersSessionInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeOthersSessionInput(ctx context.Context, v any) (model.RevokeOthersSessionInput, error) {
 	res, err := ec.unmarshalInputRevokeOthersSessionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNTwoFactorCode2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTwoFactorCode(ctx context.Context, v any) (model.TwoFactorCode, error) {
+	res, err := ec.unmarshalInputTwoFactorCode(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

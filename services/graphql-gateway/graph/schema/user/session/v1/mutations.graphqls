@@ -1,5 +1,19 @@
 extend type Mutation {
+    # Revokes a single session.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
     RevokeSession(input: RevokeSessionInput): MutationResponse!
+
+    # Revokes every session associated with the current user.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
     RevokeAllSessions(input: ScopedTokenInput!): MutationResponse!
+
+    # Revokes all other sessions and returns a refreshed auth response.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
     RevokeOthersSession(input: RevokeOthersSessionInput!): AuthResponse!
 }
