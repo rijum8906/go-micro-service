@@ -76,7 +76,7 @@ func GetHelper() (*ServiceHelper, *apperror.AppError) {
 	return instance, nil
 }
 
-func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) *apperror.AppError {
+func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *apperror.AppError) (appErr *apperror.AppError) {
 	tx, err := s.DBPool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.Serializable,
 	})
@@ -84,21 +84,18 @@ func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *appe
 		return apperror.ErrInternal.WithMessage("failed to begin transaction").WithDetail("error", err.Error())
 	}
 
+	committed := false
 	defer func() {
 		if p := recover(); p != nil {
-			err = apperror.ErrInternal.WithMessage("panic in transaction")
+			appErr = apperror.ErrInternal.WithMessage("panic in transaction")
 			if s.Logger != nil {
 				s.Logger.Error("panic in transaction",
 					zap.Any("panic", p),
 					zap.String("stack", string(debug.Stack())))
 			}
+		}
 
-			if rbErr := tx.Rollback(ctx); rbErr != nil {
-				if s.Logger != nil {
-					s.Logger.Error("rollback failed after panic", zap.Error(rbErr))
-				}
-			}
-		} else if err != nil {
+		if !committed && appErr != nil {
 			if rbErr := tx.Rollback(ctx); rbErr != nil {
 				if s.Logger != nil {
 					s.Logger.Warn("rollback failed", zap.Error(rbErr))
@@ -116,6 +113,7 @@ func (s *ServiceHelper) RunInTx(ctx context.Context, f func(q *db.Queries) *appe
 	if err = tx.Commit(ctx); err != nil {
 		return apperror.ErrInternal.WithMessage("failed to commit transaction").WithDetail("error", err.Error())
 	}
+	committed = true
 
 	return nil
 }
