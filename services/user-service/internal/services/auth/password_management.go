@@ -19,7 +19,7 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *authv1.ChangePass
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}

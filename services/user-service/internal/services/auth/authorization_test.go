@@ -42,9 +42,9 @@ func Test_Logout(t *testing.T) {
 
 	// Attach user info in ctx
 	ctx = setUserInfoInCtx(ctx, user)
-	md, _ := metadata.FromOutgoingContext(ctx)
+	md, _ := metadata.FromIncomingContext(ctx)
 	md.Set(dto.MetaSessionIDKey, claims.SessionID)
-	ctx = metadata.NewOutgoingContext(ctx, md)
+	ctx = metadata.NewIncomingContext(ctx, md)
 
 	// Logout
 	res, err := authService.Logout(ctx, &authv1.LogoutRequest{})

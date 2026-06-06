@@ -16,7 +16,7 @@ import (
 
 func (s *UserService) GetProfile(ctx context.Context, req *corev1.EmptyRequest) (*modelsv1.Profile, error) {
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrUserNotFoundInCtx
 	}

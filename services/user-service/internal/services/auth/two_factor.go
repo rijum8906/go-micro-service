@@ -31,7 +31,7 @@ import (
 //   - The TOTP URI and secret for the user
 func (s *AuthService) InitTwoFactorTOTP(ctx context.Context, req *corev1.EmptyRequest) (*authv1.InitTwoFactorTOTPResponse, error) {
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -116,7 +116,7 @@ func (s *AuthService) EnableTwoFactorTOTP(ctx context.Context, req *authv1.TwoFa
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrUserNotFoundInCtx
 	}
@@ -182,7 +182,7 @@ func (s *AuthService) EnableTwoFactorTOTP(ctx context.Context, req *authv1.TwoFa
 //   - A success response indicating the two-factor authentication was disabled
 func (s *AuthService) DisableTwoFactor(ctx context.Context, req *corev1.EmptyRequest) (*corev1.SuccessResponse, error) {
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}

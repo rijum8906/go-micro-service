@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	coreconstants "github.com/rijum8906/relay/packages/core/constants"
 	"github.com/rijum8906/relay/packages/core/dto"
@@ -14,21 +13,21 @@ import (
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/utils"
+	grpcmetadata "google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// attachClientInfo attach client info to context
-func attachClientInfo(ctx context.Context, meta coredto.RequestMeta) (context.Context, *apperror.AppError) {
-	browserInfo := utils.GetBrowserInfo(ctx)
+// Deprecated: this function will be removed soon, now we are getting the device info from request header
+//
+// attachClientMeta attach client info to context
+func attachClientMeta(ctx context.Context, meta coredto.RequestMeta) (context.Context, *apperror.AppError) {
+	md, ok := grpcmetadata.FromOutgoingContext(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithMessage("client info not found in context")
+	}
+	md.Set(dto.MetaDeviceIDKey, meta.DeviceId)
 
-	ctx = metadata.SetClientInfoToOutgoingContext(ctx, dto.ClientInfo{
-		TraceID:   uuid.NewString(),
-		UserAgent: browserInfo.UserAgent,
-		IPAddress: browserInfo.IPAddr,
-		DeviceID:  meta.DeviceId,
-	})
-
-	return ctx, nil
+	return grpcmetadata.NewOutgoingContext(ctx, md), nil
 }
 
 // validateAndAttachUserInfo validate the bearer token and on validation success attach user info to context

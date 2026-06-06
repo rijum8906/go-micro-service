@@ -37,9 +37,9 @@ func SetUserInfoToOutgoingContext(ctx context.Context, userInfo dto.UserInfo) co
 	return metadata.NewOutgoingContext(ctx, md)
 }
 
-func GetUserInfoFromContext(ctx context.Context) (dto.UserInfo, bool) {
+func GetUserInfoFromIncomingContext(ctx context.Context) (dto.UserInfo, bool) {
 	info := dto.UserInfo{}
-	md, ok := metadata.FromOutgoingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return info, false
 	}
@@ -77,9 +77,9 @@ func SetClientInfoToOutgoingContext(ctx context.Context, clientInfo dto.ClientIn
 	return metadata.NewOutgoingContext(ctx, md)
 }
 
-func GetClientInfoFromContext(ctx context.Context) (dto.ClientInfo, bool) {
+func GetClientInfoFromIncomingContext(ctx context.Context) (dto.ClientInfo, bool) {
 	info := dto.ClientInfo{}
-	md, ok := metadata.FromOutgoingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return info, false
 	}
@@ -130,9 +130,9 @@ func SetScopedTokenInfoToOutgoingContext(ctx context.Context, tokenInfo dto.Scop
 	return metadata.NewOutgoingContext(ctx, md)
 }
 
-func GetScopedTokenInfoFromContext(ctx context.Context) (dto.ScopedToken, bool) {
+func GetScopedTokenInfoFromIncomingContext(ctx context.Context) (dto.ScopedToken, bool) {
 	info := dto.ScopedToken{}
-	md, ok := metadata.FromOutgoingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return info, false
 	}
@@ -165,9 +165,9 @@ func SetAuthTokensInfoToOutgoingContext(ctx context.Context, tokenInfo dto.AuthT
 	return metadata.NewOutgoingContext(ctx, md)
 }
 
-func GetAuthTokensInfoFromContext(ctx context.Context) (dto.AuthTokens, bool) {
+func GetAuthTokensInfoFromIncomingContext(ctx context.Context) (dto.AuthTokens, bool) {
 	info := dto.AuthTokens{}
-	md, ok := metadata.FromOutgoingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return info, false
 	}

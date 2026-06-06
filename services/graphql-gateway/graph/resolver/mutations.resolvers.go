@@ -28,7 +28,7 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -38,7 +38,7 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 		Password: input.Password,
 	})
 	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+		return nil, err
 	}
 
 	return utils.MapAuthResponse(resp.User, resp.Profile, resp.Tokens), nil
@@ -50,7 +50,7 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -62,7 +62,7 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		LastName:  input.LastName,
 	})
 	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+		return nil, err
 	}
 
 	return utils.MapAuthResponse(res.User, res.Profile, res.Tokens), nil
@@ -80,7 +80,7 @@ func (r *mutationResolver) Logout(ctx context.Context) (*model.MutationResponse,
 		return nil, appErr
 	}
 
-	tokens, ok := metadata.GetAuthTokensInfoFromContext(ctx)
+	tokens, ok := metadata.GetAuthTokensInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithMessage("Failed to get auth tokens info from context")
 	}
@@ -111,7 +111,7 @@ func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userd
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -28,7 +28,7 @@ func (h *TaskHandler) CreateTask(ctx context.Context, req *taskv1.CreateTaskRequ
 		return nil, utils.MapAppError(apperror.ErrValidation.WithMessage("create task request is required"))
 	}
 
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, utils.MapAppError(apperror.ErrInternal.WithMessage("create task user metadata is required"))
 	}

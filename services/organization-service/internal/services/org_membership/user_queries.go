@@ -68,7 +68,7 @@ func (s *OrgMembershipService) GetMyMemberships(ctx context.Context, req *corev1
 	}
 
 	// 1. Authenticate and extract user identity from context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrUnAuthenticated.WithDetail("reason", "missing user metadata")
 	}
@@ -152,7 +152,7 @@ func (s *OrgMembershipService) GetMyMembership(ctx context.Context, req *corev1.
 	}
 
 	// 1. Authenticate and extract user identity from context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrUnAuthenticated.WithDetail("reason", "missing user metadata")
 	}

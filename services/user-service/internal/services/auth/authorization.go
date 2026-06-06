@@ -21,7 +21,7 @@ import (
 //   - User must be authenticated
 func (s *AuthService) LogoutAllDevices(ctx context.Context, req *corev1.EmptyRequest) (*corev1.SuccessResponse, error) {
 	// Extract user ID from context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrUserNotFoundInCtx
 	}
@@ -69,7 +69,7 @@ func (s *AuthService) LogoutAllDevices(ctx context.Context, req *corev1.EmptyReq
 //   - multiple calls with the same token will not affect the session state.
 func (s *AuthService) Logout(ctx context.Context, req *authv1.LogoutRequest) (*corev1.SuccessResponse, error) {
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrUserNotFoundInCtx
 	}
@@ -79,7 +79,7 @@ func (s *AuthService) Logout(ctx context.Context, req *authv1.LogoutRequest) (*c
 	}
 
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.GetClientInfoFromContext(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrClientNotFoundInCtx
 	}

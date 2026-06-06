@@ -48,7 +48,7 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 	}
 
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.GetClientInfoFromContext(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrClientNotFoundInCtx
 	}
@@ -124,7 +124,7 @@ func (s *AuthService) Register(ctx context.Context, req *authv1.RegisterRequest)
 	}
 
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.GetClientInfoFromContext(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrClientNotFoundInCtx
 	}
@@ -218,13 +218,13 @@ func (s *AuthService) LoginWithTwoFactorCode(ctx context.Context, req *authv1.Tw
 	}
 
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.GetClientInfoFromContext(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrClientNotFoundInCtx
 	}
 
 	// Extract tokens information from authenticated context
-	scopedTokenInfo, ok := metadata.GetScopedTokenInfoFromContext(ctx)
+	scopedTokenInfo, ok := metadata.GetScopedTokenInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve scoped token info from context")
 	}

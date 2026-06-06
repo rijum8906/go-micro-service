@@ -22,7 +22,7 @@ func (s *SessionService) GetSessions(ctx context.Context, req *corev1.Pagination
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -59,7 +59,7 @@ func (s *SessionService) GetActiveSessions(ctx context.Context, req *corev1.Pagi
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -94,7 +94,7 @@ func (s *SessionService) GetCurrentSession(ctx context.Context, req *corev1.Empt
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.GetUserInfoFromContext(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}

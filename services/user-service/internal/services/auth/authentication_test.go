@@ -10,7 +10,6 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/corelogger"
 	"github.com/rijum8906/relay/packages/core/dto"
-	"github.com/rijum8906/relay/packages/core/metadata"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	"github.com/rijum8906/relay/packages/core/token"
 	mock_token "github.com/rijum8906/relay/packages/core/token/mocks"
@@ -510,7 +509,7 @@ func setClientInfoInCtx(ctx context.Context) context.Context {
 		TraceID:    uuid.NewString(),
 	}
 
-	ctx = metadata.SetClientInfoToOutgoingContext(ctx, clientInfo)
+	ctx = testutils.SetClientInfoToIncomingContext(ctx, clientInfo)
 	return ctx
 }
 
@@ -521,7 +520,7 @@ func setUserInfoInCtx(ctx context.Context, user *db.User) context.Context {
 		SessionID: uuid.NewString(),
 	}
 
-	ctx = metadata.SetUserInfoToOutgoingContext(ctx, userInfo)
+	ctx = testutils.SetUserInfoToIncomingContext(ctx, userInfo)
 	return ctx
 }
 
@@ -533,6 +532,6 @@ func setUserScopedTokenInCtx(ctx context.Context, subject string) context.Contex
 		Subject: subject,
 	}
 
-	ctx = metadata.SetScopedTokenInfoToOutgoingContext(ctx, scopedToken)
+	ctx = testutils.SetScopedTokenInfoToIncomingContext(ctx, scopedToken)
 	return ctx
 }
