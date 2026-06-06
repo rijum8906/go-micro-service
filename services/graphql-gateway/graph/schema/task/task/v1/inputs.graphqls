@@ -1,3 +1,4 @@
+# Task creation payload.
 input CreateTaskInput {
     title: String!
     organizationId: ID
@@ -8,10 +9,12 @@ input CreateTaskInput {
     dueAt: DateTime
 }
 
+# Looks up a single task by id.
 input GetTaskInput {
     id: ID!
 }
 
+# Lists tasks for a specific project.
 input ListTasksByProjectInput {
     projectId: ID!
 }

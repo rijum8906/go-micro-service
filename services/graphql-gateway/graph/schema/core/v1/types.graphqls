@@ -1,18 +1,20 @@
+# Metadata attached to requests that need device-aware behavior.
 input RequestMetaInput {
-  deviceId: String!
+    deviceId: String!
 }
 
+# Standard pagination payload used by list queries.
 input PaginationInput {
-  page: Int!
-  limit: Int!
+    page: Int!
+    limit: Int!
 }
 
+# Scoped token used for security-sensitive operations.
 input ScopedTokenInput {
-  scopedToken: String!
-  meta: RequestMetaInput!
+    scopedToken: String!
 }
 
+# Simple email wrapper used by identity flows.
 input EmailInput {
-  email: String!
-  meta: RequestMetaInput!
+    email: String!
 }

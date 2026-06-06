@@ -42,18 +42,27 @@ type Session struct {
 	UpdatedAt        pgtype.Timestamptz
 }
 
+type TwoFactor struct {
+	ID         uuid.UUID
+	UserID     uuid.UUID
+	Method     string
+	Secret     string
+	IsEnabled  pgtype.Bool
+	IsPrimary  pgtype.Bool
+	LastUsedAt pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+}
+
 type User struct {
 	ID    uuid.UUID
 	Email string
 	// The status of the user (active, inactive, deleted)
-	Status             string
-	PasswordHash       pgtype.Text
-	IsEmailVerified    bool
-	TwoFactorEnabled   bool
-	TwoFactorSecret    pgtype.Text
-	TwoFactorEnabledAt pgtype.Timestamptz
-	EmailVerifiedAt    pgtype.Timestamptz
-	CreatedAt          pgtype.Timestamptz
-	UpdatedAt          pgtype.Timestamptz
-	DeletedAt          pgtype.Timestamptz
+	Status          string
+	PasswordHash    pgtype.Text
+	IsEmailVerified bool
+	EmailVerifiedAt pgtype.Timestamptz
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	DeletedAt       pgtype.Timestamptz
 }

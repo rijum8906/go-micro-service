@@ -22,15 +22,18 @@ type MutationResolver interface {
 	Empty(ctx context.Context) (*string, error)
 	Login(ctx context.Context, input userdto.LoginInput) (*model.AuthResponse, error)
 	Register(ctx context.Context, input userdto.RegisterInput) (*model.AuthResponse, error)
-	Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error)
+	LoginWithTwoFactorCode(ctx context.Context, input model.TwoFactorCode) (*model.AuthResponse, error)
+	Logout(ctx context.Context) (*model.MutationResponse, error)
+	LogoutALlDevices(ctx context.Context) (*model.MutationResponse, error)
 	RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error)
 	ResetPassword(ctx context.Context, input userdto.ResetPasswordInput) (*model.MutationResponse, error)
 	RequestEmailVerification(ctx context.Context, input userdto.RequestEmailVerificationInput) (*model.MutationResponse, error)
 	VerifyEmail(ctx context.Context, input userdto.VerifyEmailInput) (*model.MutationResponse, error)
+	GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.GenerateScopedTokenResponse, error)
+	RefershToken(ctx context.Context) (*model.AuthResponse, error)
 	RevokeSession(ctx context.Context, input *model.RevokeSessionInput) (*model.MutationResponse, error)
 	RevokeAllSessions(ctx context.Context, input model.ScopedTokenInput) (*model.MutationResponse, error)
 	RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.AuthResponse, error)
-	GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error)
 	UpdateProfileAvatarURL(ctx context.Context, input userdto.UpdateProfileAvatarUrlInput) (*model.Profile, error)
 	UpdateProfileName(ctx context.Context, input userdto.UpdateProfileNameInput) (*model.Profile, error)
 	ChangePassword(ctx context.Context, input userdto.ChangePasswordInput) (*model.MutationResponse, error)
@@ -84,10 +87,10 @@ func (ec *executionContext) field_Mutation_GenerateScopedToken_args(ctx context.
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_Login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_LoginWithTwoFactorCode_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLoginInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐLoginInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNTwoFactorCode2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTwoFactorCode)
 	if err != nil {
 		return nil, err
 	}
@@ -95,10 +98,10 @@ func (ec *executionContext) field_Mutation_Login_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_Logout_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_Login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLogoutInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐLogoutInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLoginInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐLoginInput)
 	if err != nil {
 		return nil, err
 	}
@@ -333,12 +336,16 @@ func (ec *executionContext) fieldContext_Mutation_Login(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "status":
+				return ec.fieldContext_AuthResponse_status(ctx, field)
 			case "tokens":
 				return ec.fieldContext_AuthResponse_tokens(ctx, field)
 			case "user":
 				return ec.fieldContext_AuthResponse_user(ctx, field)
 			case "profile":
 				return ec.fieldContext_AuthResponse_profile(ctx, field)
+			case "preAuthTOoken":
+				return ec.fieldContext_AuthResponse_preAuthTOoken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AuthResponse", field.Name)
 		},
@@ -382,12 +389,16 @@ func (ec *executionContext) fieldContext_Mutation_Register(ctx context.Context, 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "status":
+				return ec.fieldContext_AuthResponse_status(ctx, field)
 			case "tokens":
 				return ec.fieldContext_AuthResponse_tokens(ctx, field)
 			case "user":
 				return ec.fieldContext_AuthResponse_user(ctx, field)
 			case "profile":
 				return ec.fieldContext_AuthResponse_profile(ctx, field)
+			case "preAuthTOoken":
+				return ec.fieldContext_AuthResponse_preAuthTOoken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AuthResponse", field.Name)
 		},
@@ -406,6 +417,59 @@ func (ec *executionContext) fieldContext_Mutation_Register(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_LoginWithTwoFactorCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_LoginWithTwoFactorCode,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().LoginWithTwoFactorCode(ctx, fc.Args["input"].(model.TwoFactorCode))
+		},
+		nil,
+		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_LoginWithTwoFactorCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "status":
+				return ec.fieldContext_AuthResponse_status(ctx, field)
+			case "tokens":
+				return ec.fieldContext_AuthResponse_tokens(ctx, field)
+			case "user":
+				return ec.fieldContext_AuthResponse_user(ctx, field)
+			case "profile":
+				return ec.fieldContext_AuthResponse_profile(ctx, field)
+			case "preAuthTOoken":
+				return ec.fieldContext_AuthResponse_preAuthTOoken(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AuthResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_LoginWithTwoFactorCode_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_Logout(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -413,8 +477,7 @@ func (ec *executionContext) _Mutation_Logout(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Mutation_Logout,
 		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().Logout(ctx, fc.Args["input"].(userdto.LogoutInput))
+			return ec.Resolvers.Mutation().Logout(ctx)
 		},
 		nil,
 		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
@@ -423,7 +486,7 @@ func (ec *executionContext) _Mutation_Logout(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_Logout(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_Logout(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -439,16 +502,40 @@ func (ec *executionContext) fieldContext_Mutation_Logout(ctx context.Context, fi
 			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
 		},
 	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_Logout_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_LogoutALlDevices(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_LogoutALlDevices,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Mutation().LogoutALlDevices(ctx)
+		},
+		nil,
+		ec.marshalNMutationResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_LogoutALlDevices(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_MutationResponse_success(ctx, field)
+			case "message":
+				return ec.fieldContext_MutationResponse_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MutationResponse", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -641,6 +728,92 @@ func (ec *executionContext) fieldContext_Mutation_VerifyEmail(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_GenerateScopedToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_GenerateScopedToken,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().GenerateScopedToken(ctx, fc.Args["input"].(userdto.GenerateScopedTokenInput))
+		},
+		nil,
+		ec.marshalNGenerateScopedTokenResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGenerateScopedTokenResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_GenerateScopedToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "scopedToken":
+				return ec.fieldContext_GenerateScopedTokenResponse_scopedToken(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GenerateScopedTokenResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_GenerateScopedToken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_RefershToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_RefershToken,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Mutation().RefershToken(ctx)
+		},
+		nil,
+		ec.marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_RefershToken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "status":
+				return ec.fieldContext_AuthResponse_status(ctx, field)
+			case "tokens":
+				return ec.fieldContext_AuthResponse_tokens(ctx, field)
+			case "user":
+				return ec.fieldContext_AuthResponse_user(ctx, field)
+			case "profile":
+				return ec.fieldContext_AuthResponse_profile(ctx, field)
+			case "preAuthTOoken":
+				return ec.fieldContext_AuthResponse_preAuthTOoken(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AuthResponse", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_RevokeSession(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -760,12 +933,16 @@ func (ec *executionContext) fieldContext_Mutation_RevokeOthersSession(ctx contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "status":
+				return ec.fieldContext_AuthResponse_status(ctx, field)
 			case "tokens":
 				return ec.fieldContext_AuthResponse_tokens(ctx, field)
 			case "user":
 				return ec.fieldContext_AuthResponse_user(ctx, field)
 			case "profile":
 				return ec.fieldContext_AuthResponse_profile(ctx, field)
+			case "preAuthTOoken":
+				return ec.fieldContext_AuthResponse_preAuthTOoken(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AuthResponse", field.Name)
 		},
@@ -778,51 +955,6 @@ func (ec *executionContext) fieldContext_Mutation_RevokeOthersSession(ctx contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_RevokeOthersSession_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_GenerateScopedToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_GenerateScopedToken,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().GenerateScopedToken(ctx, fc.Args["input"].(userdto.GenerateScopedTokenInput))
-		},
-		nil,
-		ec.marshalNScopedTokenResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenResponse,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_GenerateScopedToken(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "scopedToken":
-				return ec.fieldContext_ScopedTokenResponse_scopedToken(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ScopedTokenResponse", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_GenerateScopedToken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1670,9 +1802,23 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "LoginWithTwoFactorCode":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_LoginWithTwoFactorCode(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "Logout":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_Logout(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "LogoutALlDevices":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_LogoutALlDevices(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -1705,6 +1851,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "GenerateScopedToken":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_GenerateScopedToken(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "RefershToken":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_RefershToken(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "RevokeSession":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_RevokeSession(ctx, field)
@@ -1722,13 +1882,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "RevokeOthersSession":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_RevokeOthersSession(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "GenerateScopedToken":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_GenerateScopedToken(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

@@ -1,6 +1,0 @@
-# services/user/.mockery.yaml
-with-expecter: true
-dir: ./internal/repository/user
-name: UserRepository
-filename: mock_user_repository.go
-outpkg: mock

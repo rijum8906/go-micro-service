@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package user_service.models.v1;
 
-import "core/v1/enums.proto";
 import "google/protobuf/timestamp.proto";
 
 message Token {
@@ -11,7 +10,7 @@ message Token {
 }
 
 message ScopedToken {
-  core.v1.TokenScope scope = 1;
+  string scope = 1;
   google.protobuf.Timestamp expires_at = 2;
 }
 

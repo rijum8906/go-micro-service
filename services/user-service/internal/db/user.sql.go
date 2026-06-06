@@ -63,25 +63,23 @@ func (q *Queries) CheckUserExists(ctx context.Context, id uuid.UUID) (bool, erro
 const CreateUser = `-- name: CreateUser :one
 INSERT INTO users (
     email,
-    password_hash,
-    two_factor_enabled_at
+    password_hash
 ) VALUES (
-    $1, $2, $3
+    $1, $2
 )
-RETURNING id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+RETURNING id, email, status, password_hash, is_email_verified, email_verified_at, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
-	Email              string
-	PasswordHash       pgtype.Text
-	TwoFactorEnabledAt pgtype.Timestamptz
+	Email        string
+	PasswordHash pgtype.Text
 }
 
 // =====================================================
 // CREATE METHODS
 // =====================================================
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, CreateUser, arg.Email, arg.PasswordHash, arg.TwoFactorEnabledAt)
+	row := q.db.QueryRow(ctx, CreateUser, arg.Email, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -89,9 +87,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Status,
 		&i.PasswordHash,
 		&i.IsEmailVerified,
-		&i.TwoFactorEnabled,
-		&i.TwoFactorSecret,
-		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -124,39 +119,8 @@ func (q *Queries) DeleteUserSoft(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const DisableUserTwoFactor = `-- name: DisableUserTwoFactor :exec
-UPDATE users
-SET two_factor_enabled = false,
-    two_factor_secret = NULL,
-    two_factor_enabled_at = NULL
-WHERE id = $1
-`
-
-func (q *Queries) DisableUserTwoFactor(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, DisableUserTwoFactor, id)
-	return err
-}
-
-const EnableUserTwoFactor = `-- name: EnableUserTwoFactor :exec
-UPDATE users
-SET two_factor_enabled = true,
-    two_factor_secret = $2,
-    two_factor_enabled_at = NOW()
-WHERE id = $1
-`
-
-type EnableUserTwoFactorParams struct {
-	ID              uuid.UUID
-	TwoFactorSecret pgtype.Text
-}
-
-func (q *Queries) EnableUserTwoFactor(ctx context.Context, arg EnableUserTwoFactorParams) error {
-	_, err := q.db.Exec(ctx, EnableUserTwoFactor, arg.ID, arg.TwoFactorSecret)
-	return err
-}
-
 const GetUser = `-- name: GetUser :one
-SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+SELECT id, email, status, password_hash, is_email_verified, email_verified_at, created_at, updated_at, deleted_at
 FROM users
 WHERE id = $1 AND status != 'deleted' LIMIT 1
 `
@@ -173,9 +137,6 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Status,
 		&i.PasswordHash,
 		&i.IsEmailVerified,
-		&i.TwoFactorEnabled,
-		&i.TwoFactorSecret,
-		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -185,7 +146,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const GetUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+SELECT id, email, status, password_hash, is_email_verified, email_verified_at, created_at, updated_at, deleted_at
 FROM users
 WHERE email = $1 AND status != 'deleted' LIMIT 1
 `
@@ -199,9 +160,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Status,
 		&i.PasswordHash,
 		&i.IsEmailVerified,
-		&i.TwoFactorEnabled,
-		&i.TwoFactorSecret,
-		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -211,7 +169,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const GetUserWithAllStatuses = `-- name: GetUserWithAllStatuses :one
-SELECT id, email, status, password_hash, is_email_verified, two_factor_enabled, two_factor_secret, two_factor_enabled_at, email_verified_at, created_at, updated_at, deleted_at
+SELECT id, email, status, password_hash, is_email_verified, email_verified_at, created_at, updated_at, deleted_at
 FROM users
 WHERE id = $1
 `
@@ -225,9 +183,6 @@ func (q *Queries) GetUserWithAllStatuses(ctx context.Context, id uuid.UUID) (Use
 		&i.Status,
 		&i.PasswordHash,
 		&i.IsEmailVerified,
-		&i.TwoFactorEnabled,
-		&i.TwoFactorSecret,
-		&i.TwoFactorEnabledAt,
 		&i.EmailVerifiedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,

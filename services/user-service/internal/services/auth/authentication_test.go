@@ -8,10 +8,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/corelogger"
 	"github.com/rijum8906/relay/packages/core/dto"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	"github.com/rijum8906/relay/packages/core/token"
 	mock_token "github.com/rijum8906/relay/packages/core/token/mocks"
+	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
 	"github.com/rijum8906/relay/services/user/app/constants"
 	"github.com/rijum8906/relay/services/user/internal/db"
@@ -20,7 +22,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/metadata"
 )
 
 var (
@@ -32,7 +33,7 @@ var (
 
 func TestMain(m *testing.M) {
 	apperror.SetConfig(&apperror.Config{
-		Logger: zap.NewNop(),
+		Logger: corelogger.NewDevLogger(),
 		AppEnv: "test",
 		Debug:  true,
 	})
@@ -107,7 +108,7 @@ func Test_Login_Validation(t *testing.T) {
 		{
 			name: "email does not exists",
 			setupCtx: func(ctx context.Context) context.Context {
-				return getClientInfoBasedCtx(ctx)
+				return setClientInfoInCtx(ctx)
 			},
 			req: &authv1.LoginRequest{
 				Email:    testutils.GenerateRandomEmail(),
@@ -120,7 +121,7 @@ func Test_Login_Validation(t *testing.T) {
 		{
 			name: "Invalida password",
 			setupCtx: func(ctx context.Context) context.Context {
-				return getClientInfoBasedCtx(ctx)
+				return setClientInfoInCtx(ctx)
 			},
 			req: &authv1.LoginRequest{
 				Email:    user.Email,
@@ -156,7 +157,7 @@ func Test_Login_Validation(t *testing.T) {
 }
 
 func Test_Login_Edge_Cases(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+	ctx := setClientInfoInCtx(context.Background())
 
 	email1 := testutils.GenerateRandomEmail()
 	password1 := testutils.GenerateRandomString(32)
@@ -228,8 +229,8 @@ func Test_Login_Edge_Cases(t *testing.T) {
 	})
 }
 
-func Test_Login_Success(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+func Test_Login_Success_Without_2FA(t *testing.T) {
+	ctx := setClientInfoInCtx(context.Background())
 
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(32)
@@ -251,6 +252,72 @@ func Test_Login_Success(t *testing.T) {
 	assert.Equal(t, profile.ID.String(), res.GetProfile().GetId())
 
 	// cleanup
+	t.Cleanup(func() {
+		if err := authService.DBQ.DeleteUserHard(context.Background(), user.ID); err != nil {
+			logger.Error("failed to cleanup user", zap.Error(err))
+		}
+	})
+}
+
+// Test_Login_Success_With_2FA tests a successful login with 2FA enabled
+//
+// Preconditions:
+// - Must tests all the functions involved in enabling 2FA
+func Test_Login_Success_With_2FA(t *testing.T) {
+	ctx := setClientInfoInCtx(context.Background())
+
+	email := testutils.GenerateRandomEmail()
+	password := testutils.GenerateRandomString(32)
+
+	// 1. Create a user
+	user, _, err := createUser(ctx, email, password)
+	if err != nil {
+		logger.Error("failed to create user", zap.Error(err))
+		t.FailNow()
+	}
+	ctx = setUserInfoInCtx(ctx, user) // InitTwoFactorTOTP and EnableTwoFactorTOTP require authenticated context
+
+	// 2. Enable 2FA for the user
+	res, err := authService.InitTwoFactorTOTP(ctx, &corev1.EmptyRequest{})
+	require.NoError(t, err)
+	require.NotEmpty(t, res.TwoFactorSecret)
+	require.NotEmpty(t, res.QrCodeUri)
+
+	// Generate a valid TOTP code
+	totpCode, appErr := generate2FATokenCode(res.TwoFactorSecret)
+	require.Nil(t, appErr)
+
+	// Enable 2FA for the user
+	successRes, err := authService.EnableTwoFactorTOTP(ctx, &authv1.TwoFactorTOTPRequest{
+		Totp:            totpCode,
+		TwoFactorSecret: res.TwoFactorSecret,
+	})
+	require.NoError(t, err)
+	require.True(t, successRes.Success)
+
+	// Verify that 2FA is enabled for the user
+	r, err := authService.DBQ.GetPrimaryTwoFactorAuthByUserID(ctx, user.ID)
+	require.NoError(t, err)
+	require.NotNil(t, r)
+
+	// Try to login with the user's credentials
+	loginRes, err := authService.Login(ctx, &authv1.LoginRequest{
+		Email:    email,
+		Password: password,
+	})
+	require.NoError(t, err)
+	require.Equal(t, authv1.AuthStatus_AUTH_STATUS_2FA_REQUIRED.String(), loginRes.Status.String())
+
+	// Attach a scoped token to the context
+	ctx = setUserScopedTokenInCtx(ctx, user.ID.String())
+
+	// Now complete the 2FA login
+	authRes, err := authService.LoginWithTwoFactorCode(ctx, &authv1.TwoFactorCodeRequest{
+		TwoFactorCode: totpCode,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, authRes)
+
 	t.Cleanup(func() {
 		if err := authService.DBQ.DeleteUserHard(context.Background(), user.ID); err != nil {
 			logger.Error("failed to cleanup user", zap.Error(err))
@@ -300,7 +367,7 @@ func Test_Register_Validation(t *testing.T) {
 		{
 			name: "email already exists",
 			setupCtx: func(ctx context.Context) context.Context {
-				return getClientInfoBasedCtx(ctx)
+				return setClientInfoInCtx(ctx)
 			},
 			req: &authv1.RegisterRequest{
 				Email:     user.Email,
@@ -338,7 +405,7 @@ func Test_Register_Validation(t *testing.T) {
 }
 
 func Test_Register_Edge_Cases(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+	ctx := setClientInfoInCtx(context.Background())
 
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(32)
@@ -368,7 +435,7 @@ func Test_Register_Edge_Cases(t *testing.T) {
 }
 
 func Test_Register_Success(t *testing.T) {
-	ctx := getClientInfoBasedCtx(context.Background())
+	ctx := setClientInfoInCtx(context.Background())
 
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(32)
@@ -429,7 +496,7 @@ func createUser(ctx context.Context, email, password string) (*db.User, *db.Prof
 	return &user, &profile, nil
 }
 
-func getClientInfoBasedCtx(ctx context.Context) context.Context {
+func setClientInfoInCtx(ctx context.Context) context.Context {
 	clientInfo := dto.ClientInfo{
 		DeviceID:   testutils.GenerateRandomString(32),
 		IPAddress:  "127.0.0.1",
@@ -438,19 +505,33 @@ func getClientInfoBasedCtx(ctx context.Context) context.Context {
 		APIVersion: "0.0.1",
 		Locale:     "en-US",
 		SDKVersion: "1.0.0",
-
-		RequestID: uuid.NewString(),
-		TraceID:   uuid.NewString(),
+		RequestID:  uuid.NewString(),
+		TraceID:    uuid.NewString(),
 	}
-	return metadata.NewIncomingContext(ctx, metadata.Pairs(
-		dto.MetaDeviceIDKey, clientInfo.DeviceID,
-		dto.MetaClientIPKey, clientInfo.IPAddress,
-		dto.MetaUserAgentKey, clientInfo.UserAgent,
-		dto.MetaClientTypeKey, clientInfo.ClientType,
-		dto.MetaAPIVersionKey, clientInfo.APIVersion,
-		dto.MetaLocaleKey, clientInfo.Locale,
-		dto.MetaSDKVersionKey, clientInfo.SDKVersion,
-		dto.MetaRequestIDKey, clientInfo.RequestID,
-		dto.MetaTraceIDKey, clientInfo.TraceID,
-	))
+
+	ctx = testutils.SetClientInfoToIncomingContext(ctx, clientInfo)
+	return ctx
+}
+
+func setUserInfoInCtx(ctx context.Context, user *db.User) context.Context {
+	userInfo := dto.UserInfo{
+		UserID:    user.ID.String(),
+		TokenID:   uuid.NewString(),
+		SessionID: uuid.NewString(),
+	}
+
+	ctx = testutils.SetUserInfoToIncomingContext(ctx, userInfo)
+	return ctx
+}
+
+func setUserScopedTokenInCtx(ctx context.Context, subject string) context.Context {
+	scopedToken := dto.ScopedToken{
+		String:  testutils.GenerateRandomString(32),
+		ID:      uuid.NewString(),
+		Scope:   constants.TokenScope2FA,
+		Subject: subject,
+	}
+
+	ctx = testutils.SetScopedTokenInfoToIncomingContext(ctx, scopedToken)
+	return ctx
 }

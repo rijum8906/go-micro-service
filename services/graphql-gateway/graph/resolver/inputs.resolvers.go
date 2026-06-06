@@ -15,6 +15,7 @@ import (
 
 // Scope is the resolver for the scope field.
 func (r *generateScopedTokenInputResolver) Scope(ctx context.Context, obj *userdto.GenerateScopedTokenInput, data model.TokenScope) error {
+	obj.Scope = data.String()
 	return nil
 }
 

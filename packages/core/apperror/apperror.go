@@ -59,7 +59,7 @@ func New(code ErrorCode, message string) *AppError {
 
 // NewWithFrame captures the caller's line number
 func NewWithFrame(code ErrorCode, message string, skip int) *AppError {
-	frames := captureFrames(skip + 1)
+	frames := captureFrames(skip)
 
 	return &AppError{
 		Code:    code,
@@ -109,5 +109,4 @@ func (e *AppError) Error() string {
 	}
 
 	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
-
 }

@@ -1,11 +1,66 @@
 extend type Mutation {
+    # Handles both a normal login and a 2FA challenge response.
+    #
+    # Required Auth: False
+    # Required Request Headers: X-Device-Id
+    #
+    # - When status is AUTH_STATUS_2FA_REQUIRED, return the pre-auth token and
+    #   send it back as Authorization: "2FA-Challenge" for the follow-up request.
+    # - When status is AUTH_STATUS_SUCCESS, return access and refresh tokens plus user/profile data.
     Login(input: LoginInput!): AuthResponse!
+
+    # Same response contract as Login.
+    #
+    # Required Auth: False
+    # Required Request Headers: X-Device-Id
     Register(input: RegisterInput!): AuthResponse!
-    Logout(input: LogoutInput!): MutationResponse!
+
+    # Completes the login flow after a 2FA challenge.
+    #
+    # Required Auth: True [Authorization: "2FA-Challenge eYJcml....."]
+    # Required Request Headers: X-Device-Id
+    #
+    # NOTE: do not use Bearer; use Authorization: "2FA-Challenge".
+    LoginWithTwoFactorCode(input: TwoFactorCode!): AuthResponse!
+
+    # Logs out the current session for the matching device.
+    #
+    # Required Auth: True
+    # Required Headers: X-Device-Id
+    #
+    # TIP: persist the device id in LocalStorage or IndexedDB.
+    Logout: MutationResponse!
+
+    # Logs out every session for the user.
+    #
+    # Required Auth: True
+    # Required Headers: X-Device-Id
+    #
+    LogoutALlDevices: MutationResponse!
+
+    # Sends a password-reset email with a tokenized reset link.
+    #
+    # NOTE: use a path such as tokens/reset-password?token={token} in the link.
     RequestPasswordReset(input: RequestPasswordResetInput!): MutationResponse!
+
+    # Resets the password after the token has been verified.
     ResetPassword(input: ResetPasswordInput!): MutationResponse!
+
+    # Sends an email verification link to the user.
     RequestEmailVerification(
         input: RequestEmailVerificationInput!
     ): MutationResponse!
+
+    # Verifies an email address using the provided token.
     VerifyEmail(input: VerifyEmailInput!): MutationResponse!
+
+    # Generates a scoped token for security-sensitive follow-up operations.
+    # Example: create a CHANGE_USER_PASSWORD token and attach it to ChangePassword.
+    # TODO: additional auth methods can be supported later.
+    GenerateScopedToken(
+        input: GenerateScopedTokenInput!
+    ): GenerateScopedTokenResponse!
+
+    # Refreshes the current access token using the refresh token.
+    RefershToken: AuthResponse!
 }

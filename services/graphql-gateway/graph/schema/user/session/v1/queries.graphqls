@@ -1,5 +1,19 @@
 extend type Query {
-  GetSessions(input: GetSessionsInput): [Session!]
-  GetActiveSessions(input: ScopedTokenInput!): [Session!]
-  GetCurrentSession: Session!
+    # Returns paginated sessions for the current user.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    GetSessions(input: GetSessionsInput): [Session!]
+
+    # Returns active sessions using a scoped token.
+    #
+    # Required Auth: True
+    # Required Request Headers: None
+    GetActiveSessions(input: ScopedTokenInput!): [Session!]
+
+    # Returns the current session.
+    #
+    # Required Auth: True
+    # Required Request Headers: X-Device-Id
+    GetCurrentSession: Session!
 }

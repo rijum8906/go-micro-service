@@ -22,7 +22,7 @@ func Test_Client_Connect_Success(t *testing.T) {
 
 func Test_Client_Connect_Failure(t *testing.T) {
 	client := broker.NewClient()
-	appErr := client.Connect("http://localhost:4222")
+	appErr := client.Connect("http://localhost:4842")
 	if appErr == nil {
 		t.Errorf("Connect() wants error with wrong address but got no error")
 		return

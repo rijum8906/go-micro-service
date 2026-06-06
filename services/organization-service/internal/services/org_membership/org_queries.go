@@ -81,7 +81,7 @@ func (s *OrgMembershipService) GetOrganizationMembershipsByOrgID(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").
@@ -239,7 +239,7 @@ func (s *OrgMembershipService) GetOrganizationMembershipsByRole(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").
@@ -401,7 +401,7 @@ func (s *OrgMembershipService) GetOrganizationMembershipsByStatus(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").
@@ -535,7 +535,7 @@ func (s *OrgMembershipService) GetOrganizationMembership(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").

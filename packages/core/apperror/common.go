@@ -32,7 +32,7 @@ const (
 // Common Errors
 var (
 	ErrInternal   = NewWithFrame(CodeInternal, "Internal Server Error", 1)
-	ErrThirdParty = NewWithFrame(CodeInternal, "Third Party Service Error", 1)
+	ErrThirdParty = NewWithFrame(CodeThirdParty, "Third Party Service Error", 1)
 
 	ErrForbidden = &AppError{
 		Code:    CodeForbidden,

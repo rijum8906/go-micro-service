@@ -1,23 +1,27 @@
+# Scoped-token payload used by auth and security-sensitive flows.
 input GenerateScopedTokenInput {
-  scope: TokenScope!
-  authMethod: AuthMethod!
-  authValue: String!
-  meta: RequestMetaInput!
+    scope: TokenScope!
+    authMethod: AuthMethod!
+    authValue: String!
+    meta: RequestMetaInput!
 }
 
+# Updates a profile avatar URL.
 input UpdateProfileAvatarUrlInput {
-  profileId: ID!
-  avatarUrl: String!
+    profileId: ID!
+    avatarUrl: String!
 }
 
+# Updates the first and last name for a profile.
 input UpdateProfileNameInput {
-  profileId: ID!
-  firstName: String!
-  lastName: String!
+    profileId: ID!
+    firstName: String!
+    lastName: String!
 }
 
+# Changes a password after validating a scoped token.
 input ChangePasswordInput {
-  token: String!
-  newPassword: String!
-  meta: RequestMetaInput!
+    token: String!
+    newPassword: String!
+    meta: RequestMetaInput!
 }

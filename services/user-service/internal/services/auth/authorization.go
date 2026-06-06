@@ -15,17 +15,13 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *AuthService) VerifyTwoFactor(ctx context.Context, req *authv1.TwoFactorRequest) (*corev1.SuccessResponse, error) {
-	return nil, nil
-}
-
 // LogoutAllDevices revokes all active tokens for the user, effectively logging them out from all devices.
 //
 // Constraints:
 //   - User must be authenticated
 func (s *AuthService) LogoutAllDevices(ctx context.Context, req *corev1.EmptyRequest) (*corev1.SuccessResponse, error) {
 	// Extract user ID from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrUserNotFoundInCtx
 	}
@@ -35,7 +31,6 @@ func (s *AuthService) LogoutAllDevices(ctx context.Context, req *corev1.EmptyReq
 	}
 
 	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
-
 		// Mark all devices as revoked in the database
 		if err := q.RevokeActiveSessions(ctx, userID); err != nil {
 			return apperror.ErrInternal.
@@ -74,7 +69,7 @@ func (s *AuthService) LogoutAllDevices(ctx context.Context, req *corev1.EmptyReq
 //   - multiple calls with the same token will not affect the session state.
 func (s *AuthService) Logout(ctx context.Context, req *authv1.LogoutRequest) (*corev1.SuccessResponse, error) {
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrUserNotFoundInCtx
 	}
@@ -84,12 +79,12 @@ func (s *AuthService) Logout(ctx context.Context, req *authv1.LogoutRequest) (*c
 	}
 
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.ReceiveClientInfo(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrClientNotFoundInCtx
 	}
 
-	tx, appErr := s.Helper.RunInTxWithManualRollback(ctx, func(q *db.Queries) *apperror.AppError {
+	appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Fetch session from database
 		session, err := q.GetSession(ctx, sessionID)
 		if err != nil {
@@ -117,17 +112,11 @@ func (s *AuthService) Logout(ctx context.Context, req *authv1.LogoutRequest) (*c
 		return nil
 	})
 	if appErr != nil {
-		if err := tx.Rollback(ctx); err != nil {
-			s.Logger.Error("failed to rollback transaction", zap.Error(err))
-		}
 		return nil, appErr
 	}
 
 	// Remove access token from redis
 	if appErr := s.TokenManager.RevokeAuthToken(ctx, userInfo.TokenID, userInfo.UserID); appErr != nil {
-		if err := tx.Rollback(ctx); err != nil {
-			s.Logger.Error("failed to rollback transaction", zap.Error(err))
-		}
 		s.Logger.Error("failed to revoke access token", apperror.ParseAppErrorIntoZapFields(appErr)...)
 		return nil, appErr
 	}

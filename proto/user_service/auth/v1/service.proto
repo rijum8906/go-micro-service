@@ -20,8 +20,11 @@ service AuthService {
   rpc ChangePassword(ChangePasswordRequest) returns (core.v1.SuccessResponse);
   rpc ResetPassword(ResetPasswordRequest) returns (core.v1.SuccessResponse);
 
+  // Two Factor Authentication
+  rpc InitTwoFactorTOTP(core.v1.EmptyRequest) returns (InitTwoFactorTOTPResponse);
+  rpc EnableTwoFactorTOTP(TwoFactorTOTPRequest) returns (core.v1.SuccessResponse);
+
   // Security
-  rpc VerifyTwoFactor(TwoFactorRequest) returns (core.v1.SuccessResponse);
   rpc DisableTwoFactor(core.v1.EmptyRequest) returns (core.v1.SuccessResponse);
 
   // Token management

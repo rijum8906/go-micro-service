@@ -22,7 +22,7 @@ func (s *SessionService) RevokeSession(ctx context.Context, req *sessionv1.Revok
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -57,7 +57,7 @@ func (s *SessionService) RevokeAllSessions(ctx context.Context, req *corev1.Empt
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
@@ -91,7 +91,7 @@ func (s *SessionService) RevokeOtherSessions(ctx context.Context, req *sessionv1
 	}
 
 	// Extract user information from authenticated context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}

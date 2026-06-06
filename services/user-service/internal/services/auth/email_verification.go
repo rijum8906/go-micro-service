@@ -47,7 +47,7 @@ func (s *AuthService) RequestEmailVerification(ctx context.Context, req *authv1.
 		}
 
 		// Get profile by user ID
-		p, err := q.GetProfile(ctx, user.ID)
+		p, err := q.GetProfileByUserID(ctx, user.ID)
 		if appErr := utils.AssertRowExists(err, "profile", user.ID.String()); appErr != nil {
 			return appErr
 		}
@@ -114,7 +114,7 @@ func (s *AuthService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 
 		user = &u
 
-		p, err := q.GetProfile(ctx, user.ID)
+		p, err := q.GetProfileByUserID(ctx, user.ID)
 		if appErr := utils.AssertRowExists(err, "profile", user.ID.String()); appErr != nil {
 			return appErr
 		}
@@ -125,7 +125,7 @@ func (s *AuthService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 			return appErr
 		}
 
-		url, appErr := utils.NewTokenURL(scopedToken.TokenString, s.Config.FrontendURL, s.Config.EmailVerificationPath)
+		url, appErr := utils.NewTokenURL(scopedToken.TokenString, s.Config.FrontendURL, s.Config.ResetPasswordPath)
 		if appErr != nil {
 			return appErr
 		}

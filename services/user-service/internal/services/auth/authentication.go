@@ -27,6 +27,9 @@ import (
 
 // Login authenticates a user with email and password, creating a new session.
 //
+// Business Rile:
+//   - If user has enabled 2FA then after authenticating the user, issue a new pre auth token, which will act as a authentication token (only allowed to LoginWithTwoFactorCode method)
+//
 // Idempotent:
 //   - Not idempotent. Each call creates a new session.
 //
@@ -45,18 +48,10 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 	}
 
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.ReceiveClientInfo(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrClientNotFoundInCtx
 	}
-
-	var (
-		session          *db.Session
-		refreshTokenHash string
-		accessToken      string
-	)
-
-	start := time.Now()
 
 	// Retrieve user by email
 	user, err := s.DBQ.GetUserByEmail(ctx, req.GetEmail())
@@ -70,21 +65,28 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 			WithDetail("db_error", err.Error())
 	}
 
-	timeTaken := time.Since(start)
-
-	s.Logger.Info("retrived user in", zap.Duration("duration", timeTaken))
-
-	start = time.Now()
-
 	// Verify password
 	if !s.HashService.Verify(user.PasswordHash.String, req.GetPassword()) {
 		return nil, apperror.ErrPermissionDenied.WithMessage("invalid credentials")
 	}
 
-	timeTaken = time.Since(start)
-	s.Logger.Info("verified password in", zap.Duration("duration", timeTaken))
-
-	start = time.Now()
+	exists, err := s.DBQ.CheckTwoFactorAuthEnabledByUserID(ctx, user.ID)
+	if err != nil {
+		return nil, apperror.ErrInternal.
+			WithDetail("internal_message", "failed to get primary two-factor auth by user id").
+			WithDetail("db_error", err.Error())
+	}
+	if exists {
+		// If 2FA is enabled, issue a pre-auth token and return 2FA required status
+		preAuthToken, appErr := s.issuePreAuthToken(ctx, user.ID.String())
+		if appErr != nil {
+			return nil, appErr
+		}
+		return &authv1.AuthResponse{
+			Status:       authv1.AuthStatus_AUTH_STATUS_2FA_REQUIRED,
+			PreAuthToken: preAuthToken,
+		}, nil
+	}
 
 	// Retrieve user profile
 	profile, err := s.DBQ.GetProfileByUserID(ctx, user.ID)
@@ -92,43 +94,12 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		return nil, appErr
 	}
 
-	timeTaken = time.Since(start)
-	s.Logger.Info("retrieved profile in", zap.Duration("duration", timeTaken))
-
-	start = time.Now()
-
-	// Execute authentication in transaction
-	if err := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
-		// Create session along with refresh token
-		s, appErr := s.createSession(ctx, q, user.ID, &clientInfo)
-		if appErr != nil {
-			return appErr
-		}
-		session = s
-		refreshTokenHash = session.RefreshTokenHash
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	timeTaken = time.Since(start)
-	s.Logger.Info("executed transaction in", zap.Duration("duration", timeTaken))
-
-	start = time.Now()
-
-	// Issue access token
-	token, appErr := s.issueAccessToken(ctx, user.ID.String(), session.ID.String())
+	_, authTokens, appErr := s.crateSessionAndIssueTokens(ctx, user.ID, &clientInfo)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	timeTaken = time.Since(start)
-	s.Logger.Info("issued access token in", zap.Duration("duration", timeTaken))
-
-	accessToken = token
-
-	return utils.MapAuthResponse(&user, &profile, accessToken, refreshTokenHash), nil
+	return utils.MapAuthResponse(&user, &profile, authTokens.AccessToken, authTokens.RefreshToken), nil
 }
 
 // TODO: create a function for oauth user login and registration
@@ -153,7 +124,7 @@ func (s *AuthService) Register(ctx context.Context, req *authv1.RegisterRequest)
 	}
 
 	// Extract client information for device fingerprinting
-	clientInfo, ok := metadata.ReceiveClientInfo(ctx)
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, constants.ErrClientNotFoundInCtx
 	}
@@ -246,8 +217,14 @@ func (s *AuthService) LoginWithTwoFactorCode(ctx context.Context, req *authv1.Tw
 		return nil, apperror.ErrValidation.WithMessage("token request is required")
 	}
 
+	// Extract client information for device fingerprinting
+	clientInfo, ok := metadata.GetClientInfoFromIncomingContext(ctx)
+	if !ok {
+		return nil, constants.ErrClientNotFoundInCtx
+	}
+
 	// Extract tokens information from authenticated context
-	scopedTokenInfo, ok := metadata.ReceiveScopedTokenInfo(ctx)
+	scopedTokenInfo, ok := metadata.GetScopedTokenInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve scoped token info from context")
 	}
@@ -265,12 +242,12 @@ func (s *AuthService) LoginWithTwoFactorCode(ctx context.Context, req *authv1.Tw
 	if err != nil {
 		return nil, constants.ErrInvalidUserIDInUserInfo
 	}
-	user, err := s.DBQ.GetUser(ctx, userID)
+	user2FA, err := s.DBQ.GetTwoFactorAuthByUserID(ctx, userID)
 	if err != nil {
-		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user from database")
+		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user 2FA from database")
 	}
 	// Generate and Match two factor code against generated code
-	generatedTwoFactorCode, appErr := generate2FATokenCode(user.TwoFactorSecret.String)
+	generatedTwoFactorCode, appErr := generate2FATokenCode(user2FA.Secret)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -278,12 +255,71 @@ func (s *AuthService) LoginWithTwoFactorCode(ctx context.Context, req *authv1.Tw
 		return nil, apperror.ErrValidation.WithMessage("invalid two factor code")
 	}
 
-	return nil, nil
+	// Fetch user from database
+	user, err := s.DBQ.GetUser(ctx, userID)
+	if appErr := utils.AssertRowExists(err, "user", userID.String()); appErr != nil {
+		return nil, appErr
+	}
+
+	// Fetch profile from database
+	profile, err := s.DBQ.GetProfileByUserID(ctx, userID)
+	if appErr := utils.AssertRowExists(err, "profile", scopedTokenInfo.Subject); appErr != nil {
+		return nil, appErr
+	}
+
+	// Create session and issue access and refresh tokens
+	_, authTokens, appErr := s.crateSessionAndIssueTokens(ctx, userID, &clientInfo)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	// Return authentication response
+	return utils.MapAuthResponse(&user, &profile, authTokens.AccessToken, authTokens.RefreshToken), nil
 }
 
 // ================================================================
 // CORE HELPER FUNCTIONS
 // ===============================================================
+
+func (s *AuthService) crateSessionAndIssueTokens(ctx context.Context, userID uuid.UUID, clientInfo *dto.ClientInfo) (*db.Session, *dto.AuthTokens, *apperror.AppError) {
+	var session *db.Session
+	var refreshTokenHash string
+
+	// Execute authentication in transaction
+	if err := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
+		// Create session along with refresh token
+		s, appErr := s.createSession(ctx, q, userID, clientInfo)
+		if appErr != nil {
+			return appErr
+		}
+		session = s
+		refreshTokenHash = session.RefreshTokenHash
+
+		return nil
+	}); err != nil {
+		return nil, nil, err
+	}
+
+	// Issue access token
+	token, appErr := s.issueAccessToken(ctx, userID.String(), session.ID.String())
+	if appErr != nil {
+		return nil, nil, appErr
+	}
+
+	return session, &dto.AuthTokens{
+		AccessToken:  token,
+		RefreshToken: refreshTokenHash,
+	}, nil
+}
+
+func (s *AuthService) issuePreAuthToken(ctx context.Context, userID string) (string, *apperror.AppError) {
+	tokenRes, appErr := s.TokenManager.IssueScopedToken(ctx, userID, constants.TokenScope2FA)
+	if appErr != nil {
+		return "", appErr
+	}
+
+	return tokenRes.TokenString, nil
+}
 
 func (s *AuthService) createSession(
 	ctx context.Context, q *db.Queries,

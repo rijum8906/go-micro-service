@@ -25,7 +25,7 @@ var File_user_service_auth_v1_service_proto protoreflect.FileDescriptor
 
 const file_user_service_auth_v1_service_proto_rawDesc = "" +
 	"\n" +
-	"\"user_service/auth/v1/service.proto\x12\x14user_service.auth.v1\x1a\x14core/v1/common.proto\x1a\"user_service/auth/v1/request.proto\x1a#user_service/auth/v1/response.proto2\x85\n" +
+	"\"user_service/auth/v1/service.proto\x12\x14user_service.auth.v1\x1a\x14core/v1/common.proto\x1a\"user_service/auth/v1/request.proto\x1a#user_service/auth/v1/response.proto2\xea\n" +
 	"\n" +
 	"\vAuthService\x12O\n" +
 	"\x05Login\x12\".user_service.auth.v1.LoginRequest\x1a\".user_service.auth.v1.AuthResponse\x12h\n" +
@@ -34,8 +34,9 @@ const file_user_service_auth_v1_service_proto_rawDesc = "" +
 	"\x06Logout\x12#.user_service.auth.v1.LogoutRequest\x1a\x18.core.v1.SuccessResponse\x12C\n" +
 	"\x10LogoutAllDevices\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponse\x12W\n" +
 	"\x0eChangePassword\x12+.user_service.auth.v1.ChangePasswordRequest\x1a\x18.core.v1.SuccessResponse\x12U\n" +
-	"\rResetPassword\x12*.user_service.auth.v1.ResetPasswordRequest\x1a\x18.core.v1.SuccessResponse\x12S\n" +
-	"\x0fVerifyTwoFactor\x12&.user_service.auth.v1.TwoFactorRequest\x1a\x18.core.v1.SuccessResponse\x12C\n" +
+	"\rResetPassword\x12*.user_service.auth.v1.ResetPasswordRequest\x1a\x18.core.v1.SuccessResponse\x12[\n" +
+	"\x11InitTwoFactorTOTP\x12\x15.core.v1.EmptyRequest\x1a/.user_service.auth.v1.InitTwoFactorTOTPResponse\x12[\n" +
+	"\x13EnableTwoFactorTOTP\x12*.user_service.auth.v1.TwoFactorTOTPRequest\x1a\x18.core.v1.SuccessResponse\x12C\n" +
 	"\x10DisableTwoFactor\x12\x15.core.v1.EmptyRequest\x1a\x18.core.v1.SuccessResponse\x12k\n" +
 	"\fRefreshToken\x12/.user_service.auth.v1.RefreshAccessTokenRequest\x1a*.user_service.auth.v1.RefreshTokenResponse\x12z\n" +
 	"\x13GenerateScopedToken\x120.user_service.auth.v1.GenerateScopedTokenRequest\x1a1.user_service.auth.v1.GenerateScopedTokenResponse\x12k\n" +
@@ -52,7 +53,7 @@ var file_user_service_auth_v1_service_proto_goTypes = []any{
 	(*v1.EmptyRequest)(nil),                 // 4: core.v1.EmptyRequest
 	(*ChangePasswordRequest)(nil),           // 5: user_service.auth.v1.ChangePasswordRequest
 	(*ResetPasswordRequest)(nil),            // 6: user_service.auth.v1.ResetPasswordRequest
-	(*TwoFactorRequest)(nil),                // 7: user_service.auth.v1.TwoFactorRequest
+	(*TwoFactorTOTPRequest)(nil),            // 7: user_service.auth.v1.TwoFactorTOTPRequest
 	(*RefreshAccessTokenRequest)(nil),       // 8: user_service.auth.v1.RefreshAccessTokenRequest
 	(*GenerateScopedTokenRequest)(nil),      // 9: user_service.auth.v1.GenerateScopedTokenRequest
 	(*RequestEmailVerificationRequest)(nil), // 10: user_service.auth.v1.RequestEmailVerificationRequest
@@ -60,8 +61,9 @@ var file_user_service_auth_v1_service_proto_goTypes = []any{
 	(*VerifyEmailRequest)(nil),              // 12: user_service.auth.v1.VerifyEmailRequest
 	(*AuthResponse)(nil),                    // 13: user_service.auth.v1.AuthResponse
 	(*v1.SuccessResponse)(nil),              // 14: core.v1.SuccessResponse
-	(*RefreshTokenResponse)(nil),            // 15: user_service.auth.v1.RefreshTokenResponse
-	(*GenerateScopedTokenResponse)(nil),     // 16: user_service.auth.v1.GenerateScopedTokenResponse
+	(*InitTwoFactorTOTPResponse)(nil),       // 15: user_service.auth.v1.InitTwoFactorTOTPResponse
+	(*RefreshTokenResponse)(nil),            // 16: user_service.auth.v1.RefreshTokenResponse
+	(*GenerateScopedTokenResponse)(nil),     // 17: user_service.auth.v1.GenerateScopedTokenResponse
 }
 var file_user_service_auth_v1_service_proto_depIdxs = []int32{
 	0,  // 0: user_service.auth.v1.AuthService.Login:input_type -> user_service.auth.v1.LoginRequest
@@ -71,29 +73,31 @@ var file_user_service_auth_v1_service_proto_depIdxs = []int32{
 	4,  // 4: user_service.auth.v1.AuthService.LogoutAllDevices:input_type -> core.v1.EmptyRequest
 	5,  // 5: user_service.auth.v1.AuthService.ChangePassword:input_type -> user_service.auth.v1.ChangePasswordRequest
 	6,  // 6: user_service.auth.v1.AuthService.ResetPassword:input_type -> user_service.auth.v1.ResetPasswordRequest
-	7,  // 7: user_service.auth.v1.AuthService.VerifyTwoFactor:input_type -> user_service.auth.v1.TwoFactorRequest
-	4,  // 8: user_service.auth.v1.AuthService.DisableTwoFactor:input_type -> core.v1.EmptyRequest
-	8,  // 9: user_service.auth.v1.AuthService.RefreshToken:input_type -> user_service.auth.v1.RefreshAccessTokenRequest
-	9,  // 10: user_service.auth.v1.AuthService.GenerateScopedToken:input_type -> user_service.auth.v1.GenerateScopedTokenRequest
-	10, // 11: user_service.auth.v1.AuthService.RequestEmailVerification:input_type -> user_service.auth.v1.RequestEmailVerificationRequest
-	11, // 12: user_service.auth.v1.AuthService.RequestPasswordReset:input_type -> user_service.auth.v1.RequestPasswordResetRequest
-	12, // 13: user_service.auth.v1.AuthService.VerifyEmail:input_type -> user_service.auth.v1.VerifyEmailRequest
-	13, // 14: user_service.auth.v1.AuthService.Login:output_type -> user_service.auth.v1.AuthResponse
-	13, // 15: user_service.auth.v1.AuthService.LoginWithTwoFactorCode:output_type -> user_service.auth.v1.AuthResponse
-	13, // 16: user_service.auth.v1.AuthService.Register:output_type -> user_service.auth.v1.AuthResponse
-	14, // 17: user_service.auth.v1.AuthService.Logout:output_type -> core.v1.SuccessResponse
-	14, // 18: user_service.auth.v1.AuthService.LogoutAllDevices:output_type -> core.v1.SuccessResponse
-	14, // 19: user_service.auth.v1.AuthService.ChangePassword:output_type -> core.v1.SuccessResponse
-	14, // 20: user_service.auth.v1.AuthService.ResetPassword:output_type -> core.v1.SuccessResponse
-	14, // 21: user_service.auth.v1.AuthService.VerifyTwoFactor:output_type -> core.v1.SuccessResponse
-	14, // 22: user_service.auth.v1.AuthService.DisableTwoFactor:output_type -> core.v1.SuccessResponse
-	15, // 23: user_service.auth.v1.AuthService.RefreshToken:output_type -> user_service.auth.v1.RefreshTokenResponse
-	16, // 24: user_service.auth.v1.AuthService.GenerateScopedToken:output_type -> user_service.auth.v1.GenerateScopedTokenResponse
-	14, // 25: user_service.auth.v1.AuthService.RequestEmailVerification:output_type -> core.v1.SuccessResponse
-	14, // 26: user_service.auth.v1.AuthService.RequestPasswordReset:output_type -> core.v1.SuccessResponse
-	14, // 27: user_service.auth.v1.AuthService.VerifyEmail:output_type -> core.v1.SuccessResponse
-	14, // [14:28] is the sub-list for method output_type
-	0,  // [0:14] is the sub-list for method input_type
+	4,  // 7: user_service.auth.v1.AuthService.InitTwoFactorTOTP:input_type -> core.v1.EmptyRequest
+	7,  // 8: user_service.auth.v1.AuthService.EnableTwoFactorTOTP:input_type -> user_service.auth.v1.TwoFactorTOTPRequest
+	4,  // 9: user_service.auth.v1.AuthService.DisableTwoFactor:input_type -> core.v1.EmptyRequest
+	8,  // 10: user_service.auth.v1.AuthService.RefreshToken:input_type -> user_service.auth.v1.RefreshAccessTokenRequest
+	9,  // 11: user_service.auth.v1.AuthService.GenerateScopedToken:input_type -> user_service.auth.v1.GenerateScopedTokenRequest
+	10, // 12: user_service.auth.v1.AuthService.RequestEmailVerification:input_type -> user_service.auth.v1.RequestEmailVerificationRequest
+	11, // 13: user_service.auth.v1.AuthService.RequestPasswordReset:input_type -> user_service.auth.v1.RequestPasswordResetRequest
+	12, // 14: user_service.auth.v1.AuthService.VerifyEmail:input_type -> user_service.auth.v1.VerifyEmailRequest
+	13, // 15: user_service.auth.v1.AuthService.Login:output_type -> user_service.auth.v1.AuthResponse
+	13, // 16: user_service.auth.v1.AuthService.LoginWithTwoFactorCode:output_type -> user_service.auth.v1.AuthResponse
+	13, // 17: user_service.auth.v1.AuthService.Register:output_type -> user_service.auth.v1.AuthResponse
+	14, // 18: user_service.auth.v1.AuthService.Logout:output_type -> core.v1.SuccessResponse
+	14, // 19: user_service.auth.v1.AuthService.LogoutAllDevices:output_type -> core.v1.SuccessResponse
+	14, // 20: user_service.auth.v1.AuthService.ChangePassword:output_type -> core.v1.SuccessResponse
+	14, // 21: user_service.auth.v1.AuthService.ResetPassword:output_type -> core.v1.SuccessResponse
+	15, // 22: user_service.auth.v1.AuthService.InitTwoFactorTOTP:output_type -> user_service.auth.v1.InitTwoFactorTOTPResponse
+	14, // 23: user_service.auth.v1.AuthService.EnableTwoFactorTOTP:output_type -> core.v1.SuccessResponse
+	14, // 24: user_service.auth.v1.AuthService.DisableTwoFactor:output_type -> core.v1.SuccessResponse
+	16, // 25: user_service.auth.v1.AuthService.RefreshToken:output_type -> user_service.auth.v1.RefreshTokenResponse
+	17, // 26: user_service.auth.v1.AuthService.GenerateScopedToken:output_type -> user_service.auth.v1.GenerateScopedTokenResponse
+	14, // 27: user_service.auth.v1.AuthService.RequestEmailVerification:output_type -> core.v1.SuccessResponse
+	14, // 28: user_service.auth.v1.AuthService.RequestPasswordReset:output_type -> core.v1.SuccessResponse
+	14, // 29: user_service.auth.v1.AuthService.VerifyEmail:output_type -> core.v1.SuccessResponse
+	15, // [15:30] is the sub-list for method output_type
+	0,  // [0:15] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
