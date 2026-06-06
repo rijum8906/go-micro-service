@@ -2,7 +2,7 @@
 // github.com/vektra/mockery
 // template: testify
 
-package userv1_mock
+package mock_userv1
 
 import (
 	"context"
@@ -207,8 +207,8 @@ func (_c *MockUserServiceClient_CheckExists_Call) RunAndReturn(run func(ctx cont
 	return _c
 }
 
-// GetProfile provides a mock function for the type MockUserServiceClient
-func (_mock *MockUserServiceClient) GetProfile(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error) {
+// GetMyProfile provides a mock function for the type MockUserServiceClient
+func (_mock *MockUserServiceClient) GetMyProfile(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error) {
 	var tmpRet mock.Arguments
 	if len(opts) > 0 {
 		tmpRet = _mock.Called(ctx, in, opts)
@@ -218,7 +218,7 @@ func (_mock *MockUserServiceClient) GetProfile(ctx context.Context, in *corev1.E
 	ret := tmpRet
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetProfile")
+		panic("no return value specified for GetMyProfile")
 	}
 
 	var r0 *modelsv1.Profile
@@ -241,21 +241,21 @@ func (_mock *MockUserServiceClient) GetProfile(ctx context.Context, in *corev1.E
 	return r0, r1
 }
 
-// MockUserServiceClient_GetProfile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetProfile'
-type MockUserServiceClient_GetProfile_Call struct {
+// MockUserServiceClient_GetMyProfile_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetMyProfile'
+type MockUserServiceClient_GetMyProfile_Call struct {
 	*mock.Call
 }
 
-// GetProfile is a helper method to define mock.On call
+// GetMyProfile is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in *corev1.EmptyRequest
 //   - opts ...grpc.CallOption
-func (_e *MockUserServiceClient_Expecter) GetProfile(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_GetProfile_Call {
-	return &MockUserServiceClient_GetProfile_Call{Call: _e.mock.On("GetProfile",
+func (_e *MockUserServiceClient_Expecter) GetMyProfile(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_GetMyProfile_Call {
+	return &MockUserServiceClient_GetMyProfile_Call{Call: _e.mock.On("GetMyProfile",
 		append([]interface{}{ctx, in}, opts...)...)}
 }
 
-func (_c *MockUserServiceClient_GetProfile_Call) Run(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption)) *MockUserServiceClient_GetProfile_Call {
+func (_c *MockUserServiceClient_GetMyProfile_Call) Run(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption)) *MockUserServiceClient_GetMyProfile_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -280,18 +280,18 @@ func (_c *MockUserServiceClient_GetProfile_Call) Run(run func(ctx context.Contex
 	return _c
 }
 
-func (_c *MockUserServiceClient_GetProfile_Call) Return(profile *modelsv1.Profile, err error) *MockUserServiceClient_GetProfile_Call {
+func (_c *MockUserServiceClient_GetMyProfile_Call) Return(profile *modelsv1.Profile, err error) *MockUserServiceClient_GetMyProfile_Call {
 	_c.Call.Return(profile, err)
 	return _c
 }
 
-func (_c *MockUserServiceClient_GetProfile_Call) RunAndReturn(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error)) *MockUserServiceClient_GetProfile_Call {
+func (_c *MockUserServiceClient_GetMyProfile_Call) RunAndReturn(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.Profile, error)) *MockUserServiceClient_GetMyProfile_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetUser provides a mock function for the type MockUserServiceClient
-func (_mock *MockUserServiceClient) GetUser(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.User, error) {
+// GetMySelf provides a mock function for the type MockUserServiceClient
+func (_mock *MockUserServiceClient) GetMySelf(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.User, error) {
 	var tmpRet mock.Arguments
 	if len(opts) > 0 {
 		tmpRet = _mock.Called(ctx, in, opts)
@@ -301,7 +301,7 @@ func (_mock *MockUserServiceClient) GetUser(ctx context.Context, in *corev1.Empt
 	ret := tmpRet
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetUser")
+		panic("no return value specified for GetMySelf")
 	}
 
 	var r0 *modelsv1.User
@@ -324,21 +324,21 @@ func (_mock *MockUserServiceClient) GetUser(ctx context.Context, in *corev1.Empt
 	return r0, r1
 }
 
-// MockUserServiceClient_GetUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUser'
-type MockUserServiceClient_GetUser_Call struct {
+// MockUserServiceClient_GetMySelf_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetMySelf'
+type MockUserServiceClient_GetMySelf_Call struct {
 	*mock.Call
 }
 
-// GetUser is a helper method to define mock.On call
+// GetMySelf is a helper method to define mock.On call
 //   - ctx context.Context
 //   - in *corev1.EmptyRequest
 //   - opts ...grpc.CallOption
-func (_e *MockUserServiceClient_Expecter) GetUser(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_GetUser_Call {
-	return &MockUserServiceClient_GetUser_Call{Call: _e.mock.On("GetUser",
+func (_e *MockUserServiceClient_Expecter) GetMySelf(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_GetMySelf_Call {
+	return &MockUserServiceClient_GetMySelf_Call{Call: _e.mock.On("GetMySelf",
 		append([]interface{}{ctx, in}, opts...)...)}
 }
 
-func (_c *MockUserServiceClient_GetUser_Call) Run(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption)) *MockUserServiceClient_GetUser_Call {
+func (_c *MockUserServiceClient_GetMySelf_Call) Run(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption)) *MockUserServiceClient_GetMySelf_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -363,12 +363,95 @@ func (_c *MockUserServiceClient_GetUser_Call) Run(run func(ctx context.Context, 
 	return _c
 }
 
+func (_c *MockUserServiceClient_GetMySelf_Call) Return(user *modelsv1.User, err error) *MockUserServiceClient_GetMySelf_Call {
+	_c.Call.Return(user, err)
+	return _c
+}
+
+func (_c *MockUserServiceClient_GetMySelf_Call) RunAndReturn(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.User, error)) *MockUserServiceClient_GetMySelf_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUser provides a mock function for the type MockUserServiceClient
+func (_mock *MockUserServiceClient) GetUser(ctx context.Context, in *corev1.IDRequest, opts ...grpc.CallOption) (*modelsv1.User, error) {
+	var tmpRet mock.Arguments
+	if len(opts) > 0 {
+		tmpRet = _mock.Called(ctx, in, opts)
+	} else {
+		tmpRet = _mock.Called(ctx, in)
+	}
+	ret := tmpRet
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUser")
+	}
+
+	var r0 *modelsv1.User
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *corev1.IDRequest, ...grpc.CallOption) (*modelsv1.User, error)); ok {
+		return returnFunc(ctx, in, opts...)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *corev1.IDRequest, ...grpc.CallOption) *modelsv1.User); ok {
+		r0 = returnFunc(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*modelsv1.User)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *corev1.IDRequest, ...grpc.CallOption) error); ok {
+		r1 = returnFunc(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockUserServiceClient_GetUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUser'
+type MockUserServiceClient_GetUser_Call struct {
+	*mock.Call
+}
+
+// GetUser is a helper method to define mock.On call
+//   - ctx context.Context
+//   - in *corev1.IDRequest
+//   - opts ...grpc.CallOption
+func (_e *MockUserServiceClient_Expecter) GetUser(ctx interface{}, in interface{}, opts ...interface{}) *MockUserServiceClient_GetUser_Call {
+	return &MockUserServiceClient_GetUser_Call{Call: _e.mock.On("GetUser",
+		append([]interface{}{ctx, in}, opts...)...)}
+}
+
+func (_c *MockUserServiceClient_GetUser_Call) Run(run func(ctx context.Context, in *corev1.IDRequest, opts ...grpc.CallOption)) *MockUserServiceClient_GetUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *corev1.IDRequest
+		if args[1] != nil {
+			arg1 = args[1].(*corev1.IDRequest)
+		}
+		var arg2 []grpc.CallOption
+		var variadicArgs []grpc.CallOption
+		if len(args) > 2 {
+			variadicArgs = args[2].([]grpc.CallOption)
+		}
+		arg2 = variadicArgs
+		run(
+			arg0,
+			arg1,
+			arg2...,
+		)
+	})
+	return _c
+}
+
 func (_c *MockUserServiceClient_GetUser_Call) Return(user *modelsv1.User, err error) *MockUserServiceClient_GetUser_Call {
 	_c.Call.Return(user, err)
 	return _c
 }
 
-func (_c *MockUserServiceClient_GetUser_Call) RunAndReturn(run func(ctx context.Context, in *corev1.EmptyRequest, opts ...grpc.CallOption) (*modelsv1.User, error)) *MockUserServiceClient_GetUser_Call {
+func (_c *MockUserServiceClient_GetUser_Call) RunAndReturn(run func(ctx context.Context, in *corev1.IDRequest, opts ...grpc.CallOption) (*modelsv1.User, error)) *MockUserServiceClient_GetUser_Call {
 	_c.Call.Return(run)
 	return _c
 }

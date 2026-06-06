@@ -71,7 +71,7 @@ func (s *AuthService) RequestEmailVerification(ctx context.Context, req *authv1.
 		return nil, appErr
 	}
 
-	if appErr := s.OrgOpenFGAPublisher.Publish(jobs.JobUserRequestedEmailVerification, dto.EmailVerificationDTO{
+	if appErr := s.BrokerPublisher.Publish(jobs.JobUserRequestedEmailVerification, dto.EmailVerificationDTO{
 		BaseEmailDTO: dto.BaseEmailDTO{
 			ClientName:  profile.FirstName + " " + profile.LastName,
 			ClientEmail: user.Email,
@@ -136,7 +136,7 @@ func (s *AuthService) RequestPasswordReset(ctx context.Context, req *authv1.Requ
 		return nil, appErr
 	}
 
-	if appErr := s.OrgOpenFGAPublisher.Publish(jobs.JobUserRequestedPasswordReset, dto.PasswordResetDTO{
+	if appErr := s.BrokerPublisher.Publish(jobs.JobUserRequestedPasswordReset, dto.PasswordResetDTO{
 		BaseEmailDTO: dto.BaseEmailDTO{
 			ClientName:  profile.FirstName + " " + profile.LastName,
 			ClientEmail: user.Email,
@@ -216,8 +216,8 @@ func (s *AuthService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 		return nil, appErr
 	}
 
-	if claims.Scope != constants.TokenScopeVerifyEmail {
-		return nil, apperror.ErrValidation.WithMessage("invalid scoped token scope for verify email")
+	if claims.Scope != constants.TokenScopeResetPassword {
+		return nil, apperror.ErrValidation.WithMessage("invalid scoped token scope for reset password")
 	}
 	userID, err := uuid.Parse(claims.Subject)
 	if err != nil {

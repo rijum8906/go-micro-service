@@ -23,7 +23,6 @@ const (
 
 type RevokeSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ScopedToken   string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
 	TokenToRevoke string                 `protobuf:"bytes,2,opt,name=token_to_revoke,json=tokenToRevoke,proto3" json:"token_to_revoke,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -57,13 +56,6 @@ func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RevokeSessionRequest.ProtoReflect.Descriptor instead.
 func (*RevokeSessionRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_session_v1_request_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *RevokeSessionRequest) GetScopedToken() string {
-	if x != nil {
-		return x.ScopedToken
-	}
-	return ""
 }
 
 func (x *RevokeSessionRequest) GetTokenToRevoke() string {
@@ -129,9 +121,8 @@ var File_user_service_session_v1_request_proto protoreflect.FileDescriptor
 
 const file_user_service_session_v1_request_proto_rawDesc = "" +
 	"\n" +
-	"%user_service/session/v1/request.proto\x12\x17user_service.session.v1\"a\n" +
-	"\x14RevokeSessionRequest\x12!\n" +
-	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12&\n" +
+	"%user_service/session/v1/request.proto\x12\x17user_service.session.v1\">\n" +
+	"\x14RevokeSessionRequest\x12&\n" +
 	"\x0ftoken_to_revoke\x18\x02 \x01(\tR\rtokenToRevoke\"m\n" +
 	"\x1aRevokeOtherSessionsRequest\x12!\n" +
 	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12,\n" +

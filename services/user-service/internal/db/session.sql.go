@@ -174,6 +174,31 @@ func (q *Queries) GetActiveSessionsByUserID(ctx context.Context, arg GetActiveSe
 	return items, nil
 }
 
+const GetRevokedSessionByRefreshTokenHash = `-- name: GetRevokedSessionByRefreshTokenHash :one
+SELECT id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
+FROM sessions
+WHERE refresh_token_hash = $1 AND is_revoked = true LIMIT 1
+`
+
+func (q *Queries) GetRevokedSessionByRefreshTokenHash(ctx context.Context, refreshTokenHash string) (Session, error) {
+	row := q.db.QueryRow(ctx, GetRevokedSessionByRefreshTokenHash, refreshTokenHash)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.RefreshTokenHash,
+		&i.UserAgent,
+		&i.IpAddr,
+		&i.DeviceID,
+		&i.LastLoginAt,
+		&i.ExpiresAt,
+		&i.IsRevoked,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const GetSession = `-- name: GetSession :one
 SELECT id, user_id, refresh_token_hash, user_agent, ip_addr, device_id, last_login_at, expires_at, is_revoked, created_at, updated_at
     FROM sessions
@@ -338,7 +363,7 @@ func (q *Queries) RevokeActiveSessions(ctx context.Context, userID uuid.UUID) er
 const RevokeOtherSessions = `-- name: RevokeOtherSessions :exec
 UPDATE sessions
 SET is_revoked = true
-WHERE user_id = $1 AND id = $2 AND is_revoked = false
+WHERE user_id = $1 AND id <> $2 AND is_revoked = false
 `
 
 type RevokeOtherSessionsParams struct {

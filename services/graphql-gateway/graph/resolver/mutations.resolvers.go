@@ -230,7 +230,6 @@ func (r *mutationResolver) RevokeSession(ctx context.Context, input *model.Revok
 	}
 
 	res, err := r.Clients.SessionClient.RevokeSession(ctx, &sessionv1.RevokeSessionRequest{
-		ScopedToken:   input.ScopedToken,
 		TokenToRevoke: input.TokenToRevoke,
 	})
 	if err != nil {
@@ -361,13 +360,8 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.Cha
 		return nil, appErr
 	}
 
-	claims, appErr := r.TokenManager.ValidateScopedToken(ctx, input.Token)
-	if appErr != nil {
-		return nil, appErr
-	}
-
 	res, err := r.Clients.AuthClient.ChangePassword(ctx, &authv1.ChangePasswordRequest{
-		TokenScope:  string(claims.Scope),
+		ScopedToken: input.Token,
 		NewPassword: input.NewPassword,
 	})
 	if err != nil {

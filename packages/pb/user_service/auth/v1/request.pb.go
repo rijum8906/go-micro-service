@@ -459,7 +459,7 @@ func (x *TwoFactorRequest) GetCode() string {
 
 type ChangePasswordRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TokenScope    string                 `protobuf:"bytes,1,opt,name=token_scope,json=tokenScope,proto3" json:"token_scope,omitempty"`
+	ScopedToken   string                 `protobuf:"bytes,1,opt,name=scoped_token,json=scopedToken,proto3" json:"scoped_token,omitempty"`
 	NewPassword   string                 `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -495,9 +495,9 @@ func (*ChangePasswordRequest) Descriptor() ([]byte, []int) {
 	return file_user_service_auth_v1_request_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *ChangePasswordRequest) GetTokenScope() string {
+func (x *ChangePasswordRequest) GetScopedToken() string {
 	if x != nil {
-		return x.TokenScope
+		return x.ScopedToken
 	}
 	return ""
 }
@@ -693,10 +693,9 @@ const file_user_service_auth_v1_request_proto_rawDesc = "" +
 	"\rLogoutRequest\x12#\n" +
 	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"&\n" +
 	"\x10TwoFactorRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\"[\n" +
-	"\x15ChangePasswordRequest\x12\x1f\n" +
-	"\vtoken_scope\x18\x01 \x01(\tR\n" +
-	"tokenScope\x12!\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\"]\n" +
+	"\x15ChangePasswordRequest\x12!\n" +
+	"\fscoped_token\x18\x01 \x01(\tR\vscopedToken\x12!\n" +
 	"\fnew_password\x18\x02 \x01(\tR\vnewPassword\"r\n" +
 	"\x1aGenerateScopedTokenRequest\x12\x14\n" +
 	"\x05scope\x18\x01 \x01(\tR\x05scope\x12\x1f\n" +

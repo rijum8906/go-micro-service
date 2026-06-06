@@ -82,7 +82,7 @@ func (r *queryResolver) MyProfile(ctx context.Context) (*model.Profile, error) {
 		return nil, appErr
 	}
 
-	res, err := r.Clients.UserClient.GetProfile(ctx, &corev1.EmptyRequest{})
+	res, err := r.Clients.UserClient.GetMyProfile(ctx, &corev1.EmptyRequest{})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
@@ -97,7 +97,7 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 		return nil, appErr
 	}
 
-	res, err := r.Clients.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	res, err := r.Clients.UserClient.GetMySelf(ctx, &corev1.EmptyRequest{})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}

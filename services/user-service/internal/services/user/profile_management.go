@@ -14,7 +14,7 @@ import (
 	"github.com/rijum8906/relay/services/user/internal/utils"
 )
 
-func (s *UserService) GetProfile(ctx context.Context, req *corev1.EmptyRequest) (*modelsv1.Profile, error) {
+func (s *UserService) GetMyProfile(ctx context.Context, req *corev1.EmptyRequest) (*modelsv1.Profile, error) {
 	// Extract user information from authenticated context
 	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {

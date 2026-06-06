@@ -5,7 +5,7 @@ all: false
 dir: "{{.InterfaceDir}}/mocks" # Dynamic directory based on interface location
 recursive: true
 inpackage: false
-pkgname: "{{.SrcPackageName}}_mock"
+pkgname: "mock_{{.SrcPackageName}}"
 filename: "mock_{{.InterfaceNameSnake}}.go"
 include-auto-generated: true
 

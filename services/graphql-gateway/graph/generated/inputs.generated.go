@@ -634,20 +634,13 @@ func (ec *executionContext) unmarshalInputRevokeSessionInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"scopedToken", "tokenToRevoke"}
+	fieldsInOrder := [...]string{"tokenToRevoke"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "scopedToken":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopedToken"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ScopedToken = data
 		case "tokenToRevoke":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tokenToRevoke"))
 			data, err := ec.unmarshalNString2string(ctx, v)

@@ -1210,7 +1210,6 @@ input RevokeOthersSessionInput {
 
 # Revokes a single session identified by token.
 input RevokeSessionInput {
-    scopedToken: String!
     tokenToRevoke: String!
 }
 `, BuiltIn: false},

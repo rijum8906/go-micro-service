@@ -37,6 +37,11 @@ SELECT *
 FROM sessions
 WHERE refresh_token_hash = $1 AND is_revoked = false LIMIT 1;
 
+-- name: GetRevokedSessionByRefreshTokenHash :one
+SELECT *
+FROM sessions
+WHERE refresh_token_hash = $1 AND is_revoked = true LIMIT 1;
+
 -- =====================================================
 -- CHECK METHODS
 -- =====================================================
@@ -82,7 +87,7 @@ WHERE user_id = $1 AND is_revoked = false;
 -- name: RevokeOtherSessions :exec
 UPDATE sessions
 SET is_revoked = true
-WHERE user_id = $1 AND id = $2 AND is_revoked = false;
+WHERE user_id = $1 AND id <> $2 AND is_revoked = false;
 
 -- =====================================================
 -- LOCK METHODS

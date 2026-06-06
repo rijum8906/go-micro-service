@@ -9,12 +9,13 @@ import "user_service/user/v1/response.proto";
 
 service UserService {
   // Profile management
-  rpc GetProfile(core.v1.EmptyRequest) returns (user_service.models.v1.Profile);
+  rpc GetMyProfile(core.v1.EmptyRequest) returns (user_service.models.v1.Profile);
   rpc UpdateProfileAvatarURL(UpdateProfileAvatarURLRequest) returns (user_service.models.v1.Profile);
   rpc UpdateProfileName(UpdateProfileNameRequest) returns (user_service.models.v1.Profile);
 
   // User management
-  rpc GetUser(core.v1.EmptyRequest) returns (user_service.models.v1.User);
+  rpc GetMySelf(core.v1.EmptyRequest) returns (user_service.models.v1.User);
+  rpc GetUser(core.v1.IDRequest) returns (user_service.models.v1.User);
 
   // User existence checks
   rpc CheckExists(core.v1.IDRequest) returns (CheckExistsResponse);
