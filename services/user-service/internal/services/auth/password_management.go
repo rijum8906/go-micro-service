@@ -24,7 +24,7 @@ func (s *AuthService) ChangePassword(ctx context.Context, req *authv1.ChangePass
 		return nil, apperror.ErrInternal.WithDetail("internal_message", "failed to retrieve user info from context")
 	}
 
-	claims, appErr := s.TokenManager.ValidateScopedToken(ctx, req.TokenScope)
+	claims, appErr := s.TokenManager.ValidateScopedToken(ctx, req.ScopedToken)
 	if appErr != nil {
 		return nil, appErr
 	}

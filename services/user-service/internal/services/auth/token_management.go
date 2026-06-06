@@ -128,7 +128,7 @@ func (s *AuthService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	if !token.IsValidTokenScope(req.GetScope()) {
 		return nil, apperror.ErrValidation.WithMessage("invalid token scope")
 	}
-	if !constants.IsInternalTokenScope(req.GetScope()) {
+	if constants.IsInternalTokenScope(req.GetScope()) {
 		return nil, apperror.ErrValidation.WithMessage("invalid token scope for generate scoped token")
 	}
 
@@ -151,11 +151,10 @@ func (s *AuthService) GenerateScopedToken(ctx context.Context, req *authv1.Gener
 	}
 
 	// Generate scoped token
-	tokenRes, appErr := s.TokenManager.GenerateToken(
+	tokenRes, appErr := s.TokenManager.IssueScopedToken(
+		ctx,
 		userInfo.UserID,
-		uuid.NewString(),
 		req.GetScope(),
-		s.Config.ScopedTokenTTL,
 	)
 	if appErr != nil {
 		return nil, appErr

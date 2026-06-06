@@ -16,6 +16,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/testutils"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
+	"github.com/rijum8906/relay/services/user/internal/services/auth"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,20 +25,21 @@ import (
 
 func Test_InitTwoFactorTOTP(t *testing.T) {
 	// Core Utils
-	ctx := context.Background()
+	suite := auth.NewTestSuite()
+	defer suite.TearDownSuite()
 
 	// User credentials
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(10)
 
 	// Create a test user
-	user, _, err := createUser(ctx, email, password)
+	user, _, err := suite.CreateUser(t, email, password)
 	require.NoError(t, err)
 
 	// Enable two-factor authentication
 	// Set user info in the context
-	ctx = setUserInfoInCtx(ctx, user)
-	res, err := authService.InitTwoFactorTOTP(ctx, &corev1.EmptyRequest{})
+	suite.SetUserInfoInContext(user)
+	res, err := suite.AuthService.InitTwoFactorTOTP(suite.Ctx, &corev1.EmptyRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, res)
 	// Check that the response contains the expected fields
@@ -47,19 +49,20 @@ func Test_InitTwoFactorTOTP(t *testing.T) {
 
 func Test_EnableTwoFactorTOTP(t *testing.T) {
 	// Core Utils
-	ctx := context.Background()
+	suite := auth.NewTestSuite()
+	defer suite.TearDownSuite()
 
 	// User credentials
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(10)
 
 	// Create a test user
-	user, _, err := createUser(ctx, email, password)
+	user, _, err := suite.CreateUser(t, email, password)
 	require.NoError(t, err)
-	ctx = setUserInfoInCtx(ctx, user) // Set user info in the context
+	suite.SetUserInfoInContext(user) // Set user info in the context
 
 	// Initialize two-factor authentication
-	res, err := authService.InitTwoFactorTOTP(ctx, &corev1.EmptyRequest{})
+	res, err := suite.AuthService.InitTwoFactorTOTP(suite.Ctx, &corev1.EmptyRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
@@ -68,7 +71,7 @@ func Test_EnableTwoFactorTOTP(t *testing.T) {
 	require.Nil(t, appErr)
 
 	// Test Enable method
-	successRes, err := authService.EnableTwoFactorTOTP(ctx, &authv1.TwoFactorTOTPRequest{
+	successRes, err := suite.AuthService.EnableTwoFactorTOTP(suite.Ctx, &authv1.TwoFactorTOTPRequest{
 		Totp:            totp,
 		TwoFactorSecret: res.TwoFactorSecret,
 	})
@@ -80,22 +83,23 @@ func Test_EnableTwoFactorTOTP(t *testing.T) {
 }
 
 func Test_DisableTwoFactor(t *testing.T) {
-	ctx := context.Background()
+	suite := auth.NewTestSuite()
+	defer suite.TearDownSuite()
 
 	// User Credentials
 	email := testutils.GenerateRandomEmail()
 	password := testutils.GenerateRandomString(10)
 
 	// Create a user for testing
-	user, _, err := createUser(ctx, email, password)
+	user, _, err := suite.CreateUser(t, email, password)
 	t.Cleanup(func() {
-		authService.DBQ.DeleteUserHard(context.Background(), user.ID)
+		suite.AuthService.DBQ.DeleteUserHard(context.Background(), user.ID)
 	})
 	require.NoError(t, err)
-	ctx = setUserInfoInCtx(ctx, user) // Set user info in the context
+	suite.SetUserInfoInContext(user) // Set user info in the context
 
 	// Init two factor authentication
-	res, err := authService.InitTwoFactorTOTP(ctx, &corev1.EmptyRequest{})
+	res, err := suite.AuthService.InitTwoFactorTOTP(suite.Ctx, &corev1.EmptyRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
@@ -104,21 +108,21 @@ func Test_DisableTwoFactor(t *testing.T) {
 	require.Nil(t, appErr)
 
 	// Enable two-factor authentication
-	_, err = authService.EnableTwoFactorTOTP(ctx, &authv1.TwoFactorTOTPRequest{
+	_, err = suite.AuthService.EnableTwoFactorTOTP(suite.Ctx, &authv1.TwoFactorTOTPRequest{
 		Totp:            totp,
 		TwoFactorSecret: res.TwoFactorSecret,
 	})
 	require.NoError(t, err)
 
 	// Disable two-factor authentication
-	successRes, err := authService.DisableTwoFactor(ctx, &corev1.EmptyRequest{})
+	successRes, err := suite.AuthService.DisableTwoFactor(suite.Ctx, &corev1.EmptyRequest{})
 	require.NoError(t, err)
 	require.NotNil(t, successRes)
 	require.True(t, successRes.Success)
 
 	// Try to login
 	// Should directly pass without two-factor authentication
-	_, err = authService.Login(ctx, &authv1.LoginRequest{
+	_, err = suite.AuthService.Login(suite.Ctx, &authv1.LoginRequest{
 		Email:    email,
 		Password: password,
 	})

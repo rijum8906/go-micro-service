@@ -216,8 +216,8 @@ func (s *AuthService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 		return nil, appErr
 	}
 
-	if claims.Scope != constants.TokenScopeVerifyEmail {
-		return nil, apperror.ErrValidation.WithMessage("invalid scoped token scope for verify email")
+	if claims.Scope != constants.TokenScopeResetPassword {
+		return nil, apperror.ErrValidation.WithMessage("invalid scoped token scope for reset password")
 	}
 	userID, err := uuid.Parse(claims.Subject)
 	if err != nil {
