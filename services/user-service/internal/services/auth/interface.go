@@ -82,6 +82,9 @@ func NewForTest() *AuthService {
 			RefreshTokenTTL: time.Minute,
 			ScopedTokenTTL:  time.Minute,
 		},
+		FrontendURL:           "http://localhost:3000",
+		EmailVerificationPath: "/token/verify-email",
+		ResetPasswordPath:     "/token/password-reset",
 	}
 
 	dbPool := testutils.MustConnectDB(

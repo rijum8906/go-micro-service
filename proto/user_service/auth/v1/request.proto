@@ -44,7 +44,7 @@ message TwoFactorRequest {
 }
 
 message ChangePasswordRequest {
-  string token_scope = 1;
+  string scoped_token = 1;
   string new_password = 2;
 }
 
