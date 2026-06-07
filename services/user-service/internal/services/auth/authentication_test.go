@@ -405,6 +405,8 @@ func Test_Register_Edge_Cases(t *testing.T) {
 
 	// Redis server error when issuing token
 	t.Run("redis server closed", func(t *testing.T) {
+		suite.SetClientInfoInContext()
+
 		mockTokenManager := mock_token.NewMockTokenManager(t)
 		mockTokenManager.On("IssueAuthToken", mock.Anything, mock.Anything, mock.Anything).
 			Return(nil, apperror.ErrInternal)
