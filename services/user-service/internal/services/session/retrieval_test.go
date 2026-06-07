@@ -24,11 +24,20 @@ func Test_GetSessions(t *testing.T) {
 	authResponses := loginToMultipleDevices(t, suite, email, password, 5)
 	authResponse := authResponses[len(authResponses)-1]
 
-	// Get the sessions
+	// Get all the sessions
 	suite.SetUserInfoInContext(authResponse.Tokens.AccessToken.Value)
-	sessions, err := suite.SessionService.GetSessions(suite.Ctx, &corev1.PaginationRequest{
+	sessions, err := suite.GetSessions(suite.Ctx, &corev1.PaginationRequest{
 		Page:  1,
-		Limit: 5,
+		Limit: 10,
+	})
+	require.Nil(t, err)
+	require.Len(t, sessions.Sessions, 5)
+
+	// Get 3 the sessions
+	suite.SetUserInfoInContext(authResponse.Tokens.AccessToken.Value)
+	sessions, err = suite.GetSessions(suite.Ctx, &corev1.PaginationRequest{
+		Page:  1,
+		Limit: 3,
 	})
 	require.Nil(t, err)
 	require.Len(t, sessions.Sessions, 3)
