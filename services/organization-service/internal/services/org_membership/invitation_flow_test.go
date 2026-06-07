@@ -143,7 +143,7 @@ func Test_SendInvitation_Integration_Failure(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctx := tc.setupContext()
-			servicetestutils.MockUserServiceClient.On("GetUser", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
+			servicetestutils.MockUserServiceClient.On("GetMySelf", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
 				Id: uuid.NewString(),
 			}, nil)
 			servicetestutils.MockUserServiceClient.On("CheckEmailExists", ctx, &corev1.EmailRequest{Email: tc.email}).Return(&userv1.CheckExistsResponse{Exists: tc.emailExists}, nil)
@@ -172,7 +172,7 @@ func Test_SendInvitation_Integration_Success(t *testing.T) {
 	))
 
 	servicetestutils.MockUserServiceClient.On("CheckEmailExists", ctx, &corev1.EmailRequest{Email: internEmail}).Return(&userv1.CheckExistsResponse{Exists: true}, nil)
-	servicetestutils.MockUserServiceClient.On("GetUser", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
+	servicetestutils.MockUserServiceClient.On("GetMySelf", ctx, &corev1.EmptyRequest{}).Return(&modelsv1.User{
 		Id:    uuid.NewString(),
 		Email: internEmail,
 	}, nil)
