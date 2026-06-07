@@ -42,7 +42,7 @@ func (s *SessionService) RevokeSession(ctx context.Context, req *sessionv1.Revok
 	}
 
 	// delete access token from cache
-	if appErr := s.TokenManager.RevokeAuthToken(ctx, userInfo.UserID, userInfo.SessionID); appErr != nil {
+	if appErr := s.TokenManager.RevokeAuthToken(ctx, userInfo.TokenID, userInfo.UserID); appErr != nil {
 		return nil, appErr
 	}
 

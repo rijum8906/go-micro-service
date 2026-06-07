@@ -36,7 +36,7 @@ func Test_RequestEmailVerification(t *testing.T) {
 	suite.SetClientInfoInContext()
 
 	// Mock publisher
-	mockPublisher, ok := suite.AuthService.OrgOpenFGAPublisher.(*mock_broker.MockPublisher)
+	mockPublisher, ok := suite.AuthService.BrokerPublisher.(*mock_broker.MockPublisher)
 	require.True(t, ok)
 	mockPublisher.On("Publish", jobs.JobUserRequestedEmailVerification, mock.Anything).Return(nil)
 
@@ -59,7 +59,7 @@ func Test_RequestPasswordReset(t *testing.T) {
 	require.NoError(t, err)
 
 	// Mock publisher
-	mockPublisher, ok := suite.AuthService.OrgOpenFGAPublisher.(*mock_broker.MockPublisher)
+	mockPublisher, ok := suite.AuthService.BrokerPublisher.(*mock_broker.MockPublisher)
 	require.True(t, ok)
 	mockPublisher.On("Publish", jobs.JobUserRequestedPasswordReset, mock.Anything).Return(nil)
 

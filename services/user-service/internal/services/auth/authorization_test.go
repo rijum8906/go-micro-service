@@ -52,6 +52,11 @@ func Test_Logout(t *testing.T) {
 	res, err := suite.AuthService.Logout(ctx, &authv1.LogoutRequest{})
 	require.Nil(t, err)
 	require.True(t, res.Success)
+
+	// Verify the session is invalidated
+	session, err := suite.AuthService.DBQ.GetRevokedSessionByRefreshTokenHash(suite.Ctx, authRes.Tokens.RefreshToken.Value)
+	require.NoError(t, err)
+	require.True(t, session.IsRevoked)
 }
 
 // Test_LogoutAllDevices tests the logout all devices functionality

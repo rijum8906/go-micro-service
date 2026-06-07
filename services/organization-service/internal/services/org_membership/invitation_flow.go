@@ -104,7 +104,7 @@ func (s *OrgMembershipService) SendInvitation(
 	}
 
 	// Get user ID from email for membership check
-	targetUser, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	targetUser, err := s.UserClient.GetMySelf(ctx, &corev1.EmptyRequest{})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.
 			WithMessage("failed to get user details").
@@ -348,7 +348,7 @@ func (s *OrgMembershipService) AcceptInvitation(
 	}
 
 	// Fetch user details from user service to get email for validation
-	user, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	user, err := s.UserClient.GetUser(ctx, &corev1.IDRequest{Id: userID.String()})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.
 			WithMessage("failed to fetch user details").
@@ -580,7 +580,7 @@ func (s *OrgMembershipService) DeclineInvitation(
 	}
 
 	// Fetch user details from user service to get email for validation
-	user, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	user, err := s.UserClient.GetUser(ctx, &corev1.IDRequest{Id: userID.String()})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.
 			WithMessage("failed to fetch user details").

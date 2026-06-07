@@ -230,7 +230,6 @@ func (r *mutationResolver) RevokeSession(ctx context.Context, input *model.Revok
 	}
 
 	res, err := r.Clients.SessionClient.RevokeSession(ctx, &sessionv1.RevokeSessionRequest{
-		ScopedToken:   input.ScopedToken,
 		TokenToRevoke: input.TokenToRevoke,
 	})
 	if err != nil {
