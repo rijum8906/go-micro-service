@@ -29,6 +29,35 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _AuthResponse_status(ctx context.Context, field graphql.CollectedField, obj *model.AuthResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AuthResponse_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNAuthStatus2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AuthResponse_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AuthStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AuthResponse_tokens(ctx context.Context, field graphql.CollectedField, obj *model.AuthResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -39,9 +68,9 @@ func (ec *executionContext) _AuthResponse_tokens(ctx context.Context, field grap
 			return obj.Tokens, nil
 		},
 		nil,
-		ec.marshalNAuthTokens2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthTokens,
+		ec.marshalOAuthTokens2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthTokens,
 		true,
-		true,
+		false,
 	)
 }
 
@@ -74,9 +103,9 @@ func (ec *executionContext) _AuthResponse_user(ctx context.Context, field graphq
 			return obj.User, nil
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐUser,
 		true,
-		true,
+		false,
 	)
 }
 
@@ -121,9 +150,9 @@ func (ec *executionContext) _AuthResponse_profile(ctx context.Context, field gra
 			return obj.Profile, nil
 		},
 		nil,
-		ec.marshalNProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
+		ec.marshalOProfile2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐProfile,
 		true,
-		true,
+		false,
 	)
 }
 
@@ -151,6 +180,35 @@ func (ec *executionContext) fieldContext_AuthResponse_profile(_ context.Context,
 				return ec.fieldContext_Profile_avatarUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AuthResponse_preAuthTOoken(ctx context.Context, field graphql.CollectedField, obj *model.AuthResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AuthResponse_preAuthTOoken,
+		func(ctx context.Context) (any, error) {
+			return obj.PreAuthTOoken, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_AuthResponse_preAuthTOoken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -226,6 +284,35 @@ func (ec *executionContext) fieldContext_AuthTokens_refreshToken(_ context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _GenerateScopedTokenResponse_scopedToken(ctx context.Context, field graphql.CollectedField, obj *model.GenerateScopedTokenResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GenerateScopedTokenResponse_scopedToken,
+		func(ctx context.Context) (any, error) {
+			return obj.ScopedToken, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GenerateScopedTokenResponse_scopedToken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GenerateScopedTokenResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _MutationResponse_success(ctx context.Context, field graphql.CollectedField, obj *model.MutationResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -284,36 +371,30 @@ func (ec *executionContext) fieldContext_MutationResponse_message(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _ScopedTokenResponse_token(ctx context.Context, field graphql.CollectedField, obj *model.ScopedTokenResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _ScopedTokenResponse_scopedToken(ctx context.Context, field graphql.CollectedField, obj *model.ScopedTokenResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ScopedTokenResponse_token,
+		ec.fieldContext_ScopedTokenResponse_scopedToken,
 		func(ctx context.Context) (any, error) {
-			return obj.Token, nil
+			return obj.ScopedToken, nil
 		},
 		nil,
-		ec.marshalNToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐToken,
+		ec.marshalNString2string,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_ScopedTokenResponse_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ScopedTokenResponse_scopedToken(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ScopedTokenResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "value":
-				return ec.fieldContext_Token_value(ctx, field)
-			case "expiresAt":
-				return ec.fieldContext_Token_expiresAt(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Token", field.Name)
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -943,7 +1024,7 @@ func (ec *executionContext) unmarshalInputEmailInput(ctx context.Context, obj an
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "meta"}
+	fieldsInOrder := [...]string{"email"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -957,13 +1038,6 @@ func (ec *executionContext) unmarshalInputEmailInput(ctx context.Context, obj an
 				return it, err
 			}
 			it.Email = data
-		case "meta":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
-			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Meta = data
 		}
 	}
 	return it, nil
@@ -1047,7 +1121,7 @@ func (ec *executionContext) unmarshalInputScopedTokenInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"scopedToken", "meta"}
+	fieldsInOrder := [...]string{"scopedToken"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -1061,13 +1135,6 @@ func (ec *executionContext) unmarshalInputScopedTokenInput(ctx context.Context, 
 				return it, err
 			}
 			it.ScopedToken = data
-		case "meta":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
-			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Meta = data
 		}
 	}
 	return it, nil
@@ -1092,21 +1159,19 @@ func (ec *executionContext) _AuthResponse(ctx context.Context, sel ast.Selection
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("AuthResponse")
+		case "status":
+			out.Values[i] = ec._AuthResponse_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "tokens":
 			out.Values[i] = ec._AuthResponse_tokens(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "user":
 			out.Values[i] = ec._AuthResponse_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "profile":
 			out.Values[i] = ec._AuthResponse_profile(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+		case "preAuthTOoken":
+			out.Values[i] = ec._AuthResponse_preAuthTOoken(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1148,6 +1213,45 @@ func (ec *executionContext) _AuthTokens(ctx context.Context, sel ast.SelectionSe
 			}
 		case "refreshToken":
 			out.Values[i] = ec._AuthTokens_refreshToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var generateScopedTokenResponseImplementors = []string{"GenerateScopedTokenResponse"}
+
+func (ec *executionContext) _GenerateScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, obj *model.GenerateScopedTokenResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, generateScopedTokenResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GenerateScopedTokenResponse")
+		case "scopedToken":
+			out.Values[i] = ec._GenerateScopedTokenResponse_scopedToken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1229,8 +1333,8 @@ func (ec *executionContext) _ScopedTokenResponse(ctx context.Context, sel ast.Se
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ScopedTokenResponse")
-		case "token":
-			out.Values[i] = ec._ScopedTokenResponse_token(ctx, field, obj)
+		case "scopedToken":
+			out.Values[i] = ec._ScopedTokenResponse_scopedToken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1418,14 +1522,28 @@ func (ec *executionContext) marshalNAuthResponse2ᚖgithubᚗcomᚋrijum8906ᚋr
 	return ec._AuthResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAuthTokens2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v *model.AuthTokens) graphql.Marshaler {
+func (ec *executionContext) unmarshalNAuthStatus2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthStatus(ctx context.Context, v any) (model.AuthStatus, error) {
+	var res model.AuthStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAuthStatus2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthStatus(ctx context.Context, sel ast.SelectionSet, v model.AuthStatus) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNGenerateScopedTokenResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGenerateScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, v model.GenerateScopedTokenResponse) graphql.Marshaler {
+	return ec._GenerateScopedTokenResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGenerateScopedTokenResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐGenerateScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, v *model.GenerateScopedTokenResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._AuthTokens(ctx, sel, v)
+	return ec._GenerateScopedTokenResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNMutationResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐMutationResponse(ctx context.Context, sel ast.SelectionSet, v model.MutationResponse) graphql.Marshaler {
@@ -1460,20 +1578,6 @@ func (ec *executionContext) unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum89
 func (ec *executionContext) unmarshalNScopedTokenInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenInput(ctx context.Context, v any) (model.ScopedTokenInput, error) {
 	res, err := ec.unmarshalInputScopedTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNScopedTokenResponse2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, v model.ScopedTokenResponse) graphql.Marshaler {
-	return ec._ScopedTokenResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNScopedTokenResponse2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐScopedTokenResponse(ctx context.Context, sel ast.SelectionSet, v *model.ScopedTokenResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ScopedTokenResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTask2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v model.Task) graphql.Marshaler {
@@ -1514,6 +1618,13 @@ func (ec *executionContext) marshalNToken2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋ
 		return graphql.Null
 	}
 	return ec._Token(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAuthTokens2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐAuthTokens(ctx context.Context, sel ast.SelectionSet, v *model.AuthTokens) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AuthTokens(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

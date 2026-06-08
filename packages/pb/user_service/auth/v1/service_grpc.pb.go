@@ -21,27 +21,48 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	AuthService_Login_FullMethodName                    = "/user_service.auth.v1.AuthService/Login"
+	AuthService_LoginWithTwoFactorCode_FullMethodName   = "/user_service.auth.v1.AuthService/LoginWithTwoFactorCode"
 	AuthService_Register_FullMethodName                 = "/user_service.auth.v1.AuthService/Register"
 	AuthService_Logout_FullMethodName                   = "/user_service.auth.v1.AuthService/Logout"
+	AuthService_LogoutAllDevices_FullMethodName         = "/user_service.auth.v1.AuthService/LogoutAllDevices"
+	AuthService_ChangePassword_FullMethodName           = "/user_service.auth.v1.AuthService/ChangePassword"
+	AuthService_ResetPassword_FullMethodName            = "/user_service.auth.v1.AuthService/ResetPassword"
+	AuthService_InitTwoFactorTOTP_FullMethodName        = "/user_service.auth.v1.AuthService/InitTwoFactorTOTP"
+	AuthService_EnableTwoFactorTOTP_FullMethodName      = "/user_service.auth.v1.AuthService/EnableTwoFactorTOTP"
+	AuthService_DisableTwoFactor_FullMethodName         = "/user_service.auth.v1.AuthService/DisableTwoFactor"
 	AuthService_RefreshToken_FullMethodName             = "/user_service.auth.v1.AuthService/RefreshToken"
+	AuthService_GenerateScopedToken_FullMethodName      = "/user_service.auth.v1.AuthService/GenerateScopedToken"
 	AuthService_RequestEmailVerification_FullMethodName = "/user_service.auth.v1.AuthService/RequestEmailVerification"
 	AuthService_RequestPasswordReset_FullMethodName     = "/user_service.auth.v1.AuthService/RequestPasswordReset"
 	AuthService_VerifyEmail_FullMethodName              = "/user_service.auth.v1.AuthService/VerifyEmail"
-	AuthService_ResetPassword_FullMethodName            = "/user_service.auth.v1.AuthService/ResetPassword"
 )
 
 // AuthServiceClient is the client API for AuthService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
+	// Authentication
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*AuthResponse, error)
+	LoginWithTwoFactorCode(ctx context.Context, in *TwoFactorCodeRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+	// Authorization
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	LogoutAllDevices(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	// Password management
+	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	// Two Factor Authentication
+	InitTwoFactorTOTP(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*InitTwoFactorTOTPResponse, error)
+	EnableTwoFactorTOTP(ctx context.Context, in *TwoFactorTOTPRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	// Security
+	DisableTwoFactor(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
+	// Token management
+	RefreshToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+	GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenRequest, opts ...grpc.CallOption) (*GenerateScopedTokenResponse, error)
+	// Email verification
 	RequestEmailVerification(ctx context.Context, in *RequestEmailVerificationRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	RequestPasswordReset(ctx context.Context, in *RequestPasswordResetRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
-	ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error)
 }
 
 type authServiceClient struct {
@@ -62,6 +83,16 @@ func (c *authServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	return out, nil
 }
 
+func (c *authServiceClient) LoginWithTwoFactorCode(ctx context.Context, in *TwoFactorCodeRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthResponse)
+	err := c.cc.Invoke(ctx, AuthService_LoginWithTwoFactorCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *authServiceClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AuthResponse)
@@ -72,7 +103,7 @@ func (c *authServiceClient) Register(ctx context.Context, in *RegisterRequest, o
 	return out, nil
 }
 
-func (c *authServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+func (c *authServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(v1.SuccessResponse)
 	err := c.cc.Invoke(ctx, AuthService_Logout_FullMethodName, in, out, cOpts...)
@@ -82,10 +113,80 @@ func (c *authServiceClient) Logout(ctx context.Context, in *v1.EmptyRequest, opt
 	return out, nil
 }
 
-func (c *authServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
+func (c *authServiceClient) LogoutAllDevices(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, AuthService_LogoutAllDevices_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, AuthService_ChangePassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, AuthService_ResetPassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) InitTwoFactorTOTP(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*InitTwoFactorTOTPResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InitTwoFactorTOTPResponse)
+	err := c.cc.Invoke(ctx, AuthService_InitTwoFactorTOTP_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) EnableTwoFactorTOTP(ctx context.Context, in *TwoFactorTOTPRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, AuthService_EnableTwoFactorTOTP_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) DisableTwoFactor(ctx context.Context, in *v1.EmptyRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.SuccessResponse)
+	err := c.cc.Invoke(ctx, AuthService_DisableTwoFactor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) RefreshToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RefreshTokenResponse)
 	err := c.cc.Invoke(ctx, AuthService_RefreshToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GenerateScopedToken(ctx context.Context, in *GenerateScopedTokenRequest, opts ...grpc.CallOption) (*GenerateScopedTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateScopedTokenResponse)
+	err := c.cc.Invoke(ctx, AuthService_GenerateScopedToken_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -122,28 +223,32 @@ func (c *authServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequ
 	return out, nil
 }
 
-func (c *authServiceClient) ResetPassword(ctx context.Context, in *ResetPasswordRequest, opts ...grpc.CallOption) (*v1.SuccessResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(v1.SuccessResponse)
-	err := c.cc.Invoke(ctx, AuthService_ResetPassword_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // AuthServiceServer is the server API for AuthService service.
 // All implementations should embed UnimplementedAuthServiceServer
 // for forward compatibility.
 type AuthServiceServer interface {
+	// Authentication
 	Login(context.Context, *LoginRequest) (*AuthResponse, error)
+	LoginWithTwoFactorCode(context.Context, *TwoFactorCodeRequest) (*AuthResponse, error)
 	Register(context.Context, *RegisterRequest) (*AuthResponse, error)
-	Logout(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
-	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
+	// Authorization
+	Logout(context.Context, *LogoutRequest) (*v1.SuccessResponse, error)
+	LogoutAllDevices(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
+	// Password management
+	ChangePassword(context.Context, *ChangePasswordRequest) (*v1.SuccessResponse, error)
+	ResetPassword(context.Context, *ResetPasswordRequest) (*v1.SuccessResponse, error)
+	// Two Factor Authentication
+	InitTwoFactorTOTP(context.Context, *v1.EmptyRequest) (*InitTwoFactorTOTPResponse, error)
+	EnableTwoFactorTOTP(context.Context, *TwoFactorTOTPRequest) (*v1.SuccessResponse, error)
+	// Security
+	DisableTwoFactor(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error)
+	// Token management
+	RefreshToken(context.Context, *RefreshAccessTokenRequest) (*RefreshTokenResponse, error)
+	GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error)
+	// Email verification
 	RequestEmailVerification(context.Context, *RequestEmailVerificationRequest) (*v1.SuccessResponse, error)
 	RequestPasswordReset(context.Context, *RequestPasswordResetRequest) (*v1.SuccessResponse, error)
 	VerifyEmail(context.Context, *VerifyEmailRequest) (*v1.SuccessResponse, error)
-	ResetPassword(context.Context, *ResetPasswordRequest) (*v1.SuccessResponse, error)
 }
 
 // UnimplementedAuthServiceServer should be embedded to have
@@ -156,14 +261,38 @@ type UnimplementedAuthServiceServer struct{}
 func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*AuthResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Login not implemented")
 }
+func (UnimplementedAuthServiceServer) LoginWithTwoFactorCode(context.Context, *TwoFactorCodeRequest) (*AuthResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LoginWithTwoFactorCode not implemented")
+}
 func (UnimplementedAuthServiceServer) Register(context.Context, *RegisterRequest) (*AuthResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedAuthServiceServer) Logout(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
+func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Logout not implemented")
 }
-func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+func (UnimplementedAuthServiceServer) LogoutAllDevices(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method LogoutAllDevices not implemented")
+}
+func (UnimplementedAuthServiceServer) ChangePassword(context.Context, *ChangePasswordRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ChangePassword not implemented")
+}
+func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ResetPassword not implemented")
+}
+func (UnimplementedAuthServiceServer) InitTwoFactorTOTP(context.Context, *v1.EmptyRequest) (*InitTwoFactorTOTPResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method InitTwoFactorTOTP not implemented")
+}
+func (UnimplementedAuthServiceServer) EnableTwoFactorTOTP(context.Context, *TwoFactorTOTPRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method EnableTwoFactorTOTP not implemented")
+}
+func (UnimplementedAuthServiceServer) DisableTwoFactor(context.Context, *v1.EmptyRequest) (*v1.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DisableTwoFactor not implemented")
+}
+func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshAccessTokenRequest) (*RefreshTokenResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RefreshToken not implemented")
+}
+func (UnimplementedAuthServiceServer) GenerateScopedToken(context.Context, *GenerateScopedTokenRequest) (*GenerateScopedTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GenerateScopedToken not implemented")
 }
 func (UnimplementedAuthServiceServer) RequestEmailVerification(context.Context, *RequestEmailVerificationRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RequestEmailVerification not implemented")
@@ -173,9 +302,6 @@ func (UnimplementedAuthServiceServer) RequestPasswordReset(context.Context, *Req
 }
 func (UnimplementedAuthServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*v1.SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method VerifyEmail not implemented")
-}
-func (UnimplementedAuthServiceServer) ResetPassword(context.Context, *ResetPasswordRequest) (*v1.SuccessResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ResetPassword not implemented")
 }
 func (UnimplementedAuthServiceServer) testEmbeddedByValue() {}
 
@@ -215,6 +341,24 @@ func _AuthService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_LoginWithTwoFactorCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TwoFactorCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).LoginWithTwoFactorCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_LoginWithTwoFactorCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).LoginWithTwoFactorCode(ctx, req.(*TwoFactorCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AuthService_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RegisterRequest)
 	if err := dec(in); err != nil {
@@ -234,7 +378,7 @@ func _AuthService_Register_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _AuthService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(v1.EmptyRequest)
+	in := new(LogoutRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -246,13 +390,121 @@ func _AuthService_Logout_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: AuthService_Logout_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).Logout(ctx, req.(*v1.EmptyRequest))
+		return srv.(AuthServiceServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_LogoutAllDevices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).LogoutAllDevices(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_LogoutAllDevices_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).LogoutAllDevices(ctx, req.(*v1.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangePasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ChangePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ChangePassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ChangePassword(ctx, req.(*ChangePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ResetPassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_InitTwoFactorTOTP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).InitTwoFactorTOTP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_InitTwoFactorTOTP_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).InitTwoFactorTOTP(ctx, req.(*v1.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_EnableTwoFactorTOTP_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TwoFactorTOTPRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).EnableTwoFactorTOTP(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_EnableTwoFactorTOTP_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).EnableTwoFactorTOTP(ctx, req.(*TwoFactorTOTPRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_DisableTwoFactor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(v1.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).DisableTwoFactor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_DisableTwoFactor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).DisableTwoFactor(ctx, req.(*v1.EmptyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _AuthService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RefreshTokenRequest)
+	in := new(RefreshAccessTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -264,7 +516,25 @@ func _AuthService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: AuthService_RefreshToken_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+		return srv.(AuthServiceServer).RefreshToken(ctx, req.(*RefreshAccessTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GenerateScopedToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateScopedTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GenerateScopedToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GenerateScopedToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GenerateScopedToken(ctx, req.(*GenerateScopedTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -323,24 +593,6 @@ func _AuthService_VerifyEmail_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResetPasswordRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).ResetPassword(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AuthService_ResetPassword_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).ResetPassword(ctx, req.(*ResetPasswordRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -353,6 +605,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_Login_Handler,
 		},
 		{
+			MethodName: "LoginWithTwoFactorCode",
+			Handler:    _AuthService_LoginWithTwoFactorCode_Handler,
+		},
+		{
 			MethodName: "Register",
 			Handler:    _AuthService_Register_Handler,
 		},
@@ -361,8 +617,36 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_Logout_Handler,
 		},
 		{
+			MethodName: "LogoutAllDevices",
+			Handler:    _AuthService_LogoutAllDevices_Handler,
+		},
+		{
+			MethodName: "ChangePassword",
+			Handler:    _AuthService_ChangePassword_Handler,
+		},
+		{
+			MethodName: "ResetPassword",
+			Handler:    _AuthService_ResetPassword_Handler,
+		},
+		{
+			MethodName: "InitTwoFactorTOTP",
+			Handler:    _AuthService_InitTwoFactorTOTP_Handler,
+		},
+		{
+			MethodName: "EnableTwoFactorTOTP",
+			Handler:    _AuthService_EnableTwoFactorTOTP_Handler,
+		},
+		{
+			MethodName: "DisableTwoFactor",
+			Handler:    _AuthService_DisableTwoFactor_Handler,
+		},
+		{
 			MethodName: "RefreshToken",
 			Handler:    _AuthService_RefreshToken_Handler,
+		},
+		{
+			MethodName: "GenerateScopedToken",
+			Handler:    _AuthService_GenerateScopedToken_Handler,
 		},
 		{
 			MethodName: "RequestEmailVerification",
@@ -375,10 +659,6 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "VerifyEmail",
 			Handler:    _AuthService_VerifyEmail_Handler,
-		},
-		{
-			MethodName: "ResetPassword",
-			Handler:    _AuthService_ResetPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

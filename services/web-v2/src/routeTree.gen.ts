@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as TokenPasswordResetRouteImport } from './routes/token/password-reset'
 import { Route as TokenTokenRouteImport } from './routes/token/$token'
+import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthSigninRouteImport } from './routes/auth/signin'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
@@ -26,9 +28,19 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TokenPasswordResetRoute = TokenPasswordResetRouteImport.update({
+  id: '/token/password-reset',
+  path: '/token/password-reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TokenTokenRoute = TokenTokenRouteImport.update({
   id: '/token/$token',
   path: '/token/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsProfileRoute = SettingsProfileRouteImport.update({
+  id: '/settings/profile',
+  path: '/settings/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
@@ -52,7 +64,9 @@ export interface FileRoutesByFullPath {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/token/$token': typeof TokenTokenRoute
+  '/token/password-reset': typeof TokenPasswordResetRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +74,9 @@ export interface FileRoutesByTo {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/token/$token': typeof TokenTokenRoute
+  '/token/password-reset': typeof TokenPasswordResetRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -69,7 +85,9 @@ export interface FileRoutesById {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/token/$token': typeof TokenTokenRoute
+  '/token/password-reset': typeof TokenPasswordResetRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -79,7 +97,9 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/signin'
     | '/auth/signup'
+    | '/settings/profile'
     | '/token/$token'
+    | '/token/password-reset'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -87,7 +107,9 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/signin'
     | '/auth/signup'
+    | '/settings/profile'
     | '/token/$token'
+    | '/token/password-reset'
     | '/dashboard'
   id:
     | '__root__'
@@ -95,7 +117,9 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/signin'
     | '/auth/signup'
+    | '/settings/profile'
     | '/token/$token'
+    | '/token/password-reset'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -104,7 +128,9 @@ export interface RootRouteChildren {
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute
   TokenTokenRoute: typeof TokenTokenRoute
+  TokenPasswordResetRoute: typeof TokenPasswordResetRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -124,11 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/token/password-reset': {
+      id: '/token/password-reset'
+      path: '/token/password-reset'
+      fullPath: '/token/password-reset'
+      preLoaderRoute: typeof TokenPasswordResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/token/$token': {
       id: '/token/$token'
       path: '/token/$token'
       fullPath: '/token/$token'
       preLoaderRoute: typeof TokenTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/settings/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/signup': {
@@ -160,7 +200,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthSignupRoute: AuthSignupRoute,
+  SettingsProfileRoute: SettingsProfileRoute,
   TokenTokenRoute: TokenTokenRoute,
+  TokenPasswordResetRoute: TokenPasswordResetRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport

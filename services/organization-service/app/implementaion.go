@@ -7,6 +7,7 @@ import (
 	"net"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/corelogger"
 	organizationv1 "github.com/rijum8906/relay/packages/pb/organization_service/organization/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
@@ -51,7 +52,14 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 }
 
 func (a *Application) initUtils() *apperror.AppError {
-	logger, appErr := initLogger(a.config)
+	logger, appErr := corelogger.InitLogger(corelogger.LoggerConfig{
+		AppEnv:       a.config.AppEnv,
+		LogLevel:     a.config.LogLevel,
+		LogFile:      a.config.LogFile,
+		EnableJSON:   a.config.EnableJSON,
+		EnableCaller: a.config.EnableCaller,
+		EnableStack:  a.config.EnableStack,
+	})
 	if appErr != nil {
 		return appErr
 	}

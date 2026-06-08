@@ -12,7 +12,7 @@ import (
 )
 
 func userInfoFromContext(ctx context.Context) (*coredto.UserInfo, *apperror.AppError) {
-	userInfo, ok := coremetadata.ReceiveUserInfo(ctx)
+	userInfo, ok := coremetadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrUnAuthenticated.WithMessage("user metadata is required")
 	}

@@ -1,3 +1,4 @@
+# Task record returned by task queries and mutations.
 type Task {
     id: ID!
     organizationId: ID

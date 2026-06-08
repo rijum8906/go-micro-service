@@ -11,7 +11,7 @@ func ValidateIDAndScopedToken(req *corev1.IDAndScopedTokenRequest) error {
 	if err := uuid.Validate(req.Id); err != nil {
 		return apperror.ErrValidation.WithMessage("invalid id")
 	}
-	if !token.ValidateTokenScope(req.TokenScope) {
+	if !token.IsValidTokenScope(req.TokenScope) {
 		return apperror.ErrValidation.WithMessage("invalid token scope")
 	}
 

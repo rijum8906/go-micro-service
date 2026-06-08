@@ -12,6 +12,7 @@ import (
 
 type Env struct {
 	coreenv.CoreEnv
+	FGAAPIURL string `env:"FGA_API_URL" envDefault:"localhost:8000"`
 
 	// Frontend URL
 	FrontendURL           string `env:"FRONTEND_URL" envDefault:"http://localhost:3000"`

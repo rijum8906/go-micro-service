@@ -13,7 +13,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/protoutils"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
-	"github.com/rijum8906/relay/services/organization-service/internal/constants"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"github.com/rijum8906/relay/services/organization-service/internal/utils"
 	"go.uber.org/zap"
@@ -81,7 +81,7 @@ func (s *OrgMembershipService) GetOrganizationMembershipsByOrgID(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").
@@ -239,7 +239,7 @@ func (s *OrgMembershipService) GetOrganizationMembershipsByRole(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").
@@ -401,7 +401,7 @@ func (s *OrgMembershipService) GetOrganizationMembershipsByStatus(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").
@@ -535,7 +535,7 @@ func (s *OrgMembershipService) GetOrganizationMembership(
 	}
 
 	// Extract authenticated user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.
 			WithMessage("user metadata not found in context").

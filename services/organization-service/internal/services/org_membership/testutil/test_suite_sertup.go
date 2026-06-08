@@ -8,13 +8,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/nats-io/nats.go"
 	"github.com/openfga/go-sdk/client"
+	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	permissions "github.com/rijum8906/relay/packages/core/permissions/organization"
 	"github.com/rijum8906/relay/packages/core/testutils"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
+	"github.com/rijum8906/relay/services/organization-service/internal/repositories/openfga"
+	"github.com/rijum8906/relay/services/organization-service/internal/services/helper"
 	orgmembership "github.com/rijum8906/relay/services/organization-service/internal/services/org_membership"
+	"go.uber.org/zap"
 )
 
 type TestSuite struct {
@@ -28,6 +33,12 @@ type TestSuite struct {
 
 func NewTestSuite(t *testing.T, fgaClient *coreopenfga.Client) *TestSuite {
 	service := orgmembership.NewTestService(fgaClient)
+	service.Helper, service.OpenFGARepo = newTestServiceDependencies(
+		service.DBPool,
+		service.DBQ,
+		fgaClient,
+		service.Logger,
+	)
 
 	ctx := context.Background()
 
@@ -45,6 +56,50 @@ func NewTestSuite(t *testing.T, fgaClient *coreopenfga.Client) *TestSuite {
 		Service:           service,
 		Ctx:               ctx,
 	}
+}
+
+// noopPublisher keeps membership-management tests focused on database state and
+// permission decisions. Production code still calls the repository publish
+// methods, but tests do not need a NATS server to verify these service flows.
+type noopPublisher struct{}
+
+func (noopPublisher) Publish(string, any) *apperror.AppError {
+	return nil
+}
+
+func (noopPublisher) PublishAsync(string, any) (nats.PubAckFuture, *apperror.AppError) {
+	return nil, nil
+}
+
+func (noopPublisher) PublishWithHeaders(string, any, nats.Header) *apperror.AppError {
+	return nil
+}
+
+func newTestServiceDependencies(
+	dbPool *pgxpool.Pool,
+	dbq *db.Queries,
+	fgaClient *coreopenfga.Client,
+	logger *zap.Logger,
+) (*helper.ServiceHelper, *openfga.Repository) {
+	publisher := noopPublisher{}
+	tupleManager := coreopenfga.NewTupleManager(fgaClient)
+	permissionManager := permissions.NewPermissionManager(fgaClient)
+
+	return &helper.ServiceHelper{
+			DBPool:              dbPool,
+			DBQ:                 dbq,
+			TuppleManager:       tupleManager,
+			PermissionManager:   permissionManager,
+			Logger:              logger,
+			OrgOpenFGAPublisher: publisher,
+		}, &openfga.Repository{
+			DBPool:              dbPool,
+			DBQ:                 dbq,
+			TuppleManager:       tupleManager,
+			PermissionManager:   permissionManager,
+			Logger:              logger,
+			OrgOpenFGAPublisher: publisher,
+		}
 }
 
 type OrgTestSuite struct {

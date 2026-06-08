@@ -13,6 +13,10 @@ import (
 
 // region    ************************** generated!.gotpl **************************
 
+type GenerateScopedTokenInputResolver interface {
+	Scope(ctx context.Context, obj *userdto.GenerateScopedTokenInput, data model.TokenScope) error
+}
+
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
@@ -165,14 +169,16 @@ func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.C
 		switch k {
 		case "scope":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
-			data, err := ec.unmarshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐTokenScope(ctx, v)
+			data, err := ec.unmarshalNTokenScope2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTokenScope(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Scope = data
+			if err = ec.Resolvers.GenerateScopedTokenInput().Scope(ctx, &it, data); err != nil {
+				return it, err
+			}
 		case "authMethod":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authMethod"))
-			data, err := ec.unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋtokenᚐAuthMethod(ctx, v)
+			data, err := ec.unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋconstantsᚐAuthMethod(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -187,6 +193,57 @@ func (ec *executionContext) unmarshalInputGenerateScopedTokenInput(ctx context.C
 		case "meta":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
 			data, err := ec.unmarshalNRequestMetaInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Meta = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGenereateScopedTokenInput(ctx context.Context, obj any) (model.GenereateScopedTokenInput, error) {
+	var it model.GenereateScopedTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"scope", "authMethod", "authValue", "meta"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "scope":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scope"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Scope = data
+		case "authMethod":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authMethod"))
+			data, err := ec.unmarshalNAuthMethod2githubᚗcomᚋrijum8906ᚋrelayᚋpackagesᚋcoreᚋconstantsᚐAuthMethod(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthMethod = data
+		case "authValue":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authValue"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthValue = data
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalNRequestMetaInput2ᚖgithubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋcoredtoᚐRequestMeta(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -577,20 +634,13 @@ func (ec *executionContext) unmarshalInputRevokeSessionInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"scopedToken", "tokenToRevoke"}
+	fieldsInOrder := [...]string{"tokenToRevoke"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "scopedToken":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scopedToken"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ScopedToken = data
 		case "tokenToRevoke":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tokenToRevoke"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -598,6 +648,36 @@ func (ec *executionContext) unmarshalInputRevokeSessionInput(ctx context.Context
 				return it, err
 			}
 			it.TokenToRevoke = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTwoFactorCode(ctx context.Context, obj any) (model.TwoFactorCode, error) {
+	var it model.TwoFactorCode
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"twoFactorCode"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "twoFactorCode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("twoFactorCode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TwoFactorCode = data
 		}
 	}
 	return it, nil
@@ -763,11 +843,6 @@ func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋrijum8906ᚋrela
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNLogoutInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐLogoutInput(ctx context.Context, v any) (userdto.LogoutInput, error) {
-	res, err := ec.unmarshalInputLogoutInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNRegisterInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋinternalᚋdtoᚋuserdtoᚋauthᚐRegisterInput(ctx context.Context, v any) (userdto.RegisterInput, error) {
 	res, err := ec.unmarshalInputRegisterInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -790,6 +865,11 @@ func (ec *executionContext) unmarshalNResetPasswordInput2githubᚗcomᚋrijum890
 
 func (ec *executionContext) unmarshalNRevokeOthersSessionInput2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐRevokeOthersSessionInput(ctx context.Context, v any) (model.RevokeOthersSessionInput, error) {
 	res, err := ec.unmarshalInputRevokeOthersSessionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNTwoFactorCode2githubᚗcomᚋrijum8906ᚋrelayᚋservicesᚋgraphqlᚑgatewayᚋgraphᚋmodelᚐTwoFactorCode(ctx context.Context, v any) (model.TwoFactorCode, error) {
+	res, err := ec.unmarshalInputTwoFactorCode(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

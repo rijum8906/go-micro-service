@@ -7,12 +7,13 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rijum8906/relay/packages/core/apperror"
+	"github.com/rijum8906/relay/packages/core/metadata"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	authv1 "github.com/rijum8906/relay/packages/pb/user_service/auth/v1"
-	modelsv1 "github.com/rijum8906/relay/packages/pb/user_service/models/v1"
 	sessionv1 "github.com/rijum8906/relay/packages/pb/user_service/session/v1"
 	userv1 "github.com/rijum8906/relay/packages/pb/user_service/user/v1"
 	"github.com/rijum8906/relay/services/graphql-gateway/graph/model"
@@ -27,14 +28,17 @@ func (r *mutationResolver) Login(ctx context.Context, input userdto.LoginInput) 
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	resp, err := r.Clients.AuthClient.Login(ctx, &authv1.LoginRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	})
 	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+		return nil, err
 	}
 
 	return utils.MapAuthResponse(resp.User, resp.Profile, resp.Tokens), nil
@@ -46,7 +50,10 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	res, err := r.Clients.AuthClient.Register(ctx, &authv1.RegisterRequest{
 		Email:     input.Email,
@@ -55,24 +62,32 @@ func (r *mutationResolver) Register(ctx context.Context, input userdto.RegisterI
 		LastName:  input.LastName,
 	})
 	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+		return nil, err
 	}
 
 	return utils.MapAuthResponse(res.User, res.Profile, res.Tokens), nil
 }
 
-// Logout is the resolver for the Logout field.
-func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput) (*model.MutationResponse, error) {
-	if err := r.Validate.Struct(input); err != nil {
-		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
+// LoginWithTwoFactorCode is the resolver for the LoginWithTwoFactorCode field.
+func (r *mutationResolver) LoginWithTwoFactorCode(ctx context.Context, input model.TwoFactorCode) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: LoginWithTwoFactorCode - LoginWithTwoFactorCode"))
+}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+// Logout is the resolver for the Logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (*model.MutationResponse, error) {
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	res, err := r.Clients.AuthClient.Logout(ctx, &corev1.EmptyRequest{})
+	tokens, ok := metadata.GetAuthTokensInfoFromIncomingContext(ctx)
+	if !ok {
+		return nil, apperror.ErrInternal.WithMessage("Failed to get auth tokens info from context")
+	}
+
+	res, err := r.Clients.AuthClient.Logout(ctx, &authv1.LogoutRequest{
+		RefreshToken: tokens.RefreshToken,
+	})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
@@ -85,13 +100,21 @@ func (r *mutationResolver) Logout(ctx context.Context, input userdto.LogoutInput
 	}, nil
 }
 
+// LogoutALlDevices is the resolver for the LogoutALlDevices field.
+func (r *mutationResolver) LogoutALlDevices(ctx context.Context) (*model.MutationResponse, error) {
+	panic(fmt.Errorf("not implemented: LogoutALlDevices - LogoutALlDevices"))
+}
+
 // RequestPasswordReset is the resolver for the RequestPasswordReset field.
 func (r *mutationResolver) RequestPasswordReset(ctx context.Context, input userdto.RequestPasswordResetInput) (*model.MutationResponse, error) {
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
+	ctx, appErr := attachClientMeta(ctx, input.Meta)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	resp, err := r.Clients.AuthClient.RequestPasswordReset(ctx, &authv1.RequestPasswordResetRequest{
 		Email: input.Email,
@@ -110,8 +133,6 @@ func (r *mutationResolver) ResetPassword(ctx context.Context, input userdto.Rese
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
-
-	ctx = attachClientInfo(ctx, input.Meta)
 
 	resp, err := r.Clients.AuthClient.ResetPassword(ctx, &authv1.ResetPasswordRequest{
 		ScopedToken: input.Token,
@@ -132,8 +153,6 @@ func (r *mutationResolver) RequestEmailVerification(ctx context.Context, input u
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
-
 	resp, err := r.Clients.AuthClient.RequestEmailVerification(ctx, &authv1.RequestEmailVerificationRequest{
 		Email: input.Email,
 	})
@@ -152,8 +171,6 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx = attachClientInfo(ctx, input.Meta)
-
 	resp, err := r.Clients.AuthClient.VerifyEmail(ctx, &authv1.VerifyEmailRequest{
 		ScopedToken: input.Token,
 	})
@@ -166,19 +183,53 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, input userdto.Verify
 	}, nil
 }
 
+// GenerateScopedToken is the resolver for the GenerateScopedToken field.
+func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.GenerateScopedTokenResponse, error) {
+	if err := r.Validate.Struct(input); err != nil {
+		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	authMethod, tokenScope, appErr := parseScopedToken(input.AuthMethod, input.Scope)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := r.Clients.AuthClient.GenerateScopedToken(ctx, &authv1.GenerateScopedTokenRequest{
+		AuthMethod: authMethod.String(),
+		Scope:      tokenScope.String(),
+		AuthValue:  input.AuthValue,
+	})
+	if err != nil {
+		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
+	}
+
+	return &model.GenerateScopedTokenResponse{
+		ScopedToken: res.GetScopedToken(),
+	}, nil
+}
+
+// RefershToken is the resolver for the RefershToken field.
+func (r *mutationResolver) RefershToken(ctx context.Context) (*model.AuthResponse, error) {
+	panic(fmt.Errorf("not implemented: RefershToken - RefershToken"))
+}
+
 // RevokeSession is the resolver for the RevokeSession field.
 func (r *mutationResolver) RevokeSession(ctx context.Context, input *model.RevokeSessionInput) (*model.MutationResponse, error) {
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	res, err := r.Clients.SessionClient.RevokeSession(ctx, &sessionv1.RevokeSessionRequest{
-		ScopedToken:   input.ScopedToken,
 		TokenToRevoke: input.TokenToRevoke,
 	})
 	if err != nil {
@@ -199,7 +250,7 @@ func (r *mutationResolver) RevokeAllSessions(ctx context.Context, input model.Sc
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -218,12 +269,12 @@ func (r *mutationResolver) RevokeAllSessions(ctx context.Context, input model.Sc
 }
 
 // RevokeOthersSession is the resolver for the RevokeOthersSession field.
-func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.MutationResponse, error) {
+func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.RevokeOthersSessionInput) (*model.AuthResponse, error) {
 	if err := r.Validate.Struct(input); err != nil {
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -235,42 +286,20 @@ func (r *mutationResolver) RevokeOthersSession(ctx context.Context, input model.
 	if err != nil {
 		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
-	if !res.Success {
-		return nil, apperror.ErrInternal.WithMessage("failed to revoke other sessions")
-	}
+	// if !res.Success {
+	// 	return nil, apperror.ErrInternal.WithMessage("failed to revoke other sessions")
+	// }
 
-	return &model.MutationResponse{Success: res.Success, Message: "sessions revoked"}, nil
-}
-
-// GenerateScopedToken is the resolver for the GenerateScopedToken field.
-func (r *mutationResolver) GenerateScopedToken(ctx context.Context, input userdto.GenerateScopedTokenInput) (*model.ScopedTokenResponse, error) {
-	if err := r.Validate.Struct(input); err != nil {
-		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
-
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	authMethod, tokenScope, appErr := parseScopedToken(input.AuthMethod, input.Scope)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	res, err := r.Clients.UserClient.GenerateScopedToken(ctx, &userv1.GenerateScopedTokenRequest{
-		AuthMethod: authMethod,
-		Scope:      tokenScope,
-		AuthValue:  input.AuthValue,
-	})
-	if err != nil {
-		return nil, apperror.ErrThirdParty.WithMessage(err.Error()).WithDetail("error", err.Error())
-	}
-
-	return &model.ScopedTokenResponse{
-		Token: &model.Token{
-			Value:     res.Token.Value,
-			ExpiresAt: res.Token.ExpiresAt.String(),
+	return &model.AuthResponse{
+		Tokens: &model.AuthTokens{
+			AccessToken: &model.Token{
+				Value:     res.AccessToken.Value,
+				ExpiresAt: res.AccessToken.ExpiresAt.String(),
+			},
+			RefreshToken: &model.Token{
+				Value:     res.RefreshToken.Value,
+				ExpiresAt: res.RefreshToken.ExpiresAt.String(),
+			},
 		},
 	}, nil
 }
@@ -281,12 +310,12 @@ func (r *mutationResolver) UpdateProfileAvatarURL(ctx context.Context, input use
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	res, err := r.Clients.UserClient.UpdateProfileAvatarUrl(ctx, &userv1.UpdateProfileAvatarUrlRequest{
+	res, err := r.Clients.UserClient.UpdateProfileAvatarURL(ctx, &userv1.UpdateProfileAvatarURLRequest{
 		ProfileId: input.ProfileID,
 		AvatarUrl: input.AvatarURL,
 	})
@@ -303,7 +332,7 @@ func (r *mutationResolver) UpdateProfileName(ctx context.Context, input userdto.
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -326,15 +355,13 @@ func (r *mutationResolver) ChangePassword(ctx context.Context, input userdto.Cha
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	res, err := r.Clients.UserClient.ChangePassword(ctx, &userv1.ChangePasswordRequest{
-		ScopedToken: &modelsv1.Token{
-			Value: input.Token,
-		},
+	res, err := r.Clients.AuthClient.ChangePassword(ctx, &authv1.ChangePasswordRequest{
+		ScopedToken: input.Token,
 		NewPassword: input.NewPassword,
 	})
 	if err != nil {
@@ -353,7 +380,7 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input taskdto.CreateT
 		return nil, apperror.ErrValidation.WithMessage(err.Error()).WithDetail("error", err.Error())
 	}
 
-	ctx, appErr := validateAndAttachUserInfo(ctx, r.Token)
+	ctx, appErr := validateAndAttachUserInfo(ctx, r.TokenManager)
 	if appErr != nil {
 		return nil, appErr
 	}

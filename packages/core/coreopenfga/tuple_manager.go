@@ -2,6 +2,7 @@ package coreopenfga
 
 import (
 	"context"
+	"errors"
 
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
@@ -76,6 +77,10 @@ func (m *tupleManager) Delete(ctx context.Context, deletes []client.ClientTupleK
 		Deletes: deletes,
 	}).Options(options).Execute()
 	if err != nil {
+		var apiErr *openfga.FgaApiNotFoundError
+		if errors.As(err, &apiErr) && apiErr.ResponseCode() == openfga.NOTFOUNDERRORCODE_NO_NOT_FOUND_ERROR {
+			return apperror.New(apperror.CodeNotFound, "tuple not found to delete in openfga").WithDetail("error", err.Error())
+		}
 		return apperror.New(apperror.CodeThirdParty, "failed to write tuple").WithDetail("error", err.Error())
 	}
 

@@ -31,7 +31,34 @@ message ResetPasswordRequest {
   string new_password = 2;
 }
 
-// Refrsh the Access Token
-message RefreshTokenRequest {
-  string access_token = 1;
+message RefreshAccessTokenRequest {
+  string refresh_token = 2;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message TwoFactorRequest {
+  string code = 1;
+}
+
+message ChangePasswordRequest {
+  string scoped_token = 1;
+  string new_password = 2;
+}
+
+message GenerateScopedTokenRequest {
+  string scope = 1;
+  string auth_method = 2;
+  string auth_value = 3;
+}
+
+message TwoFactorCodeRequest {
+  string two_factor_code = 1;
+}
+
+message TwoFactorTOTPRequest {
+  string totp = 1;
+  string two_factor_secret = 2;
 }

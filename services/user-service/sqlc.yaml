@@ -8,7 +8,7 @@ sql:
         package: "db"
         out: "internal/db"
         sql_package: "pgx/v5"
-        emit_interface: true
+        emit_interface: false
         emit_json_tags: false # NOTE: this won't be sent to user directly, graphql-gateway will handle it
         emit_prepared_queries: false
         emit_empty_slices: true

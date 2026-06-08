@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/protoutils"
-	"github.com/rijum8906/relay/packages/core/token"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 )
 
@@ -20,7 +19,7 @@ func TestValidateIDAndScopedToken(t *testing.T) {
 			name: "valid request",
 			req: &corev1.IDAndScopedTokenRequest{
 				Id:         uuid.NewString(),
-				TokenScope: string(token.TokenScopeAdmin),
+				TokenScope: "CHANGE_USER_NAME",
 			},
 			wantErr: false,
 		},
@@ -28,7 +27,7 @@ func TestValidateIDAndScopedToken(t *testing.T) {
 			name: "invalid id",
 			req: &corev1.IDAndScopedTokenRequest{
 				Id:         "invalid",
-				TokenScope: string(token.TokenScopeAdmin),
+				TokenScope: "CHANGE_PASSWORD",
 			},
 			wantErr: true,
 		},

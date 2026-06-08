@@ -4,6 +4,7 @@ package app
 import (
 	"context"
 	"net"
+	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -12,9 +13,14 @@ import (
 	"github.com/rijum8906/relay/packages/core/hash"
 	"github.com/rijum8906/relay/packages/core/token"
 	"github.com/rijum8906/relay/services/user/app/config"
-	handler "github.com/rijum8906/relay/services/user/internal/handlers/grpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+)
+
+var (
+	instance *Application
+	once     sync.Once
+	initErr  *apperror.AppError
 )
 
 type ApplicationInfra struct {
@@ -24,31 +30,43 @@ type ApplicationInfra struct {
 }
 
 type ApplicationUtils struct {
-	token  *token.TokenManager
-	hash   hash.HashService
+	token  token.TokenManager
+	hash   *hash.HashService
 	logger *zap.Logger
-}
-
-type ApplicationServices struct {
-	auth    *handler.AuthHandler
-	user    *handler.UserHandler
-	session *handler.SessionHandler
 }
 
 type Application struct {
 	config   *config.Env
 	infra    *ApplicationInfra
 	utils    *ApplicationUtils
-	services *ApplicationServices
 	listener net.Listener
 	server   *grpc.Server
 }
 
-func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
+// GetInstance safely fetches the singleton instance.
+// Thread-safe via double-checked locking idiom combined with sync.Once.
+func GetInstance() (*Application, *apperror.AppError) {
+	// If already initialized successfully, return immediately
+	if instance != nil {
+		return instance, nil
+	}
+
+	once.Do(func() {
+		ctx := context.Background()
+		instance, initErr = newApplication(ctx)
+	})
+
+	if initErr != nil {
+		return nil, initErr
+	}
+
+	return instance, nil
+}
+
+func newApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	app := &Application{
-		infra:    &ApplicationInfra{},
-		utils:    &ApplicationUtils{},
-		services: &ApplicationServices{},
+		infra: &ApplicationInfra{},
+		utils: &ApplicationUtils{},
 	}
 
 	var appErr *apperror.AppError
@@ -59,19 +77,8 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	// Initialize Dependencies
-	if appErr = app.initLogger(); appErr != nil {
-		return nil, appErr
-	}
 
-	if appErr = app.initDB(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initCache(ctx); appErr != nil {
-		return nil, appErr
-	}
-
-	if appErr = app.initNATS(); appErr != nil {
+	if appErr = app.initInfra(ctx); appErr != nil {
 		return nil, appErr
 	}
 
@@ -79,15 +86,11 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 		return nil, appErr
 	}
 
-	if appErr = app.initHandler(); appErr != nil {
-		return nil, appErr
-	}
-
 	if appErr = app.initGRPCServer(); appErr != nil {
 		return nil, appErr
 	}
 
-	apperror.SetConfig(apperror.Config{
+	apperror.SetConfig(&apperror.Config{
 		AppEnv: app.config.AppEnv,
 		Debug:  true,
 		Logger: app.utils.logger,

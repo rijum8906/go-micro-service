@@ -35,9 +35,14 @@ func Test_StreamManager_Delete(t *testing.T) {
 		t.Errorf("Delete() doesn't want error but got %v", appErr)
 	}
 
-	if stream.Exists(streamInfo.Config.Name) {
-		t.Errorf("stream didn't delete successfully")
+	exists, appErr := stream.Exists(streamInfo.Config.Name)
+	if exists {
+		t.Errorf("stream still exists after deletion")
 	}
+	if appErr != nil {
+		t.Errorf("Exists() failed with error: %v", appErr)
+	}
+
 }
 
 func createStreamConfig() *broker.StreamConfig {

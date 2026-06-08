@@ -1,18 +1,35 @@
-outpkg: mocks
+# .mockery.yaml - Version 3 compatible
 
-with-expecter: true
+# Global configuration
 all: false
+dir: "{{.InterfaceDir}}/mocks" # Dynamic directory based on interface location
 recursive: true
 inpackage: false
+pkgname: "mock_{{.SrcPackageName}}"
+filename: "mock_{{.InterfaceNameSnake}}.go"
+include-auto-generated: true
 
+# Output formatting
+formatter: "goimports"
+
+# Package-specific overrides
 packages:
   github.com/rijum8906/relay/packages/core/broker:
     config:
-      dir: ./broker/mocks
-      outpkg: mocks
-      with-expecter: true
+      # Use different output directory for this package
+      dir: "./broker/mocks"
 
     interfaces:
+      # Specific interface configuration
       Publisher:
         config:
-          filename: mock_publisher.go
+          filename: "mock_publisher.go"
+
+  github.com/rijum8906/relay/packages/core/token:
+    config:
+      dir: "./token/mocks"
+
+    interfaces:
+      TokenManager:
+        config:
+          filename: "mock_token_manager.go"

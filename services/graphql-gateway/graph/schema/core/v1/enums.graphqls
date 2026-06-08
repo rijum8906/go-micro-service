@@ -1,31 +1,26 @@
-# TokenScope defines what actions a token can perform
+# TokenScope defines what actions a scoped token can perform.
 enum TokenScope {
-  AUTH              # Standard authentication
-  REFRESH           # Token refresh
-  CHANGE_EMAIL      # Change email address
-  CHANGE_PASSWORD   # Change password
-  DELETE_ACCOUNT    # Delete account
-  RESET_PASSWORD    # Password reset flow
-  VERIFY_EMAIL      # Email verification
-  ENABLE_2FA        # Enable two-factor authentication
-  DISABLE_2FA       # Disable two-factor authentication
-  ADMIN             # Administrative actions
-  IMPERSONATE       # Impersonate another user
-  RECOVERY          # Account recovery
-  UPDATE_ORG_NAME
-  CHANGE_ORG_OWNER
+    # User Service
+    VERIFY_USER_EMAIL
+    CHANGE_USER_PASSWORD
 }
 
-# AuthMethod defines how the user authenticated
+# AuthMethod defines how the user authenticated.
 enum AuthMethod {
-  PASSWORD          # Password authentication
-  BIOMETRIC         # Biometric (fingerprint, face ID)
-  OTP               # One-time password (SMS/email)
-  TOTP              # Time-based one-time password (authenticator app)
-  RECOVERY          # Recovery code
-  MAGIC_LINK        # Magic link email
-  SOCIAL_GOOGLE     # Google OAuth
-  SOCIAL_GITHUB     # GitHub OAuth
-  API_KEY           # API key authentication
-  SERVICE_ACCOUNT   # Service-to-service authentication
+    PASSWORD # Password authentication.
+    BIOMETRIC # Biometric authentication such as fingerprint or face ID.
+    OTP # One-time password delivered by SMS or email.
+    TOTP # Time-based one-time password from an authenticator app.
+    RECOVERY # Recovery code authentication.
+    MAGIC_LINK # Magic-link email authentication.
+    SOCIAL_GOOGLE # Google OAuth.
+    SOCIAL_GITHUB # GitHub OAuth.
+    API_KEY # API key authentication.
+    SERVICE_ACCOUNT # Service-to-service authentication.
+}
+
+# Token type used when returning authorization tokens to clients.
+enum AuthorizationTokenType {
+    Bearer
+    TwoFactor # NOTE: If generating to frontend, must change the value to 2FA-Challenge.
 }

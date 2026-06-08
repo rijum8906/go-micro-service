@@ -16,13 +16,47 @@ management and collaboration.
 
 ## Development
 
-Use `make` for repository and service tasks.
+### Prerequisites:
+
+- docker
+- go (v1.26+)
+- git
+
+Use `rcli`, a cli tool only for this repository.
+
+You need to install `rcli` first.
+  - Copy this repository
+  - Run `go install ./rcli` from the root directory
+
+Now to setup the development environment:
+
 
 ```bash
-make
-make setup SERVICE=user
-make -C services/web dev
+rcli project setup
 ```
+
+### Frontend Setup
+
+To set up the frontend, run the following commands:
+
+```bash
+cd ./services/web-v2
+pnpm install
+pnpm start
+```
+
+### Backend Setup
+
+To set up the backend, run the following commands:
+
+```bash
+docker compose up --build postgres
+rcli project setup db # if you have atlas installed then add a -a flag
+```
+
+To start working with the backend, you will need to install these things:
+ - buf
+ - atlas (database migration tool)
 
 ## Features
 
@@ -58,31 +92,7 @@ make -C services/web dev
 
 This project is licensed under the MIT License.
 
-## Quick Start
-
-```bash
-go install ./cli
-```
-
-```bash
-cli init project
-```
-
-```bash
-cli dev run
-```
 
 ## Common Command
 
-- Setup Test Environment
-
-```bash
-cd services/user-service
-cli test setup
-```
-
-- Run Tests
-
-```bash
-cli test run
-```
+To learn about more commands, go to ./rcli/README.md

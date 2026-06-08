@@ -1,18 +1,26 @@
-outpkg: mocks
+# .mockery.yaml - Version 3 compatible
 
-with-expecter: true
+# Global configuration
 all: false
+dir: "{{.InterfaceDir}}/mocks" # Dynamic directory based on interface location
 recursive: true
 inpackage: false
+pkgname: "mock_{{.SrcPackageName}}"
+filename: "mock_{{.InterfaceNameSnake}}.go"
+include-auto-generated: true
 
+# Output formatting
+formatter: "goimports"
+
+# Package-specific overrides
 packages:
   github.com/rijum8906/relay/packages/pb/user_service/user/v1:
     config:
-      dir: ./user_service/mocks
-      outpkg: mocks
-      with-expecter: true
+      # Use different output directory for this package
+      dir: "./user_service/mocks"
 
     interfaces:
+      # Specific interface configuration
       UserServiceClient:
         config:
-          filename: mock_user_service_client.go
+          filename: "mock_user_service_client.go"

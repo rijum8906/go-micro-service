@@ -2,7 +2,7 @@
 package userdto
 
 import (
-	"github.com/rijum8906/relay/packages/core/token"
+	coreconstants "github.com/rijum8906/relay/packages/core/constants"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 )
 
@@ -25,10 +25,10 @@ type LogoutInput struct {
 }
 
 type GenerateScopedTokenInput struct {
-	Scope      token.TokenScope    `json:"scope" validate:"required"`
-	AuthMethod token.AuthMethod    `json:"authMethod" validate:"required"`
-	AuthValue  string              `json:"authValue" validate:"required"`
-	Meta       coredto.RequestMeta `json:"meta" validate:"required"`
+	Scope      string                   `json:"scope" validate:"required"`
+	AuthMethod coreconstants.AuthMethod `json:"authMethod" validate:"required"`
+	AuthValue  string                   `json:"authValue" validate:"required"`
+	Meta       coredto.RequestMeta      `json:"meta" validate:"required"`
 }
 
 type UpdateProfileAvatarUrlInput struct {

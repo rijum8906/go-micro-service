@@ -1,4 +1,4 @@
-// Package metadata provides helpers for reading and writing gRPC metadata.
+// Package metadata provides utility functions for working with gRPC metadata.
 package metadata
 
 import (
@@ -8,104 +8,176 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// Send adds client info to outgoing gRPC metadata.
-func Send(ctx context.Context, info dto.ClientInfo) context.Context {
-	return SendClientInfo(ctx, info)
+func NewOutgoingContext(ctx context.Context, md metadata.MD) context.Context {
+	return metadata.NewOutgoingContext(ctx, md)
 }
 
-// Receive extracts client info from incoming gRPC metadata.
-func Receive(ctx context.Context) (dto.ClientInfo, bool) {
-	return ReceiveClientInfo(ctx)
-}
-
-// SendClientInfo adds client info to outgoing gRPC metadata.
-func SendClientInfo(ctx context.Context, info dto.ClientInfo) context.Context {
-	return appendOutgoing(ctx,
-		dto.MetaDeviceIDKey, info.DeviceID,
-		dto.MetaUserAgentKey, info.UserAgent,
-		dto.MetaClientIPKey, info.IPAddress,
-		dto.MetaClientTypeKey, info.ClientType,
-		dto.MetaAPIVersionKey, info.APIVersion,
-		dto.MetaSDKVersionKey, info.SDKVersion,
-		dto.MetaRequestIDKey, info.RequestID,
-		dto.MetaSessionIDKey, info.SessionID,
-		dto.MetaTraceIDKey, info.TraceID,
-		dto.MetaLocaleKey, info.Locale,
-	)
-}
-
-// ReceiveClientInfo extracts client info from incoming gRPC metadata.
-func ReceiveClientInfo(ctx context.Context) (dto.ClientInfo, bool) {
-	md, ok := metadata.FromIncomingContext(ctx)
+func WithOutgoingContext(ctx context.Context, key string, values ...string) (context.Context, bool) {
+	md, ok := metadata.FromOutgoingContext(ctx)
 	if !ok {
-		return dto.ClientInfo{}, false
+		return nil, false
 	}
 
-	return dto.ClientInfo{
-		DeviceID:   first(md, dto.MetaDeviceIDKey),
-		UserAgent:  first(md, dto.MetaUserAgentKey),
-		IPAddress:  first(md, dto.MetaClientIPKey),
-		ClientType: first(md, dto.MetaClientTypeKey),
-		APIVersion: first(md, dto.MetaAPIVersionKey),
-		SDKVersion: first(md, dto.MetaSDKVersionKey),
-		RequestID:  first(md, dto.MetaRequestIDKey),
-		SessionID:  first(md, dto.MetaSessionIDKey),
-		TraceID:    first(md, dto.MetaTraceIDKey),
-		Locale:     first(md, dto.MetaLocaleKey),
-	}, true
+	md.Set(key, values...)
+
+	return metadata.NewOutgoingContext(ctx, md), true
 }
 
-// SendUserInfo adds user identity metadata to the outgoing context.
-func SendUserInfo(ctx context.Context, info dto.UserInfo) context.Context {
-	return appendOutgoing(ctx,
-		dto.MetaUserIDKey, info.UserID,
-		dto.MetaAccessTokenKey, info.AccessToken,
-		dto.MetaSessionIDKey, info.SessionID,
-		dto.MetaRoleKey, info.Role,
-	)
-}
-
-// ReceiveUserInfo extracts user identity metadata from the incoming context.
-func ReceiveUserInfo(ctx context.Context) (dto.UserInfo, bool) {
-	md, ok := metadata.FromIncomingContext(ctx)
+func SetUserInfoToOutgoingContext(ctx context.Context, userInfo dto.UserInfo) context.Context {
+	md, ok := metadata.FromOutgoingContext(ctx)
 	if !ok {
-		return dto.UserInfo{}, false
+		md = metadata.MD{}
 	}
 
-	return dto.UserInfo{
-		UserID:      first(md, dto.MetaUserIDKey),
-		AccessToken: first(md, dto.MetaAccessTokenKey),
-		SessionID:   first(md, dto.MetaSessionIDKey),
-		Role:        first(md, dto.MetaRoleKey),
-	}, true
-}
-
-func appendOutgoing(ctx context.Context, kv ...string) context.Context {
-	md := filterEmptyPairs(kv...)
-	if existing, ok := metadata.FromOutgoingContext(ctx); ok {
-		md = metadata.Join(existing, md)
-	}
+	// Set user info to metadata
+	md.Set(dto.MetaUserIDKey, userInfo.UserID)
+	md.Set(dto.MetaTokenIDKey, userInfo.TokenID)
+	md.Set(dto.MetaSessionIDKey, userInfo.SessionID)
 
 	return metadata.NewOutgoingContext(ctx, md)
 }
 
-func filterEmptyPairs(kv ...string) metadata.MD {
-	md := metadata.MD{}
-	for i := 0; i+1 < len(kv); i += 2 {
-		key := kv[i]
-		value := kv[i+1]
-		if key == "" || value == "" {
-			continue
-		}
-		md.Append(key, value)
+func GetUserInfoFromIncomingContext(ctx context.Context) (dto.UserInfo, bool) {
+	info := dto.UserInfo{}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return info, false
 	}
 
-	return md
+	if userID, ok := md[dto.MetaUserIDKey]; ok {
+		info.UserID = userID[0]
+	}
+	if tokenID, ok := md[dto.MetaTokenIDKey]; ok {
+		info.TokenID = tokenID[0]
+	}
+	if sessionID, ok := md[dto.MetaSessionIDKey]; ok {
+		info.SessionID = sessionID[0]
+	}
+
+	return info, true
 }
 
-func first(md metadata.MD, key string) string {
-	if vals := md.Get(key); len(vals) > 0 {
-		return vals[0]
+func SetClientInfoToOutgoingContext(ctx context.Context, clientInfo dto.ClientInfo) context.Context {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		md = metadata.MD{}
 	}
-	return ""
+
+	md.Set(dto.MetaDeviceIDKey, clientInfo.DeviceID)
+	md.Set(dto.MetaUserAgentKey, clientInfo.UserAgent)
+	md.Set(dto.MetaClientIPKey, clientInfo.IPAddress)
+	md.Set(dto.MetaClientTypeKey, clientInfo.ClientType)
+	md.Set(dto.MetaAPIVersionKey, clientInfo.APIVersion)
+	md.Set(dto.MetaLocaleKey, clientInfo.Locale)
+	md.Set(dto.MetaSDKVersionKey, clientInfo.SDKVersion)
+
+	md.Set(dto.MetaRequestIDKey, clientInfo.RequestID)
+	md.Set(dto.MetaTraceIDKey, clientInfo.TraceID)
+
+	return metadata.NewOutgoingContext(ctx, md)
+}
+
+func GetClientInfoFromIncomingContext(ctx context.Context) (dto.ClientInfo, bool) {
+	info := dto.ClientInfo{}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return info, false
+	}
+
+	if deviceID, ok := md[dto.MetaDeviceIDKey]; ok {
+		info.DeviceID = deviceID[0]
+	}
+	if userAgent, ok := md[dto.MetaUserAgentKey]; ok {
+		info.UserAgent = userAgent[0]
+	}
+	if clientIP, ok := md[dto.MetaClientIPKey]; ok {
+		info.IPAddress = clientIP[0]
+	}
+	if clientType, ok := md[dto.MetaClientTypeKey]; ok {
+		info.ClientType = clientType[0]
+	}
+	if apiVersion, ok := md[dto.MetaAPIVersionKey]; ok {
+		info.APIVersion = apiVersion[0]
+	}
+	if locale, ok := md[dto.MetaLocaleKey]; ok {
+		info.Locale = locale[0]
+	}
+	if sdkVersion, ok := md[dto.MetaSDKVersionKey]; ok {
+		info.SDKVersion = sdkVersion[0]
+	}
+
+	if requestID, ok := md[dto.MetaRequestIDKey]; ok {
+		info.RequestID = requestID[0]
+	}
+	if traceID, ok := md[dto.MetaTraceIDKey]; ok {
+		info.TraceID = traceID[0]
+	}
+
+	return info, true
+}
+
+func SetScopedTokenInfoToOutgoingContext(ctx context.Context, tokenInfo dto.ScopedToken) context.Context {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		md = metadata.MD{}
+	}
+
+	md.Set(dto.MetaScopedTokenKey, tokenInfo.String)
+	md.Set(dto.MetaScopedTokenIDKey, tokenInfo.ID)
+	md.Set(dto.MetaScopedTokenScopeKey, tokenInfo.Scope)
+	md.Set(dto.MetaScopedTokenSubjectKey, tokenInfo.Subject)
+
+	return metadata.NewOutgoingContext(ctx, md)
+}
+
+func GetScopedTokenInfoFromIncomingContext(ctx context.Context) (dto.ScopedToken, bool) {
+	info := dto.ScopedToken{}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return info, false
+	}
+
+	if scopedToken, ok := md[dto.MetaScopedTokenKey]; ok {
+		info.String = scopedToken[0]
+	}
+	if scopedTokenID, ok := md[dto.MetaScopedTokenIDKey]; ok {
+		info.ID = scopedTokenID[0]
+	}
+	if scopedTokenScope, ok := md[dto.MetaScopedTokenScopeKey]; ok {
+		info.Scope = scopedTokenScope[0]
+	}
+	if scopedTokenSubject, ok := md[dto.MetaScopedTokenSubjectKey]; ok {
+		info.Subject = scopedTokenSubject[0]
+	}
+
+	return info, true
+}
+
+func SetAuthTokensInfoToOutgoingContext(ctx context.Context, tokenInfo dto.AuthTokens) context.Context {
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		md = metadata.MD{}
+	}
+
+	md.Set(dto.MetaAccessTokenKey, tokenInfo.AccessToken)
+	md.Set(dto.MetaRefreshTokenKey, tokenInfo.RefreshToken)
+
+	return metadata.NewOutgoingContext(ctx, md)
+}
+
+func GetAuthTokensInfoFromIncomingContext(ctx context.Context) (dto.AuthTokens, bool) {
+	info := dto.AuthTokens{}
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return info, false
+	}
+
+	if accessToken, ok := md[dto.MetaAccessTokenKey]; ok {
+		info.AccessToken = accessToken[0]
+	}
+	if refreshToken, ok := md[dto.MetaRefreshTokenKey]; ok {
+		info.RefreshToken = refreshToken[0]
+	}
+
+	return info, true
 }

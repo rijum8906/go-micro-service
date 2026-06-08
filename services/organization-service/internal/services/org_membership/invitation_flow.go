@@ -15,7 +15,7 @@ import (
 	"github.com/rijum8906/relay/packages/core/protoutils"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	org_membershipv1 "github.com/rijum8906/relay/packages/pb/organization_service/org_membership/v1"
-	"github.com/rijum8906/relay/services/organization-service/internal/constants"
+	"github.com/rijum8906/relay/services/organization-service/app/constants"
 	"github.com/rijum8906/relay/services/organization-service/internal/db"
 	"go.uber.org/zap"
 )
@@ -76,7 +76,7 @@ func (s *OrgMembershipService) SendInvitation(
 	}
 
 	// Authenticate and extract user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithDetail("reason", "missing user metadata")
 	}
@@ -104,7 +104,7 @@ func (s *OrgMembershipService) SendInvitation(
 	}
 
 	// Get user ID from email for membership check
-	targetUser, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	targetUser, err := s.UserClient.GetMySelf(ctx, &corev1.EmptyRequest{})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.
 			WithMessage("failed to get user details").
@@ -147,7 +147,7 @@ func (s *OrgMembershipService) SendInvitation(
 	var tokenHash string
 	var invitedByMemID uuid.UUID
 
-	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
+	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Fetch sender's membership to get invited_by_mem_id
 		membership, err := q.GetOrganizationMembershipByOrgIDAndUserID(ctx, db.GetOrganizationMembershipByOrgIDAndUserIDParams{
 			UserID:         inviteBy,
@@ -334,7 +334,7 @@ func (s *OrgMembershipService) AcceptInvitation(
 	}
 
 	// Authenticate and extract user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}
@@ -348,7 +348,7 @@ func (s *OrgMembershipService) AcceptInvitation(
 	}
 
 	// Fetch user details from user service to get email for validation
-	user, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	user, err := s.UserClient.GetUser(ctx, &corev1.IDRequest{Id: userID.String()})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.
 			WithMessage("failed to fetch user details").
@@ -400,7 +400,7 @@ func (s *OrgMembershipService) AcceptInvitation(
 	var membershipID uuid.UUID
 	var membershipRole string
 
-	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
+	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// TODO: Add idempotency check for existing membership
 		// Check if user is already a member (prev duplicate membership)
 		existingMembership, err := q.GetOrganizationMembershipByOrgIDAndUserID(ctx, db.GetOrganizationMembershipByOrgIDAndUserIDParams{
@@ -566,7 +566,7 @@ func (s *OrgMembershipService) DeclineInvitation(
 	}
 
 	// Authenticate and extract user identity from context
-	userInfo, ok := metadata.ReceiveUserInfo(ctx)
+	userInfo, ok := metadata.GetUserInfoFromIncomingContext(ctx)
 	if !ok {
 		return nil, apperror.ErrInternal.WithMessage("user metadata not found in context")
 	}
@@ -580,7 +580,7 @@ func (s *OrgMembershipService) DeclineInvitation(
 	}
 
 	// Fetch user details from user service to get email for validation
-	user, err := s.UserClient.GetUser(ctx, &corev1.EmptyRequest{})
+	user, err := s.UserClient.GetUser(ctx, &corev1.IDRequest{Id: userID.String()})
 	if err != nil {
 		return nil, apperror.ErrThirdParty.
 			WithMessage("failed to fetch user details").
@@ -624,7 +624,7 @@ func (s *OrgMembershipService) DeclineInvitation(
 	}
 
 	// Execute decline in transaction
-	if appErr := s.runInTx(ctx, func(q *db.Queries) *apperror.AppError {
+	if appErr := s.Helper.RunInTx(ctx, func(q *db.Queries) *apperror.AppError {
 		// Mark the invitation as declined
 		_, err := q.DeclineOrganizationInvitation(ctx, db.DeclineOrganizationInvitationParams{
 			ID:          invitation.ID,

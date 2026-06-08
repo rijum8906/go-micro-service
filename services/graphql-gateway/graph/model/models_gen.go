@@ -3,13 +3,21 @@
 package model
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+
+	coreconstants "github.com/rijum8906/relay/packages/core/constants"
 	"github.com/rijum8906/relay/services/graphql-gateway/internal/dto/coredto"
 )
 
 type AuthResponse struct {
-	Tokens  *AuthTokens `json:"tokens"`
-	User    *User       `json:"user"`
-	Profile *Profile    `json:"profile"`
+	Status        AuthStatus  `json:"status"`
+	Tokens        *AuthTokens `json:"tokens,omitempty"`
+	User          *User       `json:"user,omitempty"`
+	Profile       *Profile    `json:"profile,omitempty"`
+	PreAuthTOoken *string     `json:"preAuthTOoken,omitempty"`
 }
 
 type AuthTokens struct {
@@ -18,8 +26,18 @@ type AuthTokens struct {
 }
 
 type EmailInput struct {
-	Email string               `json:"email"`
-	Meta  *coredto.RequestMeta `json:"meta"`
+	Email string `json:"email"`
+}
+
+type GenerateScopedTokenResponse struct {
+	ScopedToken string `json:"scopedToken"`
+}
+
+type GenereateScopedTokenInput struct {
+	Scope      string                   `json:"scope"`
+	AuthMethod coreconstants.AuthMethod `json:"authMethod"`
+	AuthValue  string                   `json:"authValue"`
+	Meta       *coredto.RequestMeta     `json:"meta"`
 }
 
 type GetSessionsInput struct {
@@ -58,17 +76,15 @@ type RevokeOthersSessionInput struct {
 }
 
 type RevokeSessionInput struct {
-	ScopedToken   string `json:"scopedToken"`
 	TokenToRevoke string `json:"tokenToRevoke"`
 }
 
 type ScopedTokenInput struct {
-	ScopedToken string               `json:"scopedToken"`
-	Meta        *coredto.RequestMeta `json:"meta"`
+	ScopedToken string `json:"scopedToken"`
 }
 
 type ScopedTokenResponse struct {
-	Token *Token `json:"token"`
+	ScopedToken string `json:"scopedToken"`
 }
 
 type Session struct {
@@ -108,6 +124,10 @@ type Token struct {
 	ExpiresAt string `json:"expiresAt"`
 }
 
+type TwoFactorCode struct {
+	TwoFactorCode string `json:"twoFactorCode"`
+}
+
 type User struct {
 	ID                 string  `json:"id"`
 	Email              string  `json:"email"`
@@ -117,4 +137,173 @@ type User struct {
 	TwoFactorEnabledAt *string `json:"twoFactorEnabledAt,omitempty"`
 	CreatedAt          string  `json:"createdAt"`
 	UpdatedAt          string  `json:"updatedAt"`
+}
+
+type AuthStatus string
+
+const (
+	AuthStatusAuthStatusUnspecified AuthStatus = "AUTH_STATUS_UNSPECIFIED"
+	AuthStatusAuthStatusSuccess     AuthStatus = "AUTH_STATUS_SUCCESS"
+	AuthStatusAuthStatusFailed      AuthStatus = "AUTH_STATUS_FAILED"
+	AuthStatusAuthStatus2faRequired AuthStatus = "AUTH_STATUS_2FA_REQUIRED"
+)
+
+var AllAuthStatus = []AuthStatus{
+	AuthStatusAuthStatusUnspecified,
+	AuthStatusAuthStatusSuccess,
+	AuthStatusAuthStatusFailed,
+	AuthStatusAuthStatus2faRequired,
+}
+
+func (e AuthStatus) IsValid() bool {
+	switch e {
+	case AuthStatusAuthStatusUnspecified, AuthStatusAuthStatusSuccess, AuthStatusAuthStatusFailed, AuthStatusAuthStatus2faRequired:
+		return true
+	}
+	return false
+}
+
+func (e AuthStatus) String() string {
+	return string(e)
+}
+
+func (e *AuthStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AuthStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AuthStatus", str)
+	}
+	return nil
+}
+
+func (e AuthStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AuthStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AuthStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type AuthorizationTokenType string
+
+const (
+	AuthorizationTokenTypeBearer    AuthorizationTokenType = "Bearer"
+	AuthorizationTokenTypeTwoFactor AuthorizationTokenType = "TwoFactor"
+)
+
+var AllAuthorizationTokenType = []AuthorizationTokenType{
+	AuthorizationTokenTypeBearer,
+	AuthorizationTokenTypeTwoFactor,
+}
+
+func (e AuthorizationTokenType) IsValid() bool {
+	switch e {
+	case AuthorizationTokenTypeBearer, AuthorizationTokenTypeTwoFactor:
+		return true
+	}
+	return false
+}
+
+func (e AuthorizationTokenType) String() string {
+	return string(e)
+}
+
+func (e *AuthorizationTokenType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AuthorizationTokenType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AuthorizationTokenType", str)
+	}
+	return nil
+}
+
+func (e AuthorizationTokenType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AuthorizationTokenType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AuthorizationTokenType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type TokenScope string
+
+const (
+	TokenScopeVerifyUserEmail    TokenScope = "VERIFY_USER_EMAIL"
+	TokenScopeChangeUserPassword TokenScope = "CHANGE_USER_PASSWORD"
+)
+
+var AllTokenScope = []TokenScope{
+	TokenScopeVerifyUserEmail,
+	TokenScopeChangeUserPassword,
+}
+
+func (e TokenScope) IsValid() bool {
+	switch e {
+	case TokenScopeVerifyUserEmail, TokenScopeChangeUserPassword:
+		return true
+	}
+	return false
+}
+
+func (e TokenScope) String() string {
+	return string(e)
+}
+
+func (e *TokenScope) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TokenScope(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TokenScope", str)
+	}
+	return nil
+}
+
+func (e TokenScope) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *TokenScope) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e TokenScope) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
