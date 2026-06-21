@@ -46,3 +46,16 @@ type task_comment
         define can_view: can_comment from parent_task
         define can_edit: author and can_comment from parent_task
         define can_delete: author and can_comment from parent_task
+
+type role
+    relations
+        define project: [project]
+        define assignee: [user]
+        define inherits: [role]
+        define effective_assignee: assignee or effective_assignee from inherits
+
+type permission
+    relations
+        define project_scope: [project]
+        define granted_to: [role]
+        define allowed: effective_assignee from granted_to
