@@ -16,15 +16,14 @@ func NewAllowAuthorizer() authz.Authorizer {
 	return allowAuthorizer{}
 }
 
-func (allowAuthorizer) RequireProjectRole(_ context.Context, projectID uuid.UUID, _ *coredto.UserInfo, minRole authz.Role) (*db.ProjectMembership, *apperror.AppError) {
+func (allowAuthorizer) RequireProjectPermission(_ context.Context, projectID uuid.UUID, _ *coredto.UserInfo, _ string) (*db.ProjectMembership, *apperror.AppError) {
 	return &db.ProjectMembership{
 		ID:        uuid.New(),
 		ProjectID: projectID,
-		Role:      string(minRole),
 	}, nil
 }
 
-func (allowAuthorizer) RequireTaskRole(_ context.Context, taskID uuid.UUID, userInfo *coredto.UserInfo, _ authz.Role) (*db.Task, *apperror.AppError) {
+func (allowAuthorizer) RequireTaskPermission(_ context.Context, taskID uuid.UUID, userInfo *coredto.UserInfo, _ string) (*db.Task, *apperror.AppError) {
 	task := &db.Task{ID: taskID}
 	if userInfo != nil {
 		if userID, err := uuid.Parse(userInfo.UserID); err == nil {

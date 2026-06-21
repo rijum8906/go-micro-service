@@ -79,7 +79,7 @@ func (s *service) getProject(ctx context.Context, req *taskv1.GetProjectRequest,
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr := s.authz.RequireProjectPermission(ctx, id, userInfo, taskpermissions.PermissionCanView); appErr != nil {
 		return nil, appErr
 	}
 
@@ -115,7 +115,7 @@ func (s *service) updateProject(ctx context.Context, req *taskv1.UpdateProjectRe
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr := s.authz.RequireProjectPermission(ctx, id, userInfo, taskpermissions.PermissionCanUpdate); appErr != nil {
 		return nil, appErr
 	}
 
@@ -151,7 +151,7 @@ func (s *service) completeProject(ctx context.Context, req *taskv1.CompleteProje
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr := s.authz.RequireProjectPermission(ctx, id, userInfo, taskpermissions.PermissionCanComplete); appErr != nil {
 		return nil, appErr
 	}
 
@@ -184,7 +184,7 @@ func (s *service) archiveProject(ctx context.Context, req *taskv1.ArchiveProject
 		return nil, appErr.WithDetail("field", "id")
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr := s.authz.RequireProjectPermission(ctx, id, userInfo, taskpermissions.PermissionCanArchive); appErr != nil {
 		return nil, appErr
 	}
 
@@ -218,7 +218,7 @@ func (s *service) deleteProject(ctx context.Context, req *taskv1.DeleteProjectRe
 		return nil, appErr
 	}
 
-	if _, appErr := s.authz.RequireProjectRole(ctx, id, userInfo, authz.RoleOwner); appErr != nil {
+	if _, appErr := s.authz.RequireProjectPermission(ctx, id, userInfo, taskpermissions.PermissionCanDelete); appErr != nil {
 		return nil, appErr
 	}
 

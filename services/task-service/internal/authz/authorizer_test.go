@@ -5,11 +5,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	openfga "github.com/openfga/go-sdk"
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/coreopenfga"
 	"github.com/rijum8906/relay/packages/core/dto"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	"github.com/rijum8906/relay/services/task-service/internal/db"
 )
 
@@ -57,7 +59,7 @@ func (stubTupleManager) Delete(context.Context, []client.ClientTupleKeyWithoutCo
 	panic("unexpected Delete call")
 }
 
-func TestRequireTaskRoleAllowsCreatorForNonProjectTask(t *testing.T) {
+func TestRequireTaskPermissionAllowsCreatorForNonProjectTask(t *testing.T) {
 	taskID := uuid.New()
 	userID := uuid.New()
 
@@ -67,7 +69,7 @@ func TestRequireTaskRoleAllowsCreatorForNonProjectTask(t *testing.T) {
 		},
 	}, nil)
 
-	task, appErr := authorizer.RequireTaskRole(context.Background(), taskID, &dto.UserInfo{UserID: userID.String()}, RoleAdmin)
+	task, appErr := authorizer.RequireTaskPermission(context.Background(), taskID, &dto.UserInfo{UserID: userID.String()}, taskpermissions.PermissionCanDelete)
 	if appErr != nil {
 		t.Fatalf("expected success, got error: %v", appErr)
 	}
@@ -76,7 +78,7 @@ func TestRequireTaskRoleAllowsCreatorForNonProjectTask(t *testing.T) {
 	}
 }
 
-func TestRequireTaskRoleRejectsNonCreatorForNonProjectTask(t *testing.T) {
+func TestRequireTaskPermissionRejectsNonCreatorForNonProjectTask(t *testing.T) {
 	taskID := uuid.New()
 	creatorID := uuid.New()
 	userID := uuid.New()
@@ -87,7 +89,7 @@ func TestRequireTaskRoleRejectsNonCreatorForNonProjectTask(t *testing.T) {
 		},
 	}, nil)
 
-	task, appErr := authorizer.RequireTaskRole(context.Background(), taskID, &dto.UserInfo{UserID: userID.String()}, RoleMember)
+	task, appErr := authorizer.RequireTaskPermission(context.Background(), taskID, &dto.UserInfo{UserID: userID.String()}, taskpermissions.PermissionCanView)
 	if task != nil {
 		t.Fatalf("expected nil task, got %#v", task)
 	}
@@ -96,7 +98,7 @@ func TestRequireTaskRoleRejectsNonCreatorForNonProjectTask(t *testing.T) {
 	}
 }
 
-func TestRequireProjectRoleUsesOpenFGACheck(t *testing.T) {
+func TestRequireProjectPermissionUsesOpenFGACheck(t *testing.T) {
 	projectID := uuid.New()
 	userID := uuid.New()
 	allowed := true
@@ -118,16 +120,16 @@ func TestRequireProjectRoleUsesOpenFGACheck(t *testing.T) {
 		},
 	})
 
-	membership, appErr := authorizer.RequireProjectRole(context.Background(), projectID, &dto.UserInfo{UserID: userID.String()}, RoleAdmin)
+	membership, appErr := authorizer.RequireProjectPermission(context.Background(), projectID, &dto.UserInfo{UserID: userID.String()}, taskpermissions.PermissionCanManageTasks)
 	if appErr != nil {
 		t.Fatalf("expected success, got error: %v", appErr)
 	}
-	if membership == nil || membership.ProjectID != projectID || membership.UserID != userID || membership.Role != string(RoleAdmin) {
+	if membership == nil || membership.ProjectID != projectID || membership.UserID != userID {
 		t.Fatalf("unexpected membership: %#v", membership)
 	}
 }
 
-func TestRequireProjectRoleRejectsDeniedOpenFGACheck(t *testing.T) {
+func TestRequireProjectPermissionRejectsDeniedOpenFGACheck(t *testing.T) {
 	projectID := uuid.New()
 	userID := uuid.New()
 	allowed := false
@@ -140,7 +142,7 @@ func TestRequireProjectRoleRejectsDeniedOpenFGACheck(t *testing.T) {
 		},
 	})
 
-	membership, appErr := authorizer.RequireProjectRole(context.Background(), projectID, &dto.UserInfo{UserID: userID.String()}, RoleMember)
+	membership, appErr := authorizer.RequireProjectPermission(context.Background(), projectID, &dto.UserInfo{UserID: userID.String()}, taskpermissions.PermissionCanView)
 	if membership != nil {
 		t.Fatalf("expected nil membership, got %#v", membership)
 	}
@@ -149,7 +151,7 @@ func TestRequireProjectRoleRejectsDeniedOpenFGACheck(t *testing.T) {
 	}
 }
 
-func TestRequireTaskRoleLoadsTaskAndUsesOpenFGACheck(t *testing.T) {
+func TestRequireTaskPermissionLoadsTaskAndUsesOpenFGACheck(t *testing.T) {
 	taskID := uuid.New()
 	userID := uuid.New()
 	allowed := true
@@ -163,7 +165,7 @@ func TestRequireTaskRoleLoadsTaskAndUsesOpenFGACheck(t *testing.T) {
 			if req.User != "user:"+userID.String() {
 				t.Fatalf("unexpected user: %s", req.User)
 			}
-			if req.Relation != "can_manage" {
+			if req.Relation != taskpermissions.PermissionCanAssign {
 				t.Fatalf("unexpected relation: %s", req.Relation)
 			}
 			if req.Object != "task:"+taskID.String() {
@@ -175,12 +177,70 @@ func TestRequireTaskRoleLoadsTaskAndUsesOpenFGACheck(t *testing.T) {
 		},
 	})
 
-	task, appErr := authorizer.RequireTaskRole(context.Background(), taskID, &dto.UserInfo{UserID: userID.String()}, RoleAdmin)
+	task, appErr := authorizer.RequireTaskPermission(context.Background(), taskID, &dto.UserInfo{UserID: userID.String()}, taskpermissions.PermissionCanAssign)
 	if appErr != nil {
 		t.Fatalf("expected success, got error: %v", appErr)
 	}
 	if task == nil || task.ID != taskID {
 		t.Fatalf("unexpected task: %#v", task)
+	}
+}
+
+func TestRequireTaskPermissionUsesProjectScopedCustomPermissionObject(t *testing.T) {
+	taskID := uuid.New()
+	projectID := uuid.New()
+	userID := uuid.New()
+	allowed := true
+	checks := 0
+
+	authorizer := newAuthorizer(t, stubQuerier{
+		getTaskFn: func(_ context.Context, id uuid.UUID) (db.Task, error) {
+			return db.Task{
+				ID:        id,
+				CreatedBy: uuid.New(),
+				ProjectID: pgtype.UUID{
+					Bytes: projectID,
+					Valid: true,
+				},
+			}, nil
+		},
+	}, stubTupleManager{
+		checkFn: func(_ context.Context, req client.ClientCheckRequest) (*client.ClientCheckResponse, *apperror.AppError) {
+			checks++
+			if checks == 1 {
+				if req.Relation != taskpermissions.PermissionCanComment || req.Object != "task:"+taskID.String() {
+					t.Fatalf("unexpected direct check: %#v", req)
+				}
+				denied := false
+				return &client.ClientCheckResponse{
+					CheckResponse: openfga.CheckResponse{Allowed: &denied},
+				}, nil
+			}
+			if req.User != "user:"+userID.String() {
+				t.Fatalf("unexpected user: %s", req.User)
+			}
+			if req.Relation != "allowed" {
+				t.Fatalf("unexpected relation: %s", req.Relation)
+			}
+			expectedObject := taskpermissions.GeneratePermissionObject(projectID.String(), taskpermissions.ResourceTask, taskpermissions.PermissionCanComment)
+			if req.Object != expectedObject {
+				t.Fatalf("unexpected object: %s", req.Object)
+			}
+			return &client.ClientCheckResponse{
+				CheckResponse: openfga.CheckResponse{Allowed: &allowed},
+			}, nil
+		},
+	})
+
+	task, appErr := authorizer.RequireTaskPermission(context.Background(), taskID, &dto.UserInfo{UserID: userID.String()}, taskpermissions.PermissionCanComment)
+	if appErr != nil {
+		t.Fatalf("expected success, got error: %v", appErr)
+	}
+	if task == nil || task.ID != taskID {
+		t.Fatalf("unexpected task: %#v", task)
+	}
+	if checks != 2 {
+		t.Fatalf("expected two FGA checks, got %d", checks)
 	}
 }
 

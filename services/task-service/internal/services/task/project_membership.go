@@ -40,11 +40,11 @@ func (s *service) addProjectMember(ctx context.Context, req *taskv1.AddProjectMe
 	if appErr != nil {
 		return nil, appErr
 	}
-	requiredRole := authz.RoleAdmin
-	if role == string(authz.RoleOwner) {
-		requiredRole = authz.RoleOwner
+	requiredPermission := taskpermissions.PermissionCanAddMember
+	if role == string(taskpermissions.RoleOwner) {
+		requiredPermission = taskpermissions.PermissionCanChangeMemberRole
 	}
-	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, requiredRole); appErr != nil {
+	if _, appErr = s.authz.RequireProjectPermission(ctx, projectID, userInfo, requiredPermission); appErr != nil {
 		return nil, appErr
 	}
 
@@ -95,7 +95,7 @@ func (s *service) removeProjectMember(ctx context.Context, req *taskv1.RemovePro
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr = s.authz.RequireProjectPermission(ctx, projectID, userInfo, taskpermissions.PermissionCanRemoveMember); appErr != nil {
 		return nil, appErr
 	}
 
@@ -140,7 +140,7 @@ func (s *service) updateProjectMemberRole(ctx context.Context, req *taskv1.Updat
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, authz.RoleOwner); appErr != nil {
+	if _, appErr = s.authz.RequireProjectPermission(ctx, projectID, userInfo, taskpermissions.PermissionCanChangeMemberRole); appErr != nil {
 		return nil, appErr
 	}
 
@@ -208,7 +208,7 @@ func (s *service) listProjectMembers(ctx context.Context, req *taskv1.ListProjec
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireProjectRole(ctx, projectID, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr = s.authz.RequireProjectPermission(ctx, projectID, userInfo, taskpermissions.PermissionCanView); appErr != nil {
 		return nil, appErr
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
@@ -28,7 +29,7 @@ func (s *service) assignTask(ctx context.Context, req *taskv1.AssignTaskRequest,
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, taskID, userInfo, taskpermissions.PermissionCanAssign); appErr != nil {
 		return nil, appErr
 	}
 
@@ -82,7 +83,7 @@ func (s *service) unassignTask(ctx context.Context, req *taskv1.UnassignTaskRequ
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, taskID, userInfo, taskpermissions.PermissionCanAssign); appErr != nil {
 		return nil, appErr
 	}
 
@@ -119,7 +120,7 @@ func (s *service) reassignTask(ctx context.Context, req *taskv1.ReassignTaskRequ
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, taskID, userInfo, taskpermissions.PermissionCanAssign); appErr != nil {
 		return nil, appErr
 	}
 
@@ -212,7 +213,7 @@ func (s *service) listTaskAssignments(ctx context.Context, req *taskv1.ListTaskA
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, taskID, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, taskID, userInfo, taskpermissions.PermissionCanView); appErr != nil {
 		return nil, appErr
 	}
 

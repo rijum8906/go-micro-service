@@ -14,23 +14,9 @@ import (
 	"github.com/rijum8906/relay/services/task-service/internal/utils"
 )
 
-type Role = taskpermissions.Role
-
-const (
-	RoleMember Role = taskpermissions.RoleMember
-	RoleAdmin  Role = taskpermissions.RoleAdmin
-	RoleOwner  Role = taskpermissions.RoleOwner
-)
-
-var roleRank = map[Role]int{
-	RoleMember: 1,
-	RoleAdmin:  2,
-	RoleOwner:  3,
-}
-
 type Authorizer interface {
-	RequireProjectRole(ctx context.Context, projectID uuid.UUID, userInfo *coredto.UserInfo, minRole Role) (*db.ProjectMembership, *apperror.AppError)
-	RequireTaskRole(ctx context.Context, taskID uuid.UUID, userInfo *coredto.UserInfo, minRole Role) (*db.Task, *apperror.AppError)
+	RequireProjectPermission(ctx context.Context, projectID uuid.UUID, userInfo *coredto.UserInfo, permission string) (*db.ProjectMembership, *apperror.AppError)
+	RequireTaskPermission(ctx context.Context, taskID uuid.UUID, userInfo *coredto.UserInfo, permission string) (*db.Task, *apperror.AppError)
 }
 
 type authorizer struct {
@@ -49,20 +35,33 @@ func NewAuthorizer(q db.Querier, tuples coreopenfga.TuppleManager) (Authorizer, 
 	}, nil
 }
 
-func (a *authorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID, userInfo *coredto.UserInfo, minRole Role) (*db.ProjectMembership, *apperror.AppError) {
+func (a *authorizer) RequireProjectPermission(ctx context.Context, projectID uuid.UUID, userInfo *coredto.UserInfo, permission string) (*db.ProjectMembership, *apperror.AppError) {
 	userID, appErr := utils.ValidateUserInfo(userInfo)
 	if appErr != nil {
 		return nil, appErr
 	}
+	if !taskpermissions.IsProjectPermission(permission) {
+		return nil, apperror.ErrValidation.WithMessage("invalid project permission").WithDetail("permission", permission)
+	}
 
 	if a.tuples != nil {
-		if appErr = a.requireFGA(ctx, userID, projectRelation(minRole), fgaObject("project", projectID)); appErr != nil {
+		allowed, appErr := a.checkFGA(ctx, userID, permission, fgaObject("project", projectID))
+		if appErr != nil {
 			return nil, appErr
 		}
+		if !allowed {
+			allowed, appErr = a.checkFGA(ctx, userID, "allowed", taskpermissions.GeneratePermissionObject(projectID.String(), taskpermissions.ResourceProject, permission))
+			if appErr != nil {
+				return nil, appErr
+			}
+		}
+		if !allowed {
+			return nil, apperror.ErrForbidden.WithMessage("permission denied")
+		}
+
 		return &db.ProjectMembership{
 			ProjectID: projectID,
 			UserID:    userID,
-			Role:      string(minRole),
 		}, nil
 	}
 
@@ -78,17 +77,20 @@ func (a *authorizer) RequireProjectRole(ctx context.Context, projectID uuid.UUID
 		return nil, appErr
 	}
 
-	if !hasMinRole(membership.Role, minRole) {
-		return nil, apperror.ErrForbidden.WithMessage("insufficient project role")
+	if !hasDefaultRolePermission(membership.Role, permission) {
+		return nil, apperror.ErrForbidden.WithMessage("insufficient project permission")
 	}
 
 	return membership, nil
 }
 
-func (a *authorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, userInfo *coredto.UserInfo, minRole Role) (*db.Task, *apperror.AppError) {
+func (a *authorizer) RequireTaskPermission(ctx context.Context, taskID uuid.UUID, userInfo *coredto.UserInfo, permission string) (*db.Task, *apperror.AppError) {
 	userID, appErr := utils.ValidateUserInfo(userInfo)
 	if appErr != nil {
 		return nil, appErr
+	}
+	if !taskpermissions.IsTaskPermission(permission) {
+		return nil, apperror.ErrValidation.WithMessage("invalid task permission").WithDetail("permission", permission)
 	}
 
 	taskRow, err := a.q.GetTask(ctx, taskID)
@@ -98,14 +100,26 @@ func (a *authorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, user
 	}
 
 	if a.tuples != nil {
-		if appErr = a.requireFGA(ctx, userID, taskRelation(minRole), fgaObject("task", taskID)); appErr != nil {
+		allowed, appErr := a.checkFGA(ctx, userID, permission, fgaObject("task", taskID))
+		if appErr != nil {
 			return nil, appErr
 		}
+		if !allowed && task.ProjectID.Valid {
+			allowed, appErr = a.checkFGA(ctx, userID, "allowed", taskpermissions.GeneratePermissionObject(uuid.UUID(task.ProjectID.Bytes).String(), taskpermissions.ResourceTask, permission))
+			if appErr != nil {
+				return nil, appErr
+			}
+		}
+		if !allowed {
+			return nil, apperror.ErrForbidden.WithMessage("permission denied")
+		}
+
 		return task, nil
 	}
 
 	if task.ProjectID.Valid {
-		if _, appErr := a.RequireProjectRole(ctx, task.ProjectID.Bytes, userInfo, minRole); appErr != nil {
+		projectPermission := projectPermissionForTask(permission)
+		if _, appErr := a.RequireProjectPermission(ctx, task.ProjectID.Bytes, userInfo, projectPermission); appErr != nil {
 			return nil, appErr
 		}
 		return task, nil
@@ -118,44 +132,42 @@ func (a *authorizer) RequireTaskRole(ctx context.Context, taskID uuid.UUID, user
 	return task, nil
 }
 
-func hasMinRole(actual string, required Role) bool {
-	actualRole := Role(actual)
-	return roleRank[actualRole] >= roleRank[required]
-}
-
-func (a *authorizer) requireFGA(ctx context.Context, userID uuid.UUID, relation, object string) *apperror.AppError {
+func (a *authorizer) checkFGA(ctx context.Context, userID uuid.UUID, relation, object string) (bool, *apperror.AppError) {
 	res, appErr := a.tuples.Check(ctx, client.ClientCheckRequest{
 		User:     fgaObject("user", userID),
 		Relation: relation,
 		Object:   object,
 	})
 	if appErr != nil {
-		return appErr
-	}
-	if res == nil || !res.GetAllowed() {
-		return apperror.ErrForbidden.WithMessage("permission denied")
+		return false, appErr
 	}
 
-	return nil
+	return res != nil && res.GetAllowed(), nil
 }
 
-func projectRelation(role Role) string {
-	switch role {
-	case RoleOwner:
-		return taskpermissions.PermissionCanDelete
-	case RoleAdmin:
-		return taskpermissions.PermissionCanManageTasks
-	default:
+func hasDefaultRolePermission(role, permission string) bool {
+	for _, defaultPermission := range taskpermissions.GetDefaultPermissionsForRole(role) {
+		if defaultPermission == permission {
+			return true
+		}
+	}
+	return false
+}
+
+func projectPermissionForTask(permission string) string {
+	switch permission {
+	case taskpermissions.PermissionCanView:
 		return taskpermissions.PermissionCanView
-	}
-}
-
-func taskRelation(role Role) string {
-	switch role {
-	case RoleOwner:
-		return taskpermissions.PermissionCanDelete
-	case RoleAdmin:
-		return taskpermissions.PermissionCanManage
+	case taskpermissions.PermissionCanEdit,
+		taskpermissions.PermissionCanUpdateStatus,
+		taskpermissions.PermissionCanUpdateProgress,
+		taskpermissions.PermissionCanComment:
+		return taskpermissions.PermissionCanContributeTasks
+	case taskpermissions.PermissionCanManage,
+		taskpermissions.PermissionCanAssign,
+		taskpermissions.PermissionCanArchive,
+		taskpermissions.PermissionCanDelete:
+		return taskpermissions.PermissionCanManageTasks
 	default:
 		return taskpermissions.PermissionCanView
 	}

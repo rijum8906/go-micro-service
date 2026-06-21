@@ -10,6 +10,7 @@ import (
 	"github.com/openfga/go-sdk/client"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/dto"
+	taskpermissions "github.com/rijum8906/relay/packages/core/permissions/task"
 	corev1 "github.com/rijum8906/relay/packages/pb/core/v1"
 	modelsv1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
@@ -50,7 +51,7 @@ func (s *service) createTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 	}
 	var parentTask *db.Task
 	if parentTaskID.Valid {
-		parentTask, appErr = s.authz.RequireTaskRole(ctx, parentTaskID.Bytes, userInfo, authz.RoleMember)
+		parentTask, appErr = s.authz.RequireTaskPermission(ctx, parentTaskID.Bytes, userInfo, taskpermissions.PermissionCanView)
 		if appErr != nil {
 			return nil, appErr
 		}
@@ -59,7 +60,7 @@ func (s *service) createTask(ctx context.Context, req *taskv1.CreateTaskRequest,
 		}
 	}
 	if projectID.Valid {
-		if _, appErr = s.authz.RequireProjectRole(ctx, projectID.Bytes, userInfo, authz.RoleMember); appErr != nil {
+		if _, appErr = s.authz.RequireProjectPermission(ctx, projectID.Bytes, userInfo, taskpermissions.PermissionCanContributeTasks); appErr != nil {
 			return nil, appErr
 		}
 	}
@@ -123,7 +124,7 @@ func (s *service) getTask(ctx context.Context, req *taskv1.GetTaskRequest, userI
 	if appErr != nil {
 		return nil, appErr.WithDetail("field", "id")
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, id, userInfo, taskpermissions.PermissionCanView); appErr != nil {
 		return nil, appErr
 	}
 
@@ -160,7 +161,7 @@ func (s *service) listTasksByProject(ctx context.Context, req *taskv1.ListTasksB
 	if appErr != nil {
 		return nil, appErr.WithDetail("field", "project_id")
 	}
-	if _, appErr = s.authz.RequireProjectRole(ctx, projectUUID, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr = s.authz.RequireProjectPermission(ctx, projectUUID, userInfo, taskpermissions.PermissionCanView); appErr != nil {
 		return nil, appErr
 	}
 
@@ -193,7 +194,7 @@ func (s *service) updateTask(ctx context.Context, req *taskv1.UpdateTaskRequest,
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, id, userInfo, taskpermissions.PermissionCanEdit); appErr != nil {
 		return nil, appErr
 	}
 
@@ -246,7 +247,7 @@ func (s *service) deleteTask(ctx context.Context, req *taskv1.DeleteTaskRequest,
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, id, userInfo, taskpermissions.PermissionCanDelete); appErr != nil {
 		return nil, appErr
 	}
 
@@ -278,7 +279,7 @@ func (s *service) archiveTask(ctx context.Context, req *taskv1.ArchiveTaskReques
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleAdmin); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, id, userInfo, taskpermissions.PermissionCanArchive); appErr != nil {
 		return nil, appErr
 	}
 
@@ -311,7 +312,7 @@ func (s *service) updateTaskStatus(ctx context.Context, req *taskv1.UpdateTaskSt
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, id, userInfo, taskpermissions.PermissionCanUpdateStatus); appErr != nil {
 		return nil, appErr
 	}
 
@@ -383,7 +384,7 @@ func (s *service) updateTaskProgress(ctx context.Context, req *taskv1.UpdateTask
 	if appErr != nil {
 		return nil, appErr
 	}
-	if _, appErr = s.authz.RequireTaskRole(ctx, id, userInfo, authz.RoleMember); appErr != nil {
+	if _, appErr = s.authz.RequireTaskPermission(ctx, id, userInfo, taskpermissions.PermissionCanUpdateProgress); appErr != nil {
 		return nil, appErr
 	}
 
@@ -449,7 +450,7 @@ func (s *service) listTasksByParent(ctx context.Context, req *taskv1.ListTasksBy
 	if appErr != nil {
 		return nil, appErr
 	}
-	parentTask, appErr := s.authz.RequireTaskRole(ctx, parentTaskID, userInfo, authz.RoleMember)
+	parentTask, appErr := s.authz.RequireTaskPermission(ctx, parentTaskID, userInfo, taskpermissions.PermissionCanView)
 	if appErr != nil {
 		return nil, appErr
 	}
