@@ -9,17 +9,19 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/rijum8906/relay/packages/core/apperror"
 	"github.com/rijum8906/relay/packages/core/broker"
+	"github.com/rijum8906/relay/packages/core/coreopenfga"
+	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/app/config"
-	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
-	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 type ApplicationInfra struct {
-	cache        *redis.Client
-	database     *pgxpool.Pool
-	brokerClient broker.Client
+	cache         *redis.Client
+	database      *pgxpool.Pool
+	brokerClient  broker.Client
+	openFGA       *coreopenfga.Client
+	openFGATuples coreopenfga.TuppleManager
 }
 
 type ApplicationUtils struct {
@@ -27,8 +29,7 @@ type ApplicationUtils struct {
 }
 
 type ApplicationServices struct {
-	task        taskservice.TaskService
-	taskHandler *handler.TaskHandler
+	TaskService taskv1.TaskServiceServer
 }
 
 type Application struct {
@@ -66,11 +67,6 @@ func NewApplication(ctx context.Context) (*Application, *apperror.AppError) {
 	}
 
 	if appErr = app.initServices(); appErr != nil {
-		fmt.Println(appErr.Details)
-		return nil, appErr
-	}
-
-	if appErr = app.initHandler(); appErr != nil {
 		fmt.Println(appErr.Details)
 		return nil, appErr
 	}

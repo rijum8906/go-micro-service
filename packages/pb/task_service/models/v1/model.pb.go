@@ -210,6 +210,462 @@ func (x *Task) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type Project struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	CreatedBy      string                 `protobuf:"bytes,3,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	Name           string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Description    string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	Status         string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	ArchivedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=archived_at,json=archivedAt,proto3" json:"archived_at,omitempty"`
+	CompletedAt    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	DeletedAt      *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	DeletedBy      string                 `protobuf:"bytes,10,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
+	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *Project) Reset() {
+	*x = Project{}
+	mi := &file_task_service_models_v1_model_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Project) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Project) ProtoMessage() {}
+
+func (x *Project) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_models_v1_model_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Project.ProtoReflect.Descriptor instead.
+func (*Project) Descriptor() ([]byte, []int) {
+	return file_task_service_models_v1_model_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Project) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Project) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+func (x *Project) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+func (x *Project) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Project) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Project) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Project) GetArchivedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ArchivedAt
+	}
+	return nil
+}
+
+func (x *Project) GetCompletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return nil
+}
+
+func (x *Project) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
+func (x *Project) GetDeletedBy() string {
+	if x != nil {
+		return x.DeletedBy
+	}
+	return ""
+}
+
+func (x *Project) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Project) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type ProjectMembership struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	ProjectId     string                 `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	JoinedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
+	LeftAt        *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=left_at,json=leftAt,proto3" json:"left_at,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProjectMembership) Reset() {
+	*x = ProjectMembership{}
+	mi := &file_task_service_models_v1_model_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProjectMembership) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectMembership) ProtoMessage() {}
+
+func (x *ProjectMembership) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_models_v1_model_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectMembership.ProtoReflect.Descriptor instead.
+func (*ProjectMembership) Descriptor() ([]byte, []int) {
+	return file_task_service_models_v1_model_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ProjectMembership) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ProjectMembership) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *ProjectMembership) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ProjectMembership) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *ProjectMembership) GetJoinedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.JoinedAt
+	}
+	return nil
+}
+
+func (x *ProjectMembership) GetLeftAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LeftAt
+	}
+	return nil
+}
+
+func (x *ProjectMembership) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *ProjectMembership) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type TaskAssignment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TaskId        string                 `protobuf:"bytes,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	AssigneeType  string                 `protobuf:"bytes,3,opt,name=assignee_type,json=assigneeType,proto3" json:"assignee_type,omitempty"`
+	AssigneeId    string                 `protobuf:"bytes,4,opt,name=assignee_id,json=assigneeId,proto3" json:"assignee_id,omitempty"`
+	AssignedBy    string                 `protobuf:"bytes,5,opt,name=assigned_by,json=assignedBy,proto3" json:"assigned_by,omitempty"`
+	AssignedAt    *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=assigned_at,json=assignedAt,proto3" json:"assigned_at,omitempty"`
+	UnassignedAt  *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=unassigned_at,json=unassignedAt,proto3" json:"unassigned_at,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TaskAssignment) Reset() {
+	*x = TaskAssignment{}
+	mi := &file_task_service_models_v1_model_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TaskAssignment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TaskAssignment) ProtoMessage() {}
+
+func (x *TaskAssignment) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_models_v1_model_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TaskAssignment.ProtoReflect.Descriptor instead.
+func (*TaskAssignment) Descriptor() ([]byte, []int) {
+	return file_task_service_models_v1_model_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TaskAssignment) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *TaskAssignment) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *TaskAssignment) GetAssigneeType() string {
+	if x != nil {
+		return x.AssigneeType
+	}
+	return ""
+}
+
+func (x *TaskAssignment) GetAssigneeId() string {
+	if x != nil {
+		return x.AssigneeId
+	}
+	return ""
+}
+
+func (x *TaskAssignment) GetAssignedBy() string {
+	if x != nil {
+		return x.AssignedBy
+	}
+	return ""
+}
+
+func (x *TaskAssignment) GetAssignedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.AssignedAt
+	}
+	return nil
+}
+
+func (x *TaskAssignment) GetUnassignedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UnassignedAt
+	}
+	return nil
+}
+
+func (x *TaskAssignment) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *TaskAssignment) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type TaskComment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TaskId        string                 `protobuf:"bytes,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	AuthorId      string                 `protobuf:"bytes,3,opt,name=author_id,json=authorId,proto3" json:"author_id,omitempty"`
+	Body          string                 `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
+	EditedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=edited_at,json=editedAt,proto3" json:"edited_at,omitempty"`
+	EditCount     int32                  `protobuf:"varint,6,opt,name=edit_count,json=editCount,proto3" json:"edit_count,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	DeletedBy     string                 `protobuf:"bytes,8,opt,name=deleted_by,json=deletedBy,proto3" json:"deleted_by,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TaskComment) Reset() {
+	*x = TaskComment{}
+	mi := &file_task_service_models_v1_model_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TaskComment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TaskComment) ProtoMessage() {}
+
+func (x *TaskComment) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_models_v1_model_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TaskComment.ProtoReflect.Descriptor instead.
+func (*TaskComment) Descriptor() ([]byte, []int) {
+	return file_task_service_models_v1_model_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *TaskComment) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *TaskComment) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *TaskComment) GetAuthorId() string {
+	if x != nil {
+		return x.AuthorId
+	}
+	return ""
+}
+
+func (x *TaskComment) GetBody() string {
+	if x != nil {
+		return x.Body
+	}
+	return ""
+}
+
+func (x *TaskComment) GetEditedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EditedAt
+	}
+	return nil
+}
+
+func (x *TaskComment) GetEditCount() int32 {
+	if x != nil {
+		return x.EditCount
+	}
+	return 0
+}
+
+func (x *TaskComment) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
+func (x *TaskComment) GetDeletedBy() string {
+	if x != nil {
+		return x.DeletedBy
+	}
+	return ""
+}
+
+func (x *TaskComment) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *TaskComment) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
 var File_task_service_models_v1_model_proto protoreflect.FileDescriptor
 
 const file_task_service_models_v1_model_proto_rawDesc = "" +
@@ -244,7 +700,71 @@ const file_task_service_models_v1_model_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x12 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\xe6\x01\n" +
+	"updated_at\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xfb\x03\n" +
+	"\aProject\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12'\n" +
+	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x03 \x01(\tR\tcreatedBy\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x05 \x01(\tR\vdescription\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12;\n" +
+	"\varchived_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"archivedAt\x12=\n" +
+	"\fcompleted_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x129\n" +
+	"\n" +
+	"deleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12\x1d\n" +
+	"\n" +
+	"deleted_by\x18\n" +
+	" \x01(\tR\tdeletedBy\x129\n" +
+	"\n" +
+	"created_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xd3\x02\n" +
+	"\x11ProjectMembership\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x127\n" +
+	"\tjoined_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bjoinedAt\x123\n" +
+	"\aleft_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x06leftAt\x129\n" +
+	"\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x94\x03\n" +
+	"\x0eTaskAssignment\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\atask_id\x18\x02 \x01(\tR\x06taskId\x12#\n" +
+	"\rassignee_type\x18\x03 \x01(\tR\fassigneeType\x12\x1f\n" +
+	"\vassignee_id\x18\x04 \x01(\tR\n" +
+	"assigneeId\x12\x1f\n" +
+	"\vassigned_by\x18\x05 \x01(\tR\n" +
+	"assignedBy\x12;\n" +
+	"\vassigned_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"assignedAt\x12?\n" +
+	"\runassigned_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\funassignedAt\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x8f\x03\n" +
+	"\vTaskComment\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\atask_id\x18\x02 \x01(\tR\x06taskId\x12\x1b\n" +
+	"\tauthor_id\x18\x03 \x01(\tR\bauthorId\x12\x12\n" +
+	"\x04body\x18\x04 \x01(\tR\x04body\x127\n" +
+	"\tedited_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\beditedAt\x12\x1d\n" +
+	"\n" +
+	"edit_count\x18\x06 \x01(\x05R\teditCount\x129\n" +
+	"\n" +
+	"deleted_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\x12\x1d\n" +
+	"\n" +
+	"deleted_by\x18\b \x01(\tR\tdeletedBy\x129\n" +
+	"\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\xe6\x01\n" +
 	"\x1acom.task_service.models.v1B\n" +
 	"ModelProtoP\x01ZFgithub.com/rijum8906/relay/packages/pb/task_service/models/v1;modelsv1\xa2\x02\x03TMX\xaa\x02\x15TaskService.Models.V1\xca\x02\x15TaskService\\Models\\V1\xe2\x02!TaskService\\Models\\V1\\GPBMetadata\xea\x02\x17TaskService::Models::V1b\x06proto3"
 
@@ -260,24 +780,45 @@ func file_task_service_models_v1_model_proto_rawDescGZIP() []byte {
 	return file_task_service_models_v1_model_proto_rawDescData
 }
 
-var file_task_service_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_task_service_models_v1_model_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_task_service_models_v1_model_proto_goTypes = []any{
 	(*Task)(nil),                  // 0: task_service.models.v1.Task
-	(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
+	(*Project)(nil),               // 1: task_service.models.v1.Project
+	(*ProjectMembership)(nil),     // 2: task_service.models.v1.ProjectMembership
+	(*TaskAssignment)(nil),        // 3: task_service.models.v1.TaskAssignment
+	(*TaskComment)(nil),           // 4: task_service.models.v1.TaskComment
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
 var file_task_service_models_v1_model_proto_depIdxs = []int32{
-	1, // 0: task_service.models.v1.Task.started_at:type_name -> google.protobuf.Timestamp
-	1, // 1: task_service.models.v1.Task.due_at:type_name -> google.protobuf.Timestamp
-	1, // 2: task_service.models.v1.Task.completed_at:type_name -> google.protobuf.Timestamp
-	1, // 3: task_service.models.v1.Task.archived_at:type_name -> google.protobuf.Timestamp
-	1, // 4: task_service.models.v1.Task.deleted_at:type_name -> google.protobuf.Timestamp
-	1, // 5: task_service.models.v1.Task.created_at:type_name -> google.protobuf.Timestamp
-	1, // 6: task_service.models.v1.Task.updated_at:type_name -> google.protobuf.Timestamp
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	5,  // 0: task_service.models.v1.Task.started_at:type_name -> google.protobuf.Timestamp
+	5,  // 1: task_service.models.v1.Task.due_at:type_name -> google.protobuf.Timestamp
+	5,  // 2: task_service.models.v1.Task.completed_at:type_name -> google.protobuf.Timestamp
+	5,  // 3: task_service.models.v1.Task.archived_at:type_name -> google.protobuf.Timestamp
+	5,  // 4: task_service.models.v1.Task.deleted_at:type_name -> google.protobuf.Timestamp
+	5,  // 5: task_service.models.v1.Task.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 6: task_service.models.v1.Task.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 7: task_service.models.v1.Project.archived_at:type_name -> google.protobuf.Timestamp
+	5,  // 8: task_service.models.v1.Project.completed_at:type_name -> google.protobuf.Timestamp
+	5,  // 9: task_service.models.v1.Project.deleted_at:type_name -> google.protobuf.Timestamp
+	5,  // 10: task_service.models.v1.Project.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 11: task_service.models.v1.Project.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 12: task_service.models.v1.ProjectMembership.joined_at:type_name -> google.protobuf.Timestamp
+	5,  // 13: task_service.models.v1.ProjectMembership.left_at:type_name -> google.protobuf.Timestamp
+	5,  // 14: task_service.models.v1.ProjectMembership.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 15: task_service.models.v1.ProjectMembership.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 16: task_service.models.v1.TaskAssignment.assigned_at:type_name -> google.protobuf.Timestamp
+	5,  // 17: task_service.models.v1.TaskAssignment.unassigned_at:type_name -> google.protobuf.Timestamp
+	5,  // 18: task_service.models.v1.TaskAssignment.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 19: task_service.models.v1.TaskAssignment.updated_at:type_name -> google.protobuf.Timestamp
+	5,  // 20: task_service.models.v1.TaskComment.edited_at:type_name -> google.protobuf.Timestamp
+	5,  // 21: task_service.models.v1.TaskComment.deleted_at:type_name -> google.protobuf.Timestamp
+	5,  // 22: task_service.models.v1.TaskComment.created_at:type_name -> google.protobuf.Timestamp
+	5,  // 23: task_service.models.v1.TaskComment.updated_at:type_name -> google.protobuf.Timestamp
+	24, // [24:24] is the sub-list for method output_type
+	24, // [24:24] is the sub-list for method input_type
+	24, // [24:24] is the sub-list for extension type_name
+	24, // [24:24] is the sub-list for extension extendee
+	0,  // [0:24] is the sub-list for field type_name
 }
 
 func init() { file_task_service_models_v1_model_proto_init() }
@@ -291,7 +832,7 @@ func file_task_service_models_v1_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_task_service_models_v1_model_proto_rawDesc), len(file_task_service_models_v1_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

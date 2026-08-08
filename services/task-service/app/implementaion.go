@@ -9,11 +9,8 @@ import (
 	"github.com/rijum8906/relay/packages/core/apperror"
 	taskv1 "github.com/rijum8906/relay/packages/pb/task_service/task/v1"
 	"github.com/rijum8906/relay/services/task-service/app/config"
-	taskdb "github.com/rijum8906/relay/services/task-service/internal/db"
-	handler "github.com/rijum8906/relay/services/task-service/internal/handlers/grpc"
-	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
+	"github.com/rijum8906/relay/services/task-service/internal/db"
 	taskservice "github.com/rijum8906/relay/services/task-service/internal/services/task"
-	taskutils "github.com/rijum8906/relay/services/task-service/internal/utils"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -43,6 +40,14 @@ func (a *Application) initInfra(ctx context.Context) *apperror.AppError {
 	}
 	a.infra.brokerClient = nats
 
+	// OpenFGA is optional until task-service authorization is fully migrated.
+	openFGA, openFGATuples, appErr := initOpenFGA(a.config)
+	if appErr != nil {
+		return appErr
+	}
+	a.infra.openFGA = openFGA
+	a.infra.openFGATuples = openFGATuples
+
 	return nil
 }
 
@@ -56,25 +61,6 @@ func (a *Application) initUtils() *apperror.AppError {
 	return nil
 }
 
-func (a *Application) initServices() *apperror.AppError {
-	queries := taskdb.New(a.infra.database)
-	repose := &taskutils.Repos{
-		Task: taskrepo.NewTaskRepository(queries),
-	}
-
-	taskService, appErr := taskservice.NewTaskService(repose)
-	if appErr != nil {
-		return appErr
-	}
-	a.services.task = taskService
-	return nil
-}
-
-func (a *Application) initHandler() *apperror.AppError {
-	a.services.taskHandler = handler.NewTaskHandler(a.services.task)
-	return nil
-}
-
 func (a *Application) initGRPCServer() *apperror.AppError {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", a.config.Port))
 	if err != nil {
@@ -84,13 +70,25 @@ func (a *Application) initGRPCServer() *apperror.AppError {
 
 	// Create and Register grpc server
 	server := grpc.NewServer()
+	taskv1.RegisterTaskServiceServer(server, a.services.TaskService)
 	a.server = server
 
 	if a.config.AppEnv == "development" {
 		reflection.Register(server)
 	}
 
-	taskv1.RegisterTaskServiceServer(server, a.services.taskHandler)
+	return nil
+}
+
+func (a *Application) initServices() *apperror.AppError {
+	queries := db.New(a.infra.database)
+
+	taskService, appErr := taskservice.New(queries, a.infra.openFGATuples)
+	if appErr != nil {
+		return appErr
+	}
+
+	a.services.TaskService = taskService
 
 	return nil
 }

@@ -25,3 +25,55 @@ message Task {
   google.protobuf.Timestamp created_at = 18;
   google.protobuf.Timestamp updated_at = 19;
 }
+
+message Project {
+    string id = 1;
+    string organization_id = 2;
+    string created_by = 3;
+    string name = 4;
+    string description = 5;
+    string status = 6;
+    google.protobuf.Timestamp archived_at = 7;
+    google.protobuf.Timestamp completed_at = 8;
+    google.protobuf.Timestamp deleted_at = 9;
+    string deleted_by = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
+}
+
+message ProjectMembership {
+    string id = 1;
+    string project_id = 2;
+    string user_id = 3;
+    string role = 4;
+    google.protobuf.Timestamp joined_at = 5;
+    google.protobuf.Timestamp left_at = 6;
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
+}
+
+message TaskAssignment {
+    string id = 1;
+    string task_id = 2;
+    string assignee_type = 3;
+    string assignee_id = 4;
+    string assigned_by = 5;
+    google.protobuf.Timestamp assigned_at = 6;
+    google.protobuf.Timestamp unassigned_at = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+message TaskComment {
+    string id = 1;
+    string task_id = 2;
+    string author_id = 3;
+    string body = 4;
+    google.protobuf.Timestamp edited_at = 5;
+    int32 edit_count = 6;
+    google.protobuf.Timestamp deleted_at = 7;
+    string deleted_by = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+    
+}

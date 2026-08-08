@@ -8,6 +8,7 @@ package taskv1
 
 import (
 	context "context"
+	v11 "github.com/rijum8906/relay/packages/pb/core/v1"
 	v1 "github.com/rijum8906/relay/packages/pb/task_service/models/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
@@ -20,9 +21,36 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TaskService_CreateTask_FullMethodName         = "/task_service.task.v1.TaskService/CreateTask"
-	TaskService_GetTask_FullMethodName            = "/task_service.task.v1.TaskService/GetTask"
-	TaskService_ListTasksByProject_FullMethodName = "/task_service.task.v1.TaskService/ListTasksByProject"
+	TaskService_CreateTask_FullMethodName              = "/task_service.task.v1.TaskService/CreateTask"
+	TaskService_GetTask_FullMethodName                 = "/task_service.task.v1.TaskService/GetTask"
+	TaskService_ListTasksByProject_FullMethodName      = "/task_service.task.v1.TaskService/ListTasksByProject"
+	TaskService_CreateProject_FullMethodName           = "/task_service.task.v1.TaskService/CreateProject"
+	TaskService_GetProject_FullMethodName              = "/task_service.task.v1.TaskService/GetProject"
+	TaskService_UpdateProject_FullMethodName           = "/task_service.task.v1.TaskService/UpdateProject"
+	TaskService_CompleteProject_FullMethodName         = "/task_service.task.v1.TaskService/CompleteProject"
+	TaskService_ArchiveProject_FullMethodName          = "/task_service.task.v1.TaskService/ArchiveProject"
+	TaskService_DeleteProject_FullMethodName           = "/task_service.task.v1.TaskService/DeleteProject"
+	TaskService_ListProjects_FullMethodName            = "/task_service.task.v1.TaskService/ListProjects"
+	TaskService_AddProjectMember_FullMethodName        = "/task_service.task.v1.TaskService/AddProjectMember"
+	TaskService_RemoveProjectMember_FullMethodName     = "/task_service.task.v1.TaskService/RemoveProjectMember"
+	TaskService_UpdateProjectMemberRole_FullMethodName = "/task_service.task.v1.TaskService/UpdateProjectMemberRole"
+	TaskService_ListProjectMembers_FullMethodName      = "/task_service.task.v1.TaskService/ListProjectMembers"
+	TaskService_UpdateTask_FullMethodName              = "/task_service.task.v1.TaskService/UpdateTask"
+	TaskService_DeleteTask_FullMethodName              = "/task_service.task.v1.TaskService/DeleteTask"
+	TaskService_ArchiveTask_FullMethodName             = "/task_service.task.v1.TaskService/ArchiveTask"
+	TaskService_UpdateTaskStatus_FullMethodName        = "/task_service.task.v1.TaskService/UpdateTaskStatus"
+	TaskService_UpdateTaskProgress_FullMethodName      = "/task_service.task.v1.TaskService/UpdateTaskProgress"
+	TaskService_ListTasksByOrganization_FullMethodName = "/task_service.task.v1.TaskService/ListTasksByOrganization"
+	TaskService_ListTasksByParent_FullMethodName       = "/task_service.task.v1.TaskService/ListTasksByParent"
+	TaskService_ListTasksByCreator_FullMethodName      = "/task_service.task.v1.TaskService/ListTasksByCreator"
+	TaskService_AssignTask_FullMethodName              = "/task_service.task.v1.TaskService/AssignTask"
+	TaskService_UnassignTask_FullMethodName            = "/task_service.task.v1.TaskService/UnassignTask"
+	TaskService_ReassignTask_FullMethodName            = "/task_service.task.v1.TaskService/ReassignTask"
+	TaskService_ListTaskAssignments_FullMethodName     = "/task_service.task.v1.TaskService/ListTaskAssignments"
+	TaskService_CreateTaskComment_FullMethodName       = "/task_service.task.v1.TaskService/CreateTaskComment"
+	TaskService_UpdateTaskComment_FullMethodName       = "/task_service.task.v1.TaskService/UpdateTaskComment"
+	TaskService_DeleteTaskComment_FullMethodName       = "/task_service.task.v1.TaskService/DeleteTaskComment"
+	TaskService_ListTaskComments_FullMethodName        = "/task_service.task.v1.TaskService/ListTaskComments"
 )
 
 // TaskServiceClient is the client API for TaskService service.
@@ -32,6 +60,33 @@ type TaskServiceClient interface {
 	CreateTask(ctx context.Context, in *CreateTaskRequest, opts ...grpc.CallOption) (*v1.Task, error)
 	GetTask(ctx context.Context, in *GetTaskRequest, opts ...grpc.CallOption) (*v1.Task, error)
 	ListTasksByProject(ctx context.Context, in *ListTasksByProjectRequest, opts ...grpc.CallOption) (*ListTasksByProjectResponse, error)
+	CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*v1.Project, error)
+	GetProject(ctx context.Context, in *GetProjectRequest, opts ...grpc.CallOption) (*v1.Project, error)
+	UpdateProject(ctx context.Context, in *UpdateProjectRequest, opts ...grpc.CallOption) (*v1.Project, error)
+	CompleteProject(ctx context.Context, in *CompleteProjectRequest, opts ...grpc.CallOption) (*v1.Project, error)
+	ArchiveProject(ctx context.Context, in *ArchiveProjectRequest, opts ...grpc.CallOption) (*v1.Project, error)
+	DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error)
+	AddProjectMember(ctx context.Context, in *AddProjectMemberRequest, opts ...grpc.CallOption) (*v1.ProjectMembership, error)
+	RemoveProjectMember(ctx context.Context, in *RemoveProjectMemberRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	UpdateProjectMemberRole(ctx context.Context, in *UpdateProjectMemberRoleRequest, opts ...grpc.CallOption) (*v1.ProjectMembership, error)
+	ListProjectMembers(ctx context.Context, in *ListProjectMembersRequest, opts ...grpc.CallOption) (*ListProjectMembersResponse, error)
+	UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*v1.Task, error)
+	DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	ArchiveTask(ctx context.Context, in *ArchiveTaskRequest, opts ...grpc.CallOption) (*v1.Task, error)
+	UpdateTaskStatus(ctx context.Context, in *UpdateTaskStatusRequest, opts ...grpc.CallOption) (*v1.Task, error)
+	UpdateTaskProgress(ctx context.Context, in *UpdateTaskProgressRequest, opts ...grpc.CallOption) (*v1.Task, error)
+	ListTasksByOrganization(ctx context.Context, in *ListTasksByOrganizationRequest, opts ...grpc.CallOption) (*ListTasksByOrganizationResponse, error)
+	ListTasksByParent(ctx context.Context, in *ListTasksByParentRequest, opts ...grpc.CallOption) (*ListTasksByParentResponse, error)
+	ListTasksByCreator(ctx context.Context, in *ListTasksByCreatorRequest, opts ...grpc.CallOption) (*ListTasksByCreatorResponse, error)
+	AssignTask(ctx context.Context, in *AssignTaskRequest, opts ...grpc.CallOption) (*v1.TaskAssignment, error)
+	UnassignTask(ctx context.Context, in *UnassignTaskRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	ReassignTask(ctx context.Context, in *ReassignTaskRequest, opts ...grpc.CallOption) (*v1.TaskAssignment, error)
+	ListTaskAssignments(ctx context.Context, in *ListTaskAssignmentsRequest, opts ...grpc.CallOption) (*ListTaskAssignmentsResponse, error)
+	CreateTaskComment(ctx context.Context, in *CreateTaskCommentRequest, opts ...grpc.CallOption) (*v1.TaskComment, error)
+	UpdateTaskComment(ctx context.Context, in *UpdateTaskCommentRequest, opts ...grpc.CallOption) (*v1.TaskComment, error)
+	DeleteTaskComment(ctx context.Context, in *DeleteTaskCommentRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error)
+	ListTaskComments(ctx context.Context, in *ListTaskCommentsRequest, opts ...grpc.CallOption) (*ListTaskCommentsResponse, error)
 }
 
 type taskServiceClient struct {
@@ -72,6 +127,276 @@ func (c *taskServiceClient) ListTasksByProject(ctx context.Context, in *ListTask
 	return out, nil
 }
 
+func (c *taskServiceClient) CreateProject(ctx context.Context, in *CreateProjectRequest, opts ...grpc.CallOption) (*v1.Project, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Project)
+	err := c.cc.Invoke(ctx, TaskService_CreateProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) GetProject(ctx context.Context, in *GetProjectRequest, opts ...grpc.CallOption) (*v1.Project, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Project)
+	err := c.cc.Invoke(ctx, TaskService_GetProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) UpdateProject(ctx context.Context, in *UpdateProjectRequest, opts ...grpc.CallOption) (*v1.Project, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Project)
+	err := c.cc.Invoke(ctx, TaskService_UpdateProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) CompleteProject(ctx context.Context, in *CompleteProjectRequest, opts ...grpc.CallOption) (*v1.Project, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Project)
+	err := c.cc.Invoke(ctx, TaskService_CompleteProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ArchiveProject(ctx context.Context, in *ArchiveProjectRequest, opts ...grpc.CallOption) (*v1.Project, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Project)
+	err := c.cc.Invoke(ctx, TaskService_ArchiveProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) DeleteProject(ctx context.Context, in *DeleteProjectRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.SuccessResponse)
+	err := c.cc.Invoke(ctx, TaskService_DeleteProject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListProjects(ctx context.Context, in *ListProjectsRequest, opts ...grpc.CallOption) (*ListProjectsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListProjectsResponse)
+	err := c.cc.Invoke(ctx, TaskService_ListProjects_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) AddProjectMember(ctx context.Context, in *AddProjectMemberRequest, opts ...grpc.CallOption) (*v1.ProjectMembership, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ProjectMembership)
+	err := c.cc.Invoke(ctx, TaskService_AddProjectMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) RemoveProjectMember(ctx context.Context, in *RemoveProjectMemberRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.SuccessResponse)
+	err := c.cc.Invoke(ctx, TaskService_RemoveProjectMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) UpdateProjectMemberRole(ctx context.Context, in *UpdateProjectMemberRoleRequest, opts ...grpc.CallOption) (*v1.ProjectMembership, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.ProjectMembership)
+	err := c.cc.Invoke(ctx, TaskService_UpdateProjectMemberRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListProjectMembers(ctx context.Context, in *ListProjectMembersRequest, opts ...grpc.CallOption) (*ListProjectMembersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListProjectMembersResponse)
+	err := c.cc.Invoke(ctx, TaskService_ListProjectMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) UpdateTask(ctx context.Context, in *UpdateTaskRequest, opts ...grpc.CallOption) (*v1.Task, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Task)
+	err := c.cc.Invoke(ctx, TaskService_UpdateTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) DeleteTask(ctx context.Context, in *DeleteTaskRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.SuccessResponse)
+	err := c.cc.Invoke(ctx, TaskService_DeleteTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ArchiveTask(ctx context.Context, in *ArchiveTaskRequest, opts ...grpc.CallOption) (*v1.Task, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Task)
+	err := c.cc.Invoke(ctx, TaskService_ArchiveTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) UpdateTaskStatus(ctx context.Context, in *UpdateTaskStatusRequest, opts ...grpc.CallOption) (*v1.Task, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Task)
+	err := c.cc.Invoke(ctx, TaskService_UpdateTaskStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) UpdateTaskProgress(ctx context.Context, in *UpdateTaskProgressRequest, opts ...grpc.CallOption) (*v1.Task, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Task)
+	err := c.cc.Invoke(ctx, TaskService_UpdateTaskProgress_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListTasksByOrganization(ctx context.Context, in *ListTasksByOrganizationRequest, opts ...grpc.CallOption) (*ListTasksByOrganizationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTasksByOrganizationResponse)
+	err := c.cc.Invoke(ctx, TaskService_ListTasksByOrganization_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListTasksByParent(ctx context.Context, in *ListTasksByParentRequest, opts ...grpc.CallOption) (*ListTasksByParentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTasksByParentResponse)
+	err := c.cc.Invoke(ctx, TaskService_ListTasksByParent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListTasksByCreator(ctx context.Context, in *ListTasksByCreatorRequest, opts ...grpc.CallOption) (*ListTasksByCreatorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTasksByCreatorResponse)
+	err := c.cc.Invoke(ctx, TaskService_ListTasksByCreator_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) AssignTask(ctx context.Context, in *AssignTaskRequest, opts ...grpc.CallOption) (*v1.TaskAssignment, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.TaskAssignment)
+	err := c.cc.Invoke(ctx, TaskService_AssignTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) UnassignTask(ctx context.Context, in *UnassignTaskRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.SuccessResponse)
+	err := c.cc.Invoke(ctx, TaskService_UnassignTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ReassignTask(ctx context.Context, in *ReassignTaskRequest, opts ...grpc.CallOption) (*v1.TaskAssignment, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.TaskAssignment)
+	err := c.cc.Invoke(ctx, TaskService_ReassignTask_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListTaskAssignments(ctx context.Context, in *ListTaskAssignmentsRequest, opts ...grpc.CallOption) (*ListTaskAssignmentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTaskAssignmentsResponse)
+	err := c.cc.Invoke(ctx, TaskService_ListTaskAssignments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) CreateTaskComment(ctx context.Context, in *CreateTaskCommentRequest, opts ...grpc.CallOption) (*v1.TaskComment, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.TaskComment)
+	err := c.cc.Invoke(ctx, TaskService_CreateTaskComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) UpdateTaskComment(ctx context.Context, in *UpdateTaskCommentRequest, opts ...grpc.CallOption) (*v1.TaskComment, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.TaskComment)
+	err := c.cc.Invoke(ctx, TaskService_UpdateTaskComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) DeleteTaskComment(ctx context.Context, in *DeleteTaskCommentRequest, opts ...grpc.CallOption) (*v11.SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v11.SuccessResponse)
+	err := c.cc.Invoke(ctx, TaskService_DeleteTaskComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *taskServiceClient) ListTaskComments(ctx context.Context, in *ListTaskCommentsRequest, opts ...grpc.CallOption) (*ListTaskCommentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTaskCommentsResponse)
+	err := c.cc.Invoke(ctx, TaskService_ListTaskComments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TaskServiceServer is the server API for TaskService service.
 // All implementations should embed UnimplementedTaskServiceServer
 // for forward compatibility.
@@ -79,6 +404,33 @@ type TaskServiceServer interface {
 	CreateTask(context.Context, *CreateTaskRequest) (*v1.Task, error)
 	GetTask(context.Context, *GetTaskRequest) (*v1.Task, error)
 	ListTasksByProject(context.Context, *ListTasksByProjectRequest) (*ListTasksByProjectResponse, error)
+	CreateProject(context.Context, *CreateProjectRequest) (*v1.Project, error)
+	GetProject(context.Context, *GetProjectRequest) (*v1.Project, error)
+	UpdateProject(context.Context, *UpdateProjectRequest) (*v1.Project, error)
+	CompleteProject(context.Context, *CompleteProjectRequest) (*v1.Project, error)
+	ArchiveProject(context.Context, *ArchiveProjectRequest) (*v1.Project, error)
+	DeleteProject(context.Context, *DeleteProjectRequest) (*v11.SuccessResponse, error)
+	ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error)
+	AddProjectMember(context.Context, *AddProjectMemberRequest) (*v1.ProjectMembership, error)
+	RemoveProjectMember(context.Context, *RemoveProjectMemberRequest) (*v11.SuccessResponse, error)
+	UpdateProjectMemberRole(context.Context, *UpdateProjectMemberRoleRequest) (*v1.ProjectMembership, error)
+	ListProjectMembers(context.Context, *ListProjectMembersRequest) (*ListProjectMembersResponse, error)
+	UpdateTask(context.Context, *UpdateTaskRequest) (*v1.Task, error)
+	DeleteTask(context.Context, *DeleteTaskRequest) (*v11.SuccessResponse, error)
+	ArchiveTask(context.Context, *ArchiveTaskRequest) (*v1.Task, error)
+	UpdateTaskStatus(context.Context, *UpdateTaskStatusRequest) (*v1.Task, error)
+	UpdateTaskProgress(context.Context, *UpdateTaskProgressRequest) (*v1.Task, error)
+	ListTasksByOrganization(context.Context, *ListTasksByOrganizationRequest) (*ListTasksByOrganizationResponse, error)
+	ListTasksByParent(context.Context, *ListTasksByParentRequest) (*ListTasksByParentResponse, error)
+	ListTasksByCreator(context.Context, *ListTasksByCreatorRequest) (*ListTasksByCreatorResponse, error)
+	AssignTask(context.Context, *AssignTaskRequest) (*v1.TaskAssignment, error)
+	UnassignTask(context.Context, *UnassignTaskRequest) (*v11.SuccessResponse, error)
+	ReassignTask(context.Context, *ReassignTaskRequest) (*v1.TaskAssignment, error)
+	ListTaskAssignments(context.Context, *ListTaskAssignmentsRequest) (*ListTaskAssignmentsResponse, error)
+	CreateTaskComment(context.Context, *CreateTaskCommentRequest) (*v1.TaskComment, error)
+	UpdateTaskComment(context.Context, *UpdateTaskCommentRequest) (*v1.TaskComment, error)
+	DeleteTaskComment(context.Context, *DeleteTaskCommentRequest) (*v11.SuccessResponse, error)
+	ListTaskComments(context.Context, *ListTaskCommentsRequest) (*ListTaskCommentsResponse, error)
 }
 
 // UnimplementedTaskServiceServer should be embedded to have
@@ -96,6 +448,87 @@ func (UnimplementedTaskServiceServer) GetTask(context.Context, *GetTaskRequest) 
 }
 func (UnimplementedTaskServiceServer) ListTasksByProject(context.Context, *ListTasksByProjectRequest) (*ListTasksByProjectResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTasksByProject not implemented")
+}
+func (UnimplementedTaskServiceServer) CreateProject(context.Context, *CreateProjectRequest) (*v1.Project, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateProject not implemented")
+}
+func (UnimplementedTaskServiceServer) GetProject(context.Context, *GetProjectRequest) (*v1.Project, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetProject not implemented")
+}
+func (UnimplementedTaskServiceServer) UpdateProject(context.Context, *UpdateProjectRequest) (*v1.Project, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateProject not implemented")
+}
+func (UnimplementedTaskServiceServer) CompleteProject(context.Context, *CompleteProjectRequest) (*v1.Project, error) {
+	return nil, status.Error(codes.Unimplemented, "method CompleteProject not implemented")
+}
+func (UnimplementedTaskServiceServer) ArchiveProject(context.Context, *ArchiveProjectRequest) (*v1.Project, error) {
+	return nil, status.Error(codes.Unimplemented, "method ArchiveProject not implemented")
+}
+func (UnimplementedTaskServiceServer) DeleteProject(context.Context, *DeleteProjectRequest) (*v11.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteProject not implemented")
+}
+func (UnimplementedTaskServiceServer) ListProjects(context.Context, *ListProjectsRequest) (*ListProjectsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListProjects not implemented")
+}
+func (UnimplementedTaskServiceServer) AddProjectMember(context.Context, *AddProjectMemberRequest) (*v1.ProjectMembership, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddProjectMember not implemented")
+}
+func (UnimplementedTaskServiceServer) RemoveProjectMember(context.Context, *RemoveProjectMemberRequest) (*v11.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RemoveProjectMember not implemented")
+}
+func (UnimplementedTaskServiceServer) UpdateProjectMemberRole(context.Context, *UpdateProjectMemberRoleRequest) (*v1.ProjectMembership, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateProjectMemberRole not implemented")
+}
+func (UnimplementedTaskServiceServer) ListProjectMembers(context.Context, *ListProjectMembersRequest) (*ListProjectMembersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListProjectMembers not implemented")
+}
+func (UnimplementedTaskServiceServer) UpdateTask(context.Context, *UpdateTaskRequest) (*v1.Task, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateTask not implemented")
+}
+func (UnimplementedTaskServiceServer) DeleteTask(context.Context, *DeleteTaskRequest) (*v11.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteTask not implemented")
+}
+func (UnimplementedTaskServiceServer) ArchiveTask(context.Context, *ArchiveTaskRequest) (*v1.Task, error) {
+	return nil, status.Error(codes.Unimplemented, "method ArchiveTask not implemented")
+}
+func (UnimplementedTaskServiceServer) UpdateTaskStatus(context.Context, *UpdateTaskStatusRequest) (*v1.Task, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateTaskStatus not implemented")
+}
+func (UnimplementedTaskServiceServer) UpdateTaskProgress(context.Context, *UpdateTaskProgressRequest) (*v1.Task, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateTaskProgress not implemented")
+}
+func (UnimplementedTaskServiceServer) ListTasksByOrganization(context.Context, *ListTasksByOrganizationRequest) (*ListTasksByOrganizationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTasksByOrganization not implemented")
+}
+func (UnimplementedTaskServiceServer) ListTasksByParent(context.Context, *ListTasksByParentRequest) (*ListTasksByParentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTasksByParent not implemented")
+}
+func (UnimplementedTaskServiceServer) ListTasksByCreator(context.Context, *ListTasksByCreatorRequest) (*ListTasksByCreatorResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTasksByCreator not implemented")
+}
+func (UnimplementedTaskServiceServer) AssignTask(context.Context, *AssignTaskRequest) (*v1.TaskAssignment, error) {
+	return nil, status.Error(codes.Unimplemented, "method AssignTask not implemented")
+}
+func (UnimplementedTaskServiceServer) UnassignTask(context.Context, *UnassignTaskRequest) (*v11.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UnassignTask not implemented")
+}
+func (UnimplementedTaskServiceServer) ReassignTask(context.Context, *ReassignTaskRequest) (*v1.TaskAssignment, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReassignTask not implemented")
+}
+func (UnimplementedTaskServiceServer) ListTaskAssignments(context.Context, *ListTaskAssignmentsRequest) (*ListTaskAssignmentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTaskAssignments not implemented")
+}
+func (UnimplementedTaskServiceServer) CreateTaskComment(context.Context, *CreateTaskCommentRequest) (*v1.TaskComment, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateTaskComment not implemented")
+}
+func (UnimplementedTaskServiceServer) UpdateTaskComment(context.Context, *UpdateTaskCommentRequest) (*v1.TaskComment, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateTaskComment not implemented")
+}
+func (UnimplementedTaskServiceServer) DeleteTaskComment(context.Context, *DeleteTaskCommentRequest) (*v11.SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteTaskComment not implemented")
+}
+func (UnimplementedTaskServiceServer) ListTaskComments(context.Context, *ListTaskCommentsRequest) (*ListTaskCommentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTaskComments not implemented")
 }
 func (UnimplementedTaskServiceServer) testEmbeddedByValue() {}
 
@@ -171,6 +604,492 @@ func _TaskService_ListTasksByProject_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TaskService_CreateProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).CreateProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_CreateProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).CreateProject(ctx, req.(*CreateProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_GetProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).GetProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_GetProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).GetProject(ctx, req.(*GetProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_UpdateProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).UpdateProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_UpdateProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).UpdateProject(ctx, req.(*UpdateProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_CompleteProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).CompleteProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_CompleteProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).CompleteProject(ctx, req.(*CompleteProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ArchiveProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArchiveProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ArchiveProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ArchiveProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ArchiveProject(ctx, req.(*ArchiveProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_DeleteProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteProjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).DeleteProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_DeleteProject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).DeleteProject(ctx, req.(*DeleteProjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListProjects_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProjectsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListProjects(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListProjects_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListProjects(ctx, req.(*ListProjectsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_AddProjectMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddProjectMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).AddProjectMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_AddProjectMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).AddProjectMember(ctx, req.(*AddProjectMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_RemoveProjectMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveProjectMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).RemoveProjectMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_RemoveProjectMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).RemoveProjectMember(ctx, req.(*RemoveProjectMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_UpdateProjectMemberRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateProjectMemberRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).UpdateProjectMemberRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_UpdateProjectMemberRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).UpdateProjectMemberRole(ctx, req.(*UpdateProjectMemberRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListProjectMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProjectMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListProjectMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListProjectMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListProjectMembers(ctx, req.(*ListProjectMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_UpdateTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).UpdateTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_UpdateTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).UpdateTask(ctx, req.(*UpdateTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_DeleteTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).DeleteTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_DeleteTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).DeleteTask(ctx, req.(*DeleteTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ArchiveTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArchiveTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ArchiveTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ArchiveTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ArchiveTask(ctx, req.(*ArchiveTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_UpdateTaskStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTaskStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).UpdateTaskStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_UpdateTaskStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).UpdateTaskStatus(ctx, req.(*UpdateTaskStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_UpdateTaskProgress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTaskProgressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).UpdateTaskProgress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_UpdateTaskProgress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).UpdateTaskProgress(ctx, req.(*UpdateTaskProgressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListTasksByOrganization_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTasksByOrganizationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListTasksByOrganization(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListTasksByOrganization_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListTasksByOrganization(ctx, req.(*ListTasksByOrganizationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListTasksByParent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTasksByParentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListTasksByParent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListTasksByParent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListTasksByParent(ctx, req.(*ListTasksByParentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListTasksByCreator_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTasksByCreatorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListTasksByCreator(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListTasksByCreator_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListTasksByCreator(ctx, req.(*ListTasksByCreatorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_AssignTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).AssignTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_AssignTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).AssignTask(ctx, req.(*AssignTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_UnassignTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UnassignTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).UnassignTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_UnassignTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).UnassignTask(ctx, req.(*UnassignTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ReassignTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReassignTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ReassignTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ReassignTask_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ReassignTask(ctx, req.(*ReassignTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListTaskAssignments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTaskAssignmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListTaskAssignments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListTaskAssignments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListTaskAssignments(ctx, req.(*ListTaskAssignmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_CreateTaskComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTaskCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).CreateTaskComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_CreateTaskComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).CreateTaskComment(ctx, req.(*CreateTaskCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_UpdateTaskComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTaskCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).UpdateTaskComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_UpdateTaskComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).UpdateTaskComment(ctx, req.(*UpdateTaskCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_DeleteTaskComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTaskCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).DeleteTaskComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_DeleteTaskComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).DeleteTaskComment(ctx, req.(*DeleteTaskCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TaskService_ListTaskComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTaskCommentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TaskServiceServer).ListTaskComments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TaskService_ListTaskComments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TaskServiceServer).ListTaskComments(ctx, req.(*ListTaskCommentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TaskService_ServiceDesc is the grpc.ServiceDesc for TaskService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -189,6 +1108,114 @@ var TaskService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTasksByProject",
 			Handler:    _TaskService_ListTasksByProject_Handler,
+		},
+		{
+			MethodName: "CreateProject",
+			Handler:    _TaskService_CreateProject_Handler,
+		},
+		{
+			MethodName: "GetProject",
+			Handler:    _TaskService_GetProject_Handler,
+		},
+		{
+			MethodName: "UpdateProject",
+			Handler:    _TaskService_UpdateProject_Handler,
+		},
+		{
+			MethodName: "CompleteProject",
+			Handler:    _TaskService_CompleteProject_Handler,
+		},
+		{
+			MethodName: "ArchiveProject",
+			Handler:    _TaskService_ArchiveProject_Handler,
+		},
+		{
+			MethodName: "DeleteProject",
+			Handler:    _TaskService_DeleteProject_Handler,
+		},
+		{
+			MethodName: "ListProjects",
+			Handler:    _TaskService_ListProjects_Handler,
+		},
+		{
+			MethodName: "AddProjectMember",
+			Handler:    _TaskService_AddProjectMember_Handler,
+		},
+		{
+			MethodName: "RemoveProjectMember",
+			Handler:    _TaskService_RemoveProjectMember_Handler,
+		},
+		{
+			MethodName: "UpdateProjectMemberRole",
+			Handler:    _TaskService_UpdateProjectMemberRole_Handler,
+		},
+		{
+			MethodName: "ListProjectMembers",
+			Handler:    _TaskService_ListProjectMembers_Handler,
+		},
+		{
+			MethodName: "UpdateTask",
+			Handler:    _TaskService_UpdateTask_Handler,
+		},
+		{
+			MethodName: "DeleteTask",
+			Handler:    _TaskService_DeleteTask_Handler,
+		},
+		{
+			MethodName: "ArchiveTask",
+			Handler:    _TaskService_ArchiveTask_Handler,
+		},
+		{
+			MethodName: "UpdateTaskStatus",
+			Handler:    _TaskService_UpdateTaskStatus_Handler,
+		},
+		{
+			MethodName: "UpdateTaskProgress",
+			Handler:    _TaskService_UpdateTaskProgress_Handler,
+		},
+		{
+			MethodName: "ListTasksByOrganization",
+			Handler:    _TaskService_ListTasksByOrganization_Handler,
+		},
+		{
+			MethodName: "ListTasksByParent",
+			Handler:    _TaskService_ListTasksByParent_Handler,
+		},
+		{
+			MethodName: "ListTasksByCreator",
+			Handler:    _TaskService_ListTasksByCreator_Handler,
+		},
+		{
+			MethodName: "AssignTask",
+			Handler:    _TaskService_AssignTask_Handler,
+		},
+		{
+			MethodName: "UnassignTask",
+			Handler:    _TaskService_UnassignTask_Handler,
+		},
+		{
+			MethodName: "ReassignTask",
+			Handler:    _TaskService_ReassignTask_Handler,
+		},
+		{
+			MethodName: "ListTaskAssignments",
+			Handler:    _TaskService_ListTaskAssignments_Handler,
+		},
+		{
+			MethodName: "CreateTaskComment",
+			Handler:    _TaskService_CreateTaskComment_Handler,
+		},
+		{
+			MethodName: "UpdateTaskComment",
+			Handler:    _TaskService_UpdateTaskComment_Handler,
+		},
+		{
+			MethodName: "DeleteTaskComment",
+			Handler:    _TaskService_DeleteTaskComment_Handler,
+		},
+		{
+			MethodName: "ListTaskComments",
+			Handler:    _TaskService_ListTaskComments_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

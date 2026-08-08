@@ -66,13 +66,335 @@ func (x *ListTasksByProjectResponse) GetTasks() []*v1.Task {
 	return nil
 }
 
+type ListProjectsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Projects      []*v1.Project          `protobuf:"bytes,1,rep,name=projects,proto3" json:"projects,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListProjectsResponse) Reset() {
+	*x = ListProjectsResponse{}
+	mi := &file_task_service_task_v1_response_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListProjectsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListProjectsResponse) ProtoMessage() {}
+
+func (x *ListProjectsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_response_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListProjectsResponse.ProtoReflect.Descriptor instead.
+func (*ListProjectsResponse) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_response_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ListProjectsResponse) GetProjects() []*v1.Project {
+	if x != nil {
+		return x.Projects
+	}
+	return nil
+}
+
+type ListProjectMembersResponse struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Members       []*v1.ProjectMembership `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListProjectMembersResponse) Reset() {
+	*x = ListProjectMembersResponse{}
+	mi := &file_task_service_task_v1_response_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListProjectMembersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListProjectMembersResponse) ProtoMessage() {}
+
+func (x *ListProjectMembersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_response_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListProjectMembersResponse.ProtoReflect.Descriptor instead.
+func (*ListProjectMembersResponse) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_response_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ListProjectMembersResponse) GetMembers() []*v1.ProjectMembership {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
+type ListTasksByOrganizationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tasks         []*v1.Task             `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTasksByOrganizationResponse) Reset() {
+	*x = ListTasksByOrganizationResponse{}
+	mi := &file_task_service_task_v1_response_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksByOrganizationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksByOrganizationResponse) ProtoMessage() {}
+
+func (x *ListTasksByOrganizationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_response_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksByOrganizationResponse.ProtoReflect.Descriptor instead.
+func (*ListTasksByOrganizationResponse) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_response_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListTasksByOrganizationResponse) GetTasks() []*v1.Task {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type ListTasksByParentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tasks         []*v1.Task             `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTasksByParentResponse) Reset() {
+	*x = ListTasksByParentResponse{}
+	mi := &file_task_service_task_v1_response_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksByParentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksByParentResponse) ProtoMessage() {}
+
+func (x *ListTasksByParentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_response_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksByParentResponse.ProtoReflect.Descriptor instead.
+func (*ListTasksByParentResponse) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_response_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ListTasksByParentResponse) GetTasks() []*v1.Task {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type ListTasksByCreatorResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tasks         []*v1.Task             `protobuf:"bytes,1,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTasksByCreatorResponse) Reset() {
+	*x = ListTasksByCreatorResponse{}
+	mi := &file_task_service_task_v1_response_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTasksByCreatorResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTasksByCreatorResponse) ProtoMessage() {}
+
+func (x *ListTasksByCreatorResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_response_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTasksByCreatorResponse.ProtoReflect.Descriptor instead.
+func (*ListTasksByCreatorResponse) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_response_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ListTasksByCreatorResponse) GetTasks() []*v1.Task {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type ListTaskAssignmentsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Assignments   []*v1.TaskAssignment   `protobuf:"bytes,1,rep,name=assignments,proto3" json:"assignments,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTaskAssignmentsResponse) Reset() {
+	*x = ListTaskAssignmentsResponse{}
+	mi := &file_task_service_task_v1_response_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTaskAssignmentsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTaskAssignmentsResponse) ProtoMessage() {}
+
+func (x *ListTaskAssignmentsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_response_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTaskAssignmentsResponse.ProtoReflect.Descriptor instead.
+func (*ListTaskAssignmentsResponse) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_response_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ListTaskAssignmentsResponse) GetAssignments() []*v1.TaskAssignment {
+	if x != nil {
+		return x.Assignments
+	}
+	return nil
+}
+
+type ListTaskCommentsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Comments      []*v1.TaskComment      `protobuf:"bytes,1,rep,name=comments,proto3" json:"comments,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListTaskCommentsResponse) Reset() {
+	*x = ListTaskCommentsResponse{}
+	mi := &file_task_service_task_v1_response_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListTaskCommentsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListTaskCommentsResponse) ProtoMessage() {}
+
+func (x *ListTaskCommentsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_task_service_task_v1_response_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListTaskCommentsResponse.ProtoReflect.Descriptor instead.
+func (*ListTaskCommentsResponse) Descriptor() ([]byte, []int) {
+	return file_task_service_task_v1_response_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListTaskCommentsResponse) GetComments() []*v1.TaskComment {
+	if x != nil {
+		return x.Comments
+	}
+	return nil
+}
+
 var File_task_service_task_v1_response_proto protoreflect.FileDescriptor
 
 const file_task_service_task_v1_response_proto_rawDesc = "" +
 	"\n" +
 	"#task_service/task/v1/response.proto\x12\x14task_service.task.v1\x1a\"task_service/models/v1/model.proto\"P\n" +
 	"\x1aListTasksByProjectResponse\x122\n" +
-	"\x05tasks\x18\x01 \x03(\v2\x1c.task_service.models.v1.TaskR\x05tasksB\xdb\x01\n" +
+	"\x05tasks\x18\x01 \x03(\v2\x1c.task_service.models.v1.TaskR\x05tasks\"S\n" +
+	"\x14ListProjectsResponse\x12;\n" +
+	"\bprojects\x18\x01 \x03(\v2\x1f.task_service.models.v1.ProjectR\bprojects\"a\n" +
+	"\x1aListProjectMembersResponse\x12C\n" +
+	"\amembers\x18\x01 \x03(\v2).task_service.models.v1.ProjectMembershipR\amembers\"U\n" +
+	"\x1fListTasksByOrganizationResponse\x122\n" +
+	"\x05tasks\x18\x01 \x03(\v2\x1c.task_service.models.v1.TaskR\x05tasks\"O\n" +
+	"\x19ListTasksByParentResponse\x122\n" +
+	"\x05tasks\x18\x01 \x03(\v2\x1c.task_service.models.v1.TaskR\x05tasks\"P\n" +
+	"\x1aListTasksByCreatorResponse\x122\n" +
+	"\x05tasks\x18\x01 \x03(\v2\x1c.task_service.models.v1.TaskR\x05tasks\"g\n" +
+	"\x1bListTaskAssignmentsResponse\x12H\n" +
+	"\vassignments\x18\x01 \x03(\v2&.task_service.models.v1.TaskAssignmentR\vassignments\"[\n" +
+	"\x18ListTaskCommentsResponse\x12?\n" +
+	"\bcomments\x18\x01 \x03(\v2#.task_service.models.v1.TaskCommentR\bcommentsB\xdb\x01\n" +
 	"\x18com.task_service.task.v1B\rResponseProtoP\x01ZBgithub.com/rijum8906/relay/packages/pb/task_service/task/v1;taskv1\xa2\x02\x03TTX\xaa\x02\x13TaskService.Task.V1\xca\x02\x13TaskService\\Task\\V1\xe2\x02\x1fTaskService\\Task\\V1\\GPBMetadata\xea\x02\x15TaskService::Task::V1b\x06proto3"
 
 var (
@@ -87,18 +409,36 @@ func file_task_service_task_v1_response_proto_rawDescGZIP() []byte {
 	return file_task_service_task_v1_response_proto_rawDescData
 }
 
-var file_task_service_task_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_task_service_task_v1_response_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_task_service_task_v1_response_proto_goTypes = []any{
-	(*ListTasksByProjectResponse)(nil), // 0: task_service.task.v1.ListTasksByProjectResponse
-	(*v1.Task)(nil),                    // 1: task_service.models.v1.Task
+	(*ListTasksByProjectResponse)(nil),      // 0: task_service.task.v1.ListTasksByProjectResponse
+	(*ListProjectsResponse)(nil),            // 1: task_service.task.v1.ListProjectsResponse
+	(*ListProjectMembersResponse)(nil),      // 2: task_service.task.v1.ListProjectMembersResponse
+	(*ListTasksByOrganizationResponse)(nil), // 3: task_service.task.v1.ListTasksByOrganizationResponse
+	(*ListTasksByParentResponse)(nil),       // 4: task_service.task.v1.ListTasksByParentResponse
+	(*ListTasksByCreatorResponse)(nil),      // 5: task_service.task.v1.ListTasksByCreatorResponse
+	(*ListTaskAssignmentsResponse)(nil),     // 6: task_service.task.v1.ListTaskAssignmentsResponse
+	(*ListTaskCommentsResponse)(nil),        // 7: task_service.task.v1.ListTaskCommentsResponse
+	(*v1.Task)(nil),                         // 8: task_service.models.v1.Task
+	(*v1.Project)(nil),                      // 9: task_service.models.v1.Project
+	(*v1.ProjectMembership)(nil),            // 10: task_service.models.v1.ProjectMembership
+	(*v1.TaskAssignment)(nil),               // 11: task_service.models.v1.TaskAssignment
+	(*v1.TaskComment)(nil),                  // 12: task_service.models.v1.TaskComment
 }
 var file_task_service_task_v1_response_proto_depIdxs = []int32{
-	1, // 0: task_service.task.v1.ListTasksByProjectResponse.tasks:type_name -> task_service.models.v1.Task
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	8,  // 0: task_service.task.v1.ListTasksByProjectResponse.tasks:type_name -> task_service.models.v1.Task
+	9,  // 1: task_service.task.v1.ListProjectsResponse.projects:type_name -> task_service.models.v1.Project
+	10, // 2: task_service.task.v1.ListProjectMembersResponse.members:type_name -> task_service.models.v1.ProjectMembership
+	8,  // 3: task_service.task.v1.ListTasksByOrganizationResponse.tasks:type_name -> task_service.models.v1.Task
+	8,  // 4: task_service.task.v1.ListTasksByParentResponse.tasks:type_name -> task_service.models.v1.Task
+	8,  // 5: task_service.task.v1.ListTasksByCreatorResponse.tasks:type_name -> task_service.models.v1.Task
+	11, // 6: task_service.task.v1.ListTaskAssignmentsResponse.assignments:type_name -> task_service.models.v1.TaskAssignment
+	12, // 7: task_service.task.v1.ListTaskCommentsResponse.comments:type_name -> task_service.models.v1.TaskComment
+	8,  // [8:8] is the sub-list for method output_type
+	8,  // [8:8] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_task_service_task_v1_response_proto_init() }
@@ -112,7 +452,7 @@ func file_task_service_task_v1_response_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_task_service_task_v1_response_proto_rawDesc), len(file_task_service_task_v1_response_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -1,14 +1,12 @@
 package utils
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/rijum8906/relay/packages/core/apperror"
-	taskrepo "github.com/rijum8906/relay/services/task-service/internal/repository/task"
+	"github.com/rijum8906/relay/packages/core/dto"
 )
-
-type Repos struct {
-	Task taskrepo.TaskRepository
-}
 
 func NewUUID(id string) (uuid.UUID, *apperror.AppError) {
 	u, err := uuid.Parse(id)
@@ -16,4 +14,16 @@ func NewUUID(id string) (uuid.UUID, *apperror.AppError) {
 		return uuid.UUID{}, apperror.ErrValidation.WithMessage("invalid uuid").WithDetail("error", err.Error())
 	}
 	return u, nil
+}
+
+func ValidateUserInfo(userInfo *dto.UserInfo) (uuid.UUID, *apperror.AppError) {
+	if userInfo == nil || strings.TrimSpace(userInfo.UserID) == "" {
+		return uuid.UUID{}, apperror.ErrUnAuthenticated.WithMessage("user metadata is required")
+	}
+	userID, appErr := NewUUID(userInfo.UserID)
+	if appErr != nil {
+		return uuid.UUID{}, appErr.WithDetail("field", "user_id")
+	}
+
+	return userID, nil
 }

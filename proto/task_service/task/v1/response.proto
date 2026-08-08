@@ -7,3 +7,31 @@ import "task_service/models/v1/model.proto";
 message ListTasksByProjectResponse {
   repeated task_service.models.v1.Task tasks = 1;
 }
+
+message ListProjectsResponse {
+    repeated task_service.models.v1.Project projects = 1;
+}
+
+message ListProjectMembersResponse {
+    repeated task_service.models.v1.ProjectMembership members = 1;
+}
+
+message ListTasksByOrganizationResponse {
+    repeated task_service.models.v1.Task tasks = 1;
+}
+
+message ListTasksByParentResponse {
+    repeated task_service.models.v1.Task tasks = 1;
+}
+
+message ListTasksByCreatorResponse {
+    repeated task_service.models.v1.Task tasks = 1;
+}
+
+message ListTaskAssignmentsResponse {
+    repeated task_service.models.v1.TaskAssignment assignments = 1;
+}
+
+message ListTaskCommentsResponse {
+    repeated task_service.models.v1.TaskComment comments = 1;
+}
